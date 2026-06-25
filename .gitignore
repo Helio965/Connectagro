@@ -1,5 +1,9 @@
+# ===========================================================================
+# ConnectAgro — .gitignore (projeto Python/Flask + SQLite)
+# ===========================================================================
+
 # ---------------------------------------------------------------------------
-# Python
+# Python — bytecode e build
 # ---------------------------------------------------------------------------
 __pycache__/
 *.py[cod]
@@ -23,6 +27,8 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+pip-log.txt
+pip-delete-this-directory.txt
 
 # ---------------------------------------------------------------------------
 # Ambientes virtuais
@@ -34,6 +40,7 @@ ENV/
 env.bak/
 venv.bak/
 .virtualenv/
+.python-version
 
 # ---------------------------------------------------------------------------
 # Flask
@@ -49,6 +56,8 @@ flask_session/
 *.sqlite
 *.sqlite3
 *.db-journal
+*.db-wal
+*.db-shm
 
 # ---------------------------------------------------------------------------
 # Variáveis de ambiente e segredos
@@ -57,17 +66,22 @@ flask_session/
 .env.*
 !.env.example
 *.pem
+*.key
 secrets.json
+credentials.json
 
 # ---------------------------------------------------------------------------
 # Uploads / arquivos enviados em tempo de execução
+# (manter a pasta versionada com .gitkeep, ignorar o conteúdo)
 # ---------------------------------------------------------------------------
 uploads/
 src/uploads/
+src/static/uploads/
 media/
+!**/.gitkeep
 
 # ---------------------------------------------------------------------------
-# Testes e cobertura
+# Testes, cobertura e ferramentas de qualidade
 # ---------------------------------------------------------------------------
 .pytest_cache/
 .coverage
@@ -78,6 +92,11 @@ htmlcov/
 coverage.xml
 *.cover
 .cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.ruff_cache/
+.pytype/
 
 # ---------------------------------------------------------------------------
 # Logs
@@ -93,6 +112,15 @@ logs/
 *.swp
 *.swo
 *~
+*.bak
+
+# ---------------------------------------------------------------------------
+# Node / ferramentas de frontend (caso usadas no futuro)
+# ---------------------------------------------------------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # ---------------------------------------------------------------------------
 # Sistema operacional
