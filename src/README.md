@@ -4,8 +4,11 @@ Código-fonte da aplicação **ConnectAgro** (backend Flask + frontend).
 
 ## Estado atual
 
-> ⚠️ **Ainda não há código funcional.** O sistema Flask será implementado nas
-> próximas etapas do [roadmap](../docs/07-roadmap-mvp.md).
+> ⚠️ **Ainda não há código funcional.** A implementação só deve começar **após a
+> aprovação da arquitetura técnica** descrita em
+> [06.1 — Arquitetura Técnica do MVP](../docs/06-1-arquitetura-tecnica-mvp.md)
+> (ver checklist de prontidão naquele documento e a Etapa 4 do
+> [roadmap](../docs/07-roadmap-mvp.md)).
 
 ## Stack
 
@@ -13,21 +16,31 @@ Código-fonte da aplicação **ConnectAgro** (backend Flask + frontend).
 - **Banco de dados:** SQLite
 - **Frontend:** HTML, CSS, JavaScript
 
-## Estrutura proposta
+## Estrutura profissional planejada
 
-A organização concreta será definida no início da implementação. Proposta
-inicial (ver [Arquitetura do Sistema](../docs/06-arquitetura-do-sistema.md)):
+Estrutura **planejada** (package Flask com Application Factory + Blueprints) — a
+ser criada quando a implementação começar:
 
-```txt
+```text
 src/
-├── app.py              # ponto de entrada da aplicação Flask
-├── config.py           # configurações
-├── models/             # modelos de dados
-├── routes/             # rotas/blueprints por módulo
-├── services/           # regras de negócio
-├── templates/          # HTML
-└── static/             # CSS, JS, imagens
+├── run.py                       # ponto de entrada (chama create_app)
+├── app/
+│   ├── __init__.py              # create_app / Application Factory
+│   ├── config.py                # configurações por ambiente
+│   ├── extensions.py            # instâncias de extensões (db, csrf, etc.)
+│   ├── models/                  # modelos de dados (espelham o DER)
+│   ├── blueprints/              # um pacote por módulo do MVP
+│   ├── services/                # regras de negócio
+│   ├── templates/               # HTML (Jinja2)
+│   ├── static/                  # css/, js/, uploads/
+│   └── utils/                   # helpers
+├── instance/                    # banco SQLite e config de instância (não versionado)
+└── tests/                       # testes com pytest
 ```
+
+Detalhes completos (estrutura expandida, blueprints, decisão de ORM, segurança e
+fluxos) estão em
+[06.1 — Arquitetura Técnica do MVP](../docs/06-1-arquitetura-tecnica-mvp.md).
 
 ## Módulos previstos
 
@@ -39,4 +52,5 @@ Financeiro · Upload · Equipe · Colheita · Mapa real · IA simulada · Relat�
 ## Documentos relacionados
 
 - [06 — Arquitetura do Sistema](../docs/06-arquitetura-do-sistema.md)
+- [06.1 — Arquitetura Técnica do MVP](../docs/06-1-arquitetura-tecnica-mvp.md)
 - [07 — Roadmap do MVP](../docs/07-roadmap-mvp.md)
