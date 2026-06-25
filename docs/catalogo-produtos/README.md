@@ -37,6 +37,22 @@ seguintes categorias de produtos:
 - Os dados de carga (seeds) ficarão em [`data/seeds/`](../../data/seeds/README.md)
   quando definidos.
 
+## Modelagem de referência
+
+O catálogo é modelado nas tabelas `produto_base`, `produto_tecnico`,
+`produto_preco` e `produto_imagem` — ver
+[DER](../04-modelagem-banco-der.md) e [dicionário de dados](../05-dicionario-de-dados.md).
+Pontos-chave:
+
+- `produto_base.status_regulatorio` controla a situação regulatória
+  (`nao_validado`, `autorizado_sujeito_a_verificacao`, `sujeito_a_sipeagro`,
+  `bloqueado`, `nao_se_aplica`). Defensivos nunca começam como "validado
+  oficialmente".
+- Fertilizantes genéricos (Ureia, MAP, DAP, Calcário Dolomítico) entram como
+  **tipo técnico/genérico**, separáveis de produtos comerciais no futuro.
+- `produto_preco` e `produto_imagem` têm `status_validacao` e ficam
+  **pendentes** no MVP.
+
 ## Conteúdo previsto desta pasta
 
 - Especificação dos campos de cada categoria de produto.
