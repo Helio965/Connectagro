@@ -380,8 +380,8 @@ Fluxo geral esperado do uso do sistema:
 - [ ] Regras de negócio revisadas
 - [ ] DER revisado
 - [ ] Dicionário de dados revisado
-- [ ] Catálogo de produtos corrigido com IDs, slugs e classe
-- [ ] Estratégia de seed definida
+- [x] Catálogo de produtos corrigido com IDs, slugs e classe
+- [x] Estratégia de seed definida (`produto_base` + `produto_tecnico`; preço/imagem vazios no MVP)
 - [ ] Decisão final sobre ORM ou sqlite3 puro
 - [ ] Estrutura Flask aprovada
 - [ ] Próximo passo autorizado: criação da base Flask

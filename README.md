@@ -90,7 +90,7 @@ A documentação detalhada está em [`docs/`](./docs). Comece pela
 - [06 — Arquitetura do Sistema](./docs/06-arquitetura-do-sistema.md) — **visão conceitual**
 - [06.1 — Arquitetura Técnica do MVP](./docs/06-1-arquitetura-tecnica-mvp.md) — **guia técnico para futura implementação**
 - [07 — Roadmap do MVP](./docs/07-roadmap-mvp.md)
-- [Catálogo de Produtos](./docs/catalogo-produtos/README.md)
+- [Catálogo de Produtos](./docs/catalogo-produtos/README.md) — inclui o [catálogo técnico](./docs/catalogo-produtos/catalogo-tecnico-connectagro-mvp.md) e o **seed técnico** ([`data/seeds/`](./data/seeds/README.md))
 
 ---
 
@@ -100,7 +100,8 @@ Este repositório está em fase de organização. Os próximos passos previstos 
 
 1. Consolidar **escopo**, **requisitos** e **regras de negócio**.
 2. Definir a **modelagem do banco (DER)** e o **dicionário de dados**.
-3. Receber o **catálogo de produtos corrigido** (sem dados inventados).
+3. ~~Receber o **catálogo de produtos corrigido**~~ — **concluído** (catálogo
+   técnico + seed em `data/seeds/`; preço e imagem como pendência).
 4. Implementar o código Flask do MVP, módulo a módulo.
 
 Consulte o [Roadmap do MVP](./docs/07-roadmap-mvp.md) para o detalhamento.
