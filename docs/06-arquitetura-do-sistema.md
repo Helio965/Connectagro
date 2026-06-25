@@ -2,6 +2,11 @@
 
 > Documento-base. A arquitetura definitiva será detalhada conforme a
 > implementação avança. Esta versão registra a direção pretendida para o MVP.
+>
+> **Este documento é a visão conceitual/geral.** O detalhamento técnico para a
+> futura implementação (estrutura profissional Flask, fluxos, módulos, regras e
+> checklist) está em
+> [06.1 — Arquitetura Técnica do MVP](./06-1-arquitetura-tecnica-mvp.md).
 
 ## Visão geral
 
@@ -59,4 +64,5 @@ src/
 
 - [02 — Requisitos do Sistema](./02-requisitos-do-sistema.md)
 - [04 — Modelagem do Banco (DER)](./04-modelagem-banco-der.md)
+- [06.1 — Arquitetura Técnica do MVP](./06-1-arquitetura-tecnica-mvp.md)
 - [07 — Roadmap do MVP](./07-roadmap-mvp.md)

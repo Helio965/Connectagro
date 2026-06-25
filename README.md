@@ -81,6 +81,17 @@ em etapas posteriores, evoluirá para a versão completa.
 A documentação detalhada está em [`docs/`](./docs). Comece pela
 [Visão Geral](./docs/00-visao-geral.md).
 
+### Documentação principal
+
+- [00 — Visão Geral](./docs/00-visao-geral.md)
+- [01 — Escopo do Projeto](./docs/01-escopo-do-projeto.md)
+- [04 — Modelagem do Banco (DER)](./docs/04-modelagem-banco-der.md)
+- [05 — Dicionário de Dados](./docs/05-dicionario-de-dados.md)
+- [06 — Arquitetura do Sistema](./docs/06-arquitetura-do-sistema.md) — **visão conceitual**
+- [06.1 — Arquitetura Técnica do MVP](./docs/06-1-arquitetura-tecnica-mvp.md) — **guia técnico para futura implementação**
+- [07 — Roadmap do MVP](./docs/07-roadmap-mvp.md)
+- [Catálogo de Produtos](./docs/catalogo-produtos/README.md)
+
 ---
 
 ## Próximos passos

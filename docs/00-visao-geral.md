@@ -56,5 +56,6 @@ em todas as etapas:
 - [04 — Modelagem do Banco (DER)](./04-modelagem-banco-der.md)
 - [05 — Dicionário de Dados](./05-dicionario-de-dados.md)
 - [06 — Arquitetura do Sistema](./06-arquitetura-do-sistema.md)
+- [06.1 — Arquitetura Técnica do MVP](./06-1-arquitetura-tecnica-mvp.md)
 - [07 — Roadmap do MVP](./07-roadmap-mvp.md)
 - [Catálogo de Produtos](./catalogo-produtos/README.md)

@@ -30,6 +30,7 @@
 
 ## Etapa 4 — Base da aplicação
 
+- [ ] Aprovar arquitetura técnica do MVP ([06.1 — Arquitetura Técnica do MVP](./06-1-arquitetura-tecnica-mvp.md)).
 - [ ] Estruturar o projeto Flask em `src/`.
 - [ ] Configurar banco **SQLite**.
 - [ ] Criar layout base (HTML/CSS/JS).
@@ -63,3 +64,4 @@ Ordem sugerida (sujeita a ajuste):
 
 - [01 — Escopo do Projeto](./01-escopo-do-projeto.md)
 - [06 — Arquitetura do Sistema](./06-arquitetura-do-sistema.md)
+- [06.1 — Arquitetura Técnica do MVP](./06-1-arquitetura-tecnica-mvp.md)
