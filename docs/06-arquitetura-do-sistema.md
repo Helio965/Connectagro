@@ -24,24 +24,18 @@ organização favorece a separação por módulos para facilitar evolução futu
   [03 — Regras de Negócio](./03-regras-de-negocio.md)).
 - **Dados:** camada de acesso ao SQLite.
 
-## Organização de código (proposta)
+## Organização técnica
 
-A estrutura concreta de `src/` será definida na implementação. Uma proposta
-inicial, sujeita a ajuste:
+A estrutura técnica detalhada da futura implementação está documentada em
+[06.1 — Arquitetura Técnica do MVP](./06-1-arquitetura-tecnica-mvp.md).
 
-```txt
-src/
-├── app.py              # ponto de entrada da aplicação Flask
-├── config.py           # configurações
-├── models/             # modelos de dados
-├── routes/ (ou blueprints/) # rotas por módulo
-├── services/           # regras de negócio / serviços
-├── templates/          # HTML
-└── static/             # CSS, JS, imagens
-```
+Este documento **06 não define a estrutura de pastas final** — ele apenas
+apresenta a visão conceitual da arquitetura. A estrutura oficial planejada para
+implementação deve seguir o documento 06.1.
 
-> O uso de **Blueprints** do Flask é a abordagem pretendida para separar os
-> módulos (login, culturas, glebas, financeiro, etc.).
+De forma resumida e alinhada ao 06.1: a implementação futura deverá seguir o
+padrão **Flask com Application Factory, Blueprints, camada de serviços, modelos e
+templates**, conforme detalhado no documento 06.1.
 
 ## Decisões e restrições
 
