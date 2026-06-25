@@ -31,6 +31,22 @@
   está "validado oficialmente" sem comprovação por **fonte real**.
 - RN-09 — Dados de produto sem origem confiável devem ser sinalizados como
   **não consolidados**, e não exibidos como definitivos.
+- RN-09a — Cada produto possui um **`status_regulatorio`**
+  (`nao_validado`, `autorizado_sujeito_a_verificacao`, `sujeito_a_sipeagro`,
+  `bloqueado`, `nao_se_aplica`). **Defensivos** começam como `nao_validado` ou
+  `autorizado_sujeito_a_verificacao` — **nunca** "validado oficialmente" sem
+  fonte real.
+- RN-09b — **Fertilizantes genéricos** (ex.: Ureia, MAP, DAP, Calcário
+  Dolomítico) usam `nao_se_aplica` ou `sujeito_a_sipeagro`, como **tipo
+  técnico/genérico**, separável de produtos comerciais específicos no futuro.
+- RN-09c — **Paraquate**, se citado, é tratado como `bloqueado_historico` (uso
+  proibido no Brasil), não recomendado. **Oxamil** não entra como produto
+  recomendado no seed inicial.
+- RN-09d — Preço (`produto_preco`) e imagem (`produto_imagem`) possuem
+  **`status_validacao`**; no MVP ficam `pendente`/`nao_consolidado`.
+- RN-09e — No **sistema final**, a validação diária do menor preço será apenas
+  referência informativa e cada preço deverá registrar **fonte, data, unidade e
+  status de validação**.
 
 ## Regras de acesso
 
