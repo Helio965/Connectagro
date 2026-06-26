@@ -44,18 +44,17 @@
 
 > Adotado **Flask-SQLAlchemy** como ORM. O banco real **não** é versionado.
 
-## Etapa 4.1 — Modelos e banco SQLite ⏳ (próxima etapa)
+## Etapa 4.1 — Modelos e banco SQLite ⏳
 
-> **Próximo passo oficial:** criar os **modelos SQLAlchemy** com base no
-> [DER](./04-modelagem-banco-der.md) e no
-> [dicionário de dados](./05-dicionario-de-dados.md), **sem popular o banco e sem
-> importar o seed de produtos ainda**.
-
-- [ ] Modelos SQLAlchemy de domínio (`src/app/models/`).
-- [ ] Criação real das tabelas (schema).
+- [x] **Modelos SQLAlchemy de domínio** (`src/app/models/`, 15 tabelas).
+- [x] **Schema validável** por `db.create_all()` nos testes e via `flask init-db`.
 - [ ] Migrations (Flask-Migrate/Alembic).
 - [ ] Importação do seed técnico do catálogo.
 - [ ] Seed real / banco populado.
+- [ ] CRUDs dos módulos.
+
+> **Próximo passo oficial:** configurar **migrations** e **importar o seed
+> técnico** do catálogo — ainda sem popular além do catálogo e sem CRUD.
 
 ## Etapa 5 — Implementação dos módulos
 

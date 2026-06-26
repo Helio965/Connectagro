@@ -2,8 +2,8 @@
 
 ## Status do documento
 
-**Arquitetura técnica — v0.3 (fundação Flask criada; próxima etapa: modelos
-SQLAlchemy).**
+**Arquitetura técnica — v0.4 (modelos SQLAlchemy criados; próxima etapa:
+migrations + importação do seed).**
 
 Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetura-do-sistema.md):
 
@@ -11,22 +11,23 @@ Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetur
 - O documento **06.1** (este) é o **guia técnico detalhado** da implementação do
   MVP em Flask.
 
-> **Estado atual:** a **fundação Flask já foi criada** (`src/run.py` + `src/app/`
-> com Application Factory, blueprints placeholders, layout base, `/health`),
-> já há **dependências declaradas** em [`requirements.txt`](../requirements.txt)
-> e **testes mínimos** em `tests/`.
+> **Estado atual:** a **fundação Flask** já foi criada (`src/run.py` + `src/app/`
+> com Application Factory, blueprints placeholders, layout base, `/health`) e os
+> **modelos SQLAlchemy de domínio** já estão implementados em `src/app/models/`
+> (15 tabelas; schema criável via `flask init-db`, sem popular). Há
+> **dependências declaradas** em [`requirements.txt`](../requirements.txt) e
+> **testes** em `tests/` (incluindo schema dos modelos).
 >
-> **Ainda NÃO existem:** CRUDs reais, modelos SQLAlchemy de domínio, banco
-> populado, migrations, seed real importado nem autenticação real. Preços e
-> imagens do catálogo **continuam pendentes** para o sistema final.
+> **Ainda NÃO existem:** banco populado, migrations, seed real importado, CRUDs
+> reais nem autenticação real. Preços e imagens do catálogo **continuam
+> pendentes** para o sistema final.
 >
 > Este guia deriva do [DER](./04-modelagem-banco-der.md), do
 > [dicionário de dados](./05-dicionario-de-dados.md) e dos
 > [requisitos](./02-requisitos-do-sistema.md).
 >
-> **Próximo passo oficial:** criar os **modelos SQLAlchemy de domínio** com base
-> no DER e no dicionário de dados, **sem popular o banco e sem importar o seed de
-> produtos ainda** (Etapa 4.1).
+> **Próximo passo oficial:** configurar **migrations** e **importar o seed
+> técnico** do catálogo, ainda sem CRUD nem autenticação real.
 
 ## Objetivo
 
@@ -98,11 +99,9 @@ Flask (rotas/blueprints)  ──►  Serviços (regras de negócio)  ──►  
 
 ## 3. Estrutura profissional (Flask)
 
-> ✅ **A estrutura base já foi criada** na fundação Flask (`src/run.py` +
-> `src/app/` com Application Factory, blueprints placeholders, templates,
-> estáticos e testes). **`src/app/models/` existe, mas ainda está vazio de
-> modelos reais** — os arquivos de modelos são previstos para a **Etapa 4.1**.
-> CRUD, migrations, seed real e banco populado permanecem para etapas futuras.
+> ✅ **A estrutura base e os modelos SQLAlchemy já foram criados.** `src/app/
+> models/` contém os modelos de domínio (15 tabelas). CRUD, migrations, seed
+> real e banco populado permanecem para etapas futuras.
 
 ### Estrutura criada atualmente
 
@@ -113,13 +112,20 @@ src/
     ├── __init__.py              # create_app / Application Factory
     ├── config.py                # classes de configuração por ambiente
     ├── extensions.py            # instâncias de extensões (db = SQLAlchemy)
+    ├── commands.py              # CLI: flask init-db (cria schema, sem popular)
     ├── blueprints/              # um pacote por módulo do MVP (placeholders)
     │   ├── __init__.py          # registro central dos blueprints
     │   ├── auth/  dashboard/  culturas/  glebas/  defensivos/
     │   ├── fertilizantes/  financeiro/  upload/  equipe/
     │   └── colheita/  mapa/  ia/  relatorios/
-    ├── models/
-    │   └── __init__.py          # nenhum modelo definido nesta etapa
+    ├── models/                  # modelos SQLAlchemy de domínio (15 tabelas)
+    │   ├── __init__.py          # importa todos os modelos
+    │   ├── _helpers.py          # iso_now() (datas ISO 8601 em TEXT)
+    │   ├── usuario.py  propriedade.py  equipe.py
+    │   ├── cultura.py           # Cultura + CulturaGleba (N:N)
+    │   ├── gleba.py  aplicacao.py  colheita.py
+    │   ├── produto.py           # produto_base/_tecnico/_preco/_imagem
+    │   ├── financeiro.py  upload.py  ia.py
     ├── services/
     │   └── __init__.py
     ├── utils/
@@ -129,28 +135,13 @@ src/
 ```
 
 > O banco SQLite ficará em `instance/` (não versionado) quando o schema for
-> criado. Cada blueprint tem hoje `__init__.py` + `routes.py`; `forms.py`/
-> `services.py` poderão ser adicionados quando fizer sentido.
+> criado (`flask init-db`). Cada blueprint tem hoje `__init__.py` + `routes.py`;
+> `forms.py`/`services.py` poderão ser adicionados quando fizer sentido.
 
-### Arquivos previstos para a Etapa 4.1
-
-> ⚠️ **Os arquivos abaixo ainda NÃO devem ser criados agora.** São previstos
-> para a próxima etapa (modelos SQLAlchemy) e **não fazem parte da fundação
-> Flask já concluída**.
-
-```text
-src/app/models/
-├── usuario.py
-├── propriedade.py
-├── cultura.py
-├── gleba.py
-├── produto.py           # produto_base, produto_tecnico, produto_preco, produto_imagem
-├── financeiro.py
-├── equipe.py
-├── colheita.py
-├── upload.py
-└── ia.py
-```
+> **Convenções dos modelos:** tabelas/colunas em `snake_case`; `id` PK; datas em
+> ISO 8601 como `db.String`; booleanos `db.Boolean` (0/1 no SQLite); listas
+> (`nutrientes_principais`, `culturas_comuns`, `alvos_controle`) como `db.Text`
+> (JSON). Sem enums `validado_agrofit`/`validado_sipeagro`; preço/imagem pendentes.
 
 ---
 
