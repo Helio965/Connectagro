@@ -9,6 +9,7 @@ from flask import Flask, jsonify, render_template
 from .config import get_config
 from .extensions import db
 from .blueprints import register_blueprints
+from .commands import register_commands
 
 
 def create_app(config_name=None):
@@ -23,8 +24,14 @@ def create_app(config_name=None):
     # Extensões
     db.init_app(app)
 
+    # Registra os modelos no metadata do SQLAlchemy (não cria tabelas aqui).
+    from . import models  # noqa: F401
+
     # Blueprints dos módulos do MVP
     register_blueprints(app)
+
+    # Comandos CLI (ex.: flask init-db)
+    register_commands(app)
 
     # Health check
     @app.route("/health")
