@@ -2,19 +2,31 @@
 
 ## Status do documento
 
-**Arquitetura técnica — v0.2 (MVP).**
+**Arquitetura técnica — v0.3 (fundação Flask criada; próxima etapa: modelos
+SQLAlchemy).**
 
 Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetura-do-sistema.md):
 
 - O documento **06** é a **visão conceitual/geral** (camadas em alto nível).
-- O documento **06.1** (este) é o **guia técnico detalhado** para a futura
-  implementação do MVP em Flask.
+- O documento **06.1** (este) é o **guia técnico detalhado** da implementação do
+  MVP em Flask.
 
-> **Nesta etapa ainda não deve haver código funcional, banco criado, migrations,
-> seeds definitivos ou dependências instaladas.** O objetivo é apenas documentar
-> a arquitetura técnica planejada, derivada do [DER](./04-modelagem-banco-der.md),
-> do [dicionário de dados](./05-dicionario-de-dados.md) e dos
+> **Estado atual:** a **fundação Flask já foi criada** (`src/run.py` + `src/app/`
+> com Application Factory, blueprints placeholders, layout base, `/health`),
+> já há **dependências declaradas** em [`requirements.txt`](../requirements.txt)
+> e **testes mínimos** em `tests/`.
+>
+> **Ainda NÃO existem:** CRUDs reais, modelos SQLAlchemy de domínio, banco
+> populado, migrations, seed real importado nem autenticação real. Preços e
+> imagens do catálogo **continuam pendentes** para o sistema final.
+>
+> Este guia deriva do [DER](./04-modelagem-banco-der.md), do
+> [dicionário de dados](./05-dicionario-de-dados.md) e dos
 > [requisitos](./02-requisitos-do-sistema.md).
+>
+> **Próximo passo oficial:** criar os **modelos SQLAlchemy de domínio** com base
+> no DER e no dicionário de dados, **sem popular o banco e sem importar o seed de
+> produtos ainda** (Etapa 4.1).
 
 ## Objetivo
 
@@ -355,13 +367,16 @@ Fluxo geral esperado do uso do sistema:
 
 ## 11. Testes
 
-- **pytest** com app criado via `create_app('testing')` e banco isolado (ex.:
-  SQLite em memória).
-- Organização em `src/tests/` (ou `tests/` na raiz) espelhando `src/app/` — ver
+- **pytest** é a ferramenta oficial; app criado via `create_app('testing')` com
+  banco isolado (SQLite em memória), conforme `tests/conftest.py`.
+- **Testes mínimos da fundação Flask já existem** em `tests/`
+  (`test_app_factory.py`, `test_placeholder_routes.py`): validam a criação da
+  aplicação, a rota `/health`, a rota inicial e as rotas placeholders dos módulos.
+- Organização em `tests/` (na raiz) espelhando `src/app/` — ver
   [tests/README.md](../tests/README.md).
-- Prioridade: regras de negócio e fluxos críticos (autenticação, financeiro,
-  catálogo/consulta, registro de aplicação de insumo).
-- Convenção: arquivos `test_*.py`. **Nenhum teste é criado nesta etapa.**
+- **Para etapas futuras:** testes de regras de negócio, banco, autenticação,
+  CRUD e seed.
+- Convenção: arquivos `test_*.py`.
 
 ---
 
@@ -384,20 +399,25 @@ Fluxo geral esperado do uso do sistema:
 
 ---
 
-## 13. Checklist de prontidão para iniciar o código
+## 13. Checklist de prontidão para iniciar a Etapa 4.1 — Modelos SQLAlchemy
 
 > Marcar apenas o que estiver **realmente** concluído.
 
-- [ ] Escopo consolidado
-- [ ] Requisitos revisados
-- [ ] Regras de negócio revisadas
-- [ ] DER revisado
-- [ ] Dicionário de dados revisado
+- [x] Escopo consolidado
+- [x] Requisitos revisados
+- [x] Regras de negócio revisadas
+- [x] DER revisado
+- [x] Dicionário de dados revisado
 - [x] Catálogo de produtos corrigido com IDs, slugs e classe
 - [x] Estratégia de seed definida (`produto_base` + `produto_tecnico`; preço/imagem vazios no MVP)
-- [x] Decisão final sobre ORM ou sqlite3 puro (**Flask-SQLAlchemy**)
-- [x] Estrutura Flask aprovada e **criada** (`src/run.py` + `src/app/`)
-- [x] Próximo passo autorizado: **base Flask criada** (fundação; CRUD/modelos/seed para etapas futuras)
+- [x] Decisão final sobre ORM: **Flask-SQLAlchemy**
+- [x] Fundação Flask criada (`src/run.py` + `src/app/`)
+- [x] Blueprints placeholders criados
+- [x] Testes mínimos criados
+- [ ] Modelos SQLAlchemy de domínio criados
+- [ ] Banco SQLite inicial criado
+- [ ] Migrations configuradas
+- [ ] Seed técnico importado
 
 ---
 
