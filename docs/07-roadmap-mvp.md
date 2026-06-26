@@ -24,9 +24,13 @@
 
 ## Etapa 3 — Catálogo de produtos
 
-- [ ] Receber o **catálogo corrigido** (sem dados inventados).
-- [ ] Definir formato dos dados em `data/seeds/`.
-- [ ] Tratar **preço e imagem** como pendência / não consolidado.
+- [x] Receber o **catálogo corrigido** (sem dados inventados) — ver
+  [catálogo técnico](./catalogo-produtos/catalogo-tecnico-connectagro-mvp.md).
+- [x] Definir formato dos dados em `data/seeds/`
+  (`connectagro_produtos_seed.json` + `.csv`).
+- [x] Tratar **preço e imagem** como pendência / não consolidado
+  (`produto_preco`/`produto_imagem` vazios; ver
+  [pendências](./catalogo-produtos/pendencias-validacao.md)).
 
 ## Etapa 4 — Base da aplicação
 

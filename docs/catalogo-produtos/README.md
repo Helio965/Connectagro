@@ -2,67 +2,84 @@
 
 Esta pasta documenta o **catálogo técnico de produtos agrícolas** do ConnectAgro.
 
-## Propósito
+## Finalidade
 
-O catálogo é uma **base técnica inicial** de consulta rápida. Ele abrange as
-seguintes categorias de produtos:
+O catálogo é uma **base técnica inicial** de **consulta rápida** e fonte futura
+do seed do banco. Serve para:
 
-- Defensivos
-- Fertilizantes
-- Corretivos
-- Inoculantes
-- Biofertilizantes
+- consulta rápida e organização de insumos;
+- apoio ao registro futuro de aplicação de insumos;
+- base inicial para o seed do SQLite;
+- documentação técnica do sistema.
+
+Abrange as categorias: **Defensivos**, **Fertilizantes**, **Corretivos**,
+**Inoculantes** e **Biofertilizantes**.
+
+> O ConnectAgro **não vende produtos**. O catálogo **não** é loja nem marketplace.
+
+## Documentos desta pasta
+
+- **[catalogo-tecnico-connectagro-mvp.md](./catalogo-tecnico-connectagro-mvp.md)** —
+  documento humano principal (tabelas de defensivos e fertilizantes, itens
+  bloqueados, critérios, limitações e regras de uso no banco).
+- **[pendencias-validacao.md](./pendencias-validacao.md)** — pendências de
+  validação (AGROFIT/MAPA, SIPEAGRO/MAPA, preço, imagem, fabricante, fonte técnica).
+- **Seed técnico:** [`data/seeds/connectagro_produtos_seed.json`](../../data/seeds/connectagro_produtos_seed.json)
+  e [`...seed_compacto.csv`](../../data/seeds/connectagro_produtos_seed_compacto.csv).
+
+## O que entra no MVP
+
+- **`produto_base`** (id, slug, nome, classe, categoria, descrições, status) e
+  **`produto_tecnico`** (dados técnicos): **preenchidos** como base técnica.
+- 30 defensivos + 30 fertilizantes/corretivos/inoculantes pré-cadastrados.
+
+## O que fica para o sistema final
+
+- **`produto_preco`** e **`produto_imagem`**: **pendentes / não consolidados** no
+  MVP (tabelas vazias no seed).
+- **Validação diária do menor valor** atualizado de cada produto (com fonte,
+  data, unidade, URL e status).
+- Validação oficial **AGROFIT/MAPA** (defensivos) e **SIPEAGRO/MAPA**
+  (fertilizantes).
+- Separação formal entre **produto técnico/genérico** e **produto comercial
+  específico**.
+
+## Conceitos importantes
+
+- **Defensivo × Fertilizante:** *defensivo* é agrotóxico/produto fitossanitário
+  (inseticida, fungicida, herbicida, acaricida, moluscicida...); *fertilizante*
+  é insumo nutricional (mineral, orgânico, organomineral) ou correção de solo.
+- **Produto técnico × produto comercial:** no MVP os itens são **tipos
+  técnicos/genéricos** (ingrediente ativo ou tipo de insumo), **não** marcas/
+  produtos comerciais com fabricante. Fertilizantes como **Ureia, MAP, DAP,
+  Calcário Dolomítico** entram como **tipo técnico/genérico**.
+- **Validação regulatória:** **nenhum** defensivo tem validação oficial
+  AGROFIT/MAPA dentro do repositório; `status_regulatorio` é **informativo**.
 
 ## Princípios obrigatórios
 
-> Estas regras são inegociáveis e valem para qualquer dado adicionado aqui.
+> Inegociáveis para qualquer dado adicionado aqui.
 
-1. **Consulta, não venda.** O ConnectAgro **não** vende produtos. Os valores são
-   apenas referência de consulta rápida.
-2. **Preço e imagem são pendência no MVP.** Quando não houver fonte confiável,
-   esses campos devem ser marcados como **dado não consolidado** — nunca
-   inventados.
-3. **Sem validação oficial inventada.** Não afirmar validação **AGROFIT/MAPA**
-   nem dizer que um produto está "validado oficialmente" sem **fonte real**
-   comprovada.
-4. **Base técnica, não verdade regulatória.** O catálogo não substitui consulta
-   às fontes oficiais.
-5. **Validação diária de menor valor fica para o sistema final**, não para o MVP.
-
-## Estado atual
-
-- ⚠️ **Nenhum dado de produto foi cadastrado ainda.**
-- O catálogo **corrigido** (sem dados inventados) será fornecido em etapa
-  posterior — ver [Roadmap, Etapa 3](../07-roadmap-mvp.md).
-- Os dados de carga (seeds) ficarão em [`data/seeds/`](../../data/seeds/README.md)
-  quando definidos.
+1. **Consulta, não venda.** Valores são apenas referência de consulta rápida.
+2. **Preço e imagem são pendência no MVP** — nunca inventados.
+3. **Sem validação oficial inventada** (AGROFIT/MAPA ou SIPEAGRO/MAPA) sem fonte real.
+4. **Base técnica, não verdade regulatória.**
+5. **Validação diária de menor valor fica para o sistema final.**
+6. **Não é receituário agronômico** — não substitui a orientação de um
+   engenheiro agrônomo.
 
 ## Modelagem de referência
 
-O catálogo é modelado nas tabelas `produto_base`, `produto_tecnico`,
-`produto_preco` e `produto_imagem` — ver
-[DER](../04-modelagem-banco-der.md) e [dicionário de dados](../05-dicionario-de-dados.md).
-Pontos-chave:
-
-- `produto_base.status_regulatorio` controla a situação regulatória
-  (`nao_validado`, `autorizado_sujeito_a_verificacao`, `sujeito_a_sipeagro`,
-  `bloqueado`, `nao_se_aplica`). Defensivos nunca começam como "validado
-  oficialmente".
-- Fertilizantes genéricos (Ureia, MAP, DAP, Calcário Dolomítico) entram como
-  **tipo técnico/genérico**, separáveis de produtos comerciais no futuro.
-- `produto_preco` e `produto_imagem` têm `status_validacao` e ficam
-  **pendentes** no MVP.
-
-## Conteúdo previsto desta pasta
-
-- Especificação dos campos de cada categoria de produto.
-- Critérios de classificação e organização do catálogo.
-- Marcação de campos pendentes (preço, imagem) e de origem dos dados.
+Tabelas `produto_base`, `produto_tecnico`, `produto_preco` e `produto_imagem` —
+ver [DER](../04-modelagem-banco-der.md) e
+[dicionário de dados](../05-dicionario-de-dados.md).
 
 ---
 
 ## Documentos relacionados
 
+- [Catálogo Técnico (MVP)](./catalogo-tecnico-connectagro-mvp.md)
+- [Pendências de Validação](./pendencias-validacao.md)
 - [03 — Regras de Negócio](../03-regras-de-negocio.md)
 - [04 — Modelagem do Banco (DER)](../04-modelagem-banco-der.md)
 - [data/seeds](../../data/seeds/README.md)

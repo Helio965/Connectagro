@@ -1,0 +1,1905 @@
+{
+  "_meta": {
+    "projeto": "ConnectAgro",
+    "tipo": "seed_tecnico_catalogo_produtos_mvp",
+    "versao": "0.1",
+    "status": "tecnico_nao_regulatorio",
+    "observacao": "Base técnica inicial para MVP. Não representa validação oficial AGROFIT/MAPA ou SIPEAGRO/MAPA.",
+    "preco_no_mvp": "pendente_nao_consolidado",
+    "imagem_no_mvp": "pendente_nao_consolidado",
+    "menor_valor_diario": "funcionalidade_do_sistema_final"
+  },
+  "produto_base": [
+    {
+      "id": 1,
+      "slug": "imidacloprido",
+      "nome": "Imidacloprido",
+      "classe": "defensivo",
+      "categoria": "inseticida",
+      "descricao_curta": "Imidacloprido — inseticida (Neonicotinoide).",
+      "descricao_completa": "Imidacloprido: ingrediente ativo do grupo Neonicotinoide, de uso como inseticida. Base técnica para cadastro e consulta no ConnectAgro.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "nao_validado_agrofit"
+    },
+    {
+      "id": 2,
+      "slug": "lambda-cialotrina",
+      "nome": "Lambda-cialotrina",
+      "classe": "defensivo",
+      "categoria": "inseticida",
+      "descricao_curta": "Lambda-cialotrina — inseticida (Piretroide).",
+      "descricao_completa": "Lambda-cialotrina: ingrediente ativo do grupo Piretroide, de uso como inseticida. Base técnica para cadastro e consulta no ConnectAgro.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "nao_validado_agrofit"
+    },
+    {
+      "id": 3,
+      "slug": "clorpirifos",
+      "nome": "Clorpirifós",
+      "classe": "defensivo",
+      "categoria": "inseticida",
+      "descricao_curta": "Clorpirifós — inseticida (Organofosforado).",
+      "descricao_completa": "Clorpirifós: ingrediente ativo do grupo Organofosforado, de uso como inseticida. Base técnica para cadastro e consulta no ConnectAgro.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "atencao_regulatoria"
+    },
+    {
+      "id": 4,
+      "slug": "espinetoram",
+      "nome": "Espinetoram",
+      "classe": "defensivo",
+      "categoria": "inseticida",
+      "descricao_curta": "Espinetoram — inseticida (Espinosina).",
+      "descricao_completa": "Espinetoram: ingrediente ativo do grupo Espinosina, de uso como inseticida. Base técnica para cadastro e consulta no ConnectAgro.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "nao_validado_agrofit"
+    },
+    {
+      "id": 5,
+      "slug": "metomil",
+      "nome": "Metomil",
+      "classe": "defensivo",
+      "categoria": "inseticida",
+      "descricao_curta": "Metomil — inseticida (Carbamato (metilcarbamato de oxima)).",
+      "descricao_completa": "Metomil: ingrediente ativo do grupo Carbamato (metilcarbamato de oxima), de uso como inseticida. Base técnica para cadastro e consulta no ConnectAgro.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "nao_validado_agrofit"
+    },
+    {
+      "id": 6,
+      "slug": "abamectina",
+      "nome": "Abamectina",
+      "classe": "defensivo",
+      "categoria": "acaricida",
+      "descricao_curta": "Abamectina — acaricida (Avermectina).",
+      "descricao_completa": "Abamectina: ingrediente ativo do grupo Avermectina, de uso como acaricida/inseticida/nematicida. Base técnica para cadastro e consulta no ConnectAgro.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "nao_validado_agrofit"
+    },
+    {
+      "id": 7,
+      "slug": "acefato",
+      "nome": "Acefato",
+      "classe": "defensivo",
+      "categoria": "inseticida",
+      "descricao_curta": "Acefato — inseticida (Organofosforado).",
+      "descricao_completa": "Acefato: ingrediente ativo do grupo Organofosforado, de uso como inseticida. Base técnica para cadastro e consulta no ConnectAgro.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "nao_validado_agrofit"
+    },
+    {
+      "id": 8,
+      "slug": "clorantraniliprole",
+      "nome": "Clorantraniliprole",
+      "classe": "defensivo",
+      "categoria": "inseticida",
+      "descricao_curta": "Clorantraniliprole — inseticida (Diamida antranílica).",
+      "descricao_completa": "Clorantraniliprole: ingrediente ativo do grupo Diamida antranílica, de uso como inseticida. Base técnica para cadastro e consulta no ConnectAgro.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "nao_validado_agrofit"
+    },
+    {
+      "id": 9,
+      "slug": "fipronil",
+      "nome": "Fipronil",
+      "classe": "defensivo",
+      "categoria": "inseticida",
+      "descricao_curta": "Fipronil — inseticida (Fenilpirazol).",
+      "descricao_completa": "Fipronil: ingrediente ativo do grupo Fenilpirazol, de uso como inseticida/formicida. Base técnica para cadastro e consulta no ConnectAgro.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "nao_validado_agrofit"
+    },
+    {
+      "id": 10,
+      "slug": "deltametrina",
+      "nome": "Deltametrina",
+      "classe": "defensivo",
+      "categoria": "inseticida",
+      "descricao_curta": "Deltametrina — inseticida (Piretroide).",
+      "descricao_completa": "Deltametrina: ingrediente ativo do grupo Piretroide, de uso como inseticida. Base técnica para cadastro e consulta no ConnectAgro.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "nao_validado_agrofit"
+    },
+    {
+      "id": 11,
+      "slug": "mancozebe",
+      "nome": "Mancozebe",
+      "classe": "defensivo",
+      "categoria": "fungicida",
+      "descricao_curta": "Mancozebe — fungicida (Ditiocarbamato).",
+      "descricao_completa": "Mancozebe: ingrediente ativo do grupo Ditiocarbamato, de uso como fungicida. Base técnica para cadastro e consulta no ConnectAgro.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "nao_validado_agrofit"
+    },
+    {
+      "id": 12,
+      "slug": "tebuconazol",
+      "nome": "Tebuconazol",
+      "classe": "defensivo",
+      "categoria": "fungicida",
+      "descricao_curta": "Tebuconazol — fungicida (Triazol).",
+      "descricao_completa": "Tebuconazol: ingrediente ativo do grupo Triazol, de uso como fungicida. Base técnica para cadastro e consulta no ConnectAgro.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "nao_validado_agrofit"
+    },
+    {
+      "id": 13,
+      "slug": "azoxistrobina",
+      "nome": "Azoxistrobina",
+      "classe": "defensivo",
+      "categoria": "fungicida",
+      "descricao_curta": "Azoxistrobina — fungicida (Estrobilurina).",
+      "descricao_completa": "Azoxistrobina: ingrediente ativo do grupo Estrobilurina, de uso como fungicida. Base técnica para cadastro e consulta no ConnectAgro.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "nao_validado_agrofit"
+    },
+    {
+      "id": 14,
+      "slug": "ciproconazol",
+      "nome": "Ciproconazol",
+      "classe": "defensivo",
+      "categoria": "fungicida",
+      "descricao_curta": "Ciproconazol — fungicida (Triazol).",
+      "descricao_completa": "Ciproconazol: ingrediente ativo do grupo Triazol, de uso como fungicida. Base técnica para cadastro e consulta no ConnectAgro.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "nao_validado_agrofit"
+    },
+    {
+      "id": 15,
+      "slug": "captana",
+      "nome": "Captana",
+      "classe": "defensivo",
+      "categoria": "fungicida",
+      "descricao_curta": "Captana — fungicida (Ftalimida).",
+      "descricao_completa": "Captana: ingrediente ativo do grupo Ftalimida, de uso como fungicida. Base técnica para cadastro e consulta no ConnectAgro.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "nao_validado_agrofit"
+    },
+    {
+      "id": 16,
+      "slug": "difenoconazol",
+      "nome": "Difenoconazol",
+      "classe": "defensivo",
+      "categoria": "fungicida",
+      "descricao_curta": "Difenoconazol — fungicida (Triazol).",
+      "descricao_completa": "Difenoconazol: ingrediente ativo do grupo Triazol, de uso como fungicida. Base técnica para cadastro e consulta no ConnectAgro.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "nao_validado_agrofit"
+    },
+    {
+      "id": 17,
+      "slug": "clorotalonil",
+      "nome": "Clorotalonil",
+      "classe": "defensivo",
+      "categoria": "fungicida",
+      "descricao_curta": "Clorotalonil — fungicida (Isoftalonitrila).",
+      "descricao_completa": "Clorotalonil: ingrediente ativo do grupo Isoftalonitrila, de uso como fungicida. Base técnica para cadastro e consulta no ConnectAgro.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "nao_validado_agrofit"
+    },
+    {
+      "id": 18,
+      "slug": "fluxapiroxade",
+      "nome": "Fluxapiroxade",
+      "classe": "defensivo",
+      "categoria": "fungicida",
+      "descricao_curta": "Fluxapiroxade — fungicida (Carboxamida (SDHI)).",
+      "descricao_completa": "Fluxapiroxade: ingrediente ativo do grupo Carboxamida (SDHI), de uso como fungicida. Base técnica para cadastro e consulta no ConnectAgro.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "nao_validado_agrofit"
+    },
+    {
+      "id": 19,
+      "slug": "glifosato",
+      "nome": "Glifosato",
+      "classe": "defensivo",
+      "categoria": "herbicida",
+      "descricao_curta": "Glifosato — herbicida (Glicina substituída (aminoácido fosfonado)).",
+      "descricao_completa": "Glifosato: ingrediente ativo do grupo Glicina substituída (aminoácido fosfonado), de uso como herbicida. Base técnica para cadastro e consulta no ConnectAgro.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "nao_validado_agrofit"
+    },
+    {
+      "id": 20,
+      "slug": "atrazina",
+      "nome": "Atrazina",
+      "classe": "defensivo",
+      "categoria": "herbicida",
+      "descricao_curta": "Atrazina — herbicida (Triazina).",
+      "descricao_completa": "Atrazina: ingrediente ativo do grupo Triazina, de uso como herbicida. Base técnica para cadastro e consulta no ConnectAgro.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "nao_validado_agrofit"
+    },
+    {
+      "id": 21,
+      "slug": "2-4-d",
+      "nome": "2,4-D",
+      "classe": "defensivo",
+      "categoria": "herbicida",
+      "descricao_curta": "2,4-D — herbicida (Ácido fenoxiacético (ariloxialcanoico)).",
+      "descricao_completa": "2,4-D: ingrediente ativo do grupo Ácido fenoxiacético (ariloxialcanoico), de uso como herbicida. Base técnica para cadastro e consulta no ConnectAgro.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "nao_validado_agrofit"
+    },
+    {
+      "id": 22,
+      "slug": "s-metolacloro",
+      "nome": "S-metolacloro",
+      "classe": "defensivo",
+      "categoria": "herbicida",
+      "descricao_curta": "S-metolacloro — herbicida (Cloroacetamida).",
+      "descricao_completa": "S-metolacloro: ingrediente ativo do grupo Cloroacetamida, de uso como herbicida (pré-emergente). Base técnica para cadastro e consulta no ConnectAgro.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "nao_validado_agrofit"
+    },
+    {
+      "id": 23,
+      "slug": "dicamba",
+      "nome": "Dicamba",
+      "classe": "defensivo",
+      "categoria": "herbicida",
+      "descricao_curta": "Dicamba — herbicida (Ácido benzoico).",
+      "descricao_completa": "Dicamba: ingrediente ativo do grupo Ácido benzoico, de uso como herbicida. Base técnica para cadastro e consulta no ConnectAgro.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "nao_validado_agrofit"
+    },
+    {
+      "id": 24,
+      "slug": "cletodim",
+      "nome": "Cletodim",
+      "classe": "defensivo",
+      "categoria": "herbicida",
+      "descricao_curta": "Cletodim — herbicida (Ciclohexanodiona (DIM)).",
+      "descricao_completa": "Cletodim: ingrediente ativo do grupo Ciclohexanodiona (DIM), de uso como herbicida (graminicida). Base técnica para cadastro e consulta no ConnectAgro.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "nao_validado_agrofit"
+    },
+    {
+      "id": 25,
+      "slug": "clomazona",
+      "nome": "Clomazona",
+      "classe": "defensivo",
+      "categoria": "herbicida",
+      "descricao_curta": "Clomazona — herbicida (Isoxazolidinona).",
+      "descricao_completa": "Clomazona: ingrediente ativo do grupo Isoxazolidinona, de uso como herbicida (pré-emergente). Base técnica para cadastro e consulta no ConnectAgro.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "nao_validado_agrofit"
+    },
+    {
+      "id": 26,
+      "slug": "sulfentrazona",
+      "nome": "Sulfentrazona",
+      "classe": "defensivo",
+      "categoria": "herbicida",
+      "descricao_curta": "Sulfentrazona — herbicida (Triazolinona).",
+      "descricao_completa": "Sulfentrazona: ingrediente ativo do grupo Triazolinona, de uso como herbicida (pré-emergente). Base técnica para cadastro e consulta no ConnectAgro.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "nao_validado_agrofit"
+    },
+    {
+      "id": 27,
+      "slug": "fluopiram",
+      "nome": "Fluopiram",
+      "classe": "defensivo",
+      "categoria": "fungicida",
+      "descricao_curta": "Fluopiram — fungicida (Piridiniletil-benzamida (SDHI)).",
+      "descricao_completa": "Fluopiram: ingrediente ativo do grupo Piridiniletil-benzamida (SDHI), de uso como fungicida/nematicida. Base técnica para cadastro e consulta no ConnectAgro.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "nao_validado_agrofit"
+    },
+    {
+      "id": 28,
+      "slug": "propargito",
+      "nome": "Propargito",
+      "classe": "defensivo",
+      "categoria": "acaricida",
+      "descricao_curta": "Propargito — acaricida (Sulfito de organoenxofre).",
+      "descricao_completa": "Propargito: ingrediente ativo do grupo Sulfito de organoenxofre, de uso como acaricida. Base técnica para cadastro e consulta no ConnectAgro.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "nao_validado_agrofit"
+    },
+    {
+      "id": 29,
+      "slug": "metaldeido",
+      "nome": "Metaldeído",
+      "classe": "defensivo",
+      "categoria": "moluscicida",
+      "descricao_curta": "Metaldeído — moluscicida (Aldeído (polímero do acetaldeído)).",
+      "descricao_completa": "Metaldeído: ingrediente ativo do grupo Aldeído (polímero do acetaldeído), de uso como moluscicida. Base técnica para cadastro e consulta no ConnectAgro.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "nao_validado_agrofit"
+    },
+    {
+      "id": 30,
+      "slug": "fosfato-ferrico",
+      "nome": "Fosfato férrico",
+      "classe": "defensivo",
+      "categoria": "moluscicida",
+      "descricao_curta": "Fosfato férrico — moluscicida (Composto inorgânico (fosfato de ferro)).",
+      "descricao_completa": "Fosfato férrico: ingrediente ativo do grupo Composto inorgânico (fosfato de ferro), de uso como moluscicida. Base técnica para cadastro e consulta no ConnectAgro.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "nao_validado_agrofit"
+    },
+    {
+      "id": 40,
+      "slug": "npk-04-14-08",
+      "nome": "NPK 04-14-08",
+      "classe": "fertilizante",
+      "categoria": "mineral",
+      "descricao_curta": "NPK 04-14-08 — fertilizante mineral.",
+      "descricao_completa": "NPK 04-14-08: Formulação NPK 04-14-08. Tratado como tipo técnico/genérico no MVP, para cadastro e consulta.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "sujeito_a_sipeagro_nao_validado"
+    },
+    {
+      "id": 41,
+      "slug": "npk-20-05-20",
+      "nome": "NPK 20-05-20",
+      "classe": "fertilizante",
+      "categoria": "mineral",
+      "descricao_curta": "NPK 20-05-20 — fertilizante mineral.",
+      "descricao_completa": "NPK 20-05-20: Formulação NPK 20-05-20. Tratado como tipo técnico/genérico no MVP, para cadastro e consulta.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "sujeito_a_sipeagro_nao_validado"
+    },
+    {
+      "id": 42,
+      "slug": "npk-10-10-10",
+      "nome": "NPK 10-10-10",
+      "classe": "fertilizante",
+      "categoria": "mineral",
+      "descricao_curta": "NPK 10-10-10 — fertilizante mineral.",
+      "descricao_completa": "NPK 10-10-10: Formulação NPK 10-10-10. Tratado como tipo técnico/genérico no MVP, para cadastro e consulta.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "sujeito_a_sipeagro_nao_validado"
+    },
+    {
+      "id": 43,
+      "slug": "ureia",
+      "nome": "Ureia",
+      "classe": "fertilizante",
+      "categoria": "mineral",
+      "descricao_curta": "Ureia — fertilizante mineral.",
+      "descricao_completa": "Ureia: Ureia (≈45% N). Tratado como tipo técnico/genérico no MVP, para cadastro e consulta.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "sujeito_a_sipeagro_nao_validado"
+    },
+    {
+      "id": 44,
+      "slug": "sulfato-de-amonio",
+      "nome": "Sulfato de amônio",
+      "classe": "fertilizante",
+      "categoria": "mineral",
+      "descricao_curta": "Sulfato de amônio — fertilizante mineral.",
+      "descricao_completa": "Sulfato de amônio: Sulfato de amônio (≈21% N, ≈24% S). Tratado como tipo técnico/genérico no MVP, para cadastro e consulta.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "sujeito_a_sipeagro_nao_validado"
+    },
+    {
+      "id": 45,
+      "slug": "nitrato-de-calcio",
+      "nome": "Nitrato de cálcio",
+      "classe": "fertilizante",
+      "categoria": "mineral",
+      "descricao_curta": "Nitrato de cálcio — fertilizante mineral.",
+      "descricao_completa": "Nitrato de cálcio: Nitrato de cálcio (≈15% N, Ca). Tratado como tipo técnico/genérico no MVP, para cadastro e consulta.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "sujeito_a_sipeagro_nao_validado"
+    },
+    {
+      "id": 46,
+      "slug": "map",
+      "nome": "MAP",
+      "classe": "fertilizante",
+      "categoria": "mineral",
+      "descricao_curta": "MAP — fertilizante mineral.",
+      "descricao_completa": "MAP: Fosfato monoamônico (≈11% N, ≈52% P2O5). Tratado como tipo técnico/genérico no MVP, para cadastro e consulta.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "sujeito_a_sipeagro_nao_validado"
+    },
+    {
+      "id": 47,
+      "slug": "dap",
+      "nome": "DAP",
+      "classe": "fertilizante",
+      "categoria": "mineral",
+      "descricao_curta": "DAP — fertilizante mineral.",
+      "descricao_completa": "DAP: Fosfato diamônico (≈18% N, ≈46% P2O5). Tratado como tipo técnico/genérico no MVP, para cadastro e consulta.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "sujeito_a_sipeagro_nao_validado"
+    },
+    {
+      "id": 48,
+      "slug": "superfosfato-simples",
+      "nome": "Superfosfato simples",
+      "classe": "fertilizante",
+      "categoria": "mineral",
+      "descricao_curta": "Superfosfato simples — fertilizante mineral.",
+      "descricao_completa": "Superfosfato simples: Superfosfato simples (≈18% P2O5, Ca, S). Tratado como tipo técnico/genérico no MVP, para cadastro e consulta.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "sujeito_a_sipeagro_nao_validado"
+    },
+    {
+      "id": 49,
+      "slug": "superfosfato-triplo",
+      "nome": "Superfosfato triplo",
+      "classe": "fertilizante",
+      "categoria": "mineral",
+      "descricao_curta": "Superfosfato triplo — fertilizante mineral.",
+      "descricao_completa": "Superfosfato triplo: Superfosfato triplo (≈41% P2O5). Tratado como tipo técnico/genérico no MVP, para cadastro e consulta.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "sujeito_a_sipeagro_nao_validado"
+    },
+    {
+      "id": 50,
+      "slug": "cloreto-de-potassio",
+      "nome": "Cloreto de potássio",
+      "classe": "fertilizante",
+      "categoria": "mineral",
+      "descricao_curta": "Cloreto de potássio — fertilizante mineral.",
+      "descricao_completa": "Cloreto de potássio: Cloreto de potássio (≈60% K2O). Tratado como tipo técnico/genérico no MVP, para cadastro e consulta.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "sujeito_a_sipeagro_nao_validado"
+    },
+    {
+      "id": 51,
+      "slug": "fosfato-monopotassico-mkp",
+      "nome": "Fosfato monopotássico MKP",
+      "classe": "fertilizante",
+      "categoria": "mineral",
+      "descricao_curta": "Fosfato monopotássico MKP — fertilizante mineral.",
+      "descricao_completa": "Fosfato monopotássico MKP: MKP (P, K). Tratado como tipo técnico/genérico no MVP, para cadastro e consulta.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "sujeito_a_sipeagro_nao_validado"
+    },
+    {
+      "id": 52,
+      "slug": "nitrato-de-potassio",
+      "nome": "Nitrato de potássio",
+      "classe": "fertilizante",
+      "categoria": "mineral",
+      "descricao_curta": "Nitrato de potássio — fertilizante mineral.",
+      "descricao_completa": "Nitrato de potássio: Nitrato de potássio (N, K). Tratado como tipo técnico/genérico no MVP, para cadastro e consulta.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "sujeito_a_sipeagro_nao_validado"
+    },
+    {
+      "id": 53,
+      "slug": "sulfato-de-magnesio",
+      "nome": "Sulfato de magnésio",
+      "classe": "fertilizante",
+      "categoria": "mineral",
+      "descricao_curta": "Sulfato de magnésio — fertilizante mineral.",
+      "descricao_completa": "Sulfato de magnésio: Sulfato de magnésio (Mg, S). Tratado como tipo técnico/genérico no MVP, para cadastro e consulta.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "sujeito_a_sipeagro_nao_validado"
+    },
+    {
+      "id": 54,
+      "slug": "enxofre-bentonita",
+      "nome": "Enxofre bentonita",
+      "classe": "fertilizante",
+      "categoria": "mineral",
+      "descricao_curta": "Enxofre bentonita — fertilizante mineral.",
+      "descricao_completa": "Enxofre bentonita: Enxofre elementar com bentonita (S). Tratado como tipo técnico/genérico no MVP, para cadastro e consulta.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "sujeito_a_sipeagro_nao_validado"
+    },
+    {
+      "id": 55,
+      "slug": "boro-granubor",
+      "nome": "Fonte de boro (Granubor)",
+      "classe": "fertilizante",
+      "categoria": "mineral",
+      "descricao_curta": "Fonte de boro (Granubor) — fertilizante mineral.",
+      "descricao_completa": "Fonte de boro (Granubor): Fonte de boro granulado (B). Tratado como tipo técnico/genérico no MVP, para cadastro e consulta.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "sujeito_a_sipeagro_nao_validado"
+    },
+    {
+      "id": 56,
+      "slug": "fosfato-natural-reativo",
+      "nome": "Fosfato natural reativo",
+      "classe": "fertilizante",
+      "categoria": "mineral",
+      "descricao_curta": "Fosfato natural reativo — fertilizante mineral.",
+      "descricao_completa": "Fosfato natural reativo: Fosfato natural reativo (P2O5). Tratado como tipo técnico/genérico no MVP, para cadastro e consulta.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "sujeito_a_sipeagro_nao_validado"
+    },
+    {
+      "id": 57,
+      "slug": "npk-s-granulado",
+      "nome": "NPK+S granulado",
+      "classe": "fertilizante",
+      "categoria": "mineral",
+      "descricao_curta": "NPK+S granulado — fertilizante mineral.",
+      "descricao_completa": "NPK+S granulado: Formulação NPK com enxofre. Tratado como tipo técnico/genérico no MVP, para cadastro e consulta.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "sujeito_a_sipeagro_nao_validado"
+    },
+    {
+      "id": 58,
+      "slug": "esterco-bovino-curtido",
+      "nome": "Esterco bovino curtido",
+      "classe": "fertilizante",
+      "categoria": "organico",
+      "descricao_curta": "Esterco bovino curtido — fertilizante organico.",
+      "descricao_completa": "Esterco bovino curtido: Esterco bovino curtido. Tratado como tipo técnico/genérico no MVP, para cadastro e consulta.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "tipo_tecnico_generico"
+    },
+    {
+      "id": 59,
+      "slug": "cama-de-frango-curtida",
+      "nome": "Cama de frango curtida",
+      "classe": "fertilizante",
+      "categoria": "organico",
+      "descricao_curta": "Cama de frango curtida — fertilizante organico.",
+      "descricao_completa": "Cama de frango curtida: Cama de frango curtida. Tratado como tipo técnico/genérico no MVP, para cadastro e consulta.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "tipo_tecnico_generico"
+    },
+    {
+      "id": 60,
+      "slug": "composto-organico",
+      "nome": "Composto orgânico",
+      "classe": "fertilizante",
+      "categoria": "organico",
+      "descricao_curta": "Composto orgânico — fertilizante organico.",
+      "descricao_completa": "Composto orgânico: Composto orgânico. Tratado como tipo técnico/genérico no MVP, para cadastro e consulta.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "tipo_tecnico_generico"
+    },
+    {
+      "id": 61,
+      "slug": "humus-de-minhoca",
+      "nome": "Húmus de minhoca",
+      "classe": "fertilizante",
+      "categoria": "organico",
+      "descricao_curta": "Húmus de minhoca — fertilizante organico.",
+      "descricao_completa": "Húmus de minhoca: Húmus de minhoca (vermicomposto). Tratado como tipo técnico/genérico no MVP, para cadastro e consulta.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "tipo_tecnico_generico"
+    },
+    {
+      "id": 62,
+      "slug": "torta-de-mamona",
+      "nome": "Torta de mamona",
+      "classe": "fertilizante",
+      "categoria": "organico",
+      "descricao_curta": "Torta de mamona — fertilizante organico.",
+      "descricao_completa": "Torta de mamona: Torta de mamona. Tratado como tipo técnico/genérico no MVP, para cadastro e consulta.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "tipo_tecnico_generico"
+    },
+    {
+      "id": 63,
+      "slug": "organomineral-npk-granulado",
+      "nome": "Organomineral NPK granulado",
+      "classe": "fertilizante",
+      "categoria": "organomineral",
+      "descricao_curta": "Organomineral NPK granulado — fertilizante organomineral.",
+      "descricao_completa": "Organomineral NPK granulado: Organomineral NPK granulado. Tratado como tipo técnico/genérico no MVP, para cadastro e consulta.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "sujeito_a_sipeagro_nao_validado"
+    },
+    {
+      "id": 64,
+      "slug": "biofertilizante-liquido-fermentado",
+      "nome": "Biofertilizante líquido fermentado",
+      "classe": "fertilizante",
+      "categoria": "biofertilizante",
+      "descricao_curta": "Biofertilizante líquido fermentado — fertilizante biofertilizante.",
+      "descricao_completa": "Biofertilizante líquido fermentado: Biofertilizante líquido fermentado. Tratado como tipo técnico/genérico no MVP, para cadastro e consulta.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "sujeito_a_sipeagro_nao_validado"
+    },
+    {
+      "id": 65,
+      "slug": "extrato-de-algas",
+      "nome": "Extrato de algas",
+      "classe": "fertilizante",
+      "categoria": "biofertilizante",
+      "descricao_curta": "Extrato de algas — fertilizante biofertilizante.",
+      "descricao_completa": "Extrato de algas: Extrato de algas (bioestimulante). Tratado como tipo técnico/genérico no MVP, para cadastro e consulta.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "sujeito_a_sipeagro_nao_validado"
+    },
+    {
+      "id": 66,
+      "slug": "inoculante-bradyrhizobium-soja",
+      "nome": "Inoculante Bradyrhizobium para soja",
+      "classe": "fertilizante",
+      "categoria": "inoculante",
+      "descricao_curta": "Inoculante Bradyrhizobium para soja — fertilizante inoculante.",
+      "descricao_completa": "Inoculante Bradyrhizobium para soja: Bradyrhizobium spp. (fixação biológica de nitrogênio). Tratado como tipo técnico/genérico no MVP, para cadastro e consulta.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "sujeito_a_sipeagro_nao_validado"
+    },
+    {
+      "id": 67,
+      "slug": "inoculante-azospirillum-milho",
+      "nome": "Inoculante Azospirillum para milho",
+      "classe": "fertilizante",
+      "categoria": "inoculante",
+      "descricao_curta": "Inoculante Azospirillum para milho — fertilizante inoculante.",
+      "descricao_completa": "Inoculante Azospirillum para milho: Azospirillum brasilense. Tratado como tipo técnico/genérico no MVP, para cadastro e consulta.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "sujeito_a_sipeagro_nao_validado"
+    },
+    {
+      "id": 68,
+      "slug": "calcario-dolomitico",
+      "nome": "Calcário dolomítico",
+      "classe": "fertilizante",
+      "categoria": "corretivo",
+      "descricao_curta": "Calcário dolomítico — fertilizante corretivo.",
+      "descricao_completa": "Calcário dolomítico: Calcário dolomítico (Ca, Mg). Tratado como tipo técnico/genérico no MVP, para cadastro e consulta.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "sujeito_a_sipeagro_nao_validado"
+    },
+    {
+      "id": 69,
+      "slug": "gesso-agricola",
+      "nome": "Gesso agrícola",
+      "classe": "fertilizante",
+      "categoria": "corretivo",
+      "descricao_curta": "Gesso agrícola — fertilizante corretivo.",
+      "descricao_completa": "Gesso agrícola: Gesso agrícola (Ca, S). Tratado como tipo técnico/genérico no MVP, para cadastro e consulta.",
+      "status_sistema": "pre_cadastrado",
+      "status_regulatorio": "sujeito_a_sipeagro_nao_validado"
+    }
+  ],
+  "produto_tecnico": [
+    {
+      "produto_id": 1,
+      "grupo_quimico": "Neonicotinoide",
+      "uso_principal": "inseticida",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "algodão",
+        "feijão",
+        "trigo"
+      ],
+      "alvos_controle": [
+        "pulgões",
+        "mosca-branca",
+        "cigarrinhas"
+      ],
+      "modo_aplicacao": "pulverização (conforme bula)",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Base técnica para cadastro/consulta; não é receituário agronômico. Culturas/alvos exigem validação na bula e no AGROFIT."
+    },
+    {
+      "produto_id": 2,
+      "grupo_quimico": "Piretroide",
+      "uso_principal": "inseticida",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "algodão",
+        "feijão",
+        "trigo"
+      ],
+      "alvos_controle": [
+        "lagartas",
+        "percevejos"
+      ],
+      "modo_aplicacao": "pulverização (conforme bula)",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Base técnica para cadastro/consulta; não é receituário agronômico. Culturas/alvos exigem validação na bula e no AGROFIT."
+    },
+    {
+      "produto_id": 3,
+      "grupo_quimico": "Organofosforado",
+      "uso_principal": "inseticida",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "algodão",
+        "feijão",
+        "trigo"
+      ],
+      "alvos_controle": [
+        "lagartas",
+        "percevejos"
+      ],
+      "modo_aplicacao": "pulverização (conforme bula)",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Base técnica para cadastro/consulta; não é receituário agronômico. Culturas/alvos exigem validação na bula e no AGROFIT."
+    },
+    {
+      "produto_id": 4,
+      "grupo_quimico": "Espinosina",
+      "uso_principal": "inseticida",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "algodão",
+        "feijão",
+        "trigo"
+      ],
+      "alvos_controle": [
+        "lagartas",
+        "tripes"
+      ],
+      "modo_aplicacao": "pulverização (conforme bula)",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Base técnica para cadastro/consulta; não é receituário agronômico. Culturas/alvos exigem validação na bula e no AGROFIT."
+    },
+    {
+      "produto_id": 5,
+      "grupo_quimico": "Carbamato (metilcarbamato de oxima)",
+      "uso_principal": "inseticida",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "algodão",
+        "feijão",
+        "trigo"
+      ],
+      "alvos_controle": [
+        "lagartas"
+      ],
+      "modo_aplicacao": "pulverização (conforme bula)",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Base técnica para cadastro/consulta; não é receituário agronômico. Culturas/alvos exigem validação na bula e no AGROFIT."
+    },
+    {
+      "produto_id": 6,
+      "grupo_quimico": "Avermectina",
+      "uso_principal": "acaricida/inseticida/nematicida",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "algodão",
+        "feijão",
+        "trigo"
+      ],
+      "alvos_controle": [
+        "ácaros",
+        "nematoides",
+        "tripes"
+      ],
+      "modo_aplicacao": "pulverização (conforme bula)",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Base técnica para cadastro/consulta; não é receituário agronômico. Culturas/alvos exigem validação na bula e no AGROFIT."
+    },
+    {
+      "produto_id": 7,
+      "grupo_quimico": "Organofosforado",
+      "uso_principal": "inseticida",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "algodão",
+        "feijão",
+        "trigo"
+      ],
+      "alvos_controle": [
+        "percevejos",
+        "pulgões",
+        "lagartas"
+      ],
+      "modo_aplicacao": "pulverização (conforme bula)",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Base técnica para cadastro/consulta; não é receituário agronômico. Culturas/alvos exigem validação na bula e no AGROFIT."
+    },
+    {
+      "produto_id": 8,
+      "grupo_quimico": "Diamida antranílica",
+      "uso_principal": "inseticida",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "algodão",
+        "feijão",
+        "trigo"
+      ],
+      "alvos_controle": [
+        "lagartas"
+      ],
+      "modo_aplicacao": "pulverização (conforme bula)",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Base técnica para cadastro/consulta; não é receituário agronômico. Culturas/alvos exigem validação na bula e no AGROFIT."
+    },
+    {
+      "produto_id": 9,
+      "grupo_quimico": "Fenilpirazol",
+      "uso_principal": "inseticida/formicida",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "algodão",
+        "feijão",
+        "trigo"
+      ],
+      "alvos_controle": [
+        "formigas",
+        "cupins",
+        "percevejos"
+      ],
+      "modo_aplicacao": "pulverização (conforme bula)",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Base técnica para cadastro/consulta; não é receituário agronômico. Culturas/alvos exigem validação na bula e no AGROFIT."
+    },
+    {
+      "produto_id": 10,
+      "grupo_quimico": "Piretroide",
+      "uso_principal": "inseticida",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "algodão",
+        "feijão",
+        "trigo"
+      ],
+      "alvos_controle": [
+        "lagartas",
+        "percevejos",
+        "besouros"
+      ],
+      "modo_aplicacao": "pulverização (conforme bula)",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Base técnica para cadastro/consulta; não é receituário agronômico. Culturas/alvos exigem validação na bula e no AGROFIT."
+    },
+    {
+      "produto_id": 11,
+      "grupo_quimico": "Ditiocarbamato",
+      "uso_principal": "fungicida",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "algodão",
+        "feijão",
+        "trigo"
+      ],
+      "alvos_controle": [
+        "manchas foliares",
+        "ferrugens"
+      ],
+      "modo_aplicacao": "pulverização (conforme bula)",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Base técnica para cadastro/consulta; não é receituário agronômico. Culturas/alvos exigem validação na bula e no AGROFIT."
+    },
+    {
+      "produto_id": 12,
+      "grupo_quimico": "Triazol",
+      "uso_principal": "fungicida",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "algodão",
+        "feijão",
+        "trigo"
+      ],
+      "alvos_controle": [
+        "ferrugem-asiática",
+        "manchas foliares"
+      ],
+      "modo_aplicacao": "pulverização (conforme bula)",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Base técnica para cadastro/consulta; não é receituário agronômico. Culturas/alvos exigem validação na bula e no AGROFIT."
+    },
+    {
+      "produto_id": 13,
+      "grupo_quimico": "Estrobilurina",
+      "uso_principal": "fungicida",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "algodão",
+        "feijão",
+        "trigo"
+      ],
+      "alvos_controle": [
+        "ferrugens",
+        "manchas foliares"
+      ],
+      "modo_aplicacao": "pulverização (conforme bula)",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Base técnica para cadastro/consulta; não é receituário agronômico. Culturas/alvos exigem validação na bula e no AGROFIT."
+    },
+    {
+      "produto_id": 14,
+      "grupo_quimico": "Triazol",
+      "uso_principal": "fungicida",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "algodão",
+        "feijão",
+        "trigo"
+      ],
+      "alvos_controle": [
+        "ferrugens"
+      ],
+      "modo_aplicacao": "pulverização (conforme bula)",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Base técnica para cadastro/consulta; não é receituário agronômico. Culturas/alvos exigem validação na bula e no AGROFIT."
+    },
+    {
+      "produto_id": 15,
+      "grupo_quimico": "Ftalimida",
+      "uso_principal": "fungicida",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "algodão",
+        "feijão",
+        "trigo"
+      ],
+      "alvos_controle": [
+        "doenças foliares",
+        "tombamento"
+      ],
+      "modo_aplicacao": "pulverização (conforme bula)",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Base técnica para cadastro/consulta; não é receituário agronômico. Culturas/alvos exigem validação na bula e no AGROFIT."
+    },
+    {
+      "produto_id": 16,
+      "grupo_quimico": "Triazol",
+      "uso_principal": "fungicida",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "algodão",
+        "feijão",
+        "trigo"
+      ],
+      "alvos_controle": [
+        "manchas foliares",
+        "ferrugens"
+      ],
+      "modo_aplicacao": "pulverização (conforme bula)",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Base técnica para cadastro/consulta; não é receituário agronômico. Culturas/alvos exigem validação na bula e no AGROFIT."
+    },
+    {
+      "produto_id": 17,
+      "grupo_quimico": "Isoftalonitrila",
+      "uso_principal": "fungicida",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "algodão",
+        "feijão",
+        "trigo"
+      ],
+      "alvos_controle": [
+        "manchas foliares",
+        "míldio"
+      ],
+      "modo_aplicacao": "pulverização (conforme bula)",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Base técnica para cadastro/consulta; não é receituário agronômico. Culturas/alvos exigem validação na bula e no AGROFIT."
+    },
+    {
+      "produto_id": 18,
+      "grupo_quimico": "Carboxamida (SDHI)",
+      "uso_principal": "fungicida",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "algodão",
+        "feijão",
+        "trigo"
+      ],
+      "alvos_controle": [
+        "ferrugens",
+        "manchas foliares"
+      ],
+      "modo_aplicacao": "pulverização (conforme bula)",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Base técnica para cadastro/consulta; não é receituário agronômico. Culturas/alvos exigem validação na bula e no AGROFIT."
+    },
+    {
+      "produto_id": 19,
+      "grupo_quimico": "Glicina substituída (aminoácido fosfonado)",
+      "uso_principal": "herbicida",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "algodão",
+        "feijão",
+        "trigo"
+      ],
+      "alvos_controle": [
+        "plantas daninhas anuais e perenes"
+      ],
+      "modo_aplicacao": "pulverização (conforme bula)",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Base técnica para cadastro/consulta; não é receituário agronômico. Culturas/alvos exigem validação na bula e no AGROFIT."
+    },
+    {
+      "produto_id": 20,
+      "grupo_quimico": "Triazina",
+      "uso_principal": "herbicida",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "algodão",
+        "feijão",
+        "trigo"
+      ],
+      "alvos_controle": [
+        "folhas largas",
+        "gramíneas"
+      ],
+      "modo_aplicacao": "pulverização (conforme bula)",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Base técnica para cadastro/consulta; não é receituário agronômico. Culturas/alvos exigem validação na bula e no AGROFIT."
+    },
+    {
+      "produto_id": 21,
+      "grupo_quimico": "Ácido fenoxiacético (ariloxialcanoico)",
+      "uso_principal": "herbicida",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "algodão",
+        "feijão",
+        "trigo"
+      ],
+      "alvos_controle": [
+        "folhas largas"
+      ],
+      "modo_aplicacao": "pulverização (conforme bula)",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Base técnica para cadastro/consulta; não é receituário agronômico. Culturas/alvos exigem validação na bula e no AGROFIT."
+    },
+    {
+      "produto_id": 22,
+      "grupo_quimico": "Cloroacetamida",
+      "uso_principal": "herbicida (pré-emergente)",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "algodão",
+        "feijão",
+        "trigo"
+      ],
+      "alvos_controle": [
+        "gramíneas",
+        "folhas largas"
+      ],
+      "modo_aplicacao": "pulverização (conforme bula)",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Base técnica para cadastro/consulta; não é receituário agronômico. Culturas/alvos exigem validação na bula e no AGROFIT."
+    },
+    {
+      "produto_id": 23,
+      "grupo_quimico": "Ácido benzoico",
+      "uso_principal": "herbicida",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "algodão",
+        "feijão",
+        "trigo"
+      ],
+      "alvos_controle": [
+        "folhas largas"
+      ],
+      "modo_aplicacao": "pulverização (conforme bula)",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Base técnica para cadastro/consulta; não é receituário agronômico. Culturas/alvos exigem validação na bula e no AGROFIT."
+    },
+    {
+      "produto_id": 24,
+      "grupo_quimico": "Ciclohexanodiona (DIM)",
+      "uso_principal": "herbicida (graminicida)",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "algodão",
+        "feijão",
+        "trigo"
+      ],
+      "alvos_controle": [
+        "gramíneas"
+      ],
+      "modo_aplicacao": "pulverização (conforme bula)",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Base técnica para cadastro/consulta; não é receituário agronômico. Culturas/alvos exigem validação na bula e no AGROFIT."
+    },
+    {
+      "produto_id": 25,
+      "grupo_quimico": "Isoxazolidinona",
+      "uso_principal": "herbicida (pré-emergente)",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "algodão",
+        "feijão",
+        "trigo"
+      ],
+      "alvos_controle": [
+        "gramíneas",
+        "folhas largas"
+      ],
+      "modo_aplicacao": "pulverização (conforme bula)",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Base técnica para cadastro/consulta; não é receituário agronômico. Culturas/alvos exigem validação na bula e no AGROFIT."
+    },
+    {
+      "produto_id": 26,
+      "grupo_quimico": "Triazolinona",
+      "uso_principal": "herbicida (pré-emergente)",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "algodão",
+        "feijão",
+        "trigo"
+      ],
+      "alvos_controle": [
+        "folhas largas",
+        "tiririca"
+      ],
+      "modo_aplicacao": "pulverização (conforme bula)",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Base técnica para cadastro/consulta; não é receituário agronômico. Culturas/alvos exigem validação na bula e no AGROFIT."
+    },
+    {
+      "produto_id": 27,
+      "grupo_quimico": "Piridiniletil-benzamida (SDHI)",
+      "uso_principal": "fungicida/nematicida",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "algodão",
+        "feijão",
+        "trigo"
+      ],
+      "alvos_controle": [
+        "nematoides",
+        "doenças foliares"
+      ],
+      "modo_aplicacao": "pulverização (conforme bula)",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Base técnica para cadastro/consulta; não é receituário agronômico. Culturas/alvos exigem validação na bula e no AGROFIT."
+    },
+    {
+      "produto_id": 28,
+      "grupo_quimico": "Sulfito de organoenxofre",
+      "uso_principal": "acaricida",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "algodão",
+        "feijão",
+        "trigo"
+      ],
+      "alvos_controle": [
+        "ácaros"
+      ],
+      "modo_aplicacao": "pulverização (conforme bula)",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Base técnica para cadastro/consulta; não é receituário agronômico. Culturas/alvos exigem validação na bula e no AGROFIT."
+    },
+    {
+      "produto_id": 29,
+      "grupo_quimico": "Aldeído (polímero do acetaldeído)",
+      "uso_principal": "moluscicida",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "algodão",
+        "feijão",
+        "trigo"
+      ],
+      "alvos_controle": [
+        "lesmas",
+        "caracóis"
+      ],
+      "modo_aplicacao": "pulverização (conforme bula)",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Base técnica para cadastro/consulta; não é receituário agronômico. Culturas/alvos exigem validação na bula e no AGROFIT."
+    },
+    {
+      "produto_id": 30,
+      "grupo_quimico": "Composto inorgânico (fosfato de ferro)",
+      "uso_principal": "moluscicida",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "algodão",
+        "feijão",
+        "trigo"
+      ],
+      "alvos_controle": [
+        "lesmas",
+        "caracóis"
+      ],
+      "modo_aplicacao": "pulverização (conforme bula)",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Base técnica para cadastro/consulta; não é receituário agronômico. Culturas/alvos exigem validação na bula e no AGROFIT."
+    },
+    {
+      "produto_id": 40,
+      "composicao": "Formulação NPK 04-14-08",
+      "nutrientes_principais": [
+        "N",
+        "P",
+        "K"
+      ],
+      "uso_principal": "fertilizante mineral",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "café",
+        "cana-de-açúcar",
+        "hortaliças"
+      ],
+      "forma_aplicacao": "solo",
+      "tipo_liberacao": "convencional",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Tipo técnico/genérico para cadastro/consulta; não é recomendação agronômica. Dose e uso exigem análise de solo e orientação técnica."
+    },
+    {
+      "produto_id": 41,
+      "composicao": "Formulação NPK 20-05-20",
+      "nutrientes_principais": [
+        "N",
+        "P",
+        "K"
+      ],
+      "uso_principal": "fertilizante mineral",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "café",
+        "cana-de-açúcar",
+        "hortaliças"
+      ],
+      "forma_aplicacao": "solo",
+      "tipo_liberacao": "convencional",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Tipo técnico/genérico para cadastro/consulta; não é recomendação agronômica. Dose e uso exigem análise de solo e orientação técnica."
+    },
+    {
+      "produto_id": 42,
+      "composicao": "Formulação NPK 10-10-10",
+      "nutrientes_principais": [
+        "N",
+        "P",
+        "K"
+      ],
+      "uso_principal": "fertilizante mineral",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "café",
+        "cana-de-açúcar",
+        "hortaliças"
+      ],
+      "forma_aplicacao": "solo",
+      "tipo_liberacao": "convencional",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Tipo técnico/genérico para cadastro/consulta; não é recomendação agronômica. Dose e uso exigem análise de solo e orientação técnica."
+    },
+    {
+      "produto_id": 43,
+      "composicao": "Ureia (≈45% N)",
+      "nutrientes_principais": [
+        "N"
+      ],
+      "uso_principal": "fertilizante mineral",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "café",
+        "cana-de-açúcar",
+        "hortaliças"
+      ],
+      "forma_aplicacao": "solo",
+      "tipo_liberacao": "convencional",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Tipo técnico/genérico para cadastro/consulta; não é recomendação agronômica. Dose e uso exigem análise de solo e orientação técnica."
+    },
+    {
+      "produto_id": 44,
+      "composicao": "Sulfato de amônio (≈21% N, ≈24% S)",
+      "nutrientes_principais": [
+        "N",
+        "S"
+      ],
+      "uso_principal": "fertilizante mineral",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "café",
+        "cana-de-açúcar",
+        "hortaliças"
+      ],
+      "forma_aplicacao": "solo",
+      "tipo_liberacao": "convencional",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Tipo técnico/genérico para cadastro/consulta; não é recomendação agronômica. Dose e uso exigem análise de solo e orientação técnica."
+    },
+    {
+      "produto_id": 45,
+      "composicao": "Nitrato de cálcio (≈15% N, Ca)",
+      "nutrientes_principais": [
+        "N",
+        "Ca"
+      ],
+      "uso_principal": "fertilizante mineral",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "café",
+        "cana-de-açúcar",
+        "hortaliças"
+      ],
+      "forma_aplicacao": "solo/fertirrigação",
+      "tipo_liberacao": "convencional",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Tipo técnico/genérico para cadastro/consulta; não é recomendação agronômica. Dose e uso exigem análise de solo e orientação técnica."
+    },
+    {
+      "produto_id": 46,
+      "composicao": "Fosfato monoamônico (≈11% N, ≈52% P2O5)",
+      "nutrientes_principais": [
+        "N",
+        "P"
+      ],
+      "uso_principal": "fertilizante mineral",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "café",
+        "cana-de-açúcar",
+        "hortaliças"
+      ],
+      "forma_aplicacao": "solo",
+      "tipo_liberacao": "convencional",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Tipo técnico/genérico para cadastro/consulta; não é recomendação agronômica. Dose e uso exigem análise de solo e orientação técnica."
+    },
+    {
+      "produto_id": 47,
+      "composicao": "Fosfato diamônico (≈18% N, ≈46% P2O5)",
+      "nutrientes_principais": [
+        "N",
+        "P"
+      ],
+      "uso_principal": "fertilizante mineral",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "café",
+        "cana-de-açúcar",
+        "hortaliças"
+      ],
+      "forma_aplicacao": "solo",
+      "tipo_liberacao": "convencional",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Tipo técnico/genérico para cadastro/consulta; não é recomendação agronômica. Dose e uso exigem análise de solo e orientação técnica."
+    },
+    {
+      "produto_id": 48,
+      "composicao": "Superfosfato simples (≈18% P2O5, Ca, S)",
+      "nutrientes_principais": [
+        "P",
+        "Ca",
+        "S"
+      ],
+      "uso_principal": "fertilizante mineral",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "café",
+        "cana-de-açúcar",
+        "hortaliças"
+      ],
+      "forma_aplicacao": "solo",
+      "tipo_liberacao": "convencional",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Tipo técnico/genérico para cadastro/consulta; não é recomendação agronômica. Dose e uso exigem análise de solo e orientação técnica."
+    },
+    {
+      "produto_id": 49,
+      "composicao": "Superfosfato triplo (≈41% P2O5)",
+      "nutrientes_principais": [
+        "P"
+      ],
+      "uso_principal": "fertilizante mineral",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "café",
+        "cana-de-açúcar",
+        "hortaliças"
+      ],
+      "forma_aplicacao": "solo",
+      "tipo_liberacao": "convencional",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Tipo técnico/genérico para cadastro/consulta; não é recomendação agronômica. Dose e uso exigem análise de solo e orientação técnica."
+    },
+    {
+      "produto_id": 50,
+      "composicao": "Cloreto de potássio (≈60% K2O)",
+      "nutrientes_principais": [
+        "K"
+      ],
+      "uso_principal": "fertilizante mineral",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "café",
+        "cana-de-açúcar",
+        "hortaliças"
+      ],
+      "forma_aplicacao": "solo",
+      "tipo_liberacao": "convencional",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Tipo técnico/genérico para cadastro/consulta; não é recomendação agronômica. Dose e uso exigem análise de solo e orientação técnica."
+    },
+    {
+      "produto_id": 51,
+      "composicao": "MKP (P, K)",
+      "nutrientes_principais": [
+        "P",
+        "K"
+      ],
+      "uso_principal": "fertilizante mineral",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "café",
+        "cana-de-açúcar",
+        "hortaliças"
+      ],
+      "forma_aplicacao": "fertirrigação/foliar",
+      "tipo_liberacao": "convencional",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Tipo técnico/genérico para cadastro/consulta; não é recomendação agronômica. Dose e uso exigem análise de solo e orientação técnica."
+    },
+    {
+      "produto_id": 52,
+      "composicao": "Nitrato de potássio (N, K)",
+      "nutrientes_principais": [
+        "N",
+        "K"
+      ],
+      "uso_principal": "fertilizante mineral",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "café",
+        "cana-de-açúcar",
+        "hortaliças"
+      ],
+      "forma_aplicacao": "fertirrigação/foliar",
+      "tipo_liberacao": "convencional",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Tipo técnico/genérico para cadastro/consulta; não é recomendação agronômica. Dose e uso exigem análise de solo e orientação técnica."
+    },
+    {
+      "produto_id": 53,
+      "composicao": "Sulfato de magnésio (Mg, S)",
+      "nutrientes_principais": [
+        "Mg",
+        "S"
+      ],
+      "uso_principal": "fertilizante mineral",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "café",
+        "cana-de-açúcar",
+        "hortaliças"
+      ],
+      "forma_aplicacao": "solo/foliar",
+      "tipo_liberacao": "convencional",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Tipo técnico/genérico para cadastro/consulta; não é recomendação agronômica. Dose e uso exigem análise de solo e orientação técnica."
+    },
+    {
+      "produto_id": 54,
+      "composicao": "Enxofre elementar com bentonita (S)",
+      "nutrientes_principais": [
+        "S"
+      ],
+      "uso_principal": "fertilizante mineral",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "café",
+        "cana-de-açúcar",
+        "hortaliças"
+      ],
+      "forma_aplicacao": "solo",
+      "tipo_liberacao": "lenta",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Tipo técnico/genérico para cadastro/consulta; não é recomendação agronômica. Dose e uso exigem análise de solo e orientação técnica."
+    },
+    {
+      "produto_id": 55,
+      "composicao": "Fonte de boro granulado (B)",
+      "nutrientes_principais": [
+        "B"
+      ],
+      "uso_principal": "fertilizante mineral",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "café",
+        "cana-de-açúcar",
+        "hortaliças"
+      ],
+      "forma_aplicacao": "solo",
+      "tipo_liberacao": "convencional",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Tipo técnico/genérico para cadastro/consulta; não é recomendação agronômica. Dose e uso exigem análise de solo e orientação técnica."
+    },
+    {
+      "produto_id": 56,
+      "composicao": "Fosfato natural reativo (P2O5)",
+      "nutrientes_principais": [
+        "P"
+      ],
+      "uso_principal": "fertilizante mineral",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "café",
+        "cana-de-açúcar",
+        "hortaliças"
+      ],
+      "forma_aplicacao": "solo",
+      "tipo_liberacao": "lenta",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Tipo técnico/genérico para cadastro/consulta; não é recomendação agronômica. Dose e uso exigem análise de solo e orientação técnica."
+    },
+    {
+      "produto_id": 57,
+      "composicao": "Formulação NPK com enxofre",
+      "nutrientes_principais": [
+        "N",
+        "P",
+        "K",
+        "S"
+      ],
+      "uso_principal": "fertilizante mineral",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "café",
+        "cana-de-açúcar",
+        "hortaliças"
+      ],
+      "forma_aplicacao": "solo",
+      "tipo_liberacao": "convencional",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Tipo técnico/genérico para cadastro/consulta; não é recomendação agronômica. Dose e uso exigem análise de solo e orientação técnica."
+    },
+    {
+      "produto_id": 58,
+      "composicao": "Esterco bovino curtido",
+      "nutrientes_principais": [
+        "N",
+        "P",
+        "K",
+        "matéria orgânica"
+      ],
+      "uso_principal": "fertilizante organico",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "café",
+        "cana-de-açúcar",
+        "hortaliças"
+      ],
+      "forma_aplicacao": "solo",
+      "tipo_liberacao": "lenta",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Tipo técnico/genérico para cadastro/consulta; não é recomendação agronômica. Dose e uso exigem análise de solo e orientação técnica."
+    },
+    {
+      "produto_id": 59,
+      "composicao": "Cama de frango curtida",
+      "nutrientes_principais": [
+        "N",
+        "P",
+        "K",
+        "matéria orgânica"
+      ],
+      "uso_principal": "fertilizante organico",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "café",
+        "cana-de-açúcar",
+        "hortaliças"
+      ],
+      "forma_aplicacao": "solo",
+      "tipo_liberacao": "lenta",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Tipo técnico/genérico para cadastro/consulta; não é recomendação agronômica. Dose e uso exigem análise de solo e orientação técnica."
+    },
+    {
+      "produto_id": 60,
+      "composicao": "Composto orgânico",
+      "nutrientes_principais": [
+        "matéria orgânica",
+        "N",
+        "P",
+        "K"
+      ],
+      "uso_principal": "fertilizante organico",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "café",
+        "cana-de-açúcar",
+        "hortaliças"
+      ],
+      "forma_aplicacao": "solo",
+      "tipo_liberacao": "lenta",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Tipo técnico/genérico para cadastro/consulta; não é recomendação agronômica. Dose e uso exigem análise de solo e orientação técnica."
+    },
+    {
+      "produto_id": 61,
+      "composicao": "Húmus de minhoca (vermicomposto)",
+      "nutrientes_principais": [
+        "matéria orgânica",
+        "N"
+      ],
+      "uso_principal": "fertilizante organico",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "café",
+        "cana-de-açúcar",
+        "hortaliças"
+      ],
+      "forma_aplicacao": "solo",
+      "tipo_liberacao": "lenta",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Tipo técnico/genérico para cadastro/consulta; não é recomendação agronômica. Dose e uso exigem análise de solo e orientação técnica."
+    },
+    {
+      "produto_id": 62,
+      "composicao": "Torta de mamona",
+      "nutrientes_principais": [
+        "N",
+        "matéria orgânica"
+      ],
+      "uso_principal": "fertilizante organico",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "café",
+        "cana-de-açúcar",
+        "hortaliças"
+      ],
+      "forma_aplicacao": "solo",
+      "tipo_liberacao": "lenta",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Tipo técnico/genérico para cadastro/consulta; não é recomendação agronômica. Dose e uso exigem análise de solo e orientação técnica."
+    },
+    {
+      "produto_id": 63,
+      "composicao": "Organomineral NPK granulado",
+      "nutrientes_principais": [
+        "N",
+        "P",
+        "K",
+        "matéria orgânica"
+      ],
+      "uso_principal": "fertilizante organomineral",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "café",
+        "cana-de-açúcar",
+        "hortaliças"
+      ],
+      "forma_aplicacao": "solo",
+      "tipo_liberacao": "lenta",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Tipo técnico/genérico para cadastro/consulta; não é recomendação agronômica. Dose e uso exigem análise de solo e orientação técnica."
+    },
+    {
+      "produto_id": 64,
+      "composicao": "Biofertilizante líquido fermentado",
+      "nutrientes_principais": [
+        "nutrientes diversos",
+        "matéria orgânica"
+      ],
+      "uso_principal": "fertilizante biofertilizante",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "café",
+        "cana-de-açúcar",
+        "hortaliças"
+      ],
+      "forma_aplicacao": "foliar/fertirrigação",
+      "tipo_liberacao": "convencional",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Tipo técnico/genérico para cadastro/consulta; não é recomendação agronômica. Dose e uso exigem análise de solo e orientação técnica."
+    },
+    {
+      "produto_id": 65,
+      "composicao": "Extrato de algas (bioestimulante)",
+      "nutrientes_principais": [
+        "nutrientes diversos",
+        "bioativos"
+      ],
+      "uso_principal": "fertilizante biofertilizante",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "café",
+        "cana-de-açúcar",
+        "hortaliças"
+      ],
+      "forma_aplicacao": "foliar",
+      "tipo_liberacao": "convencional",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Tipo técnico/genérico para cadastro/consulta; não é recomendação agronômica. Dose e uso exigem análise de solo e orientação técnica."
+    },
+    {
+      "produto_id": 66,
+      "composicao": "Bradyrhizobium spp. (fixação biológica de nitrogênio)",
+      "nutrientes_principais": [
+        "N (biológico)"
+      ],
+      "uso_principal": "fertilizante inoculante",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "café",
+        "cana-de-açúcar",
+        "hortaliças"
+      ],
+      "forma_aplicacao": "tratamento de sementes",
+      "tipo_liberacao": "convencional",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Tipo técnico/genérico para cadastro/consulta; não é recomendação agronômica. Dose e uso exigem análise de solo e orientação técnica."
+    },
+    {
+      "produto_id": 67,
+      "composicao": "Azospirillum brasilense",
+      "nutrientes_principais": [
+        "N (biológico)"
+      ],
+      "uso_principal": "fertilizante inoculante",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "café",
+        "cana-de-açúcar",
+        "hortaliças"
+      ],
+      "forma_aplicacao": "tratamento de sementes/sulco",
+      "tipo_liberacao": "convencional",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Tipo técnico/genérico para cadastro/consulta; não é recomendação agronômica. Dose e uso exigem análise de solo e orientação técnica."
+    },
+    {
+      "produto_id": 68,
+      "composicao": "Calcário dolomítico (Ca, Mg)",
+      "nutrientes_principais": [
+        "Ca",
+        "Mg"
+      ],
+      "uso_principal": "fertilizante corretivo",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "café",
+        "cana-de-açúcar",
+        "hortaliças"
+      ],
+      "forma_aplicacao": "solo",
+      "tipo_liberacao": "lenta",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Tipo técnico/genérico para cadastro/consulta; não é recomendação agronômica. Dose e uso exigem análise de solo e orientação técnica."
+    },
+    {
+      "produto_id": 69,
+      "composicao": "Gesso agrícola (Ca, S)",
+      "nutrientes_principais": [
+        "Ca",
+        "S"
+      ],
+      "uso_principal": "fertilizante corretivo",
+      "culturas_comuns": [
+        "soja",
+        "milho",
+        "café",
+        "cana-de-açúcar",
+        "hortaliças"
+      ],
+      "forma_aplicacao": "solo",
+      "tipo_liberacao": "lenta",
+      "fonte_tecnica": "Conhecimento técnico geral — pendente de validação por fonte oficial",
+      "observacoes": "Tipo técnico/genérico para cadastro/consulta; não é recomendação agronômica. Dose e uso exigem análise de solo e orientação técnica."
+    }
+  ],
+  "produto_preco": [],
+  "produto_imagem": [],
+  "itens_bloqueados_ou_excluidos": [
+    {
+      "id": 90,
+      "slug": "paraquate",
+      "nome": "Paraquate",
+      "classe": "defensivo",
+      "categoria": "herbicida",
+      "status_sistema": "bloqueado_historico",
+      "status_regulatorio": "bloqueado_historico",
+      "motivo": "Uso proibido no Brasil (banido pela Anvisa). Mantido apenas como item histórico/bloqueado. Não recomendado e não aplicável ao registro de aplicação de insumos."
+    },
+    {
+      "id": 91,
+      "slug": "oxamil",
+      "nome": "Oxamil",
+      "classe": "defensivo",
+      "categoria": "nematicida/inseticida",
+      "status_sistema": "excluido_do_seed",
+      "status_regulatorio": "bloqueado_historico",
+      "motivo": "Não incluído como item ativo recomendado no seed do MVP. Mantido apenas como registro de exclusão."
+    }
+  ],
+  "pendencias_validacao": [
+    {
+      "tipo": "validacao_agrofit_defensivos",
+      "descricao": "Todos os defensivos estão como status_regulatorio 'nao_validado_agrofit' (ou 'atencao_regulatoria'). A validação oficial no AGROFIT/MAPA não foi realizada dentro do repositório.",
+      "status": "pendente"
+    },
+    {
+      "tipo": "validacao_sipeagro_fertilizantes",
+      "descricao": "Fertilizantes minerais/comerciais estão como 'sujeito_a_sipeagro_nao_validado'; genéricos orgânicos como 'tipo_tecnico_generico'. Sem validação SIPEAGRO/MAPA no repositório.",
+      "status": "pendente"
+    },
+    {
+      "tipo": "preco",
+      "descricao": "produto_preco está vazio: preço é pendente/não consolidado no MVP. Menor valor diário pertence ao sistema final.",
+      "status": "pendente"
+    },
+    {
+      "tipo": "imagem",
+      "descricao": "produto_imagem está vazio: nenhuma imagem foi consolidada sem fonte/licença confiável.",
+      "status": "pendente"
+    },
+    {
+      "tipo": "fabricante_produto_comercial",
+      "descricao": "Itens estão como tipo técnico/genérico, sem fabricante nem produto comercial específico. A separação técnico x comercial fica para o sistema final.",
+      "status": "pendente"
+    },
+    {
+      "tipo": "fonte_tecnica",
+      "descricao": "fonte_tecnica é conhecimento técnico geral, pendente de validação por fonte oficial (bula/AGROFIT/literatura).",
+      "status": "pendente"
+    }
+  ]
+}
