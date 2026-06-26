@@ -219,9 +219,9 @@ Fluxo geral esperado do uso do sistema:
 - O MVP **não** deve buscar preços automaticamente.
 - O MVP **não** deve afirmar que um defensivo foi validado oficialmente no
   AGROFIT/MAPA sem comprovação real.
-- **`status_regulatorio` é informativo** (`nao_validado`,
-  `autorizado_sujeito_a_verificacao`, `sujeito_a_sipeagro`, `bloqueado`,
-  `nao_se_aplica`).
+- **`status_regulatorio` é informativo** (enum MVP: `nao_validado_agrofit`,
+  `atencao_regulatoria`, `sujeito_a_sipeagro_nao_validado`,
+  `tipo_tecnico_generico`, `bloqueado_historico`).
 - Itens **bloqueados/históricos**, como **Paraquate**
   (`status_sistema = bloqueado_historico`), **não** devem ser recomendados nem
   permitidos em registro de aplicação (`aplicacao_insumo`).

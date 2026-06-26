@@ -167,29 +167,36 @@ Tabela **central** do catálogo.
 - `descricao_completa` — descrição detalhada (opcional).
 - `status_sistema` — status interno do ConnectAgro: `pre_cadastrado`,
   `cadastrado_usuario`, `definitivo`, `bloqueado_historico`.
-- `status_regulatorio` — status regulatório: `nao_validado`,
-  `autorizado_sujeito_a_verificacao`, `sujeito_a_sipeagro`, `bloqueado`,
-  `nao_se_aplica`.
+- `status_regulatorio` — status regulatório (enumeração oficial do MVP):
+  `nao_validado_agrofit`, `atencao_regulatoria`,
+  `sujeito_a_sipeagro_nao_validado`, `tipo_tecnico_generico`,
+  `bloqueado_historico`.
 - `criado_em`, `atualizado_em` — controle temporal.
 
 **Regras de `status_regulatorio` no MVP:**
 
-- Defensivos começam como `nao_validado` ou
-  `autorizado_sujeito_a_verificacao` — **nunca** como "validado oficialmente".
-  Não há validação AGROFIT/MAPA presumida sem fonte real.
-- Fertilizantes genéricos podem usar `nao_se_aplica` (quando o conceito de
-  registro de produto comercial não se aplica ao tipo genérico) ou
-  `sujeito_a_sipeagro` (quando a regularização caberia ao SIPEAGRO/MAPA no caso
-  de um produto comercial específico). A distinção fina entre produto
-  técnico/genérico e produto comercial será aprofundada no sistema final.
-- **Paraquate**, se citado, deve ser tratado como `bloqueado_historico` (uso
-  proibido no Brasil), **não recomendado**.
-- **Oxamil** não deve entrar como produto recomendado no seed inicial.
+- **Defensivos** começam como `nao_validado_agrofit` (ainda não validado
+  oficialmente no AGROFIT/MAPA dentro do repositório) ou `atencao_regulatoria`
+  (exige atenção especial antes de uso/validação/recomendação futura) —
+  **nunca** como "validado oficialmente". Não há validação AGROFIT/MAPA
+  presumida sem fonte real.
+- **Fertilizantes, corretivos, inoculantes e biofertilizantes** usam
+  `sujeito_a_sipeagro_nao_validado` (item técnico/comercial que dependeria de
+  validação futura no SIPEAGRO/MAPA quando houver produto comercial específico)
+  ou `tipo_tecnico_generico` (item genérico/técnico, como Ureia, MAP, DAP,
+  Calcário Dolomítico, Esterco Bovino, Composto Orgânico, tratado como conceito
+  técnico no MVP — não produto comercial específico).
+- **Itens bloqueados/históricos** usam `bloqueado_historico` — não recomendados
+  e não permitidos em registro de aplicação. **Paraquate** permanece como
+  `bloqueado_historico` (uso proibido no Brasil). **Oxamil** não entra como
+  produto recomendado no seed.
+- Valores futuros como `validado_agrofit` ou `validado_sipeagro` **só poderão
+  existir após validação real comprovada por fonte oficial** — não no MVP.
 
 ### `produto_tecnico`
 Informações técnicas do produto (1:N a partir de `produto_base`).
 
-- `id` — PK.
+- `id` — PK (no banco, autoincremento).
 - `produto_id` — FK → `produto_base`.
 - `grupo_quimico` — grupo químico (principalmente para defensivos).
 - `composicao` — composição (principalmente para fertilizantes).
@@ -205,6 +212,11 @@ Informações técnicas do produto (1:N a partir de `produto_base`).
 > Para defensivos, priorizar `grupo_quimico`, `culturas_comuns`,
 > `alvos_controle` e `modo_aplicacao`; para fertilizantes, priorizar
 > `composicao`, `nutrientes_principais`, `culturas_comuns` e `modo_aplicacao`.
+
+> **Seed técnico:** no arquivo JSON de seed, o campo `id` de `produto_tecnico`
+> **pode ser omitido**. Na futura importação para o SQLite/ORM, o banco deverá
+> gerar esse identificador automaticamente. O vínculo com `produto_base` é feito
+> pelo campo `produto_id`.
 
 ### `produto_preco`
 Preços de **referência** para **consulta rápida** (informativo, **não** venda).

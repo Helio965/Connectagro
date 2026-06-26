@@ -31,6 +31,13 @@ Dados de **carga inicial (seeds)** do ConnectAgro.
    aplicação.
 6. Estrutura alinhada ao [DER](../../docs/04-modelagem-banco-der.md) e ao
    [dicionário de dados](../../docs/05-dicionario-de-dados.md).
+7. **`produto_tecnico.id` é omitido no JSON.** No banco, `produto_tecnico.id` é
+   PK autoincremento; na futura importação para o SQLite/ORM, o banco gera esse
+   identificador automaticamente. No seed, o vínculo com o produto é feito apenas
+   por **`produto_id`** (FK para `produto_base.id`).
+8. **`status_regulatorio`** segue o enum oficial do MVP: `nao_validado_agrofit`,
+   `atencao_regulatoria`, `sujeito_a_sipeagro_nao_validado`,
+   `tipo_tecnico_generico`, `bloqueado_historico`.
 
 ## Como validar o JSON antes de usar
 
