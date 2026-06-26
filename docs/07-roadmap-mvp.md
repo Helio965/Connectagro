@@ -77,7 +77,12 @@ Ordem sugerida (sujeita a ajuste):
 
 ## Etapa 6 — Testes e qualidade
 
-- [ ] Implementar testes em `tests/`.
+> Os **testes mínimos da fundação Flask já existem** em `tests/`
+> (`test_app_factory.py`, `test_placeholder_routes.py`).
+
+- [x] Testes mínimos da fundação (app factory, `/health`, rotas placeholders).
+- [ ] Expandir os testes existentes em `tests/` para cobrir modelos, banco,
+  autenticação, CRUDs, regras de negócio, seed técnico e fluxos principais.
 - [ ] Revisão e ajustes do MVP.
 
 ---

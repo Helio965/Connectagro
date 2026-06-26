@@ -98,59 +98,59 @@ Flask (rotas/blueprints)  ──►  Serviços (regras de negócio)  ──►  
 
 ## 3. Estrutura profissional (Flask)
 
-> ✅ **Esta estrutura foi criada** na etapa de fundação Flask (`src/run.py` +
-> `src/app/` com Application Factory, blueprints, templates, estáticos e testes).
-> CRUD, modelos, migrations, seed real e banco populado permanecem para etapas
-> futuras.
+> ✅ **A estrutura base já foi criada** na fundação Flask (`src/run.py` +
+> `src/app/` com Application Factory, blueprints placeholders, templates,
+> estáticos e testes). **`src/app/models/` existe, mas ainda está vazio de
+> modelos reais** — os arquivos de modelos são previstos para a **Etapa 4.1**.
+> CRUD, migrations, seed real e banco populado permanecem para etapas futuras.
+
+### Estrutura criada atualmente
 
 ```text
 src/
 ├── run.py                       # ponto de entrada (chama create_app)
-├── app/
-│   ├── __init__.py              # create_app / Application Factory
-│   ├── config.py                # classes de configuração por ambiente
-│   ├── extensions.py            # instâncias de extensões (db, csrf, etc.)
-│   ├── models/
-│   │   ├── __init__.py
-│   │   ├── usuario.py
-│   │   ├── propriedade.py
-│   │   ├── cultura.py
-│   │   ├── gleba.py
-│   │   ├── produto.py           # produto_base, produto_tecnico, produto_preco, produto_imagem
-│   │   ├── financeiro.py
-│   │   ├── equipe.py
-│   │   ├── colheita.py
-│   │   ├── upload.py
-│   │   └── ia.py
-│   ├── blueprints/
-│   │   ├── auth/                # login
-│   │   ├── dashboard/
-│   │   ├── culturas/
-│   │   ├── glebas/
-│   │   ├── defensivos/
-│   │   ├── fertilizantes/
-│   │   ├── financeiro/
-│   │   ├── upload/
-│   │   ├── equipe/
-│   │   ├── colheita/
-│   │   ├── mapa/
-│   │   ├── ia/                  # IA simulada
-│   │   └── relatorios/
-│   ├── services/                # regras de negócio reutilizáveis
-│   ├── templates/
-│   │   ├── base.html
-│   │   └── ...                  # um subdiretório por módulo
-│   ├── static/
-│   │   ├── css/
-│   │   ├── js/
-│   │   └── uploads/             # arquivos enviados (conteúdo ignorado no git)
-│   └── utils/                   # helpers (datas, validações, etc.)
-├── instance/                    # banco SQLite e config de instância (não versionado)
-└── tests/                       # testes com pytest
+└── app/
+    ├── __init__.py              # create_app / Application Factory
+    ├── config.py                # classes de configuração por ambiente
+    ├── extensions.py            # instâncias de extensões (db = SQLAlchemy)
+    ├── blueprints/              # um pacote por módulo do MVP (placeholders)
+    │   ├── __init__.py          # registro central dos blueprints
+    │   ├── auth/  dashboard/  culturas/  glebas/  defensivos/
+    │   ├── fertilizantes/  financeiro/  upload/  equipe/
+    │   └── colheita/  mapa/  ia/  relatorios/
+    ├── models/
+    │   └── __init__.py          # nenhum modelo definido nesta etapa
+    ├── services/
+    │   └── __init__.py
+    ├── utils/
+    │   └── __init__.py
+    ├── templates/               # base.html, dashboard/, placeholders/, errors/
+    └── static/                  # css/, js/, uploads/ (conteúdo ignorado no git)
 ```
 
-> Cada blueprint conterá tipicamente `routes.py`, podendo ter `forms.py` e
-> `services.py` próprios quando fizer sentido.
+> O banco SQLite ficará em `instance/` (não versionado) quando o schema for
+> criado. Cada blueprint tem hoje `__init__.py` + `routes.py`; `forms.py`/
+> `services.py` poderão ser adicionados quando fizer sentido.
+
+### Arquivos previstos para a Etapa 4.1
+
+> ⚠️ **Os arquivos abaixo ainda NÃO devem ser criados agora.** São previstos
+> para a próxima etapa (modelos SQLAlchemy) e **não fazem parte da fundação
+> Flask já concluída**.
+
+```text
+src/app/models/
+├── usuario.py
+├── propriedade.py
+├── cultura.py
+├── gleba.py
+├── produto.py           # produto_base, produto_tecnico, produto_preco, produto_imagem
+├── financeiro.py
+├── equipe.py
+├── colheita.py
+├── upload.py
+└── ia.py
+```
 
 ---
 
