@@ -31,14 +31,15 @@
   está "validado oficialmente" sem comprovação por **fonte real**.
 - RN-09 — Dados de produto sem origem confiável devem ser sinalizados como
   **não consolidados**, e não exibidos como definitivos.
-- RN-09a — Cada produto possui um **`status_regulatorio`**
-  (`nao_validado`, `autorizado_sujeito_a_verificacao`, `sujeito_a_sipeagro`,
-  `bloqueado`, `nao_se_aplica`). **Defensivos** começam como `nao_validado` ou
-  `autorizado_sujeito_a_verificacao` — **nunca** "validado oficialmente" sem
-  fonte real.
-- RN-09b — **Fertilizantes genéricos** (ex.: Ureia, MAP, DAP, Calcário
-  Dolomítico) usam `nao_se_aplica` ou `sujeito_a_sipeagro`, como **tipo
-  técnico/genérico**, separável de produtos comerciais específicos no futuro.
+- RN-09a — Cada produto possui um **`status_regulatorio`** (enum oficial do MVP):
+  `nao_validado_agrofit`, `atencao_regulatoria`,
+  `sujeito_a_sipeagro_nao_validado`, `tipo_tecnico_generico`,
+  `bloqueado_historico`. **Defensivos** começam como `nao_validado_agrofit` (ou
+  `atencao_regulatoria`) — **nunca** "validado oficialmente" sem fonte real.
+- RN-09b — **Fertilizantes, corretivos, inoculantes e biofertilizantes** usam
+  `sujeito_a_sipeagro_nao_validado` ou `tipo_tecnico_generico` (este para
+  genéricos como Ureia, MAP, DAP, Calcário Dolomítico, Esterco Bovino, Composto
+  Orgânico), separáveis de produtos comerciais específicos no futuro.
 - RN-09c — **Paraquate**, se citado, é tratado como `bloqueado_historico` (uso
   proibido no Brasil), não recomendado. **Oxamil** não entra como produto
   recomendado no seed inicial.

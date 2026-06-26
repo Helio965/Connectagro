@@ -180,23 +180,31 @@ Tabela central do catálogo.
 | descricao_curta    | TEXT    | Não         |       | Resumo                     |                                                                             |
 | descricao_completa | TEXT    | Não         |       | Descrição detalhada        |                                                                             |
 | status_sistema     | TEXT    | Sim         |       | Status interno do sistema  | `pre_cadastrado`, `cadastrado_usuario`, `definitivo`, `bloqueado_historico`  |
-| status_regulatorio | TEXT    | Sim         |       | Status regulatório         | `nao_validado`, `autorizado_sujeito_a_verificacao`, `sujeito_a_sipeagro`, `bloqueado`, `nao_se_aplica` |
+| status_regulatorio | TEXT    | Sim         |       | Status regulatório         | Enum MVP: `nao_validado_agrofit`, `atencao_regulatoria`, `sujeito_a_sipeagro_nao_validado`, `tipo_tecnico_generico`, `bloqueado_historico` |
 | criado_em          | TEXT    | Sim         |       | Data/hora de criação       | ISO 8601                                                                    |
 | atualizado_em      | TEXT    | Não         |       | Data/hora de atualização   | ISO 8601                                                                    |
 
-**Regras (MVP):** defensivos começam como `nao_validado` ou
-`autorizado_sujeito_a_verificacao`, nunca "validado oficialmente"; fertilizantes
-genéricos usam `nao_se_aplica` ou `sujeito_a_sipeagro`; Paraquate, se citado, é
-`bloqueado_historico` (não recomendado); Oxamil não entra como recomendado no
-seed inicial.
+**Regras (MVP):**
+
+- **Defensivos** começam como `nao_validado_agrofit`, exceto itens de atenção,
+  que usam `atencao_regulatoria` — nunca "validado oficialmente".
+- **Fertilizantes, corretivos, inoculantes e biofertilizantes** usam
+  `sujeito_a_sipeagro_nao_validado` ou `tipo_tecnico_generico` (este para
+  genéricos como Ureia, MAP, DAP, Calcário Dolomítico, Esterco Bovino, Composto
+  Orgânico).
+- **Paraquate** permanece como `bloqueado_historico`; **Oxamil** não entra como
+  recomendado no seed.
+- **Nenhum item** deve ser marcado como validado oficialmente sem fonte real.
+  Valores como `validado_agrofit`/`validado_sipeagro` só existirão após validação
+  comprovada (não no MVP).
 
 ### Tabela: `produto_tecnico`
 Informações técnicas do produto.
 
 | Campo                 | Tipo    | Obrigatório | Chave | Descrição                  | Observações                                  |
 |-----------------------|---------|-------------|-------|----------------------------|----------------------------------------------|
-| id                    | INTEGER | Sim         | PK    | Identificador único        | Autoincremento                               |
-| produto_id            | INTEGER | Sim         | FK    | Produto associado          | FK para `produto_base(id)`                   |
+| id                    | INTEGER | Sim         | PK    | Identificador único        | Autoincremento. **No seed JSON pode ser omitido** (gerado no banco) |
+| produto_id            | INTEGER | Sim         | FK    | Produto associado          | FK para `produto_base(id)`; vínculo usado no seed |
 | grupo_quimico         | TEXT    | Não         |       | Grupo químico              | Principalmente defensivos                    |
 | composicao            | TEXT    | Não         |       | Composição                 | Principalmente fertilizantes                 |
 | nutrientes_principais | TEXT    | Não         |       | Nutrientes (ex.: NPK)      | Lista; JSON em `TEXT`; normalizar no futuro  |
@@ -205,6 +213,11 @@ Informações técnicas do produto.
 | modo_aplicacao        | TEXT    | Não         |       | Modo de aplicação          |                                              |
 | fonte_tecnica         | TEXT    | Não         |       | Origem da informação técnica| Não inventar; validar depois se ausente      |
 | observacoes           | TEXT    | Não         |       | Texto livre                |                                              |
+
+> **Seed técnico:** no arquivo JSON de seed, o campo `id` de `produto_tecnico`
+> pode ser omitido. Na futura importação para o SQLite/ORM, o banco deverá gerar
+> esse identificador automaticamente. O vínculo com `produto_base` é feito pelo
+> campo `produto_id`.
 
 ### Tabela: `produto_preco`
 Preços de **referência** (consulta rápida). **Pendência no MVP.**
