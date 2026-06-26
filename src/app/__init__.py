@@ -1,0 +1,43 @@
+"""Application Factory do ConnectAgro (MVP).
+
+Cria e configura a aplicação Flask: carrega configuração por ambiente,
+inicializa extensões, registra blueprints, handlers de erro e a rota de
+health check. Nenhum CRUD, banco populado, migration ou seed é executado aqui.
+"""
+from flask import Flask, jsonify, render_template
+
+from .config import get_config
+from .extensions import db
+from .blueprints import register_blueprints
+
+
+def create_app(config_name=None):
+    """Cria a aplicação Flask configurada.
+
+    :param config_name: ``development`` | ``testing`` | ``production``.
+        Quando ``None``, usa ``FLASK_ENV`` (padrão: ``development``).
+    """
+    app = Flask(__name__)
+    app.config.from_object(get_config(config_name))
+
+    # Extensões
+    db.init_app(app)
+
+    # Blueprints dos módulos do MVP
+    register_blueprints(app)
+
+    # Health check
+    @app.route("/health")
+    def health():
+        return jsonify({"status": "ok", "app": app.config.get("APP_NAME", "ConnectAgro")})
+
+    # Handlers de erro
+    @app.errorhandler(404)
+    def not_found(error):
+        return render_template("errors/404.html"), 404
+
+    @app.errorhandler(500)
+    def server_error(error):
+        return render_template("errors/500.html"), 500
+
+    return app

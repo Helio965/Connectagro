@@ -46,6 +46,7 @@ venv.bak/
 # Flask
 # ---------------------------------------------------------------------------
 instance/
+src/instance/
 .webassets-cache
 flask_session/
 
@@ -74,10 +75,14 @@ credentials.json
 # Uploads / arquivos enviados em tempo de execução
 # (manter a pasta versionada com .gitkeep, ignorar o conteúdo)
 # ---------------------------------------------------------------------------
-uploads/
+/uploads/
 src/uploads/
 src/static/uploads/
 media/
+# Manter a pasta de uploads da app versionada, ignorando apenas seu conteúdo:
+!src/app/static/uploads/
+src/app/static/uploads/*
+!src/app/static/uploads/.gitkeep
 !**/.gitkeep
 
 # ---------------------------------------------------------------------------

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}ConnectAgro{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="{{ url_for('dashboard.index') }}">ConnectAgro</a>
+    <span class="mvp-badge">MVP</span>
+  </header>
+
+  <nav class="menu">
+    <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+    <a href="{{ url_for('culturas.index') }}">Culturas</a>
+    <a href="{{ url_for('glebas.index') }}">Glebas</a>
+    <a href="{{ url_for('defensivos.index') }}">Defensivos</a>
+    <a href="{{ url_for('fertilizantes.index') }}">Fertilizantes</a>
+    <a href="{{ url_for('financeiro.index') }}">Financeiro</a>
+    <a href="{{ url_for('upload.index') }}">Upload</a>
+    <a href="{{ url_for('equipe.index') }}">Equipe</a>
+    <a href="{{ url_for('colheita.index') }}">Colheita</a>
+    <a href="{{ url_for('mapa.index') }}">Mapa</a>
+    <a href="{{ url_for('ia.index') }}">IA</a>
+    <a href="{{ url_for('relatorios.index') }}">Relatórios</a>
+    <a href="{{ url_for('auth.index') }}">Login</a>
+  </nav>
+
+  <main class="content">
+    <p class="mvp-notice">
+      ⚠️ Sistema em <strong>MVP</strong> — fundação inicial. Módulos ainda são
+      placeholders (sem CRUD, banco populado ou autenticação real).
+    </p>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <small>ConnectAgro — plataforma de gestão agrícola (MVP). Não vende produtos.</small>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

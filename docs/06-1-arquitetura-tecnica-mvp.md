@@ -62,7 +62,7 @@ Flask (rotas/blueprints)  ──►  Serviços (regras de negócio)  ──►  
 | Framework web    | Flask                                        | Monólito com blueprints                        |
 | Templates        | Jinja2 (incluído no Flask)                   | SSR                                            |
 | Banco de dados   | SQLite                                       | Arquivo local em `instance/`                   |
-| Acesso a dados   | **Flask-SQLAlchemy (ORM)** — proposto        | Ver decisão em §6; alternativa: `sqlite3` puro |
+| Acesso a dados   | **Flask-SQLAlchemy (ORM)** — **adotado**     | Decisão final (§6); `sqlite3` puro fica como alternativa histórica |
 | Migrations       | Flask-Migrate (Alembic) — **futuro**         | Não no MVP inicial                             |
 | Autenticação     | Sessão Flask + hash de senha (Werkzeug)      | `werkzeug.security`                            |
 | Formulários/CSRF | Flask-WTF — proposto                         | Proteção CSRF e validação                      |
@@ -75,11 +75,12 @@ Flask (rotas/blueprints)  ──►  Serviços (regras de negócio)  ──►  
 
 ---
 
-## 3. Estrutura profissional planejada (Flask)
+## 3. Estrutura profissional (Flask)
 
-Estrutura **planejada para a futura implementação** — **não deve ser criada
-agora** se ainda não existir. Será adotada quando a arquitetura for aprovada e a
-codificação começar.
+> ✅ **Esta estrutura foi criada** na etapa de fundação Flask (`src/run.py` +
+> `src/app/` com Application Factory, blueprints, templates, estáticos e testes).
+> CRUD, modelos, migrations, seed real e banco populado permanecem para etapas
+> futuras.
 
 ```text
 src/
@@ -168,15 +169,18 @@ src/
 - **Banco:** arquivo SQLite em `src/instance/connectagro.db` (a pasta `instance/`
   e arquivos `*.db` já estão no [.gitignore](../.gitignore); o banco **não** é
   versionado).
-- **Decisão proposta:** usar **Flask-SQLAlchemy** como ORM, mapeando os modelos
-  diretamente às tabelas do [dicionário de dados](./05-dicionario-de-dados.md).
+- **Decisão final:** ✅ adotado **Flask-SQLAlchemy** como ORM do MVP, mapeando os
+  modelos às tabelas do [dicionário de dados](./05-dicionario-de-dados.md). A
+  instância `db` está centralizada em `src/app/extensions.py` e é inicializada na
+  Application Factory.
   - *Justificativa:* ~15 tabelas com vários relacionamentos; um ORM reduz SQL
     repetitivo, melhora manutenção e facilita testes.
-  - *Alternativa registrada:* `sqlite3` puro com uma fina camada de repositório.
-    **A decisão final fica para o início da implementação** (ver checklist, §13).
+  - *Alternativa histórica/documentada:* `sqlite3` puro com uma fina camada de
+    repositório — **não** adotado.
 - **Tipos:** seguir o dicionário — `TEXT` para datas (ISO 8601), `BOOLEAN` como
   `0/1`, listas como `TEXT`/JSON no MVP (normalização futura).
-- **Migrations:** não no MVP inicial. **Nenhuma migration é criada nesta etapa.**
+- **Migrations:** Flask-Migrate/Alembic ficam para **etapa futura**. **Nenhuma
+  migration é criada nesta etapa**, e o **banco real não é versionado**.
 - **Seeds:** o seed definitivo **ainda não existe** (ver
   [data/seeds/README.md](../data/seeds/README.md)); preço e imagem permanecem
   pendentes.
@@ -382,9 +386,9 @@ Fluxo geral esperado do uso do sistema:
 - [ ] Dicionário de dados revisado
 - [x] Catálogo de produtos corrigido com IDs, slugs e classe
 - [x] Estratégia de seed definida (`produto_base` + `produto_tecnico`; preço/imagem vazios no MVP)
-- [ ] Decisão final sobre ORM ou sqlite3 puro
-- [ ] Estrutura Flask aprovada
-- [ ] Próximo passo autorizado: criação da base Flask
+- [x] Decisão final sobre ORM ou sqlite3 puro (**Flask-SQLAlchemy**)
+- [x] Estrutura Flask aprovada e **criada** (`src/run.py` + `src/app/`)
+- [x] Próximo passo autorizado: **base Flask criada** (fundação; CRUD/modelos/seed para etapas futuras)
 
 ---
 
