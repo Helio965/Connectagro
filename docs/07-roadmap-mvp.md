@@ -11,16 +11,16 @@
 - [x] READMEs auxiliares nas pastas principais.
 - [x] `.gitignore` para projeto Python/Flask.
 
-## Etapa 1 — Documentação de produto
+## Etapa 1 — Documentação de produto ✅
 
-- [ ] Consolidar **escopo** definitivo.
-- [ ] Detalhar **requisitos** (RF/RNF) priorizados.
-- [ ] Fechar **regras de negócio**.
+- [x] Consolidar **escopo** definitivo.
+- [x] Detalhar **requisitos** (RF/RNF) priorizados.
+- [x] Fechar **regras de negócio**.
 
-## Etapa 2 — Modelagem de dados
+## Etapa 2 — Modelagem de dados ✅
 
-- [ ] Definir o **DER** oficial.
-- [ ] Preencher o **dicionário de dados**.
+- [x] Definir o **DER** oficial.
+- [x] Preencher o **dicionário de dados**.
 
 ## Etapa 3 — Catálogo de produtos
 
@@ -32,12 +32,30 @@
   (`produto_preco`/`produto_imagem` vazios; ver
   [pendências](./catalogo-produtos/pendencias-validacao.md)).
 
-## Etapa 4 — Base da aplicação
+## Etapa 4 — Fundação Flask da aplicação ✅
 
-- [ ] Aprovar arquitetura técnica do MVP ([06.1 — Arquitetura Técnica do MVP](./06-1-arquitetura-tecnica-mvp.md)).
-- [ ] Estruturar o projeto Flask em `src/`.
-- [ ] Configurar banco **SQLite**.
-- [ ] Criar layout base (HTML/CSS/JS).
+- [x] Aprovar arquitetura técnica do MVP ([06.1 — Arquitetura Técnica do MVP](./06-1-arquitetura-tecnica-mvp.md)).
+- [x] Estruturar o projeto Flask em `src/` (`run.py` + `src/app/`).
+- [x] Criar a **Application Factory** (`create_app`) e a configuração por ambiente.
+- [x] Criar os **blueprints placeholders** dos módulos do MVP.
+- [x] Criar o **layout base** (HTML/CSS/JS) e páginas de erro.
+- [x] Criar a rota `/health`.
+- [x] Criar **testes mínimos** (pytest).
+
+> Adotado **Flask-SQLAlchemy** como ORM. O banco real **não** é versionado.
+
+## Etapa 4.1 — Modelos e banco SQLite ⏳ (próxima etapa)
+
+> **Próximo passo oficial:** criar os **modelos SQLAlchemy** com base no
+> [DER](./04-modelagem-banco-der.md) e no
+> [dicionário de dados](./05-dicionario-de-dados.md), **sem popular o banco e sem
+> importar o seed de produtos ainda**.
+
+- [ ] Modelos SQLAlchemy de domínio (`src/app/models/`).
+- [ ] Criação real das tabelas (schema).
+- [ ] Migrations (Flask-Migrate/Alembic).
+- [ ] Importação do seed técnico do catálogo.
+- [ ] Seed real / banco populado.
 
 ## Etapa 5 — Implementação dos módulos
 

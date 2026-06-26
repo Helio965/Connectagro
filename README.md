@@ -122,13 +122,19 @@ placeholder dos módulos. Para rodar os testes: `pytest`.
 
 ## Próximos passos
 
-Este repositório está em fase de organização. Os próximos passos previstos são:
+Concluídos: documentação de produto, modelagem (DER + dicionário), catálogo
+técnico/seed e a **fundação Flask** (Application Factory, blueprints placeholders,
+layout base, `/health` e testes mínimos).
 
-1. Consolidar **escopo**, **requisitos** e **regras de negócio**.
-2. Definir a **modelagem do banco (DER)** e o **dicionário de dados**.
-3. ~~Receber o **catálogo de produtos corrigido**~~ — **concluído** (catálogo
-   técnico + seed em `data/seeds/`; preço e imagem como pendência).
-4. Implementar o código Flask do MVP, módulo a módulo.
+O **próximo passo não é o CRUD ainda**. A sequência prevista é:
+
+1. **Criar os modelos SQLAlchemy** com base no [DER](./docs/04-modelagem-banco-der.md)
+   e no [dicionário de dados](./docs/05-dicionario-de-dados.md), montando a
+   estrutura inicial controlada do banco **SQLite** — **sem** popular o banco.
+2. Posteriormente, importar o **catálogo de produtos**, que hoje permanece como
+   **seed técnico/documental** (ainda **não** importado no banco). **Preço e
+   imagem continuam pendentes** para a versão final.
+3. Em seguida, autenticação e o **CRUD módulo a módulo**.
 
 Consulte o [Roadmap do MVP](./docs/07-roadmap-mvp.md) para o detalhamento.
 
