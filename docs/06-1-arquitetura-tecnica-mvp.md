@@ -70,8 +70,17 @@ Flask (rotas/blueprints)  ──►  Serviços (regras de negócio)  ──►  
 | Mapa             | Biblioteca de mapa JS (ex.: Leaflet)         | Mapa real; começa simples                      |
 | Testes           | pytest                                       | Ver §11                                        |
 
-> As bibliotecas acima são **planejadas**, não instaladas nesta etapa. As versões
-> exatas serão fixadas em `requirements.txt` na etapa de implementação.
+> **Flask**, **Flask-SQLAlchemy**, **python-dotenv** e **pytest** já estão
+> declarados no [`requirements.txt`](../requirements.txt) — ou seja, as
+> dependências do **projeto** estão definidas. Isso **não** significa que o
+> ambiente local de quem clona o repositório já está instalado: é preciso rodar
+> `pip install -r requirements.txt` (ver "Como executar" no README).
+>
+> **Flask-Migrate** e **Flask-WTF** permanecem **futuro/proposto** e **não**
+> devem ser adicionados ao `requirements.txt` agora, pois ainda não são usados.
+> Continuam fora desta etapa: migrations, seed real, banco populado, CRUD,
+> autenticação real, validação AGROFIT/MAPA automatizada e a validação diária de
+> preço (sistema final).
 
 ---
 
