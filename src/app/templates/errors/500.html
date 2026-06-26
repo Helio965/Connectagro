@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Erro interno — ConnectAgro{% endblock %}
+
+{% block content %}
+<section class="card">
+  <h1>500 — Erro interno</h1>
+  <p>Ocorreu um erro inesperado. Tente novamente mais tarde.</p>
+  <p><a href="{{ url_for('dashboard.index') }}">Voltar ao dashboard</a></p>
+</section>
+{% endblock %}

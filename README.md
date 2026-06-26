@@ -5,8 +5,9 @@ O ConnectAgro centraliza o controle de culturas, glebas, insumos, finanças,
 equipe, colheita e mapa, oferecendo ainda apoio por uma camada de IA e um
 catálogo técnico de produtos agrícolas para consulta rápida.
 
-> **Status do projeto:** início do desenvolvimento — fase de organização do
-> repositório e documentação. O sistema Flask ainda **não** foi implementado.
+> **Status do projeto:** a **fundação Flask inicial foi criada**. O projeto ainda
+> **não** possui CRUD completo, banco populado, migrations ou autenticação real —
+> os módulos são placeholders nesta etapa.
 
 ---
 
@@ -73,13 +74,38 @@ em etapas posteriores, evoluirá para a versão completa.
 ├── docs/                  # Documentação do projeto (visão, escopo, requisitos, DER...)
 │   └── catalogo-produtos/ # Documentação e especificação do catálogo de produtos
 ├── data/                  # Dados de apoio do projeto
-│   └── seeds/             # Dados de carga inicial (seeds) — ainda não definitivos
-├── src/                   # Código-fonte da aplicação Flask (a ser implementado)
-└── tests/                 # Testes automatizados (a serem implementados)
+│   └── seeds/             # Seed técnico do catálogo (JSON/CSV) — não importado ainda
+├── src/                   # Código-fonte da aplicação Flask
+│   ├── run.py             # ponto de entrada
+│   └── app/               # package Flask (Application Factory)
+│       ├── __init__.py    # create_app
+│       ├── config.py      # configuração por ambiente
+│       ├── extensions.py  # extensões (Flask-SQLAlchemy)
+│       ├── blueprints/    # um blueprint por módulo do MVP (placeholders)
+│       ├── models/        # modelos (vazio nesta etapa)
+│       ├── services/      # regras de negócio (vazio nesta etapa)
+│       ├── utils/         # utilitários (vazio nesta etapa)
+│       ├── templates/     # HTML (Jinja2)
+│       └── static/        # css/, js/, uploads/
+├── tests/                 # testes (pytest)
+├── requirements.txt       # dependências
+└── .env.example           # exemplo de variáveis de ambiente
 ```
 
 A documentação detalhada está em [`docs/`](./docs). Comece pela
 [Visão Geral](./docs/00-visao-geral.md).
+
+## Como executar (MVP)
+
+```bash
+python -m venv .venv
+# ative o ambiente conforme seu SO (ex.: source .venv/bin/activate)
+pip install -r requirements.txt
+python src/run.py
+```
+
+A aplicação sobe com a rota inicial `/`, o health check `/health` e as páginas
+placeholder dos módulos. Para rodar os testes: `pytest`.
 
 ### Documentação principal
 
