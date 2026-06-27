@@ -2,12 +2,13 @@
 
 ## Status do documento
 
-**Dicionário de dados preliminar — v0.2 (MVP).**
+**Dicionário de Dados — v0.3 (alinhado aos modelos SQLAlchemy implementados).**
 
-Detalha as tabelas e campos derivados do [DER preliminar](./04-modelagem-banco-der.md)
-e está **alinhado** a ele (mesmos nomes de tabelas e campos). Serve de fonte
-confiável para a futura implementação em **SQLite**. **Nenhum banco, migration ou
-seed definitivo é criado nesta etapa.**
+Detalha as tabelas e campos derivados do [DER](./04-modelagem-banco-der.md) e está
+**alinhado** a ele (mesmos nomes de tabelas e campos), servindo como **referência
+documental dos modelos SQLAlchemy já implementados** em `src/app/models/`. O schema
+pode ser criado localmente via `flask init-db`. **Migrations e seed importado ainda
+não foram implementados; o banco real não é versionado.**
 
 ## Objetivo
 

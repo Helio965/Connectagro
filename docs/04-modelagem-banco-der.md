@@ -2,13 +2,13 @@
 
 ## Status do documento
 
-**DER preliminar — v0.2 (MVP).**
+**DER do MVP — v0.3 (alinhado aos modelos SQLAlchemy implementados).**
 
-Este documento descreve a modelagem de dados do ConnectAgro e serve de **fonte
-confiável** para a futura implementação do banco em **SQLite**. Ele **ainda não**
-é um schema final: nomes, tipos, chaves e cardinalidades podem ser refinados nas
-próximas etapas. **Nenhuma migration, seed definitivo ou banco real é criado
-nesta etapa.**
+Este documento descreve a modelagem de dados do ConnectAgro e serve como
+**referência documental dos modelos SQLAlchemy já implementados** em
+`src/app/models/`. O schema pode ser criado localmente via `flask init-db`.
+Refinamentos ainda são possíveis em etapas futuras. **Migrations e seed importado
+ainda não foram implementados; o banco real não é versionado.**
 
 ## Objetivo
 
@@ -308,7 +308,7 @@ Registro das interações com a camada de IA. **No MVP a IA é simulada.**
 ## Diagrama (visão preliminar)
 
 > Diagrama textual em [Mermaid](https://mermaid.js.org/). Representação de apoio
-> da v0.2, não o schema final.
+> alinhada aos modelos SQLAlchemy implementados (v0.3).
 
 ```mermaid
 erDiagram
