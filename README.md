@@ -110,6 +110,16 @@ python src/run.py
 A aplicação sobe com a rota inicial `/`, o health check `/health` e as páginas
 placeholder dos módulos. Para rodar os testes: `pytest`.
 
+### Criar o schema do banco (opcional)
+
+O comando abaixo cria as tabelas no SQLite (a partir da raiz do projeto), **sem
+popular dados e sem importar o seed**. O arquivo de banco gerado **não** é
+versionado.
+
+```bash
+flask --app src/run.py init-db
+```
+
 ### Documentação principal
 
 - [00 — Visão Geral](./docs/00-visao-geral.md)

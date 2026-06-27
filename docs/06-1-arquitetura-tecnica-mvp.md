@@ -76,7 +76,7 @@ Flask (rotas/blueprints)  ──►  Serviços (regras de negócio)  ──►  
 | Templates        | Jinja2 (incluído no Flask)                   | SSR                                            |
 | Banco de dados   | SQLite                                       | Arquivo local em `instance/`                   |
 | Acesso a dados   | **Flask-SQLAlchemy (ORM)** — **adotado**     | Decisão final (§6); `sqlite3` puro fica como alternativa histórica |
-| Migrations       | Flask-Migrate (Alembic) — **futuro**         | Não no MVP inicial                             |
+| Migrations       | Flask-Migrate (Alembic) — **próxima etapa**  | Schema atual via `flask init-db`; migrations entram na fase seguinte |
 | Autenticação     | Sessão Flask + hash de senha (Werkzeug)      | `werkzeug.security`                            |
 | Formulários/CSRF | Flask-WTF — proposto                         | Proteção CSRF e validação                      |
 | Frontend         | HTML, CSS, JavaScript                        | Sem framework JS obrigatório no MVP            |
@@ -89,9 +89,10 @@ Flask (rotas/blueprints)  ──►  Serviços (regras de negócio)  ──►  
 > ambiente local de quem clona o repositório já está instalado: é preciso rodar
 > `pip install -r requirements.txt` (ver "Como executar" no README).
 >
-> **Flask-Migrate** e **Flask-WTF** permanecem **futuro/proposto** e **não**
-> devem ser adicionados ao `requirements.txt` agora, pois ainda não são usados.
-> Continuam fora desta etapa: migrations, seed real, banco populado, CRUD,
+> **Flask-Migrate** será adotado na **próxima fase** (migrations + importação do
+> seed) e **não** deve ser adicionado ao `requirements.txt` nesta correção de
+> alinhamento. **Flask-WTF** permanece proposto (usado quando houver formulários).
+> Continuam fora desta etapa: migrations, seed importado, banco populado, CRUD,
 > autenticação real, validação AGROFIT/MAPA automatizada e a validação diária de
 > preço (sistema final).
 
@@ -191,11 +192,13 @@ src/
     repositório — **não** adotado.
 - **Tipos:** seguir o dicionário — `TEXT` para datas (ISO 8601), `BOOLEAN` como
   `0/1`, listas como `TEXT`/JSON no MVP (normalização futura).
-- **Migrations:** Flask-Migrate/Alembic ficam para **etapa futura**. **Nenhuma
-  migration é criada nesta etapa**, e o **banco real não é versionado**.
-- **Seeds:** o seed definitivo **ainda não existe** (ver
-  [data/seeds/README.md](../data/seeds/README.md)); preço e imagem permanecem
-  pendentes.
+- **Migrations:** Flask-Migrate/Alembic entram na **próxima fase**. Nesta etapa o
+  schema é criado por `flask init-db` (`db.create_all()`); **nenhuma migration é
+  criada** e o **banco real não é versionado**.
+- **Seeds:** já existe **seed técnico/documental** em
+  [data/seeds/](../data/seeds/README.md), mas ele **ainda não foi importado** no
+  banco. **Não** existe seed regulatório definitivo; **preço e imagem permanecem
+  pendentes**.
 
 ---
 

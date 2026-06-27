@@ -4,9 +4,12 @@ Dados de **carga inicial (seeds)** do ConnectAgro.
 
 ## Estado atual
 
-> Os seeds aqui são **técnicos/documentais** — base para a futura criação do
-> banco. **Ainda não há banco, migrations nem aplicação.** Preço e imagem **não**
-> entram como dados consolidados no MVP.
+> Os seeds aqui são **técnicos/documentais**. Já existem a **aplicação Flask** e
+> os **modelos SQLAlchemy** (`src/app/models/`), e o schema pode ser criado com
+> `flask init-db`. Porém, **o seed ainda NÃO foi importado para o banco**, **não
+> há migrations** e **não há banco populado**. Preço e imagem **não** entram como
+> dados consolidados no MVP; o menor valor diário atualizado fica para o **sistema
+> final** (apenas consulta rápida — o ConnectAgro não vende produtos).
 
 ## Arquivos
 

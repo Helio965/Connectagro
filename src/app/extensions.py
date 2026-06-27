@@ -1,9 +1,10 @@
 """Extensões centralizadas do ConnectAgro.
 
-As instâncias são criadas aqui, sem aplicação, e inicializadas na Application
-Factory (``create_app``) via ``init_app``. Nenhum modelo é definido nesta etapa.
+Este módulo apenas centraliza a instância ``db`` (Flask-SQLAlchemy), criada sem
+aplicação e inicializada na Application Factory (``create_app``) via ``init_app``.
+Os modelos de domínio ficam em ``src/app/models/`` e usam esta mesma instância.
 """
 from flask_sqlalchemy import SQLAlchemy
 
-# ORM oficial do MVP (Flask-SQLAlchemy). Modelos serão adicionados em etapa futura.
+# ORM oficial do MVP (Flask-SQLAlchemy). Modelos definidos em app/models/.
 db = SQLAlchemy()
