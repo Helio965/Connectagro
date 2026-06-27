@@ -1,9 +1,11 @@
 """Testes do schema SQLAlchemy (Etapa 4.1).
 
-Usam ``create_app('testing')`` e SQLite em memória. Não importam seed nem
-dependem de arquivo .db.
+Usam ``create_app('testing')`` (via fixture ``app``) e SQLite em memória. Não
+importam seed nem dependem de arquivo .db. Usam o fixture ``app`` para garantir
+que os modelos já foram importados/registrados antes de inspecionar o metadata.
 """
 import pytest
+from sqlalchemy import inspect
 
 from app.extensions import db
 
@@ -26,7 +28,8 @@ TABELAS_ESPERADAS = {
 }
 
 
-def test_todas_as_tabelas_registradas():
+def test_todas_as_tabelas_registradas(app):
+    """Todas as 15 tabelas esperadas estão registradas no metadata."""
     tabelas = set(db.metadata.tables.keys())
     faltando = TABELAS_ESPERADAS - tabelas
     assert not faltando, f"tabelas ausentes: {faltando}"
@@ -42,21 +45,21 @@ def test_todas_as_tabelas_registradas():
         ("produto_imagem", "status_validacao"),
     ],
 )
-def test_colunas_principais(tabela, coluna):
+def test_colunas_principais(app, tabela, coluna):
     assert coluna in db.metadata.tables[tabela].columns
 
 
 def test_create_all_em_memoria(app):
-    """db.create_all() funciona no ambiente de teste."""
+    """db.create_all() funciona no ambiente de teste (SQLite em memória)."""
     with app.app_context():
         db.create_all()
-        insp = db.inspect(db.engine)
+        insp = inspect(db.engine)
         nomes = set(insp.get_table_names())
         assert TABELAS_ESPERADAS.issubset(nomes)
 
 
 def test_insercao_minima(app):
-    """Insere registros mínimos sem depender de seed."""
+    """Insere registros mínimos sem depender de seed nem de arquivo .db."""
     from app.models import Usuario, Propriedade, ProdutoBase, ProdutoTecnico
 
     with app.app_context():
