@@ -393,9 +393,11 @@ Fluxo geral esperado do uso do sistema:
 
 ---
 
-## 13. Checklist de prontidão para iniciar a Etapa 4.1 — Modelos SQLAlchemy
+## 13. Checklist de fechamento da Etapa 4.1 e prontidão para a Etapa 4.2
 
 > Marcar apenas o que estiver **realmente** concluído.
+
+**Concluído (Etapa 4.1 e anteriores):**
 
 - [x] Escopo consolidado
 - [x] Requisitos revisados
@@ -408,10 +410,18 @@ Fluxo geral esperado do uso do sistema:
 - [x] Fundação Flask criada (`src/run.py` + `src/app/`)
 - [x] Blueprints placeholders criados
 - [x] Testes mínimos criados
-- [ ] Modelos SQLAlchemy de domínio criados
-- [ ] Banco SQLite inicial criado
-- [ ] Migrations configuradas
-- [ ] Seed técnico importado
+- [x] Modelos SQLAlchemy de domínio criados (15 tabelas em `src/app/models/`)
+- [x] Schema validável por `db.create_all()`
+- [x] Comando `flask init-db` criado
+
+**Pendente (Etapa 4.2 — migrations + importação do seed):**
+
+- [ ] Configurar Flask-Migrate/Alembic
+- [ ] Criar migrations versionadas
+- [ ] Implementar importação do seed técnico do catálogo
+- [ ] Popular o banco apenas com o catálogo técnico permitido
+- [ ] Criar autenticação real
+- [ ] Criar CRUDs dos módulos
 
 ---
 
