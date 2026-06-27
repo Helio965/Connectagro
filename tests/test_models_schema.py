@@ -6,6 +6,7 @@ que os modelos já foram importados/registrados antes de inspecionar o metadata.
 """
 import pytest
 from sqlalchemy import inspect
+from sqlalchemy.exc import IntegrityError
 
 from app.extensions import db
 
@@ -91,3 +92,56 @@ def test_insercao_minima(app):
         assert prod.slug == "glifosato"
         assert tec.produto.id == prod.id
         assert prod.tecnicos[0].id == tec.id
+
+
+def test_usuario_email_unico(app):
+    """usuario.email é único (segundo insert com mesmo e-mail falha)."""
+    from app.models import Usuario
+
+    with app.app_context():
+        db.create_all()
+        db.session.add(Usuario(nome="A", email="dup@example.com", senha_hash="x"))
+        db.session.commit()
+        db.session.add(Usuario(nome="B", email="dup@example.com", senha_hash="y"))
+        with pytest.raises(IntegrityError):
+            db.session.commit()
+        db.session.rollback()
+
+
+def test_produto_base_slug_unico(app):
+    """produto_base.slug é único (segundo insert com mesmo slug falha)."""
+    from app.models import ProdutoBase
+
+    with app.app_context():
+        db.create_all()
+        db.session.add(ProdutoBase(nome="Ureia", slug="ureia", classe="fertilizante"))
+        db.session.commit()
+        db.session.add(ProdutoBase(nome="Ureia 2", slug="ureia", classe="fertilizante"))
+        with pytest.raises(IntegrityError):
+            db.session.commit()
+        db.session.rollback()
+
+
+def test_preco_e_imagem_existem_mas_vazias(app):
+    """produto_preco e produto_imagem existem como tabelas e ficam vazias no MVP
+    (nenhum dado é populado/seed importado automaticamente)."""
+    from app.models import ProdutoPreco, ProdutoImagem
+
+    with app.app_context():
+        db.create_all()
+        nomes = set(inspect(db.engine).get_table_names())
+        assert {"produto_preco", "produto_imagem"}.issubset(nomes)
+        # Sem seed/import automático: tabelas permanecem vazias.
+        assert ProdutoPreco.query.count() == 0
+        assert ProdutoImagem.query.count() == 0
+
+
+def test_seed_nao_importado_automaticamente(app):
+    """Após create_all(), nenhuma tabela do catálogo é populada (seed técnico
+    não é importado nesta etapa)."""
+    from app.models import ProdutoBase, ProdutoTecnico
+
+    with app.app_context():
+        db.create_all()
+        assert ProdutoBase.query.count() == 0
+        assert ProdutoTecnico.query.count() == 0
