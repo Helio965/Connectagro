@@ -1,70 +1,95 @@
 # ConnectAgro
 
 Plataforma web de **gestão agrícola** para pequenos, médios e grandes produtores.
-O ConnectAgro centraliza culturas, glebas, insumos, finanças, equipe, colheita,
-uploads, mapa, relatórios e apoio operacional por IA simulada.
+O ConnectAgro centraliza o controle de culturas, glebas, insumos, finanças,
+equipe, colheita, upload de documentos e mapa, oferecendo ainda apoio por uma
+camada de IA simulada, relatórios operacionais e um catálogo técnico de produtos
+agrícolas para consulta rápida.
 
-> **Status do projeto:** MVP Flask com modelos SQLAlchemy, migrations,
-> importação de catálogo técnico, autenticação real, permissões finas por perfil,
-> Dashboard Operacional, Mapa real simplificado, IA Simulada Operacional, CRUDs de
-> Glebas, Culturas, Equipe, Financeiro, Colheita, Aplicações de Insumo e Upload de
-> Arquivos, consulta de Defensivos/Fertilizantes e Relatórios Operacionais HTML.
-> O sistema não vende produtos, não recomenda produtos, não valida dose, não usa
-> LLM/API externa, não faz OCR e não gera PDF/exportação nesta fase.
+> **Status do projeto:** fundação Flask, **modelos SQLAlchemy** (15 tabelas),
+> **migrations** (Flask-Migrate), **importação do catálogo técnico** (via CLI),
+> **autenticação real** (login/logout), **permissões finas por perfil**,
+> **Dashboard Operacional** somente leitura, **Mapa real simplificado** somente
+> leitura, **IA Simulada Operacional** baseada em regras locais, **CRUDs** de
+> **Glebas**, **Culturas** (com associação cultura↔gleba), **Equipe**,
+> **Financeiro** (com totais), **Colheita**, **Aplicações de Insumo** (registro
+> histórico operacional) e **Upload de Arquivos** (armazenamento local com
+> metadados), além da **consulta somente leitura** do catálogo de **Defensivos** e
+> **Fertilizantes** e dos **Relatórios Operacionais HTML** (geral, financeiro,
+> agrícola, aplicações e uploads), somente leitura. Não há CRUD de produtos;
+> `produto_preco`/`produto_imagem` continuam **vazios** no MVP. O sistema **não
+> vende produtos**, não recomenda produtos, não valida dose, não usa LLM/API
+> externa, não faz OCR/IA/extração automática de arquivos, não gera PDF/exportação
+> e não oferece recursos avançados de mapa; o banco populado e uploads reais
+> **não** são versionados.
 
 ---
 
 ## Visão geral
 
-O objetivo do ConnectAgro é dar ao produtor uma ferramenta simples para acompanhar
-a operação da propriedade do plantio à colheita, com registro financeiro, equipe,
-documentos, mapa, relatórios e consulta técnica de produtos agrícolas.
+O objetivo do ConnectAgro é dar ao produtor uma ferramenta simples e organizada
+para acompanhar a operação da propriedade do plantio à colheita, com registro
+financeiro, gestão de equipe, documentos, relatórios, apoio operacional por IA
+simulada e visualização em mapa.
 
-### O que o ConnectAgro é
+O sistema será desenvolvido inicialmente como **MVP** (Produto Mínimo Viável) e,
+em etapas posteriores, evoluirá para a versão completa.
+
+### O que o ConnectAgro **é**
 
 - Uma plataforma de **gestão e consulta**.
-- Um dashboard operacional da propriedade atual.
-- Um catálogo técnico de produtos agrícolas para consulta rápida.
-- Um sistema para registrar aplicações de insumo como histórico operacional.
-- Um repositório local de documentos da propriedade no MVP.
-- Uma visualização simples das glebas em mapa.
-- Uma IA simulada por regras para leitura operacional dos dados locais.
-- Relatórios HTML somente leitura.
+- Um dashboard operacional somente leitura para resumir dados já cadastrados.
+- Um catálogo técnico de produtos agrícolas usado como **base de consulta rápida**.
+- Um sistema para registrar aplicações de insumo como **histórico operacional**.
+- Um sistema para armazenar localmente documentos da propriedade no MVP.
+- Uma visualização simples das glebas em mapa, baseada nas coordenadas cadastradas.
+- Uma IA simulada por regras para apoiar a leitura operacional dos dados locais da propriedade.
+- Um conjunto de relatórios HTML somente leitura, escopados pela propriedade atual.
+- Um controle básico de acesso por perfil (`admin`, `tecnico`, `trabalhador`).
 
-### O que o ConnectAgro não é
+### O que o ConnectAgro **não é**
 
-- Não vende produtos.
-- Não possui carrinho, checkout ou cotação.
-- Não recomenda produtos nem valida dose.
-- Não substitui profissional habilitado.
-- Não usa LLM/API externa, OCR ou leitura automática de arquivos.
-- Não afirma validação oficial AGROFIT/MAPA sem fonte real.
+- O sistema **não vende** produtos.
+- Os valores de produtos servem **apenas como consulta rápida**.
+- O catálogo é uma **base técnica inicial**, não uma verdade regulatória definitiva.
+- O registro de aplicação de insumo **não recomenda produtos** e **não valida dose**.
+- A IA simulada **não** usa LLM/API externa, não substitui profissional habilitado,
+  não recomenda produtos, não valida dose e não faz diagnóstico agronômico.
+- O upload **não** faz OCR, IA, extração automática ou validação documental avançada.
+- O mapa do MVP **não** mede área, não desenha polígonos e não usa GPS em tempo real.
+- Os relatórios do MVP **não** geram PDF, CSV, Excel ou exportação automática.
+
+> **Importante sobre dados de produtos:** no MVP, **preço e imagem** devem ser
+> tratados como **pendência / dado não consolidado**. A validação diária do menor
+> valor atualizado fica para o sistema final. Não há, neste momento, validação
+> oficial AGROFIT/MAPA — nenhum produto deve ser apresentado como "validado
+> oficialmente" sem fonte real comprovada.
 
 ---
 
 ## Módulos do MVP
 
-| Módulo | Descrição resumida |
-|---|---|
-| Login | Autenticação por sessão Flask |
-| Permissões | Matriz por perfil (`admin`, `tecnico`, `trabalhador`) |
-| Dashboard | Resumo operacional da propriedade atual |
-| Culturas | Cadastro e acompanhamento das culturas |
-| Glebas | Cadastro e gestão das áreas/talhões |
-| Defensivos | Consulta de defensivos do catálogo |
-| Fertilizantes | Consulta de fertilizantes do catálogo |
-| Aplicações | Registro histórico operacional de aplicações de insumo |
-| Financeiro | Registro de receitas e despesas |
-| Upload | Envio, listagem, download e remoção de arquivos |
-| Equipe | Gestão de membros e funções |
-| Colheita | Registro e acompanhamento de colheita |
-| Mapa real | Visualização das glebas em mapa |
-| IA simulada | Apoio operacional por regras |
-| Relatórios | Relatórios operacionais HTML |
+| Módulo         | Descrição resumida                                              |
+| -------------- | --------------------------------------------------------------- |
+| Login          | Autenticação e controle de acesso                               |
+| Permissões     | Matriz por perfil (`admin`, `tecnico`, `trabalhador`)           |
+| Dashboard      | Resumo operacional somente leitura da propriedade atual         |
+| Culturas       | Cadastro e acompanhamento das culturas                          |
+| Glebas         | Cadastro e gestão das áreas/talhões                             |
+| Defensivos     | Consulta de defensivos a partir do catálogo                     |
+| Fertilizantes  | Consulta de fertilizantes a partir do catálogo                  |
+| Aplicações     | Registro histórico operacional de aplicações de insumo          |
+| Financeiro     | Registro de receitas e despesas                                 |
+| Upload         | Envio, listagem, download e remoção de arquivos da propriedade  |
+| Equipe         | Gestão de membros e funções                                     |
+| Colheita       | Registro e acompanhamento de colheita                           |
+| Mapa real      | Visualização das glebas em mapa                                 |
+| IA simulada    | Apoio operacional por regras, com histórico por propriedade     |
+| Relatórios     | Relatórios operacionais HTML somente leitura                    |
 
 ---
 
-## Stack tecnológica
+## Stack tecnológica (MVP)
 
 - **Backend:** Python + Flask
 - **Banco de dados:** SQLite + Flask-SQLAlchemy + Flask-Migrate
@@ -77,121 +102,212 @@ documentos, mapa, relatórios e consulta técnica de produtos agrícolas.
 
 ```txt
 .
-├── docs/
-├── data/seeds/
-├── migrations/
-├── instance/              # banco e uploads locais; não versionado
-├── src/
-│   ├── run.py
-│   └── app/
-│       ├── __init__.py
-│       ├── blueprints/
-│       ├── models/
-│       ├── services/
-│       ├── utils/         # auth.py, contexto.py, permissions.py etc.
-│       ├── templates/
-│       └── static/
-├── tests/
-├── requirements.txt
-└── .env.example
+├── docs/                  # Documentação do projeto (visão, escopo, requisitos, DER...)
+│   └── catalogo-produtos/ # Documentação e especificação do catálogo de produtos
+├── data/                  # Dados de apoio do projeto
+│   └── seeds/             # Seed técnico do catálogo (JSON/CSV) — importável via CLI
+├── migrations/            # Flask-Migrate/Alembic (migration inicial das 15 tabelas)
+├── instance/              # Banco SQLite e uploads locais em execução — não versionado
+├── src/                   # Código-fonte da aplicação Flask
+│   ├── run.py             # ponto de entrada
+│   └── app/               # package Flask (Application Factory)
+│       ├── __init__.py    # create_app
+│       ├── config.py      # configuração por ambiente
+│       ├── extensions.py  # extensões (Flask-SQLAlchemy, Flask-Migrate)
+│       ├── blueprints/    # auth + CRUDs + catálogo + módulos protegidos
+│       ├── models/        # modelos SQLAlchemy de domínio (15 tabelas)
+│       ├── commands.py    # CLI: init-db, validate/import-catalog-seed, seed-users
+│       ├── services/      # regras de negócio e agregações (dashboard, IA, relatórios)
+│       ├── utils/         # auth.py, contexto.py, formatters.py, permissions.py
+│       ├── templates/     # HTML (Jinja2)
+│       └── static/        # css/, js/ (arquivos públicos)
+├── tests/                 # testes (pytest)
+├── requirements.txt       # dependências
+└── .env.example           # exemplo de variáveis de ambiente
 ```
 
----
+A documentação detalhada está em [`docs/`](./docs). Comece pela
+[Visão Geral](./docs/00-visao-geral.md).
 
-## Como executar
+## Como executar (MVP)
+
+Fluxo recomendado, a partir da raiz do projeto:
 
 ```bash
+# 1. Ambiente virtual
 python -m venv .venv
-# ative o ambiente conforme seu sistema operacional
+# ative o ambiente conforme seu SO (ex.: source .venv/bin/activate)
+
+# 2. Dependências
 pip install -r requirements.txt
+
+# 3. Schema do banco (migrations — Flask-Migrate/Alembic)
 flask --app src/run.py db upgrade
+
+# 4. Importar o catálogo técnico (opcional; idempotente)
 flask --app src/run.py validate-catalog-seed
 flask --app src/run.py import-catalog-seed
+
+# 5. Criar os usuários de teste (idempotente)
 flask --app src/run.py seed-users
+
+# 6. Subir a aplicação
 python src/run.py
+
+# 7. Acessar /auth/login e entrar com um usuário de teste
+
+# 8. Rodar os testes
 pytest
 ```
 
-Rotas públicas: `/auth/login` e `/health`. Os módulos exigem login.
+O acesso exige **login** (sessão Flask + `werkzeug.security`): a rota `/` e os
+módulos são protegidos e redirecionam para `/auth/login`; `/health` é público. O
+arquivo de banco gerado **não** é versionado.
 
----
+### Dashboard operacional
 
-## Usuários de teste
+O Dashboard em `/` é protegido por login e mostra um resumo somente leitura da
+propriedade atual. Ele agrega dados já existentes de Glebas, Culturas,
+Financeiro, Equipe, Colheita, Aplicações de Insumo, Upload e Catálogo.
 
-| Perfil | E-mail | Senha |
-|---|---|---|
-| admin | admin@connectagro.com | admin123 |
-| tecnico | tecnico@connectagro.com | tecnico123 |
-| trabalhador | trabalhador@connectagro.com | trabalhador123 |
+Indicadores principais:
 
-Não há cadastro público, convite de usuários, recuperação de senha ou painel de
-administração de usuários nesta fase.
+- total de glebas, área somada e glebas sem área informada;
+- culturas por status e associações cultura↔gleba;
+- receitas, despesas, saldo e últimos lançamentos financeiros;
+- membros de equipe ativos/inativos;
+- registros e somas de colheita por unidade;
+- aplicações recentes como histórico operacional;
+- total e tamanho aproximado dos uploads;
+- totais globais do catálogo técnico por classe e produtos bloqueados/históricos.
 
----
+O Dashboard não cria dados, não altera schema e não implementa gráficos externos.
 
-## Permissões por perfil
+### Mapa real simplificado
 
-As permissões finas estão em `src/app/utils/permissions.py`. Elas usam o campo já
-existente `usuario.perfil`, sem migration, sem tabela de permissões e sem RBAC
-externo.
+O módulo Mapa em `/mapa/` é protegido por login e mostra uma visualização somente
+leitura das glebas da propriedade atual usando as coordenadas já cadastradas em
+`Gleba.latitude` e `Gleba.longitude`. A rota `/mapa/dados` entrega JSON escopado
+pela propriedade atual, sem dados de usuário/e-mail e separando glebas sem
+coordenadas válidas.
 
-### Admin
+O frontend usa Leaflet via CDN e renderiza marcadores. Quando `poligono_geojson`
+contém GeoJSON válido, ele pode ser exibido em modo somente leitura; conteúdo
+inválido é ignorado com segurança. A página continua renderizando mesmo sem
+internet, embora o mapa visual dependa da biblioteca externa.
 
-Pode acessar todos os módulos e criar, editar e remover registros nos CRUDs da
-sua propriedade atual, além de enviar, baixar e remover uploads.
+O módulo não cria, edita ou remove glebas, não altera schema, não usa PostGIS,
+não mede área, não desenha polígonos, não importa/exporta GeoJSON e não usa GPS
+em tempo real.
 
-### Técnico
+### IA simulada operacional
 
-Pode acessar dashboard, mapa, catálogo, relatórios, IA, equipe e financeiro em
-leitura. Pode criar/editar glebas, culturas, colheitas e aplicações. Pode enviar
-e baixar uploads. Não pode remover registros críticos, remover upload ou gerenciar
-equipe/financeiro.
+O módulo IA em `/ia/` é protegido por login e oferece apoio operacional por regras
+simples. Ele usa dados locais já cadastrados na propriedade atual para responder
+sobre resumo geral, financeiro, glebas, culturas, colheita, aplicações de insumo,
+documentos e catálogo.
 
-### Trabalhador
+Cada pergunta/resposta válida é registrada em `ia_interacao` com `usuario_id`,
+`propriedade_id`, `pergunta`, `resposta` e `tipo="simulada"`. O histórico exibido
+mostra apenas as últimas interações do usuário e da propriedade atual.
 
-Pode acessar dashboard, mapa, catálogo, relatórios e IA; visualizar glebas,
-culturas, colheitas e aplicações; criar colheitas, aplicações e uploads; e baixar
-uploads. Não acessa equipe/financeiro e não edita/remove registros críticos.
+A IA simulada não usa LLM, OpenAI, Claude, Gemini, API externa, internet ou
+machine learning. Ela não recomenda produtos, não valida dose, não faz diagnóstico
+agronômico, não consulta fontes oficiais em tempo real e não lê o conteúdo dos
+arquivos enviados.
 
-O backend valida permissões e retorna **403** para ações não autorizadas. Os
-templates usam `can(...)` para esconder menus, atalhos e botões indisponíveis.
-Permissões não alteram o escopo por propriedade: cada usuário continua vendo
-apenas dados da propriedade atual.
+### Upload de arquivos
 
----
+O módulo Upload armazena arquivos localmente no MVP usando
+`UPLOAD_FOLDER` (`instance/uploads` por padrão), em subpastas por propriedade
+(`propriedade_<id>/`). Essa pasta padrão fica fora de `src/app/static`, então os
+arquivos enviados não são servidos diretamente por `/static/uploads`; o acesso
+continua passando pela rota protegida de download, com validação da propriedade.
 
-## Observações de segurança e escopo
+O banco guarda apenas metadados e caminho relativo seguro; arquivos reais
+enviados por usuários são ignorados pelo Git.
 
-- Senhas são armazenadas como hash.
-- A sessão guarda apenas dados mínimos do usuário.
-- Uploads ficam fora de `static` e são servidos por rota protegida.
-- Registros operacionais são filtrados por propriedade.
-- Catálogo e relatórios são somente leitura.
-- CSRF/Flask-WTF ainda está pendente.
+Extensões permitidas no MVP: `pdf`, `png`, `jpg`, `jpeg`, `csv`, `xlsx`, `txt` e
+`docx`. Executáveis, scripts, compactados e HTML/PHP/Python são bloqueados pela
+allowlist. O módulo não faz OCR, IA, leitura automática, classificação ou
+extração de dados.
 
----
+### Relatórios operacionais
 
-## Documentação principal
+Em `/relatorios/` há uma central com cinco relatórios **HTML somente leitura**,
+escopados pela propriedade atual: **geral**, **financeiro** (com filtros de
+período e tipo), **agrícola**, **aplicações** (com filtros de período e classe) e
+**uploads**. Os relatórios apenas consultam dados já existentes — não criam,
+alteram ou removem nada. Não há geração de PDF nem exportação CSV/Excel nesta
+fase; a impressão usa o recurso do próprio navegador (`window.print()`). Os
+relatórios não recomendam produtos, não validam dose e não leem o conteúdo dos
+uploads.
+
+### Permissões por perfil
+
+A Fase 6.3 adicionou permissões finas usando `src/app/utils/permissions.py`.
+A autorização usa o campo existente `usuario.perfil`, sem migration, sem tabela
+nova de roles/permissões e sem dependência externa de RBAC.
+
+Elementos principais:
+
+- `PERMISSOES_POR_PERFIL` define a matriz dos perfis `admin`, `tecnico` e
+  `trabalhador`.
+- `require_permission(...)` protege rotas sensíveis no backend e retorna **403**
+  para ação não autorizada.
+- `can(...)` fica disponível nos templates para esconder menus, atalhos e botões
+  que o perfil não pode usar.
+- O handler 403 renderiza `templates/errors/403.html`.
+- As permissões não substituem o escopo por propriedade: cada usuário continua
+  acessando apenas os dados da sua propriedade atual.
+
+Resumo dos perfis:
+
+| Perfil | Permissões principais |
+| ------ | --------------------- |
+| admin | Acessa todos os módulos e pode criar, editar e remover registros nos CRUDs da sua propriedade atual; pode enviar, baixar e remover uploads. |
+| tecnico | Acessa dashboard, mapa, catálogo, relatórios, IA, equipe e financeiro em leitura; cria/edita glebas, culturas, colheitas e aplicações; envia e baixa uploads; não remove registros críticos nem gerencia equipe/financeiro. |
+| trabalhador | Acessa dashboard, mapa, catálogo, relatórios e IA; visualiza glebas, culturas, colheitas e aplicações; cria colheitas, aplicações e uploads; baixa upload; não acessa equipe/financeiro e não edita/remove registros críticos. |
+
+### Usuários de teste (`seed-users`)
+
+| Perfil      | E-mail                       | Senha           |
+| ----------- | ---------------------------- | --------------- |
+| admin       | admin@connectagro.com        | admin123        |
+| tecnico     | tecnico@connectagro.com      | tecnico123      |
+| trabalhador | trabalhador@connectagro.com  | trabalhador123  |
+
+> A importação do catálogo popula apenas `produto_base` + `produto_tecnico`;
+> `produto_preco`/`produto_imagem` permanecem vazios no MVP e itens bloqueados
+> (Paraquate/Oxamil) não são importados. Alternativa pontual ao passo 3 (sem
+> migrations): `flask --app src/run.py init-db`.
+
+### Documentação principal
 
 - [00 — Visão Geral](./docs/00-visao-geral.md)
 - [01 — Escopo do Projeto](./docs/01-escopo-do-projeto.md)
-- [03 — Regras de Negócio](./docs/03-regras-de-negocio.md)
 - [04 — Modelagem do Banco (DER)](./docs/04-modelagem-banco-der.md)
 - [05 — Dicionário de Dados](./docs/05-dicionario-de-dados.md)
-- [06 — Arquitetura do Sistema](./docs/06-arquitetura-do-sistema.md)
-- [06.1 — Arquitetura Técnica do MVP](./docs/06-1-arquitetura-tecnica-mvp.md)
+- [06 — Arquitetura do Sistema](./docs/06-arquitetura-do-sistema.md) — **visão conceitual**
+- [06.1 — Arquitetura Técnica do MVP](./docs/06-1-arquitetura-tecnica-mvp.md) — **guia técnico detalhado do MVP**
 - [07 — Roadmap do MVP](./docs/07-roadmap-mvp.md)
-- [Catálogo de Produtos](./docs/catalogo-produtos/README.md)
+- [Catálogo de Produtos](./docs/catalogo-produtos/README.md) — inclui o [catálogo técnico](./docs/catalogo-produtos/catalogo-tecnico-connectagro-mvp.md) e o **seed técnico** ([`data/seeds/`](./data/seeds/README.md))
 
 ---
 
 ## Próximos passos
 
-Concluídos: fundação Flask, modelos/migrations, catálogo, autenticação,
-permissões finas, dashboard, mapa, IA simulada, relatórios HTML e CRUDs
-operacionais.
+Concluídos: documentação de produto, modelagem (DER + dicionário), catálogo
+técnico/seed, a **fundação Flask**, os **modelos SQLAlchemy de domínio** (15
+tabelas), migrations, autenticação real, permissões finas por perfil, Dashboard
+Operacional, Mapa real simplificado, IA Simulada Operacional, Relatórios
+Operacionais HTML, CRUDs de glebas/culturas/equipe/financeiro/colheita/aplicações
+de insumo/upload e consulta somente leitura de Defensivos/Fertilizantes.
 
-Próximo passo recomendado: **CSRF/Flask-WTF**, seguido da revisão final do MVP.
+O **próximo passo recomendado** é implementar **CSRF/Flask-WTF**, mantendo
+pendente apenas a revisão final do MVP após essa proteção.
+
+Consulte o [Roadmap do MVP](./docs/07-roadmap-mvp.md) para o detalhamento.
 
 ---
 
