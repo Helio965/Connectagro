@@ -10,8 +10,17 @@
   <header class="topbar">
     <a class="brand" href="{{ url_for('dashboard.index') }}">ConnectAgro</a>
     <span class="mvp-badge">MVP</span>
+    <span class="topbar-user">
+      {% if is_authenticated %}
+        {{ current_user.nome }} <small>({{ current_user.perfil }})</small> ·
+        <a href="{{ url_for('auth.logout') }}">Sair</a>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}">Login</a>
+      {% endif %}
+    </span>
   </header>
 
+  {% if is_authenticated %}
   <nav class="menu">
     <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
     <a href="{{ url_for('culturas.index') }}">Culturas</a>
@@ -25,13 +34,23 @@
     <a href="{{ url_for('mapa.index') }}">Mapa</a>
     <a href="{{ url_for('ia.index') }}">IA</a>
     <a href="{{ url_for('relatorios.index') }}">Relatórios</a>
-    <a href="{{ url_for('auth.index') }}">Login</a>
   </nav>
+  {% endif %}
 
   <main class="content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for category, message in messages %}
+            <li class="flash flash-{{ category }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
     <p class="mvp-notice">
-      ⚠️ Sistema em <strong>MVP</strong> — fundação inicial. Módulos ainda são
-      placeholders (sem CRUD, banco populado ou autenticação real).
+      ⚠️ Sistema em <strong>MVP</strong>. A autenticação já funciona; os módulos
+      ainda são placeholders (sem CRUD real nesta etapa).
     </p>
     {% block content %}{% endblock %}
   </main>

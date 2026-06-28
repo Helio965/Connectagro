@@ -10,8 +10,8 @@ class Usuario(db.Model):
     nome = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(180), nullable=False, unique=True)
     senha_hash = db.Column(db.String(255), nullable=False)
-    # perfil: admin | produtor | membro
-    perfil = db.Column(db.String(20), nullable=False, default="produtor")
+    # perfil: admin | tecnico | trabalhador (perfis oficiais do MVP)
+    perfil = db.Column(db.String(20), nullable=False, default="trabalhador")
     ativo = db.Column(db.Boolean, nullable=False, default=True)
     criado_em = db.Column(db.String(40), nullable=False, default=iso_now)
     atualizado_em = db.Column(db.String(40), nullable=True)

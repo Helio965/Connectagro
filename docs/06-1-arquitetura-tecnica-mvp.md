@@ -2,8 +2,8 @@
 
 ## Status do documento
 
-**Arquitetura técnica — v0.5 (migrations + importação do seed técnico; próxima
-etapa: autenticação + CRUDs).**
+**Arquitetura técnica — v0.6 (autenticação real; próxima etapa: CRUDs dos
+módulos).**
 
 Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetura-do-sistema.md):
 
@@ -12,23 +12,25 @@ Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetur
   MVP em Flask.
 
 > **Estado atual:** estão prontos a **fundação Flask** (`src/run.py` + `src/app/`
-> com Application Factory, blueprints placeholders, layout base, `/health`), os
-> **modelos SQLAlchemy** (15 tabelas em `src/app/models/`), as **migrations**
-> (Flask-Migrate, pasta `migrations/` versionada) e a **importação do catálogo
-> técnico** via CLI (`validate-catalog-seed` / `import-catalog-seed`). Há
-> **dependências declaradas** em [`requirements.txt`](../requirements.txt) e
-> **testes** em `tests/` (fundação, schema dos modelos e seed).
+> com Application Factory, layout base, `/health`), os **modelos SQLAlchemy** (15
+> tabelas), as **migrations** (Flask-Migrate, pasta `migrations/` versionada), a
+> **importação do catálogo técnico** via CLI (`validate-catalog-seed` /
+> `import-catalog-seed`) e a **autenticação real** (login/logout com sessão Flask
+> + `werkzeug.security`; rotas dos módulos protegidas por `@login_required`;
+> usuários de teste via `seed-users`). Há **dependências declaradas** em
+> [`requirements.txt`](../requirements.txt) e **testes** em `tests/` (fundação,
+> schema, seed e autenticação).
 >
-> **Ainda NÃO existem:** CRUDs reais nem autenticação real. O **banco populado
-> não é versionado**; `produto_preco`/`produto_imagem` permanecem **vazios** e
-> preço/imagem seguem **pendentes** para o sistema final.
+> **Ainda NÃO existem:** CRUDs reais. O **banco populado não é versionado**;
+> `produto_preco`/`produto_imagem` permanecem **vazios** e preço/imagem seguem
+> **pendentes** para o sistema final. Os módulos continuam **placeholders**
+> (porém protegidos por login).
 >
 > Este guia deriva do [DER](./04-modelagem-banco-der.md), do
 > [dicionário de dados](./05-dicionario-de-dados.md) e dos
 > [requisitos](./02-requisitos-do-sistema.md).
 >
-> **Próximo passo oficial:** implementar **autenticação real** e os **CRUDs**
-> módulo a módulo (Etapa 5).
+> **Próximo passo oficial:** implementar os **CRUDs** módulo a módulo (Etapa 5).
 
 ## Objetivo
 
@@ -78,7 +80,7 @@ Flask (rotas/blueprints)  ──►  Serviços (regras de negócio)  ──►  
 | Banco de dados   | SQLite                                       | Arquivo local em `instance/`                   |
 | Acesso a dados   | **Flask-SQLAlchemy (ORM)** — **adotado**     | Decisão final (§6); `sqlite3` puro fica como alternativa histórica |
 | Migrations       | Flask-Migrate (Alembic) — **adotado**        | Pasta `migrations/` versionada; aplicar com `flask db upgrade` |
-| Autenticação     | Sessão Flask + hash de senha (Werkzeug)      | `werkzeug.security`                            |
+| Autenticação     | Sessão Flask + hash de senha (Werkzeug) — **adotado** | `werkzeug.security`; `utils/auth.py` (`login_required`) |
 | Formulários/CSRF | Flask-WTF — proposto                         | Proteção CSRF e validação                      |
 | Frontend         | HTML, CSS, JavaScript                        | Sem framework JS obrigatório no MVP            |
 | Mapa             | Biblioteca de mapa JS (ex.: Leaflet)         | Mapa real; começa simples                      |
@@ -349,9 +351,14 @@ Fluxo geral esperado do uso do sistema:
   (`Development`/`Testing`/`Production`). Variáveis sensíveis em `.env`
   (não versionado; haverá `.env.example`): `SECRET_KEY`, caminho do SQLite,
   `FLASK_ENV`/`FLASK_DEBUG`, `UPLOAD_FOLDER` e limites.
-- **Autenticação:** login por e-mail e senha; hash com `werkzeug.security`;
-  sessão assinada por `SECRET_KEY`; acesso por `usuario.perfil` (`admin`,
-  `produtor`, `membro`) e futuramente `equipe_membro.funcao`.
+- **Autenticação (implementada):** login/logout por e-mail e senha; hash com
+  `werkzeug.security`; sessão Flask assinada por `SECRET_KEY` guardando apenas
+  dados mínimos (`user_id`, `user_email`, `user_nome`, `user_perfil` — **nunca** a
+  senha). Helpers em `utils/auth.py` (`login_usuario`, `logout_usuario`,
+  `usuario_atual`, `login_required`). Rotas dos módulos exigem login; `/health` e
+  `/auth/*` são públicas. Usuário inativo não autentica. Perfis oficiais do MVP:
+  `admin`, `tecnico`, `trabalhador` (permissões finas por módulo ficam para etapa
+  futura). Usuários de teste via `flask seed-users`.
 - **Segurança:** CSRF em formulários (Flask-WTF proposto); *escaping* do Jinja2
   contra XSS; uploads validados; nenhum segredo no repositório.
 - **Erros e logging:** páginas 404/500 amigáveis; logging por ambiente; logs não
@@ -420,13 +427,14 @@ Fluxo geral esperado do uso do sistema:
 - [x] Flask-Migrate/Alembic configurado e migration inicial versionada
 - [x] Validação do seed técnico (`flask validate-catalog-seed`)
 - [x] Importação idempotente do catálogo (`flask import-catalog-seed`)
-- [x] Testes de fundação, schema e seed
+- [x] Autenticação real (login/logout, sessão, `login_required`, `seed-users`)
+- [x] Testes de fundação, schema, seed e autenticação
 
 **Pendente (Etapa 5):**
 
-- [ ] Criar autenticação real
 - [ ] Criar CRUDs dos módulos
-- [ ] Testes de autenticação, CRUD, regras de negócio e fluxos
+- [ ] Permissões finas por perfil/módulo
+- [ ] Testes de CRUD, regras de negócio e fluxos
 
 ---
 

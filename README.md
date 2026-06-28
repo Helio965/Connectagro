@@ -6,11 +6,12 @@ equipe, colheita e mapa, oferecendo ainda apoio por uma camada de IA e um
 catálogo técnico de produtos agrícolas para consulta rápida.
 
 > **Status do projeto:** fundação Flask, **modelos SQLAlchemy** (15 tabelas),
-> **migrations** (Flask-Migrate) e **importação do catálogo técnico** (via CLI)
-> prontos. O projeto ainda **não** possui CRUD nem autenticação real — os módulos
-> seguem como placeholders. `produto_preco`/`produto_imagem` continuam **vazios**
-> no MVP; preço e imagem ficam **pendentes** para o sistema final. O banco
-> populado **não** é versionado.
+> **migrations** (Flask-Migrate), **importação do catálogo técnico** (via CLI) e
+> **autenticação real** (login/logout com sessão Flask + `werkzeug.security`)
+> prontos. O projeto ainda **não** possui CRUD — os módulos seguem como
+> placeholders protegidos por login. `produto_preco`/`produto_imagem` continuam
+> **vazios** no MVP; preço e imagem ficam **pendentes** para o sistema final. O
+> banco populado **não** é versionado.
 
 ---
 
@@ -85,11 +86,11 @@ em etapas posteriores, evoluirá para a versão completa.
 │       ├── __init__.py    # create_app
 │       ├── config.py      # configuração por ambiente
 │       ├── extensions.py  # extensões (Flask-SQLAlchemy, Flask-Migrate)
-│       ├── blueprints/    # um blueprint por módulo do MVP (placeholders)
+│       ├── blueprints/    # blueprints dos módulos: auth (login real) + placeholders
 │       ├── models/        # modelos SQLAlchemy de domínio (15 tabelas)
-│       ├── commands.py    # CLI: init-db, validate-catalog-seed, import-catalog-seed
+│       ├── commands.py    # CLI: init-db, validate/import-catalog-seed, seed-users
 │       ├── services/      # regras de negócio (ex.: catalogo_seed.py)
-│       ├── utils/         # utilitários (vazio nesta etapa)
+│       ├── utils/         # utilitários (ex.: auth.py — sessão/login_required)
 │       ├── templates/     # HTML (Jinja2)
 │       └── static/        # css/, js/, uploads/
 ├── tests/                 # testes (pytest)
@@ -119,17 +120,31 @@ flask --app src/run.py db upgrade
 flask --app src/run.py validate-catalog-seed
 flask --app src/run.py import-catalog-seed
 
-# 5. Subir a aplicação
+# 5. Criar os usuários de teste (idempotente)
+flask --app src/run.py seed-users
+
+# 6. Subir a aplicação
 python src/run.py
 
-# 6. Rodar os testes
+# 7. Acessar /auth/login e entrar com um usuário de teste
+
+# 8. Rodar os testes
 pytest
 ```
 
-A aplicação sobe com a rota inicial `/`, o health check `/health` e as páginas
-placeholder dos módulos. O arquivo de banco gerado **não** é versionado.
+O acesso exige **login** (sessão Flask + `werkzeug.security`): a rota `/` e os
+módulos são protegidos e redirecionam para `/auth/login`; `/health` é público. O
+arquivo de banco gerado **não** é versionado.
 
-> A importação popula apenas `produto_base` + `produto_tecnico`;
+### Usuários de teste (`seed-users`)
+
+| Perfil      | E-mail                       | Senha           |
+| ----------- | ---------------------------- | --------------- |
+| admin       | admin@connectagro.com        | admin123        |
+| tecnico     | tecnico@connectagro.com      | tecnico123      |
+| trabalhador | trabalhador@connectagro.com  | trabalhador123  |
+
+> A importação do catálogo popula apenas `produto_base` + `produto_tecnico`;
 > `produto_preco`/`produto_imagem` permanecem vazios no MVP e itens bloqueados
 > (Paraquate/Oxamil) não são importados. Alternativa pontual ao passo 3 (sem
 > migrations): `flask --app src/run.py init-db`.

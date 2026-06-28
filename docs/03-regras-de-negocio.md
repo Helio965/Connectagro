@@ -51,9 +51,17 @@
 
 ## Regras de acesso
 
-- RN-10 — O acesso aos módulos exige **usuário autenticado**.
-- RN-11 — Membros da equipe podem ter **funções** distintas, que poderão
-  condicionar permissões (a detalhar).
+- RN-10 — O acesso aos módulos exige **usuário autenticado** (login com e-mail e
+  senha; sessão Flask). Sem login, as rotas dos módulos redirecionam para
+  `/auth/login`. Rotas públicas: `/auth/login`, `/auth/logout`, `/health` e
+  arquivos estáticos.
+- RN-10a — **Usuário inativo** (`ativo = 0`) **não** consegue autenticar.
+- RN-10b — Senhas são armazenadas como **hash** (`werkzeug.security`); a sessão
+  guarda apenas dados mínimos do usuário, **nunca** a senha.
+- RN-11 — **Perfis oficiais do MVP:** `admin`, `tecnico`, `trabalhador`
+  (`usuario.perfil`). **Permissões finas por módulo** (o que cada perfil pode
+  fazer) ficam para **etapa futura** — no MVP, todo usuário autenticado acessa os
+  módulos. As **funções** de `equipe_membro` poderão refinar permissões depois.
 
 ## Regras operacionais (a detalhar)
 
