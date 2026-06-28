@@ -6,7 +6,9 @@
 <section class="card">
   <div class="card-head">
     <h1>Culturas</h1>
+    {% if can("culturas.create") %}
     <a class="btn-acao" href="{{ url_for('culturas.nova') }}">+ Nova cultura</a>
+    {% endif %}
   </div>
 
   {% if culturas %}
@@ -25,18 +27,23 @@
         <td>{{ c.status }}</td>
         <td>{{ c.cultura_glebas | length }}</td>
         <td class="acoes">
+          {% if can("culturas.edit") %}
           <a href="{{ url_for('culturas.editar', cultura_id=c.id) }}">Editar</a>
+          {% endif %}
+          {% if can("culturas.delete") %}
           <form method="post" action="{{ url_for('culturas.remover', cultura_id=c.id) }}"
                 onsubmit="return confirm('Remover esta cultura?');">
             <button type="submit" class="btn-link-danger">Remover</button>
           </form>
+          {% endif %}
+          {% if not can("culturas.edit") and not can("culturas.delete") %}—{% endif %}
         </td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
   {% else %}
-  <p>Nenhuma cultura cadastrada ainda. <a href="{{ url_for('culturas.nova') }}">Criar a primeira</a>.</p>
+  <p>Nenhuma cultura cadastrada ainda.{% if can("culturas.create") %} <a href="{{ url_for('culturas.nova') }}">Criar a primeira</a>.{% endif %}</p>
   {% endif %}
 </section>
 {% endblock %}
