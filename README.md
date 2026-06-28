@@ -8,16 +8,17 @@ camada de IA e um catálogo técnico de produtos agrícolas para consulta rápid
 > **Status do projeto:** fundação Flask, **modelos SQLAlchemy** (15 tabelas),
 > **migrations** (Flask-Migrate), **importação do catálogo técnico** (via CLI),
 > **autenticação real** (login/logout), **Dashboard Operacional** somente leitura,
-> **Mapa real simplificado** somente leitura, **CRUDs** de **Glebas**, **Culturas**
-> (com associação cultura↔gleba), **Equipe**, **Financeiro** (com totais),
-> **Colheita**, **Aplicações de Insumo** (registro histórico operacional) e
-> **Upload de Arquivos** (armazenamento local com metadados), além da **consulta
-> somente leitura** do catálogo de **Defensivos** e **Fertilizantes**. IA e
-> Relatórios seguem pendentes. Não há CRUD de produtos; `produto_preco`/
-> `produto_imagem` continuam **vazios** no MVP. O sistema **não vende produtos**,
-> não recomenda produtos, não valida dose, não faz OCR/IA/extração automática de
-> arquivos e não oferece recursos avançados de mapa; o banco populado e uploads
-> reais **não** são versionados.
+> **Mapa real simplificado** somente leitura, **IA Simulada Operacional** baseada
+> em regras locais, **CRUDs** de **Glebas**, **Culturas** (com associação
+> cultura↔gleba), **Equipe**, **Financeiro** (com totais), **Colheita**,
+> **Aplicações de Insumo** (registro histórico operacional) e **Upload de Arquivos**
+> (armazenamento local com metadados), além da **consulta somente leitura** do
+> catálogo de **Defensivos** e **Fertilizantes**. Relatórios seguem pendentes. Não
+> há CRUD de produtos; `produto_preco`/`produto_imagem` continuam **vazios** no
+> MVP. O sistema **não vende produtos**, não recomenda produtos, não valida dose,
+> não usa LLM/API externa, não faz OCR/IA/extração automática de arquivos e não
+> oferece recursos avançados de mapa; o banco populado e uploads reais **não** são
+> versionados.
 
 ---
 
@@ -38,6 +39,7 @@ em etapas posteriores, evoluirá para a versão completa.
 - Um sistema para registrar aplicações de insumo como **histórico operacional**.
 - Um sistema para armazenar localmente documentos da propriedade no MVP.
 - Uma visualização simples das glebas em mapa, baseada nas coordenadas cadastradas.
+- Uma IA simulada por regras para apoiar a leitura operacional dos dados locais da propriedade.
 
 ### O que o ConnectAgro **não é**
 
@@ -45,6 +47,8 @@ em etapas posteriores, evoluirá para a versão completa.
 - Os valores de produtos servem **apenas como consulta rápida**.
 - O catálogo é uma **base técnica inicial**, não uma verdade regulatória definitiva.
 - O registro de aplicação de insumo **não recomenda produtos** e **não valida dose**.
+- A IA simulada **não** usa LLM/API externa, não substitui profissional habilitado,
+  não recomenda produtos, não valida dose e não faz diagnóstico agronômico.
 - O upload **não** faz OCR, IA, extração automática ou validação documental avançada.
 - O mapa do MVP **não** mede área, não desenha polígonos e não usa GPS em tempo real.
 
@@ -72,7 +76,7 @@ em etapas posteriores, evoluirá para a versão completa.
 | Equipe         | Gestão de membros e funções                                     |
 | Colheita       | Registro e acompanhamento de colheita                           |
 | Mapa real      | Visualização das glebas em mapa                                 |
-| IA simulada    | Camada de apoio por IA (respostas simuladas no MVP)             |
+| IA simulada    | Apoio operacional por regras, com histórico por propriedade     |
 | Relatórios     | Geração de relatórios operacionais e financeiros                |
 
 ---
@@ -104,7 +108,7 @@ em etapas posteriores, evoluirá para a versão completa.
 │       ├── blueprints/    # auth + CRUDs + catálogo + módulos protegidos
 │       ├── models/        # modelos SQLAlchemy de domínio (15 tabelas)
 │       ├── commands.py    # CLI: init-db, validate/import-catalog-seed, seed-users
-│       ├── services/      # regras de negócio e agregações (ex.: dashboard_service.py)
+│       ├── services/      # regras de negócio e agregações (ex.: dashboard_service.py, ia_simulada_service.py)
 │       ├── utils/         # utilitários (auth.py, contexto.py, formatters.py)
 │       ├── templates/     # HTML (Jinja2)
 │       └── static/        # css/, js/ (arquivos públicos)
@@ -187,6 +191,22 @@ O módulo não cria, edita ou remove glebas, não altera schema, não usa PostGI
 não mede área, não desenha polígonos, não importa/exporta GeoJSON e não usa GPS
 em tempo real.
 
+### IA simulada operacional
+
+O módulo IA em `/ia/` é protegido por login e oferece apoio operacional por regras
+simples. Ele usa dados locais já cadastrados na propriedade atual para responder
+sobre resumo geral, financeiro, glebas, culturas, colheita, aplicações de insumo,
+documentos e catálogo.
+
+Cada pergunta/resposta válida é registrada em `ia_interacao` com `usuario_id`,
+`propriedade_id`, `pergunta`, `resposta` e `tipo="simulada"`. O histórico exibido
+mostra apenas as últimas interações do usuário e da propriedade atual.
+
+A IA simulada não usa LLM, OpenAI, Claude, Gemini, API externa, internet ou
+machine learning. Ela não recomenda produtos, não valida dose, não faz diagnóstico
+agronômico, não consulta fontes oficiais em tempo real e não lê o conteúdo dos
+arquivos enviados.
+
 ### Upload de arquivos
 
 O módulo Upload armazena arquivos localmente no MVP usando
@@ -234,11 +254,12 @@ extração de dados.
 Concluídos: documentação de produto, modelagem (DER + dicionário), catálogo
 técnico/seed, a **fundação Flask**, os **modelos SQLAlchemy de domínio** (15
 tabelas), migrations, autenticação real, Dashboard Operacional, Mapa real
-simplificado, CRUDs de glebas/culturas/equipe/financeiro/colheita/aplicações de
-insumo/upload e consulta somente leitura de Defensivos/Fertilizantes.
+simplificado, IA Simulada Operacional, CRUDs de glebas/culturas/equipe/financeiro/
+colheita/aplicações de insumo/upload e consulta somente leitura de Defensivos/
+Fertilizantes.
 
-O **próximo passo recomendado** é implementar a **IA simulada**, mantendo
-pendentes Relatórios, permissões finas por perfil e CSRF dedicado.
+O **próximo passo recomendado** é implementar **Relatórios**, mantendo pendentes
+permissões finas por perfil, CSRF dedicado e revisão final do MVP.
 
 Consulte o [Roadmap do MVP](./docs/07-roadmap-mvp.md) para o detalhamento.
 
