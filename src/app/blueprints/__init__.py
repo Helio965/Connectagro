@@ -5,6 +5,7 @@ from .culturas import culturas_bp
 from .glebas import glebas_bp
 from .defensivos import defensivos_bp
 from .fertilizantes import fertilizantes_bp
+from .aplicacoes import aplicacoes_bp
 from .financeiro import financeiro_bp
 from .upload import upload_bp
 from .equipe import equipe_bp
@@ -20,6 +21,7 @@ ALL_BLUEPRINTS = [
     glebas_bp,
     defensivos_bp,
     fertilizantes_bp,
+    aplicacoes_bp,
     financeiro_bp,
     upload_bp,
     equipe_bp,

@@ -63,13 +63,25 @@
   fazer) ficam para **etapa futura** — no MVP, todo usuário autenticado acessa os
   módulos. As **funções** de `equipe_membro` poderão refinar permissões depois.
 
-## Regras operacionais (a detalhar)
+## Regras operacionais
 
 - RN-12 — Uma **cultura** está associada a uma ou mais **glebas** (relação a ser
   formalizada no DER).
 - RN-13 — Lançamentos **financeiros** classificam-se em **receita** ou
   **despesa**.
 - RN-14 — Registros de **colheita** referenciam a cultura/gleba correspondente.
+- RN-15 — A **aplicação de insumo** é um **registro histórico operacional** do
+  que foi aplicado em uma associação cultura↔gleba. Ela **não** representa
+  recomendação agronômica.
+- RN-16 — Produtos com `status_sistema == "bloqueado_historico"` ou
+  `status_regulatorio == "bloqueado_historico"` **não** podem ser registrados
+  como aplicação válida.
+- RN-17 — A dose informada em uma aplicação é **histórica/informativa**; o
+  ConnectAgro apenas registra o valor digitado e **não** valida dose correta,
+  segura, ideal ou recomendada.
+- RN-18 — Cada usuário só acessa aplicações vinculadas à sua própria
+  propriedade. Tentativas de editar ou remover aplicação de outra propriedade
+  devem retornar **404**.
 
 ---
 
