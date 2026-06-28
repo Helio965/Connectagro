@@ -1,24 +1,38 @@
 # tests/
 
-Testes automatizados do **ConnectAgro**.
+Testes automatizados do **ConnectAgro** (pytest).
 
 ## Estado atual
 
-> ⚠️ **Ainda não há testes implementados.** Eles serão adicionados quando a
-> implementação do código começar — após a aprovação da
-> [arquitetura técnica](../docs/06-1-arquitetura-tecnica-mvp.md) (ver
-> [Roadmap, Etapa 6](../docs/07-roadmap-mvp.md)).
+Os testes usam a **Application Factory** (`create_app("testing")`) com banco
+**SQLite em memória** (ver `conftest.py`) e **não** dependem de banco `.db` real.
 
-## Abordagem planejada
+Arquivos existentes:
 
-- **Framework:** `pytest`.
-- App de teste criado via **Application Factory** (`create_app('testing')`) com
-  banco isolado (ex.: SQLite em memória).
-- Estrutura espelhando o package da aplicação (`src/app/`), por módulo/blueprint.
-- Cobertura priorizando regras de negócio e fluxos críticos
-  (autenticação, financeiro, catálogo/consulta, registro de aplicação de insumo).
+- **`conftest.py`** — coloca `src/` no path; fixtures `app` e `client`.
+- **`test_app_factory.py`** — criação da app no modo testing; `/health`; rota `/`.
+- **`test_placeholder_routes.py`** — as 14 rotas (incl. `/health` e placeholders)
+  respondem HTTP 200.
+- **`test_models_schema.py`** — registro das 15 tabelas no metadata; colunas
+  principais; `db.create_all()`; inserção mínima (usuário, propriedade, produto
+  base e técnico); unicidade de `usuario.email` e `produto_base.slug`;
+  `produto_preco`/`produto_imagem` existem mas vazias; seed não importado
+  automaticamente.
+- **`test_catalogo_seed.py`** — Flask-Migrate inicializado sem quebrar a app;
+  validação do seed (ids/slugs duplicados, FK inválida, preço/imagem não vazios);
+  importação idempotente (popula `produto_base`/`produto_tecnico`, não popula
+  preço/imagem, ignora itens bloqueados; listas salvas como JSON; campos
+  `uso_principal`/`tipo_liberacao`).
 
-## Convenções (planejadas)
+Para rodar: `pytest` (a partir da raiz do projeto).
+
+## Pendente para etapas futuras
+
+- Testes de **autenticação real**.
+- Testes de **CRUDs** dos módulos.
+- Testes de **regras de negócio** e **fluxos completos** do MVP.
+
+## Convenções
 
 - Arquivos de teste nomeados como `test_*.py`.
 - Cada módulo do MVP deve ter testes correspondentes antes de ser considerado

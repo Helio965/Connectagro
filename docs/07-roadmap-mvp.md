@@ -44,17 +44,27 @@
 
 > Adotado **Flask-SQLAlchemy** como ORM. O banco real **não** é versionado.
 
-## Etapa 4.1 — Modelos e banco SQLite ⏳
+## Etapa 4.1 — Modelos e banco SQLite ✅
 
 - [x] **Modelos SQLAlchemy de domínio** (`src/app/models/`, 15 tabelas).
 - [x] **Schema validável** por `db.create_all()` nos testes e via `flask init-db`.
-- [ ] Migrations (Flask-Migrate/Alembic).
-- [ ] Importação do seed técnico do catálogo.
-- [ ] Seed real / banco populado.
-- [ ] CRUDs dos módulos.
 
-> **Próximo passo oficial:** configurar **migrations** e **importar o seed
-> técnico** do catálogo — ainda sem popular além do catálogo e sem CRUD.
+> Adotado **Flask-SQLAlchemy** como ORM. O banco real **não** é versionado.
+
+## Etapa 4.2 — Migrations e importação do seed técnico ✅
+
+- [x] **Flask-Migrate/Alembic** configurado (`migrations/` versionada).
+- [x] **Migration inicial** das 15 tabelas (`flask db upgrade`).
+- [x] **Validação** do seed técnico (`flask validate-catalog-seed`).
+- [x] **Importação idempotente** do catálogo (`flask import-catalog-seed`):
+  popula `produto_base` + `produto_tecnico`.
+- [x] `produto_preco`/`produto_imagem` permanecem **vazios**; itens
+  bloqueados (Paraquate/Oxamil) **não** importados.
+- [ ] CRUDs dos módulos (Etapa 5).
+- [ ] Autenticação real (Etapa 5).
+
+> O seed é **importado sob demanda** via CLI; o banco populado **não** é
+> versionado. Preço e imagem seguem pendentes para o sistema final.
 
 ## Etapa 5 — Implementação dos módulos
 
@@ -76,12 +86,15 @@ Ordem sugerida (sujeita a ajuste):
 
 ## Etapa 6 — Testes e qualidade
 
-> Os **testes mínimos da fundação Flask já existem** em `tests/`
-> (`test_app_factory.py`, `test_placeholder_routes.py`).
+> Já existem em `tests/`: testes da fundação (`test_app_factory.py`,
+> `test_placeholder_routes.py`), de schema/modelos (`test_models_schema.py`) e de
+> validação/importação do seed (`test_catalogo_seed.py`).
 
-- [x] Testes mínimos da fundação (app factory, `/health`, rotas placeholders).
-- [ ] Expandir os testes existentes em `tests/` para cobrir modelos, banco,
-  autenticação, CRUDs, regras de negócio, seed técnico e fluxos principais.
+- [x] Testes da fundação (app factory, `/health`, rotas placeholders).
+- [x] Testes de schema/modelos (15 tabelas, unicidade, schema validável).
+- [x] Testes de validação e importação do seed técnico.
+- [ ] Expandir os testes para **autenticação, CRUDs, regras de negócio e fluxos
+  principais** do MVP.
 - [ ] Revisão e ajustes do MVP.
 
 ---

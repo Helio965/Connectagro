@@ -7,7 +7,7 @@ health check. Nenhum CRUD, banco populado, migration ou seed é executado aqui.
 from flask import Flask, jsonify, render_template
 
 from .config import get_config
-from .extensions import db
+from .extensions import db, migrate
 from .blueprints import register_blueprints
 from .commands import register_commands
 
@@ -26,6 +26,9 @@ def create_app(config_name=None):
 
     # Registra os modelos no metadata do SQLAlchemy (não cria tabelas aqui).
     from . import models  # noqa: F401
+
+    # Migrations (Flask-Migrate) — precisa dos modelos já registrados.
+    migrate.init_app(app, db)
 
     # Blueprints dos módulos do MVP
     register_blueprints(app)

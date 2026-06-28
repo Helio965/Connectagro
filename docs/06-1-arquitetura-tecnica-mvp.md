@@ -2,8 +2,8 @@
 
 ## Status do documento
 
-**Arquitetura técnica — v0.4 (modelos SQLAlchemy criados; próxima etapa:
-migrations + importação do seed).**
+**Arquitetura técnica — v0.5 (migrations + importação do seed técnico; próxima
+etapa: autenticação + CRUDs).**
 
 Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetura-do-sistema.md):
 
@@ -11,23 +11,24 @@ Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetur
 - O documento **06.1** (este) é o **guia técnico detalhado** da implementação do
   MVP em Flask.
 
-> **Estado atual:** a **fundação Flask** já foi criada (`src/run.py` + `src/app/`
-> com Application Factory, blueprints placeholders, layout base, `/health`) e os
-> **modelos SQLAlchemy de domínio** já estão implementados em `src/app/models/`
-> (15 tabelas; schema criável via `flask init-db`, sem popular). Há
+> **Estado atual:** estão prontos a **fundação Flask** (`src/run.py` + `src/app/`
+> com Application Factory, blueprints placeholders, layout base, `/health`), os
+> **modelos SQLAlchemy** (15 tabelas em `src/app/models/`), as **migrations**
+> (Flask-Migrate, pasta `migrations/` versionada) e a **importação do catálogo
+> técnico** via CLI (`validate-catalog-seed` / `import-catalog-seed`). Há
 > **dependências declaradas** em [`requirements.txt`](../requirements.txt) e
-> **testes** em `tests/` (incluindo schema dos modelos).
+> **testes** em `tests/` (fundação, schema dos modelos e seed).
 >
-> **Ainda NÃO existem:** banco populado, migrations, seed real importado, CRUDs
-> reais nem autenticação real. Preços e imagens do catálogo **continuam
-> pendentes** para o sistema final.
+> **Ainda NÃO existem:** CRUDs reais nem autenticação real. O **banco populado
+> não é versionado**; `produto_preco`/`produto_imagem` permanecem **vazios** e
+> preço/imagem seguem **pendentes** para o sistema final.
 >
 > Este guia deriva do [DER](./04-modelagem-banco-der.md), do
 > [dicionário de dados](./05-dicionario-de-dados.md) e dos
 > [requisitos](./02-requisitos-do-sistema.md).
 >
-> **Próximo passo oficial:** configurar **migrations** e **importar o seed
-> técnico** do catálogo, ainda sem CRUD nem autenticação real.
+> **Próximo passo oficial:** implementar **autenticação real** e os **CRUDs**
+> módulo a módulo (Etapa 5).
 
 ## Objetivo
 
@@ -76,25 +77,22 @@ Flask (rotas/blueprints)  ──►  Serviços (regras de negócio)  ──►  
 | Templates        | Jinja2 (incluído no Flask)                   | SSR                                            |
 | Banco de dados   | SQLite                                       | Arquivo local em `instance/`                   |
 | Acesso a dados   | **Flask-SQLAlchemy (ORM)** — **adotado**     | Decisão final (§6); `sqlite3` puro fica como alternativa histórica |
-| Migrations       | Flask-Migrate (Alembic) — **próxima etapa**  | Schema atual via `flask init-db`; migrations entram na fase seguinte |
+| Migrations       | Flask-Migrate (Alembic) — **adotado**        | Pasta `migrations/` versionada; aplicar com `flask db upgrade` |
 | Autenticação     | Sessão Flask + hash de senha (Werkzeug)      | `werkzeug.security`                            |
 | Formulários/CSRF | Flask-WTF — proposto                         | Proteção CSRF e validação                      |
 | Frontend         | HTML, CSS, JavaScript                        | Sem framework JS obrigatório no MVP            |
 | Mapa             | Biblioteca de mapa JS (ex.: Leaflet)         | Mapa real; começa simples                      |
 | Testes           | pytest                                       | Ver §11                                        |
 
-> **Flask**, **Flask-SQLAlchemy**, **python-dotenv** e **pytest** já estão
-> declarados no [`requirements.txt`](../requirements.txt) — ou seja, as
+> **Flask**, **Flask-SQLAlchemy**, **Flask-Migrate**, **python-dotenv** e
+> **pytest** já estão declarados no [`requirements.txt`](../requirements.txt) — as
 > dependências do **projeto** estão definidas. Isso **não** significa que o
 > ambiente local de quem clona o repositório já está instalado: é preciso rodar
 > `pip install -r requirements.txt` (ver "Como executar" no README).
 >
-> **Flask-Migrate** será adotado na **próxima fase** (migrations + importação do
-> seed) e **não** deve ser adicionado ao `requirements.txt` nesta correção de
-> alinhamento. **Flask-WTF** permanece proposto (usado quando houver formulários).
-> Continuam fora desta etapa: migrations, seed importado, banco populado, CRUD,
-> autenticação real, validação AGROFIT/MAPA automatizada e a validação diária de
-> preço (sistema final).
+> **Flask-WTF** permanece proposto (usado quando houver formulários, na etapa de
+> CRUD). Continuam fora desta etapa: CRUD, autenticação real, validação
+> AGROFIT/MAPA automatizada e a validação diária de preço (sistema final).
 
 ---
 
@@ -192,13 +190,15 @@ src/
     repositório — **não** adotado.
 - **Tipos:** seguir o dicionário — `TEXT` para datas (ISO 8601), `BOOLEAN` como
   `0/1`, listas como `TEXT`/JSON no MVP (normalização futura).
-- **Migrations:** Flask-Migrate/Alembic entram na **próxima fase**. Nesta etapa o
-  schema é criado por `flask init-db` (`db.create_all()`); **nenhuma migration é
-  criada** e o **banco real não é versionado**.
-- **Seeds:** já existe **seed técnico/documental** em
-  [data/seeds/](../data/seeds/README.md), mas ele **ainda não foi importado** no
-  banco. **Não** existe seed regulatório definitivo; **preço e imagem permanecem
-  pendentes**.
+- **Migrations:** **Flask-Migrate/Alembic adotado** — pasta `migrations/`
+  versionada com a migration inicial das 15 tabelas; aplique com
+  `flask db upgrade`. (`flask init-db`/`db.create_all()` permanece como atalho
+  local pontual.) O **banco real não é versionado**.
+- **Seeds:** o **seed técnico/documental** em
+  [data/seeds/](../data/seeds/README.md) é **importado sob demanda** via
+  `flask import-catalog-seed` (idempotente), populando apenas `produto_base` +
+  `produto_tecnico`. **Não** existe seed regulatório definitivo; `produto_preco`/
+  `produto_imagem` permanecem **vazios** e preço/imagem **pendentes**.
 
 ---
 
@@ -363,13 +363,19 @@ Fluxo geral esperado do uso do sistema:
 
 - **pytest** é a ferramenta oficial; app criado via `create_app('testing')` com
   banco isolado (SQLite em memória), conforme `tests/conftest.py`.
-- **Testes mínimos da fundação Flask já existem** em `tests/`
-  (`test_app_factory.py`, `test_placeholder_routes.py`): validam a criação da
-  aplicação, a rota `/health`, a rota inicial e as rotas placeholders dos módulos.
+- Testes já existentes em `tests/`:
+  - `test_app_factory.py` e `test_placeholder_routes.py` — fundação (criação da
+    app, `/health`, rota inicial e placeholders dos módulos);
+  - `test_models_schema.py` — schema/modelos (15 tabelas, colunas-chave,
+    `create_all`, unicidade de `usuario.email`/`produto_base.slug`, preço/imagem
+    vazios, seed não importado automaticamente);
+  - `test_catalogo_seed.py` — Flask-Migrate inicializado, validação do seed
+    (ids/slugs duplicados, FK, preço/imagem não vazios) e importação idempotente
+    (popula base/técnico; não popula preço/imagem; ignora itens bloqueados).
 - Organização em `tests/` (na raiz) espelhando `src/app/` — ver
   [tests/README.md](../tests/README.md).
-- **Para etapas futuras:** testes de regras de negócio, banco, autenticação,
-  CRUD e seed.
+- **Para etapas futuras:** testes de autenticação, CRUD, regras de negócio e
+  fluxos principais.
 - Convenção: arquivos `test_*.py`.
 
 ---
@@ -393,11 +399,11 @@ Fluxo geral esperado do uso do sistema:
 
 ---
 
-## 13. Checklist de fechamento da Etapa 4.1 e prontidão para a Etapa 4.2
+## 13. Checklist de fechamento das Etapas 4.1/4.2 e prontidão para a Etapa 5
 
 > Marcar apenas o que estiver **realmente** concluído.
 
-**Concluído (Etapa 4.1 e anteriores):**
+**Concluído (Etapas 4.1, 4.2 e anteriores):**
 
 - [x] Escopo consolidado
 - [x] Requisitos revisados
@@ -409,19 +415,18 @@ Fluxo geral esperado do uso do sistema:
 - [x] Decisão final sobre ORM: **Flask-SQLAlchemy**
 - [x] Fundação Flask criada (`src/run.py` + `src/app/`)
 - [x] Blueprints placeholders criados
-- [x] Testes mínimos criados
 - [x] Modelos SQLAlchemy de domínio criados (15 tabelas em `src/app/models/`)
-- [x] Schema validável por `db.create_all()`
-- [x] Comando `flask init-db` criado
+- [x] Schema validável por `db.create_all()` e comando `flask init-db`
+- [x] Flask-Migrate/Alembic configurado e migration inicial versionada
+- [x] Validação do seed técnico (`flask validate-catalog-seed`)
+- [x] Importação idempotente do catálogo (`flask import-catalog-seed`)
+- [x] Testes de fundação, schema e seed
 
-**Pendente (Etapa 4.2 — migrations + importação do seed):**
+**Pendente (Etapa 5):**
 
-- [ ] Configurar Flask-Migrate/Alembic
-- [ ] Criar migrations versionadas
-- [ ] Implementar importação do seed técnico do catálogo
-- [ ] Popular o banco apenas com o catálogo técnico permitido
 - [ ] Criar autenticação real
 - [ ] Criar CRUDs dos módulos
+- [ ] Testes de autenticação, CRUD, regras de negócio e fluxos
 
 ---
 

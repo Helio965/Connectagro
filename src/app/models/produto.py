@@ -51,7 +51,9 @@ class ProdutoTecnico(db.Model):
     nutrientes_principais = db.Column(db.Text, nullable=True)
     culturas_comuns = db.Column(db.Text, nullable=True)
     alvos_controle = db.Column(db.Text, nullable=True)
+    uso_principal = db.Column(db.String(120), nullable=True)
     modo_aplicacao = db.Column(db.String(120), nullable=True)
+    tipo_liberacao = db.Column(db.String(40), nullable=True)
     fonte_tecnica = db.Column(db.String(255), nullable=True)
     observacoes = db.Column(db.Text, nullable=True)
 
