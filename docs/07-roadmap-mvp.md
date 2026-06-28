@@ -166,6 +166,21 @@
 > Sem migration nova, sem models novos, sem CRUD novo, sem gráficos externos,
 > sem mapa, sem IA, sem relatórios/PDF e sem recomendação agronômica.
 
+## Etapa 5.9 — Mapa real simplificado ✅
+
+- [x] Mapa em `/mapa/`, protegido por login e escopado pela propriedade atual.
+- [x] Endpoint JSON `/mapa/dados` somente leitura, sem dados de usuário/e-mail.
+- [x] Separação entre glebas com coordenadas válidas e glebas sem coordenadas válidas.
+- [x] Validação de latitude/longitude em faixa aceitável, sem alterar dados gravados.
+- [x] Renderização de marcadores com Leaflet via CDN e centro padrão no Brasil.
+- [x] Suporte simples a `poligono_geojson` válido, ignorando conteúdo inválido.
+- [x] Estados vazios para propriedade sem glebas e sem coordenadas válidas.
+- [x] Testes (`tests/test_mapa_real.py`).
+
+> Sem migration nova, sem models novos, sem CRUD de coordenadas, sem desenho de
+> polígonos, sem medição de área, sem GPS em tempo real, sem PostGIS, sem camadas
+> avançadas e sem dependência Python/NPM nova.
+
 ## Etapa 5 — Implementação dos módulos
 
 Ordem sugerida (sujeita a ajuste):
@@ -181,7 +196,7 @@ Ordem sugerida (sujeita a ajuste):
 - [x] Upload (ver Etapa 5.7)
 - [x] Equipe (CRUD — ver Etapa 5.3)
 - [x] Colheita (CRUD — ver Etapa 5.4)
-- [ ] Mapa real
+- [x] Mapa real (ver Etapa 5.9)
 - [ ] IA simulada
 - [ ] Relatórios
 
@@ -192,7 +207,7 @@ Ordem sugerida (sujeita a ajuste):
 - [x] Testes de validação e importação do seed técnico.
 - [x] Testes de autenticação, CRUDs já entregues, Upload e consulta do catálogo.
 - [x] Dashboard.
-- [ ] Mapa real
+- [x] Mapa real.
 - [ ] IA simulada
 - [ ] Relatórios
 - [ ] Permissões finas por perfil/módulo
