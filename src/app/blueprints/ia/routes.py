@@ -11,6 +11,7 @@ from ...services.ia_simulada_service import (
 )
 from ...utils.auth import login_required, usuario_atual
 from ...utils.contexto import propriedade_atual
+from ...utils.permissions import require_permission
 
 MIN_PERGUNTA = 2
 MAX_PERGUNTA = 1000
@@ -30,6 +31,7 @@ def _render_ia(propriedade, usuario, resposta_atual=None, pergunta_atual="", sta
 
 @ia_bp.route("/", methods=["GET", "POST"])
 @login_required
+@require_permission("ia.view")
 def index():
     propriedade = propriedade_atual()
     usuario = usuario_atual()
