@@ -60,8 +60,6 @@
   popula `produto_base` + `produto_tecnico`.
 - [x] `produto_preco`/`produto_imagem` permanecem **vazios**; itens
   bloqueados (Paraquate/Oxamil) **não** importados.
-- [x] `produto_preco`/`produto_imagem` permanecem **vazios**; itens
-  bloqueados (Paraquate/Oxamil) **não** importados.
 
 > O seed é **importado sob demanda** via CLI; o banco populado **não** é
 > versionado. Preço e imagem seguem pendentes para o sistema final.
@@ -127,8 +125,27 @@
   status regulatório **sem** validação oficial automática.
 - [x] Testes (`tests/test_catalogo_consulta.py`).
 
-> **Somente leitura:** sem cadastro/edição/remoção de produto (fica para etapa
-> futura). `produto_preco`/`produto_imagem` seguem **vazios**; sem migration nova.
+> **Somente leitura:** sem cadastro/edição/remoção de produto. `produto_preco`/
+> `produto_imagem` seguem **vazios**; sem migration nova.
+
+## Etapa 5.6 — Registro de Aplicação de Insumo ✅
+
+- [x] **CRUD de Aplicações de Insumo** (criar/listar/editar/remover), protegido
+  por login e escopado por propriedade.
+- [x] Cada aplicação vincula uma associação **cultura↔gleba** da propriedade
+  atual a um `ProdutoBase` do catálogo.
+- [x] Produtos com `status_sistema == "bloqueado_historico"` ou
+  `status_regulatorio == "bloqueado_historico"` não aparecem no select e não
+  podem ser registrados.
+- [x] Validações: cultura↔gleba obrigatória/válida/da propriedade, produto
+  obrigatório/válido/não bloqueado, data obrigatória e dose opcional numérica
+  maior que zero com vírgula ou ponto.
+- [x] Avisos: registro histórico operacional, sem recomendação agronômica, sem
+  validação técnica de dose, sem venda/carrinho/cotação.
+- [x] Testes (`tests/test_aplicacoes_crud.py`).
+
+> Sem migration nova: o modelo/tabela `AplicacaoInsumo` já existia. Sem CRUD de
+> produto, sem preço, sem imagem e sem recomendação agronômica.
 
 ## Etapa 5 — Implementação dos módulos
 
@@ -140,6 +157,7 @@ Ordem sugerida (sujeita a ajuste):
 - [x] Glebas (CRUD — ver Etapa 5.2)
 - [x] Defensivos (consulta — ver Etapa 5.5)
 - [x] Fertilizantes (consulta — ver Etapa 5.5)
+- [x] Aplicações de Insumo (CRUD — ver Etapa 5.6)
 - [x] Financeiro (CRUD — ver Etapa 5.3)
 - [ ] Upload
 - [x] Equipe (CRUD — ver Etapa 5.3)
@@ -154,11 +172,10 @@ Ordem sugerida (sujeita a ajuste):
 > `test_placeholder_routes.py`), de schema/modelos (`test_models_schema.py`) e de
 > validação/importação do seed (`test_catalogo_seed.py`).
 
-- [x] Testes da fundação (app factory, `/health`, rotas placeholders).
+- [x] Testes da fundação (app factory, `/health`, rotas protegidas).
 - [x] Testes de schema/modelos (15 tabelas, unicidade, schema validável).
 - [x] Testes de validação e importação do seed técnico.
-- [ ] Expandir os testes para **autenticação, CRUDs, regras de negócio e fluxos
-  principais** do MVP.
+- [x] Testes de autenticação, CRUDs já entregues e consulta do catálogo.
 - [ ] Revisão e ajustes do MVP.
 
 ---
