@@ -25,6 +25,11 @@ Arquivos existentes:
 - **`test_auth.py`** — autenticação: `/auth/login`, login válido, senha errada,
   usuário inativo, logout, rotas protegidas, `/health` público, sessão sem senha,
   senha armazenada como hash e `seed-users` idempotente.
+- **`test_dashboard_operacional.py`** — Dashboard Operacional: exige login;
+  responde 200 com login; mostra propriedade atual; calcula totais de glebas,
+  culturas, financeiro, equipe, colheita, aplicações e uploads; não vaza dados de
+  outra propriedade; mostra totais globais do catálogo; exibe estados vazios;
+  contém atalhos principais; e não contém termos de venda.
 - **`test_glebas_culturas_crud.py`** — CRUD de Glebas e Culturas, associação
   cultura↔gleba, escopo por propriedade e exigência de login.
 - **`test_equipe_financeiro_crud.py`** — CRUD de Equipe e Financeiro, validações,
@@ -59,8 +64,8 @@ Para rodar: `pytest` (a partir da raiz do projeto).
 
 ## Pendente para etapas futuras
 
-- Testes dos módulos ainda pendentes (Dashboard, Mapa real, IA simulada e
-  Relatórios) quando forem implementados.
+- Testes dos módulos ainda pendentes (Mapa real, IA simulada e Relatórios) quando
+  forem implementados.
 - Testes de **permissões finas** por perfil/módulo.
 - Testes de **CSRF/Flask-WTF**, quando essa proteção entrar no escopo.
 - Testes de **fluxos completos** do MVP.
