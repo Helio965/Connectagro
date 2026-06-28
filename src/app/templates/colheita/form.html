@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}{{ "Editar" if colheita else "Nova" }} colheita — ConnectAgro{% endblock %}
+
+{% block content %}
+<section class="card">
+  <h1>{{ "Editar colheita" if colheita else "Nova colheita" }}</h1>
+
+  {% if not opcoes %}
+  <p class="placeholder-tag">
+    🚧 Você ainda não tem associações <strong>cultura↔gleba</strong>. Cadastre uma
+    <a href="{{ url_for('glebas.nova') }}">gleba</a> e uma
+    <a href="{{ url_for('culturas.nova') }}">cultura</a>, associando a cultura à
+    gleba, antes de registrar uma colheita.
+  </p>
+  {% else %}
+  <form method="post" class="form-vertical"
+        action="{{ url_for('colheita.editar', colheita_id=colheita.id) if colheita else url_for('colheita.nova') }}">
+    <label for="cultura_gleba_id">Cultura ↔ Gleba *</label>
+    <select id="cultura_gleba_id" name="cultura_gleba_id" required>
+      <option value="">Selecione…</option>
+      {% for cg_id, rotulo in opcoes %}
+      <option value="{{ cg_id }}"
+        {{ "selected" if (form.cultura_gleba_id|string == cg_id|string) or (selecionado == cg_id) else "" }}>
+        {{ rotulo }}
+      </option>
+      {% endfor %}
+    </select>
+
+    <label for="data_colheita">Data da colheita *</label>
+    <input type="date" id="data_colheita" name="data_colheita" required
+           value="{{ form.data_colheita or '' }}">
+
+    <label for="quantidade">Quantidade</label>
+    <input type="text" id="quantidade" name="quantidade"
+           value="{{ form.quantidade if form.quantidade is not none else '' }}">
+
+    <label for="unidade">Unidade</label>
+    <input type="text" id="unidade" name="unidade" placeholder="kg, sacas, ton"
+           value="{{ form.unidade or '' }}">
+
+    <label for="qualidade">Qualidade</label>
+    <input type="text" id="qualidade" name="qualidade" value="{{ form.qualidade or '' }}">
+
+    <label for="observacao">Observação</label>
+    <textarea id="observacao" name="observacao" rows="2">{{ form.observacao or '' }}</textarea>
+
+    <div class="form-acoes">
+      <button type="submit" class="btn-acao">Salvar</button>
+      <a href="{{ url_for('colheita.index') }}">Cancelar</a>
+    </div>
+  </form>
+  {% endif %}
+</section>
+{% endblock %}
