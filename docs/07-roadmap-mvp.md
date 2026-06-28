@@ -90,6 +90,19 @@
 > Cada usuário opera sobre sua propriedade; um usuário não acessa glebas/culturas
 > de outro (404). Sem permissões finas por perfil ainda.
 
+## Etapa 5.3 — CRUD de Equipe e Financeiro ✅
+
+- [x] **CRUD de Equipe** (criar/listar/editar/remover); `ativo`, e-mail
+  normalizado; escopo por propriedade.
+- [x] **CRUD de Financeiro** (criar/listar/editar/remover) com validação de
+  `tipo` (receita/despesa), `valor > 0` e `data` obrigatória.
+- [x] Listagem financeira com **totais**: receitas, despesas e saldo.
+- [x] Testes de CRUD, validações, totais e escopo
+  (`tests/test_equipe_financeiro_crud.py`).
+
+> Sem migration nova (modelos já existiam). Sem permissões finas por perfil; sem
+> CSRF dedicado (pendência documentada).
+
 ## Etapa 5 — Implementação dos módulos
 
 Ordem sugerida (sujeita a ajuste):
@@ -100,9 +113,9 @@ Ordem sugerida (sujeita a ajuste):
 - [x] Glebas (CRUD — ver Etapa 5.2)
 - [ ] Defensivos
 - [ ] Fertilizantes
-- [ ] Financeiro
+- [x] Financeiro (CRUD — ver Etapa 5.3)
 - [ ] Upload
-- [ ] Equipe
+- [x] Equipe (CRUD — ver Etapa 5.3)
 - [ ] Colheita
 - [ ] Mapa real
 - [ ] IA simulada

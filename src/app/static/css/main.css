@@ -178,3 +178,21 @@ body {
 .checkbox-grupo { display: flex; flex-wrap: wrap; gap: .5rem 1rem; padding: .3rem 0; }
 .check-inline { font-weight: 400; display: flex; align-items: center; gap: .3rem; }
 .hint { color: #666; font-size: .9rem; }
+
+/* Totais do financeiro */
+.fin-totais { display: flex; flex-wrap: wrap; gap: 1rem; margin: 1rem 0; }
+.fin-card {
+  flex: 1 1 140px;
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  padding: .75rem 1rem;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+}
+.fin-card strong { font-size: 1.15rem; }
+.fin-label { font-size: .8rem; color: #666; }
+.fin-receita { border-left: 4px solid #2e7d32; }
+.fin-despesa { border-left: 4px solid #b71c1c; }
+.fin-saldo   { border-left: 4px solid #1565c0; }

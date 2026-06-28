@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}{{ "Editar" if lancamento else "Novo" }} lançamento — ConnectAgro{% endblock %}
+
+{% block content %}
+<section class="card">
+  <h1>{{ "Editar lançamento" if lancamento else "Novo lançamento" }}</h1>
+
+  <form method="post" class="form-vertical"
+        action="{{ url_for('financeiro.editar', lancamento_id=lancamento.id) if lancamento else url_for('financeiro.novo') }}">
+    <label for="tipo">Tipo *</label>
+    <select id="tipo" name="tipo" required>
+      {% for t in tipos %}
+      <option value="{{ t }}" {{ "selected" if form.tipo == t else "" }}>{{ t }}</option>
+      {% endfor %}
+    </select>
+
+    <label for="categoria">Categoria</label>
+    <input type="text" id="categoria" name="categoria" value="{{ form.categoria or '' }}">
+
+    <label for="descricao">Descrição</label>
+    <textarea id="descricao" name="descricao" rows="2">{{ form.descricao or '' }}</textarea>
+
+    <label for="valor">Valor (R$) *</label>
+    <input type="text" id="valor" name="valor" required
+           value="{{ form.valor if form.valor is not none else '' }}">
+
+    <label for="data">Data *</label>
+    <input type="date" id="data" name="data" required value="{{ form.data or '' }}">
+
+    <div class="form-acoes">
+      <button type="submit" class="btn-acao">Salvar</button>
+      <a href="{{ url_for('financeiro.index') }}">Cancelar</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

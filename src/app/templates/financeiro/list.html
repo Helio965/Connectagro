@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Financeiro — ConnectAgro{% endblock %}
+
+{% block content %}
+<section class="card">
+  <div class="card-head">
+    <h1>Financeiro</h1>
+    <a class="btn-acao" href="{{ url_for('financeiro.novo') }}">+ Novo lançamento</a>
+  </div>
+
+  <div class="fin-totais">
+    <div class="fin-card fin-receita">
+      <span class="fin-label">Receitas</span>
+      <strong>R$ {{ "%.2f"|format(receitas) }}</strong>
+    </div>
+    <div class="fin-card fin-despesa">
+      <span class="fin-label">Despesas</span>
+      <strong>R$ {{ "%.2f"|format(despesas) }}</strong>
+    </div>
+    <div class="fin-card fin-saldo">
+      <span class="fin-label">Saldo</span>
+      <strong>R$ {{ "%.2f"|format(saldo) }}</strong>
+    </div>
+  </div>
+
+  {% if lancamentos %}
+  <table class="tabela">
+    <thead>
+      <tr>
+        <th>Data</th><th>Tipo</th><th>Categoria</th><th>Descrição</th><th>Valor (R$)</th><th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for l in lancamentos %}
+      <tr>
+        <td>{{ l.data }}</td>
+        <td>{{ l.tipo }}</td>
+        <td>{{ l.categoria or "—" }}</td>
+        <td>{{ l.descricao or "—" }}</td>
+        <td>{{ "%.2f"|format(l.valor) }}</td>
+        <td class="acoes">
+          <a href="{{ url_for('financeiro.editar', lancamento_id=l.id) }}">Editar</a>
+          <form method="post" action="{{ url_for('financeiro.remover', lancamento_id=l.id) }}"
+                onsubmit="return confirm('Remover este lançamento?');">
+            <button type="submit" class="btn-link-danger">Remover</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>Nenhum lançamento ainda. <a href="{{ url_for('financeiro.novo') }}">Registrar o primeiro</a>.</p>
+  {% endif %}
+</section>
+{% endblock %}
