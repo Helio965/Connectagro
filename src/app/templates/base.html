@@ -23,19 +23,19 @@
 
   {% if is_authenticated %}
   <nav class="menu">
-    <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
-    <a href="{{ url_for('culturas.index') }}">Culturas</a>
-    <a href="{{ url_for('glebas.index') }}">Glebas</a>
-    <a href="{{ url_for('defensivos.index') }}">Defensivos</a>
-    <a href="{{ url_for('fertilizantes.index') }}">Fertilizantes</a>
-    <a href="{{ url_for('aplicacoes.index') }}">Aplicações</a>
-    <a href="{{ url_for('financeiro.index') }}">Financeiro</a>
-    <a href="{{ url_for('upload.index') }}">Upload</a>
-    <a href="{{ url_for('equipe.index') }}">Equipe</a>
-    <a href="{{ url_for('colheita.index') }}">Colheita</a>
-    <a href="{{ url_for('mapa.index') }}">Mapa</a>
-    <a href="{{ url_for('ia.index') }}">IA</a>
-    <a href="{{ url_for('relatorios.index') }}">Relatórios</a>
+    {% if can("dashboard.view") %}<a href="{{ url_for('dashboard.index') }}">Dashboard</a>{% endif %}
+    {% if can("culturas.view") %}<a href="{{ url_for('culturas.index') }}">Culturas</a>{% endif %}
+    {% if can("glebas.view") %}<a href="{{ url_for('glebas.index') }}">Glebas</a>{% endif %}
+    {% if can("catalogo.view") %}<a href="{{ url_for('defensivos.index') }}">Defensivos</a>{% endif %}
+    {% if can("catalogo.view") %}<a href="{{ url_for('fertilizantes.index') }}">Fertilizantes</a>{% endif %}
+    {% if can("aplicacoes.view") %}<a href="{{ url_for('aplicacoes.index') }}">Aplicações</a>{% endif %}
+    {% if can("financeiro.view") %}<a href="{{ url_for('financeiro.index') }}">Financeiro</a>{% endif %}
+    {% if can("upload.view") %}<a href="{{ url_for('upload.index') }}">Upload</a>{% endif %}
+    {% if can("equipe.view") %}<a href="{{ url_for('equipe.index') }}">Equipe</a>{% endif %}
+    {% if can("colheita.view") %}<a href="{{ url_for('colheita.index') }}">Colheita</a>{% endif %}
+    {% if can("mapa.view") %}<a href="{{ url_for('mapa.index') }}">Mapa</a>{% endif %}
+    {% if can("ia.view") %}<a href="{{ url_for('ia.index') }}">IA</a>{% endif %}
+    {% if can("relatorios.view") %}<a href="{{ url_for('relatorios.index') }}">Relatórios</a>{% endif %}
   </nav>
   {% endif %}
 
