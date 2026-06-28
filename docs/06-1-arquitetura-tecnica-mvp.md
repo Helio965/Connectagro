@@ -2,7 +2,7 @@
 
 ## Status do documento
 
-**Arquitetura técnica — v0.12 (CRUDs + catálogo + aplicação de insumo + upload).**
+**Arquitetura técnica — v0.12.1 (CRUDs + catálogo + aplicação de insumo + upload seguro).**
 
 Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetura-do-sistema.md):
 
@@ -17,9 +17,11 @@ Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetur
 > Fertilizantes. `ProdutoPreco`/`ProdutoImagem` seguem vazios no MVP.
 >
 > **Upload de Arquivos:** o módulo usa `UPLOAD_FOLDER`, salva arquivos localmente
-> em subpastas por propriedade, aplica `secure_filename`, gera nome único com UUID
-> e grava em `upload_arquivo` apenas metadados e caminho relativo. Arquivos reais
-> enviados por usuários ficam fora do Git.
+> fora da pasta pública `static` (`instance/uploads` por padrão), em subpastas por
+> propriedade, aplica `secure_filename`, gera nome único com UUID e grava em
+> `upload_arquivo` apenas metadados e caminho relativo. Arquivos reais enviados
+> por usuários ficam fora do Git e não devem ser servidos diretamente por
+> `/static/uploads`.
 >
 > **Pendente:** Dashboard, Mapa real, IA simulada, Relatórios, permissões finas e
 > CSRF/Flask-WTF.
@@ -72,7 +74,7 @@ Flask (rotas/blueprints)  ──►  Serviços/helpers  ──►  Modelos/Acess
 | Banco de dados   | SQLite                                       | Arquivo local em `instance/`                   |
 | Acesso a dados   | Flask-SQLAlchemy                             | ORM adotado                                    |
 | Migrations       | Flask-Migrate (Alembic)                      | Pasta `migrations/` versionada                 |
-| Upload local     | Werkzeug `secure_filename` + Flask `send_from_directory` | Arquivos fora do Git           |
+| Upload local     | Werkzeug `secure_filename` + Flask `send_from_directory` | Arquivos fora de `static` e do Git |
 | Autenticação     | Sessão Flask + hash de senha (Werkzeug)      | Helpers em `utils/auth.py`                     |
 | Formulários/CSRF | Sem Flask-WTF nesta etapa                    | CSRF dedicado permanece pendente               |
 | Frontend         | HTML, CSS, JavaScript                        | Sem framework JS obrigatório no MVP            |
@@ -100,12 +102,16 @@ src/
     ├── services/                # regras compartilhadas quando necessário
     ├── utils/                   # auth.py, contexto.py, catalogo.py
     ├── templates/               # base.html, módulos, erros
-    └── static/                  # css/, js/, uploads/ (conteúdo ignorado)
+    └── static/                  # css/, js/ (arquivos públicos)
+
+instance/
+├── connectagro.db               # banco local quando usado em desenvolvimento
+└── uploads/                     # arquivos enviados no MVP, fora de static
 ```
 
-> O banco SQLite fica em `instance/` e arquivos `.db` não são versionados. O
-> conteúdo de `src/app/static/uploads/` também é ignorado pelo Git, preservando
-> apenas `.gitkeep` quando existir.
+> O banco SQLite e os uploads locais padrão ficam em `instance/`, pasta ignorada
+> pelo Git. Uploads de usuário não devem ficar em `src/app/static`, porque esse
+> diretório é público no Flask e pode ser exposto por `/static/...`.
 
 ---
 
@@ -156,7 +162,7 @@ src/
 ### Upload local
 
 - `UPLOAD_FOLDER` define a pasta base de armazenamento local. O padrão é
-  `src/app/static/uploads`.
+  `instance/uploads`, fora de `src/app/static`.
 - `MAX_CONTENT_LENGTH` define o limite máximo aceito pela aplicação.
 - Cada propriedade usa subpasta própria: `UPLOAD_FOLDER/propriedade_<id>/`.
 - O arquivo salvo usa `secure_filename` e UUID, por exemplo
@@ -165,6 +171,8 @@ src/
   `propriedade_1/uuid_nome.pdf`, nunca caminho absoluto.
 - Download usa busca por id + validação de `propriedade_id` + resolução dentro de
   `UPLOAD_FOLDER`, sem aceitar caminho vindo diretamente da URL.
+- Os arquivos não devem ficar acessíveis por `/static/uploads`; o acesso correto é
+  sempre a rota protegida `/upload/<id>/download`.
 - Remoção apaga o registro e tenta apagar o arquivo físico; se o arquivo físico
   já não existir, o registro ainda é removido com aviso simples.
 - Extensões permitidas: `pdf`, `png`, `jpg`, `jpeg`, `csv`, `xlsx`, `txt`, `docx`.
@@ -248,7 +256,8 @@ src/
 ### Upload ✅
 - CRUD operacional de arquivos: listagem, envio, download e remoção.
 - Escopo por propriedade em todas as operações.
-- Arquivos locais organizados em subpasta por propriedade.
+- Arquivos locais organizados em subpasta por propriedade, fora de `static`.
+- Download passa por rota protegida e valida a propriedade antes de servir o arquivo.
 - Metadados em `upload_arquivo`; arquivo físico fora do Git.
 - `secure_filename`, UUID e allowlist de extensões.
 - Sem OCR, IA, APIs externas, antivírus real, armazenamento em nuvem ou extração automática.
@@ -283,6 +292,8 @@ src/
 - Sem permissões finas por perfil no MVP atual.
 - Sem Flask-WTF/CSRF dedicado nesta etapa.
 - Templates Jinja com escaping padrão.
+- Uploads ficam fora da pasta pública `static` por padrão; arquivos devem ser
+  acessados apenas pelas rotas protegidas do módulo Upload.
 - Banco real, `.env`, uploads de usuário e arquivos sensíveis não são versionados.
 
 ---
@@ -296,8 +307,9 @@ src/
   do catálogo, Aplicações de Insumo e Upload.
 - `tests/test_upload_crud.py` usa pasta temporária para uploads e cobre login,
   envio válido, arquivo físico, nome seguro, extensão proibida/permitida, caminho
-  malicioso, listagem, download, remoção, escopo por propriedade e garantia de
-  que `ProdutoPreco`/`ProdutoImagem` não são criados.
+  malicioso, listagem, download, remoção, escopo por propriedade, garantia de
+  pasta padrão fora de `static` e garantia de que `ProdutoPreco`/`ProdutoImagem`
+  não são criados.
 
 ---
 
@@ -318,6 +330,7 @@ src/
 - Priorizar código simples, modular e testável.
 - Usar Application Factory e Blueprints.
 - Nunca versionar `.env`, banco SQLite real, uploads de usuário ou arquivos sensíveis.
+- Não armazenar uploads de usuário dentro da pasta pública `src/app/static`.
 
 ---
 

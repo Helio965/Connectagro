@@ -90,6 +90,7 @@ em etapas posteriores, evoluirá para a versão completa.
 ├── data/                  # Dados de apoio do projeto
 │   └── seeds/             # Seed técnico do catálogo (JSON/CSV) — importável via CLI
 ├── migrations/            # Flask-Migrate/Alembic (migration inicial das 15 tabelas)
+├── instance/              # Banco SQLite e uploads locais em execução — não versionado
 ├── src/                   # Código-fonte da aplicação Flask
 │   ├── run.py             # ponto de entrada
 │   └── app/               # package Flask (Application Factory)
@@ -102,7 +103,7 @@ em etapas posteriores, evoluirá para a versão completa.
 │       ├── services/      # regras de negócio (ex.: catalogo_seed.py)
 │       ├── utils/         # utilitários (auth.py, contexto.py)
 │       ├── templates/     # HTML (Jinja2)
-│       └── static/        # css/, js/, uploads/ (conteúdo ignorado no Git)
+│       └── static/        # css/, js/ (arquivos públicos)
 ├── tests/                 # testes (pytest)
 ├── requirements.txt       # dependências
 └── .env.example           # exemplo de variáveis de ambiente
@@ -149,9 +150,13 @@ arquivo de banco gerado **não** é versionado.
 ### Upload de arquivos
 
 O módulo Upload armazena arquivos localmente no MVP usando
-`UPLOAD_FOLDER` (`src/app/static/uploads` por padrão), em subpastas por
-propriedade (`propriedade_<id>/`). O banco guarda apenas metadados e caminho
-relativo seguro; arquivos reais enviados por usuários são ignorados pelo Git.
+`UPLOAD_FOLDER` (`instance/uploads` por padrão), em subpastas por propriedade
+(`propriedade_<id>/`). Essa pasta padrão fica fora de `src/app/static`, então os
+arquivos enviados não são servidos diretamente por `/static/uploads`; o acesso
+continua passando pela rota protegida de download, com validação da propriedade.
+
+O banco guarda apenas metadados e caminho relativo seguro; arquivos reais
+enviados por usuários são ignorados pelo Git.
 
 Extensões permitidas no MVP: `pdf`, `png`, `jpg`, `jpeg`, `csv`, `xlsx`, `txt` e
 `docx`. Executáveis, scripts, compactados e HTML/PHP/Python são bloqueados pela

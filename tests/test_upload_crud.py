@@ -53,6 +53,15 @@ def _primeiro_upload(app_db):
         return UploadArquivo.query.first()
 
 
+def test_upload_folder_padrao_fica_fora_de_static_publico():
+    from app.config import BaseConfig
+
+    pasta_padrao = os.path.normpath(BaseConfig.UPLOAD_FOLDER).replace("\\", "/")
+    assert pasta_padrao == "instance/uploads"
+    assert pasta_padrao != "src/app/static/uploads"
+    assert "/static/uploads" not in f"/{pasta_padrao}"
+
+
 def test_index_exige_login(app_db):
     resp = app_db.test_client().get("/upload/")
     assert resp.status_code == 302

@@ -73,16 +73,12 @@ credentials.json
 
 # ---------------------------------------------------------------------------
 # Uploads / arquivos enviados em tempo de execução
-# (manter a pasta versionada com .gitkeep, ignorar o conteúdo)
+# O padrão do MVP é instance/uploads, já coberto por instance/ acima.
 # ---------------------------------------------------------------------------
 /uploads/
 src/uploads/
-src/static/uploads/
+src/app/static/uploads/
 media/
-# Manter a pasta de uploads da app versionada, ignorando apenas seu conteúdo:
-!src/app/static/uploads/
-src/app/static/uploads/*
-!src/app/static/uploads/.gitkeep
 !**/.gitkeep
 
 # ---------------------------------------------------------------------------

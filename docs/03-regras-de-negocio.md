@@ -90,8 +90,9 @@
 - RN-21 — Executáveis, scripts, compactados e arquivos web executáveis devem ser
   bloqueados no Upload. Exemplos proibidos: `exe`, `bat`, `cmd`, `sh`, `ps1`,
   `js`, `html`, `php`, `py`, `zip`, `rar`, `7z`, `dll`, `msi` e `jar`.
-- RN-22 — Arquivos enviados são armazenados localmente no MVP, dentro da pasta
-  configurada de uploads, com nome seguro e sem versionar o conteúdo no Git.
+- RN-22 — Arquivos enviados são armazenados localmente no MVP, fora da pasta
+  `static` pública, com nome seguro, sem versionar o conteúdo no Git e com acesso
+  apenas pelas rotas protegidas do módulo Upload.
 - RN-23 — O Upload não faz OCR, IA, leitura automática, classificação,
   validação documental avançada ou extração automática de conteúdo nesta etapa.
 

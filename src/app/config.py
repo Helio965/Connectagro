@@ -12,7 +12,7 @@ class BaseConfig:
     SECRET_KEY = os.environ.get("SECRET_KEY", "change-this-in-production")
     SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", "sqlite:///connectagro.db")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    UPLOAD_FOLDER = os.environ.get("UPLOAD_FOLDER", "src/app/static/uploads")
+    UPLOAD_FOLDER = os.environ.get("UPLOAD_FOLDER", "instance/uploads")
     MAX_CONTENT_LENGTH = int(os.environ.get("MAX_CONTENT_LENGTH", 16 * 1024 * 1024))
     APP_NAME = "ConnectAgro"
 
