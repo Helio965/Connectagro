@@ -12,6 +12,7 @@ from ...models import ColheitaRegistro, Cultura, CulturaGleba, Gleba
 from ...models._helpers import iso_now
 from ...utils.auth import login_required
 from ...utils.contexto import parse_float, propriedade_atual, vazio_para_none
+from ...utils.permissions import require_permission
 from . import colheita_bp
 
 
@@ -77,6 +78,7 @@ def _ler_e_validar_form(propriedade):
 
 @colheita_bp.route("/")
 @login_required
+@require_permission("colheita.view")
 def index():
     propriedade = propriedade_atual()
     ids_validos = _ids_cultura_gleba_validos(propriedade)
@@ -98,6 +100,7 @@ def index():
 
 @colheita_bp.route("/nova", methods=["GET", "POST"])
 @login_required
+@require_permission("colheita.create")
 def nova():
     propriedade = propriedade_atual()
     opcoes = _opcoes_cultura_gleba(propriedade)
@@ -118,6 +121,7 @@ def nova():
 
 @colheita_bp.route("/<int:colheita_id>/editar", methods=["GET", "POST"])
 @login_required
+@require_permission("colheita.edit")
 def editar(colheita_id):
     propriedade = propriedade_atual()
     colheita = _colheita_da_propriedade_ou_404(colheita_id, propriedade)
@@ -144,6 +148,7 @@ def editar(colheita_id):
 
 @colheita_bp.route("/<int:colheita_id>/remover", methods=["POST"])
 @login_required
+@require_permission("colheita.delete")
 def remover(colheita_id):
     propriedade = propriedade_atual()
     colheita = _colheita_da_propriedade_ou_404(colheita_id, propriedade)
