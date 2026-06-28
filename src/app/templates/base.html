@@ -27,6 +27,7 @@
     <a href="{{ url_for('glebas.index') }}">Glebas</a>
     <a href="{{ url_for('defensivos.index') }}">Defensivos</a>
     <a href="{{ url_for('fertilizantes.index') }}">Fertilizantes</a>
+    <a href="{{ url_for('aplicacoes.index') }}">Aplicações</a>
     <a href="{{ url_for('financeiro.index') }}">Financeiro</a>
     <a href="{{ url_for('upload.index') }}">Upload</a>
     <a href="{{ url_for('equipe.index') }}">Equipe</a>
@@ -49,8 +50,8 @@
     {% endwith %}
 
     <p class="mvp-notice">
-      ⚠️ Sistema em <strong>MVP</strong>. A autenticação já funciona; os módulos
-      ainda são placeholders (sem CRUD real nesta etapa).
+      ⚠️ Sistema em <strong>MVP</strong>. A autenticação e os CRUDs operacionais
+      principais já funcionam; módulos ainda pendentes seguem em evolução.
     </p>
     {% block content %}{% endblock %}
   </main>
