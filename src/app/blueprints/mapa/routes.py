@@ -8,6 +8,7 @@ from ...models import Gleba
 from ...utils.auth import login_required
 from ...utils.contexto import propriedade_atual
 from ...utils.formatters import formatar_area
+from ...utils.permissions import require_permission
 
 _GEOJSON_TYPES = {"Feature", "FeatureCollection", "Polygon", "MultiPolygon"}
 
@@ -90,6 +91,7 @@ def _dados_mapa(propriedade):
 
 @mapa_bp.route("/")
 @login_required
+@require_permission("mapa.view")
 def index():
     propriedade = propriedade_atual()
     glebas, glebas_com_coordenadas, glebas_sem_coordenadas = _dados_mapa(propriedade)
@@ -105,6 +107,7 @@ def index():
 
 @mapa_bp.route("/dados")
 @login_required
+@require_permission("mapa.view")
 def dados():
     propriedade = propriedade_atual()
     _, glebas_com_coordenadas, glebas_sem_coordenadas = _dados_mapa(propriedade)
