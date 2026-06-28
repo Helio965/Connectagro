@@ -103,6 +103,19 @@
 > Sem migration nova (modelos já existiam). Sem permissões finas por perfil; sem
 > CSRF dedicado (pendência documentada).
 
+## Etapa 5.4 — CRUD de Colheita ✅
+
+- [x] **CRUD de Colheita** (criar/listar/editar/remover), vinculado a uma
+  associação **cultura↔gleba** da propriedade atual.
+- [x] Validações: `cultura_gleba_id` válido e da propriedade, `data` obrigatória,
+  `quantidade` (se informada) número > 0 (vírgula/ponto).
+- [x] Listagem com cultura, gleba, quantidade, unidade, qualidade + resumo
+  (total e soma por unidade).
+- [x] Orientação ao usuário quando não há associação cultura↔gleba.
+- [x] Testes de CRUD, validações e escopo (`tests/test_colheita_crud.py`).
+
+> Sem migration nova. Colheita depende da associação cultura↔gleba (Etapa 5.2).
+
 ## Etapa 5 — Implementação dos módulos
 
 Ordem sugerida (sujeita a ajuste):
@@ -116,7 +129,7 @@ Ordem sugerida (sujeita a ajuste):
 - [x] Financeiro (CRUD — ver Etapa 5.3)
 - [ ] Upload
 - [x] Equipe (CRUD — ver Etapa 5.3)
-- [ ] Colheita
+- [x] Colheita (CRUD — ver Etapa 5.4)
 - [ ] Mapa real
 - [ ] IA simulada
 - [ ] Relatórios

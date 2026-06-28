@@ -37,6 +37,11 @@ Arquivos existentes:
   e-mail normalizado, escopo) e Financeiro (criar receita/despesa, valor com
   vírgula/ponto, validações de tipo/valor>0/data → 400, totais
   receitas/despesas/saldo, escopo por propriedade) e exigência de login.
+- **`test_colheita_crud.py`** — CRUD de Colheita: criar/editar/remover, validação
+  de `cultura_gleba_id` (obrigatório/inexistente/de outra propriedade → 400),
+  data obrigatória, quantidade com vírgula/ponto e > 0, escopo por propriedade
+  (404), listagem com cultura/gleba/quantidade/unidade/qualidade, orientação
+  quando não há associação, e exigência de login.
 
 > As rotas protegidas e a rota `/` são testadas também em
 > `test_placeholder_routes.py` (redirecionam sem login; respondem 200 com login).

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Colheita — ConnectAgro{% endblock %}
+
+{% block content %}
+<section class="card">
+  <div class="card-head">
+    <h1>Colheita</h1>
+    <a class="btn-acao" href="{{ url_for('colheita.nova') }}">+ Nova colheita</a>
+  </div>
+
+  {% if registros %}
+  <p class="hint">
+    Total de registros: {{ total }}.
+    {% if soma_por_unidade %}
+      Soma por unidade:
+      {% for unidade, qtd in soma_por_unidade.items() %}
+        <strong>{{ unidade }}: {{ "%.2f"|format(qtd) }}</strong>{{ "; " if not loop.last else "" }}
+      {% endfor %}
+    {% endif %}
+  </p>
+
+  <table class="tabela">
+    <thead>
+      <tr>
+        <th>Data</th><th>Cultura</th><th>Gleba</th><th>Quantidade</th>
+        <th>Unidade</th><th>Qualidade</th><th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in registros %}
+      <tr>
+        <td>{{ r.data_colheita }}</td>
+        <td>{{ r.cultura_gleba.cultura.nome }}</td>
+        <td>{{ r.cultura_gleba.gleba.nome }}</td>
+        <td>{{ "%.2f"|format(r.quantidade) if r.quantidade is not none else "—" }}</td>
+        <td>{{ r.unidade or "—" }}</td>
+        <td>{{ r.qualidade or "—" }}</td>
+        <td class="acoes">
+          <a href="{{ url_for('colheita.editar', colheita_id=r.id) }}">Editar</a>
+          <form method="post" action="{{ url_for('colheita.remover', colheita_id=r.id) }}"
+                onsubmit="return confirm('Remover este registro de colheita?');">
+            <button type="submit" class="btn-link-danger">Remover</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>Nenhum registro de colheita ainda. <a href="{{ url_for('colheita.nova') }}">Registrar o primeiro</a>.</p>
+  {% endif %}
+</section>
+{% endblock %}

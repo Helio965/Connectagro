@@ -2,7 +2,7 @@
 
 ## Status do documento
 
-**Arquitetura técnica — v0.8 (CRUD de Glebas/Culturas/Equipe/Financeiro; próxima etapa: demais
+**Arquitetura técnica — v0.9 (CRUD de Glebas/Culturas/Equipe/Financeiro/Colheita; próxima etapa: demais
 CRUDs dos módulos).**
 
 Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetura-do-sistema.md):
@@ -34,11 +34,11 @@ Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetur
 > [dicionário de dados](./05-dicionario-de-dados.md) e dos
 > [requisitos](./02-requisitos-do-sistema.md).
 >
-> **CRUDs entregues:** Glebas, Culturas (+ associação), **Equipe** e
-> **Financeiro** (com totais receitas/despesas/saldo).
+> **CRUDs entregues:** Glebas, Culturas (+ associação), **Equipe**,
+> **Financeiro** (com totais) e **Colheita** (vinculada a cultura↔gleba).
 >
-> **Próximo passo oficial:** implementar os **demais CRUDs** módulo a módulo
-> (colheita, upload), a consulta do catálogo e o registro de aplicação de insumo.
+> **Próximo passo oficial:** implementar **Upload**, a **consulta do catálogo**
+> (defensivos/fertilizantes) e o **registro de aplicação de insumo**.
 
 ## Objetivo
 
@@ -326,12 +326,13 @@ Fluxo geral esperado do uso do sistema:
 - **Implementado:** CRUD (nome, função, e-mail normalizado, telefone, ativo).
 - **Futuro:** `funcao` poderá condicionar permissões finas.
 
-### Colheita
+### Colheita ✅ (CRUD implementado)
 - **Objetivo:** registrar e acompanhar a colheita.
 - **Dados principais:** `colheita_registro`, `cultura_gleba`.
 - **Blueprint:** `colheita` (`/colheita`).
-- **Implementação futura:** registro de quantidade/unidade/qualidade por
-  cultura/gleba.
+- **Implementado:** CRUD de quantidade/unidade/qualidade/data por associação
+  cultura↔gleba (select escopado à propriedade); resumo com total e soma por
+  unidade. **Depende da associação cultura↔gleba (Etapa 5.2).**
 
 ### Mapa real
 - **Objetivo:** visualizar as glebas em mapa.
@@ -441,11 +442,12 @@ Fluxo geral esperado do uso do sistema:
 - [x] Autenticação real (login/logout, sessão, `login_required`, `seed-users`)
 - [x] CRUD de Glebas e Culturas (+ associação cultura↔gleba)
 - [x] CRUD de Equipe e Financeiro (com totais receitas/despesas/saldo)
-- [x] Testes de fundação, schema, seed, autenticação e CRUD (glebas/culturas/equipe/financeiro)
+- [x] CRUD de Colheita (vinculada a cultura↔gleba)
+- [x] Testes de fundação, schema, seed, autenticação e CRUD (glebas/culturas/equipe/financeiro/colheita)
 
 **Pendente (Etapa 5):**
 
-- [ ] CRUDs dos demais módulos (colheita, upload), consulta do catálogo e registro de aplicação de insumo
+- [ ] CRUDs/telas dos demais módulos (upload), consulta do catálogo e registro de aplicação de insumo
 - [ ] Permissões finas por perfil/módulo
 - [ ] Testes de regras de negócio e fluxos completos
 
