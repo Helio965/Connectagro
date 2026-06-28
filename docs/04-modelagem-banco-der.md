@@ -203,7 +203,10 @@ Informações técnicas do produto (1:N a partir de `produto_base`).
 - `nutrientes_principais` — nutrientes (ex.: NPK), `TEXT`/JSON (lista).
 - `culturas_comuns` — culturas usuais, `TEXT`/JSON (lista).
 - `alvos_controle` — alvos de controle (defensivos), `TEXT`/JSON (lista).
-- `modo_aplicacao` — modo de aplicação.
+- `uso_principal` — uso principal (ex.: inseticida, fertilizante mineral).
+- `modo_aplicacao` — modo de aplicação (no seed de fertilizantes,
+  `forma_aplicacao` é mapeada para este campo na importação).
+- `tipo_liberacao` — tipo de liberação (ex.: convencional, lenta) — fertilizantes.
 - `fonte_tecnica` — origem da informação técnica.
 - `observacoes` — texto livre.
 

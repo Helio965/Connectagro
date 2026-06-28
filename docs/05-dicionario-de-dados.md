@@ -211,7 +211,9 @@ Informações técnicas do produto.
 | nutrientes_principais | TEXT    | Não         |       | Nutrientes (ex.: NPK)      | Lista; JSON em `TEXT`; normalizar no futuro  |
 | culturas_comuns       | TEXT    | Não         |       | Culturas usuais            | Lista; JSON em `TEXT`; normalizar no futuro  |
 | alvos_controle        | TEXT    | Não         |       | Alvos de controle          | Defensivos; JSON em `TEXT`                    |
-| modo_aplicacao        | TEXT    | Não         |       | Modo de aplicação          |                                              |
+| uso_principal         | TEXT    | Não         |       | Uso principal              | Ex.: inseticida, fertilizante mineral        |
+| modo_aplicacao        | TEXT    | Não         |       | Modo de aplicação          | `forma_aplicacao` do seed é mapeada para cá  |
+| tipo_liberacao        | TEXT    | Não         |       | Tipo de liberação          | Fertilizantes (ex.: convencional, lenta)     |
 | fonte_tecnica         | TEXT    | Não         |       | Origem da informação técnica| Não inventar; validar depois se ausente      |
 | observacoes           | TEXT    | Não         |       | Texto livre                |                                              |
 

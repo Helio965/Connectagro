@@ -4,12 +4,26 @@ Dados de **carga inicial (seeds)** do ConnectAgro.
 
 ## Estado atual
 
-> Os seeds aqui são **técnicos/documentais**. Já existem a **aplicação Flask** e
-> os **modelos SQLAlchemy** (`src/app/models/`), e o schema pode ser criado com
-> `flask init-db`. Porém, **o seed ainda NÃO foi importado para o banco**, **não
-> há migrations** e **não há banco populado**. Preço e imagem **não** entram como
-> dados consolidados no MVP; o menor valor diário atualizado fica para o **sistema
-> final** (apenas consulta rápida — o ConnectAgro não vende produtos).
+> Os seeds aqui são **técnicos/documentais**. Já existem a **aplicação Flask**, os
+> **modelos SQLAlchemy** (`src/app/models/`), **migrations** (Flask-Migrate) e
+> comandos CLI para **validar** e **importar** o catálogo. A importação popula
+> apenas `produto_base` + `produto_tecnico`; `produto_preco`/`produto_imagem`
+> permanecem **vazios** no MVP e itens bloqueados (Paraquate/Oxamil) **não** são
+> importados. O **banco populado não é versionado**. O menor valor diário fica
+> para o **sistema final** (apenas consulta rápida — o ConnectAgro não vende).
+
+## Comandos (a partir da raiz do projeto)
+
+```bash
+# 1. Aplicar o schema (migrations)
+flask --app src/run.py db upgrade
+
+# 2. Validar o seed técnico (não importa nada)
+flask --app src/run.py validate-catalog-seed
+
+# 3. Importar o catálogo técnico (idempotente: rodar 2x não duplica)
+flask --app src/run.py import-catalog-seed
+```
 
 ## Arquivos
 

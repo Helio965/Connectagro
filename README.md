@@ -5,11 +5,12 @@ O ConnectAgro centraliza o controle de culturas, glebas, insumos, finanças,
 equipe, colheita e mapa, oferecendo ainda apoio por uma camada de IA e um
 catálogo técnico de produtos agrícolas para consulta rápida.
 
-> **Status do projeto:** fundação Flask criada e **modelos SQLAlchemy de domínio
-> implementados** (15 tabelas). O projeto ainda **não** possui banco populado,
-> CRUD, migrations, seed importado nem autenticação real — os módulos seguem como
-> placeholders. Preço e imagem do catálogo continuam **pendentes** para o sistema
-> final.
+> **Status do projeto:** fundação Flask, **modelos SQLAlchemy** (15 tabelas),
+> **migrations** (Flask-Migrate) e **importação do catálogo técnico** (via CLI)
+> prontos. O projeto ainda **não** possui CRUD nem autenticação real — os módulos
+> seguem como placeholders. `produto_preco`/`produto_imagem` continuam **vazios**
+> no MVP; preço e imagem ficam **pendentes** para o sistema final. O banco
+> populado **não** é versionado.
 
 ---
 
@@ -76,17 +77,18 @@ em etapas posteriores, evoluirá para a versão completa.
 ├── docs/                  # Documentação do projeto (visão, escopo, requisitos, DER...)
 │   └── catalogo-produtos/ # Documentação e especificação do catálogo de produtos
 ├── data/                  # Dados de apoio do projeto
-│   └── seeds/             # Seed técnico do catálogo (JSON/CSV) — não importado ainda
+│   └── seeds/             # Seed técnico do catálogo (JSON/CSV) — importável via CLI
+├── migrations/            # Flask-Migrate/Alembic (migration inicial das 15 tabelas)
 ├── src/                   # Código-fonte da aplicação Flask
 │   ├── run.py             # ponto de entrada
 │   └── app/               # package Flask (Application Factory)
 │       ├── __init__.py    # create_app
 │       ├── config.py      # configuração por ambiente
-│       ├── extensions.py  # extensões (Flask-SQLAlchemy)
+│       ├── extensions.py  # extensões (Flask-SQLAlchemy, Flask-Migrate)
 │       ├── blueprints/    # um blueprint por módulo do MVP (placeholders)
 │       ├── models/        # modelos SQLAlchemy de domínio (15 tabelas)
-│       ├── commands.py    # CLI: flask init-db (cria schema, sem popular)
-│       ├── services/      # regras de negócio (vazio nesta etapa)
+│       ├── commands.py    # CLI: init-db, validate-catalog-seed, import-catalog-seed
+│       ├── services/      # regras de negócio (ex.: catalogo_seed.py)
 │       ├── utils/         # utilitários (vazio nesta etapa)
 │       ├── templates/     # HTML (Jinja2)
 │       └── static/        # css/, js/, uploads/
@@ -100,25 +102,37 @@ A documentação detalhada está em [`docs/`](./docs). Comece pela
 
 ## Como executar (MVP)
 
+Fluxo recomendado, a partir da raiz do projeto:
+
 ```bash
+# 1. Ambiente virtual
 python -m venv .venv
 # ative o ambiente conforme seu SO (ex.: source .venv/bin/activate)
+
+# 2. Dependências
 pip install -r requirements.txt
+
+# 3. Schema do banco (migrations — Flask-Migrate/Alembic)
+flask --app src/run.py db upgrade
+
+# 4. Importar o catálogo técnico (opcional; idempotente)
+flask --app src/run.py validate-catalog-seed
+flask --app src/run.py import-catalog-seed
+
+# 5. Subir a aplicação
 python src/run.py
+
+# 6. Rodar os testes
+pytest
 ```
 
 A aplicação sobe com a rota inicial `/`, o health check `/health` e as páginas
-placeholder dos módulos. Para rodar os testes: `pytest`.
+placeholder dos módulos. O arquivo de banco gerado **não** é versionado.
 
-### Criar o schema do banco (opcional)
-
-O comando abaixo cria as tabelas no SQLite (a partir da raiz do projeto), **sem
-popular dados e sem importar o seed**. O arquivo de banco gerado **não** é
-versionado.
-
-```bash
-flask --app src/run.py init-db
-```
+> A importação popula apenas `produto_base` + `produto_tecnico`;
+> `produto_preco`/`produto_imagem` permanecem vazios no MVP e itens bloqueados
+> (Paraquate/Oxamil) não são importados. Alternativa pontual ao passo 3 (sem
+> migrations): `flask --app src/run.py init-db`.
 
 ### Documentação principal
 
