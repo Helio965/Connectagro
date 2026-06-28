@@ -14,6 +14,7 @@
   }
 
   const url = container.dataset.mapaUrl || "/mapa/dados";
+  container.innerHTML = "";
   const mapa = L.map(container).setView([-15.7801, -47.9292], 4);
   const limites = L.latLngBounds([]);
 
