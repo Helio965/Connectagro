@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Relatórios — ConnectAgro{% endblock %}
+
+{% block content %}
+<section class="card">
+  <h1>Relatórios Operacionais</h1>
+  <p class="hint">Propriedade: <strong>{{ propriedade.nome }}</strong></p>
+  {% include "relatorios/_avisos.html" %}
+
+  <div class="relatorios-grid">
+    <a class="relatorio-card" href="{{ url_for('relatorios.geral') }}">
+      <strong>Relatório Geral</strong>
+      <span>Resumo consolidado da propriedade.</span>
+    </a>
+    <a class="relatorio-card" href="{{ url_for('relatorios.financeiro') }}">
+      <strong>Relatório Financeiro</strong>
+      <span>Lançamentos, receitas, despesas e saldo.</span>
+    </a>
+    <a class="relatorio-card" href="{{ url_for('relatorios.agricola') }}">
+      <strong>Relatório Agrícola</strong>
+      <span>Glebas, culturas, associações e colheitas.</span>
+    </a>
+    <a class="relatorio-card" href="{{ url_for('relatorios.aplicacoes') }}">
+      <strong>Relatório de Aplicações</strong>
+      <span>Registros históricos de aplicação de insumo.</span>
+    </a>
+    <a class="relatorio-card" href="{{ url_for('relatorios.uploads') }}">
+      <strong>Relatório de Uploads</strong>
+      <span>Documentos enviados da propriedade.</span>
+    </a>
+  </div>
+
+  <p class="no-print"><a href="{{ url_for('dashboard.index') }}">Voltar ao Dashboard</a></p>
+</section>
+{% endblock %}

@@ -13,7 +13,8 @@ camada de IA e um catálogo técnico de produtos agrícolas para consulta rápid
 > cultura↔gleba), **Equipe**, **Financeiro** (com totais), **Colheita**,
 > **Aplicações de Insumo** (registro histórico operacional) e **Upload de Arquivos**
 > (armazenamento local com metadados), além da **consulta somente leitura** do
-> catálogo de **Defensivos** e **Fertilizantes**. Relatórios seguem pendentes. Não
+> catálogo de **Defensivos** e **Fertilizantes** e os **Relatórios Operacionais
+> HTML** (geral, financeiro, agrícola, aplicações e uploads), somente leitura. Não
 > há CRUD de produtos; `produto_preco`/`produto_imagem` continuam **vazios** no
 > MVP. O sistema **não vende produtos**, não recomenda produtos, não valida dose,
 > não usa LLM/API externa, não faz OCR/IA/extração automática de arquivos e não
@@ -222,6 +223,17 @@ Extensões permitidas no MVP: `pdf`, `png`, `jpg`, `jpeg`, `csv`, `xlsx`, `txt` 
 `docx`. Executáveis, scripts, compactados e HTML/PHP/Python são bloqueados pela
 allowlist. O módulo não faz OCR, IA, leitura automática, classificação ou
 extração de dados.
+
+### Relatórios operacionais
+
+Em `/relatorios/` há uma central com cinco relatórios **HTML somente leitura**,
+escopados pela propriedade atual: **geral**, **financeiro** (com filtros de
+período e tipo), **agrícola**, **aplicações** (com filtros de período e classe) e
+**uploads**. Os relatórios apenas consultam dados já existentes — não criam,
+alteram ou removem nada. Não há geração de PDF nem exportação CSV/Excel nesta
+fase; a impressão usa o recurso do próprio navegador (`window.print()`). Os
+relatórios não recomendam produtos, não validam dose e não leem o conteúdo dos
+uploads.
 
 ### Usuários de teste (`seed-users`)
 

@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Relatório Geral — ConnectAgro{% endblock %}
+
+{% block content %}
+<section class="card">
+  <h1>Relatório Geral da Propriedade</h1>
+  <p class="hint">Propriedade: <strong>{{ propriedade.nome }}</strong></p>
+  {% include "relatorios/_acoes.html" %}
+  {% include "relatorios/_avisos.html" %}
+
+  <div class="relatorio-section">
+    <h2>Glebas</h2>
+    <ul class="dados">
+      <li><strong>Total de glebas:</strong> {{ dados.glebas.total }}</li>
+      <li><strong>Área total informada:</strong> {{ formatar_area(dados.glebas.area_total) }}</li>
+      <li><strong>Glebas sem área:</strong> {{ dados.glebas.sem_area }}</li>
+      <li><strong>Glebas sem coordenadas válidas:</strong> {{ dados.glebas.sem_coordenadas }}</li>
+    </ul>
+  </div>
+
+  <div class="relatorio-section">
+    <h2>Culturas</h2>
+    <ul class="dados">
+      <li><strong>Total de culturas:</strong> {{ dados.culturas.total }}</li>
+      {% for status, qtd in dados.culturas.por_status.items() %}
+      <li><strong>{{ status }}:</strong> {{ qtd }}</li>
+      {% endfor %}
+      <li><strong>Associações cultura↔gleba:</strong> {{ dados.culturas.total_associacoes }}</li>
+    </ul>
+  </div>
+
+  <div class="relatorio-section">
+    <h2>Equipe</h2>
+    <ul class="dados">
+      <li><strong>Total de membros:</strong> {{ dados.equipe.total }}</li>
+      <li><strong>Ativos:</strong> {{ dados.equipe.ativos }} · <strong>Inativos:</strong> {{ dados.equipe.inativos }}</li>
+    </ul>
+  </div>
+
+  <div class="relatorio-section">
+    <h2>Financeiro</h2>
+    <ul class="dados">
+      <li><strong>Receitas:</strong> {{ formatar_moeda(dados.financeiro.receitas) }}</li>
+      <li><strong>Despesas:</strong> {{ formatar_moeda(dados.financeiro.despesas) }}</li>
+      <li><strong>Saldo:</strong> {{ formatar_moeda(dados.financeiro.saldo) }}</li>
+      <li><strong>Lançamentos:</strong> {{ dados.financeiro.total_lancamentos }}</li>
+    </ul>
+  </div>
+
+  <div class="relatorio-section">
+    <h2>Colheita</h2>
+    <ul class="dados">
+      <li><strong>Total de colheitas:</strong> {{ dados.colheita.total }}</li>
+      {% for unidade, qtd in dados.colheita.por_unidade %}
+      <li><strong>{{ unidade }}:</strong> {{ formatar_numero(qtd) }}</li>
+      {% else %}
+      <li>Sem colheitas registradas.</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="relatorio-section">
+    <h2>Aplicações e Uploads</h2>
+    <ul class="dados">
+      <li><strong>Total de aplicações:</strong> {{ dados.aplicacoes.total }}</li>
+      <li><strong>Total de uploads:</strong> {{ dados.uploads.total }}</li>
+      <li><strong>Tamanho total de uploads:</strong> {{ formatar_tamanho(dados.uploads.tamanho_total) }}</li>
+    </ul>
+  </div>
+
+  <div class="relatorio-section">
+    <h2>Catálogo (global)</h2>
+    <ul class="dados">
+      <li><strong>Defensivos no catálogo:</strong> {{ dados.catalogo.defensivos }}</li>
+      <li><strong>Fertilizantes no catálogo:</strong> {{ dados.catalogo.fertilizantes }}</li>
+    </ul>
+    <p class="hint">
+      O catálogo é base técnica de consulta. O sistema não vende produtos. As
+      aplicações são histórico operacional. A IA do MVP é simulada.
+    </p>
+  </div>
+</section>
+{% endblock %}

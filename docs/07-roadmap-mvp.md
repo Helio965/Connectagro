@@ -202,6 +202,27 @@
 > agronômica, sem validação técnica de dose, sem relatórios/PDF, sem permissões
 > finas e sem CSRF/Flask-WTF.
 
+## Fase 6.2 — Relatórios Operacionais HTML ✅
+
+- [x] Central de relatórios em `/relatorios/` + rotas `geral`, `financeiro`,
+  `agricola`, `aplicacoes`, `uploads` (todas `@login_required` e via
+  `propriedade_atual()`).
+- [x] Serviço `src/app/services/relatorios_service.py` (somente leitura,
+  reutiliza helpers do `dashboard_service`).
+- [x] Relatório financeiro com filtros de período e tipo (receita/despesa) e
+  totais (receitas/despesas/saldo); período/tipo inválido → 400.
+- [x] Relatório de aplicações com filtros de período e classe; avisos de não
+  recomendação e não validação de dose.
+- [x] Relatórios geral, agrícola e de uploads (download por rota protegida).
+- [x] Botão "Imprimir" (`window.print()`) e CSS de impressão; sem PDF/exportação.
+- [x] Testes (`tests/test_relatorios_operacionais.py` e
+  `tests/test_relatorios_service.py`).
+
+> Somente leitura: não cria/altera/remove dados; escopado por propriedade
+> (nenhuma rota aceita `propriedade_id`). Sem migration, sem model novo, sem
+> dependência nova, sem PDF/CSV/Excel, sem gráficos externos. Pendentes:
+> permissões finas, CSRF/Flask-WTF e revisão final do MVP.
+
 ## Etapa 5 — Implementação dos módulos
 
 Ordem sugerida (sujeita a ajuste):
@@ -219,7 +240,7 @@ Ordem sugerida (sujeita a ajuste):
 - [x] Colheita (CRUD — ver Etapa 5.4)
 - [x] Mapa real (ver Etapa 5.9)
 - [x] IA simulada (ver Fase 6.1)
-- [ ] Relatórios
+- [x] Relatórios (ver Fase 6.2)
 
 ## Etapa 6 — Testes e qualidade
 
@@ -230,7 +251,7 @@ Ordem sugerida (sujeita a ajuste):
 - [x] Dashboard.
 - [x] Mapa real.
 - [x] IA simulada.
-- [ ] Relatórios
+- [x] Relatórios (operacionais HTML).
 - [ ] Permissões finas por perfil/módulo
 - [ ] CSRF/Flask-WTF
 - [ ] Revisão e ajustes do MVP.
