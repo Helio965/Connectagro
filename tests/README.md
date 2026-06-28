@@ -42,6 +42,11 @@ Arquivos existentes:
   data obrigatória, quantidade com vírgula/ponto e > 0, escopo por propriedade
   (404), listagem com cultura/gleba/quantidade/unidade/qualidade, orientação
   quando não há associação, e exigência de login.
+- **`test_catalogo_consulta.py`** — consulta somente leitura do catálogo:
+  exige login; listagens filtram por `classe`; busca (`q`) e filtros (categoria,
+  status_regulatorio); detalhe por slug e 404; ausência de termos de compra;
+  aviso de preço/imagem pendentes; render de campos JSON (lista) e fallback para
+  JSON inválido; `produto_preco`/`produto_imagem` seguem vazios.
 
 > As rotas protegidas e a rota `/` são testadas também em
 > `test_placeholder_routes.py` (redirecionam sem login; respondem 200 com login).

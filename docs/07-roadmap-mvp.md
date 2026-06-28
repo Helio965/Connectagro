@@ -116,6 +116,20 @@
 
 > Sem migration nova. Colheita depende da associação cultura↔gleba (Etapa 5.2).
 
+## Etapa 5.5 — Consulta do Catálogo (Defensivos/Fertilizantes) ✅
+
+- [x] **Consulta somente leitura** de Defensivos e Fertilizantes (listagem +
+  detalhe por `slug`), filtrando por `classe`.
+- [x] Busca textual (`q`) e filtros por `categoria` e `status_regulatorio`.
+- [x] Detalhe com dados de `ProdutoBase` + `ProdutoTecnico`; campos JSON
+  renderizados como lista, com fallback seguro para JSON inválido.
+- [x] Avisos: base técnica de consulta, **não vende**, preço/imagem pendentes,
+  status regulatório **sem** validação oficial automática.
+- [x] Testes (`tests/test_catalogo_consulta.py`).
+
+> **Somente leitura:** sem cadastro/edição/remoção de produto (fica para etapa
+> futura). `produto_preco`/`produto_imagem` seguem **vazios**; sem migration nova.
+
 ## Etapa 5 — Implementação dos módulos
 
 Ordem sugerida (sujeita a ajuste):
@@ -124,8 +138,8 @@ Ordem sugerida (sujeita a ajuste):
 - [ ] Dashboard
 - [x] Culturas (CRUD — ver Etapa 5.2)
 - [x] Glebas (CRUD — ver Etapa 5.2)
-- [ ] Defensivos
-- [ ] Fertilizantes
+- [x] Defensivos (consulta — ver Etapa 5.5)
+- [x] Fertilizantes (consulta — ver Etapa 5.5)
 - [x] Financeiro (CRUD — ver Etapa 5.3)
 - [ ] Upload
 - [x] Equipe (CRUD — ver Etapa 5.3)
