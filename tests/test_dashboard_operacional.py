@@ -89,7 +89,6 @@ def _popular_cenario_dashboard():
     ])
 
     glifosato = ProdutoBase(nome="Glifosato", slug="glifosato", classe="defensivo",
-                            category="herbicida") if False else ProdutoBase(nome="Glifosato", slug="glifosato", classe="defensivo",
                             categoria="herbicida")
     ureia = ProdutoBase(nome="Ureia", slug="ureia", classe="fertilizante",
                         categoria="fertilizante nitrogenado",
