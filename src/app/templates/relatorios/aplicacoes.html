@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Relatório de Aplicações — ConnectAgro{% endblock %}
+
+{% block content %}
+<section class="card">
+  <h1>Relatório de Aplicações de Insumo</h1>
+  <p class="hint">Propriedade: <strong>{{ propriedade.nome }}</strong></p>
+  {% include "relatorios/_acoes.html" %}
+  <p class="relatorio-aviso no-print">
+    Aplicações de insumo são <strong>registros históricos operacionais</strong>.
+    O ConnectAgro <strong>não recomenda produtos</strong> e <strong>não valida
+    dose</strong>. O status regulatório do catálogo não representa validação
+    oficial automática.
+  </p>
+
+  <form method="get" class="relatorio-filtros no-print">
+    <label>Início <input type="date" name="data_inicio" value="{{ filtros.data_inicio }}"></label>
+    <label>Fim <input type="date" name="data_fim" value="{{ filtros.data_fim }}"></label>
+    <label>Classe
+      <select name="classe">
+        {% for op in ["todos", "defensivo", "fertilizante"] %}
+        <option value="{{ op }}" {{ "selected" if filtros.classe == op else "" }}>{{ op }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button type="submit" class="btn-acao">Filtrar</button>
+    <a href="{{ url_for('relatorios.aplicacoes') }}">Limpar</a>
+  </form>
+
+  {% if dados %}
+  <p class="hint">Total de aplicações: <strong>{{ dados.total }}</strong></p>
+  {% if dados.aplicacoes %}
+  <table class="tabela">
+    <thead><tr>
+      <th>Data</th><th>Cultura</th><th>Gleba</th><th>Produto</th><th>Classe</th>
+      <th>Categoria</th><th>Dose</th><th>Unidade</th><th>Responsável</th><th>Observação</th>
+    </tr></thead>
+    <tbody>
+      {% for a in dados.aplicacoes %}
+      <tr>
+        <td>{{ a.data_aplicacao }}</td>
+        <td>{{ a.cultura_gleba.cultura.nome }}</td>
+        <td>{{ a.cultura_gleba.gleba.nome }}</td>
+        <td>{{ a.produto.nome }}</td>
+        <td>{{ a.produto.classe }}</td>
+        <td>{{ a.produto.categoria or "—" }}</td>
+        <td>{% if a.dose is not none %}{{ formatar_numero(a.dose) }}{% else %}—{% endif %}</td>
+        <td>{{ a.unidade or "—" }}</td>
+        <td>{{ a.responsavel or "—" }}</td>
+        <td>{{ a.observacao or "—" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>Nenhuma aplicação no período/filtro selecionado.</p>
+  {% endif %}
+  {% endif %}
+</section>
+{% endblock %}

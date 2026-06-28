@@ -2,7 +2,14 @@
 
 ## Status do documento
 
-**Arquitetura técnica — v0.15 (CRUDs + catálogo + upload seguro + dashboard + mapa + IA simulada).**
+**Arquitetura técnica — v0.16 (CRUDs + catálogo + upload + dashboard + mapa + IA simulada + relatórios operacionais).**
+
+> **Relatórios Operacionais (Fase 6.2):** `services/relatorios_service.py` reúne
+> agregações **somente leitura** (geral, financeiro, agrícola, aplicações,
+> uploads), reutilizando os helpers de consulta do `dashboard_service` e
+> escopando tudo pela propriedade atual. Renderização em HTML (Jinja2); **sem
+> PDF/exportação** nesta fase — a impressão é feita pelo navegador
+> (`window.print()`). Os relatórios não criam/alteram/removem dados.
 
 Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetura-do-sistema.md):
 

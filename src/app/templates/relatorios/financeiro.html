@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Relatório Financeiro — ConnectAgro{% endblock %}
+
+{% block content %}
+<section class="card">
+  <h1>Relatório Financeiro</h1>
+  <p class="hint">Propriedade: <strong>{{ propriedade.nome }}</strong></p>
+  {% include "relatorios/_acoes.html" %}
+  <p class="relatorio-aviso no-print">
+    Relatório financeiro informativo — <strong>não substitui contabilidade
+    formal</strong>. Somente leitura, escopado pela propriedade atual.
+  </p>
+
+  <form method="get" class="relatorio-filtros no-print">
+    <label>Início <input type="date" name="data_inicio" value="{{ filtros.data_inicio }}"></label>
+    <label>Fim <input type="date" name="data_fim" value="{{ filtros.data_fim }}"></label>
+    <label>Tipo
+      <select name="tipo">
+        {% for op in ["todos", "receita", "despesa"] %}
+        <option value="{{ op }}" {{ "selected" if filtros.tipo == op else "" }}>{{ op }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button type="submit" class="btn-acao">Filtrar</button>
+    <a href="{{ url_for('relatorios.financeiro') }}">Limpar</a>
+  </form>
+
+  {% if dados %}
+  <div class="fin-totais">
+    <div class="fin-card fin-receita"><span class="fin-label">Receitas</span><strong>{{ formatar_moeda(dados.receitas) }}</strong></div>
+    <div class="fin-card fin-despesa"><span class="fin-label">Despesas</span><strong>{{ formatar_moeda(dados.despesas) }}</strong></div>
+    <div class="fin-card fin-saldo"><span class="fin-label">Saldo</span><strong>{{ formatar_moeda(dados.saldo) }}</strong></div>
+    <div class="fin-card"><span class="fin-label">Lançamentos</span><strong>{{ dados.quantidade }}</strong></div>
+  </div>
+
+  {% if dados.lancamentos %}
+  <table class="tabela">
+    <thead><tr><th>Data</th><th>Tipo</th><th>Categoria</th><th>Descrição</th><th>Valor</th></tr></thead>
+    <tbody>
+      {% for l in dados.lancamentos %}
+      <tr>
+        <td>{{ l.data }}</td><td>{{ l.tipo }}</td><td>{{ l.categoria or "—" }}</td>
+        <td>{{ l.descricao or "—" }}</td><td>{{ formatar_moeda(l.valor) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>Nenhum lançamento no período/filtro selecionado.</p>
+  {% endif %}
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Relatório de Uploads — ConnectAgro{% endblock %}
+
+{% block content %}
+<section class="card">
+  <h1>Relatório de Uploads / Documentos</h1>
+  <p class="hint">Propriedade: <strong>{{ propriedade.nome }}</strong></p>
+  {% include "relatorios/_acoes.html" %}
+  <p class="relatorio-aviso no-print">
+    O ConnectAgro <strong>não lê automaticamente</strong> o conteúdo dos uploads
+    no MVP. O Upload não faz OCR, IA, classificação ou extração automática.
+    Arquivos são armazenados localmente e acessados por rota protegida.
+  </p>
+
+  <ul class="dados">
+    <li><strong>Total de arquivos:</strong> {{ dados.total }}</li>
+    <li><strong>Tamanho total:</strong> {{ formatar_tamanho(dados.tamanho_total) }}</li>
+  </ul>
+
+  {% if dados.arquivos %}
+  <table class="tabela">
+    <thead><tr><th>Nome original</th><th>Tipo</th><th>Tamanho</th><th>Descrição</th><th>Enviado em</th><th>Download</th></tr></thead>
+    <tbody>
+      {% for a in dados.arquivos %}
+      <tr>
+        <td>{{ a.nome_original }}</td>
+        <td>{{ a.tipo_mime or "—" }}</td>
+        <td>{{ formatar_tamanho(a.tamanho) }}</td>
+        <td>{{ a.descricao or "—" }}</td>
+        <td>{{ a.enviado_em }}</td>
+        <td><a href="{{ url_for('upload.download', arquivo_id=a.id) }}">Baixar</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>Nenhum arquivo enviado ainda.</p>
+  {% endif %}
+</section>
+{% endblock %}

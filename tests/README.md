@@ -44,6 +44,13 @@ Arquivos existentes:
 - **`test_ia_simulada_service.py`** — Serviço de IA simulada: classifica intenção,
   monta contexto operacional, gera alertas, responde resumo e registra/lista
   interações sem passar pela rota.
+- **`test_relatorios_operacionais.py`** — Relatórios HTML (geral, financeiro,
+  agrícola, aplicações, uploads): exige login; totais e filtros (período/tipo/
+  classe) com 400 em filtro inválido; escopo por propriedade (sem vazamento);
+  avisos de não recomendação/validação e de não leitura de uploads; ausência de
+  termos de venda/recomendação; relatórios não criam registros.
+- **`test_relatorios_service.py`** — Serviço de relatórios: validação de período,
+  totais financeiros e erros de tipo/classe inválidos.
 - **`test_glebas_culturas_crud.py`** — CRUD de Glebas e Culturas, associação
   cultura↔gleba, escopo por propriedade e exigência de login.
 - **`test_equipe_financeiro_crud.py`** — CRUD de Equipe e Financeiro, validações,

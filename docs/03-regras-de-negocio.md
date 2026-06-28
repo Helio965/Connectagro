@@ -107,6 +107,16 @@
   correspondentes.
 - RN-29 — A IA simulada não substitui orientação técnica profissional ou
   profissional habilitado.
+- RN-30 — Os **relatórios são somente leitura**: não criam, alteram ou removem
+  dados.
+- RN-31 — Os relatórios são **escopados pela propriedade atual**; nenhuma rota de
+  relatório aceita `propriedade_id` por parâmetro.
+- RN-32 — O relatório de **aplicações** não recomenda produtos e não valida dose;
+  apresenta apenas o histórico operacional registrado.
+- RN-33 — O relatório de **uploads** não lê o conteúdo dos arquivos (sem OCR/IA/
+  extração); apenas lista metadados e oferece download por rota protegida.
+- RN-34 — Os relatórios **financeiros** são informativos e **não substituem
+  contabilidade formal**.
 
 ---
 

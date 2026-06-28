@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Relatório Agrícola — ConnectAgro{% endblock %}
+
+{% block content %}
+<section class="card">
+  <h1>Relatório Agrícola</h1>
+  <p class="hint">Propriedade: <strong>{{ propriedade.nome }}</strong></p>
+  {% include "relatorios/_acoes.html" %}
+  {% include "relatorios/_avisos.html" %}
+
+  <div class="relatorio-section">
+    <h2>Glebas</h2>
+    {% if dados.glebas %}
+    <table class="tabela">
+      <thead><tr><th>Nome</th><th>Área</th><th>Tipo de solo</th><th>Latitude</th><th>Longitude</th><th>Coordenadas válidas</th></tr></thead>
+      <tbody>
+        {% for item in dados.glebas %}
+        <tr>
+          <td>{{ item.obj.nome }}</td>
+          <td>{% if item.obj.area_ha is not none %}{{ formatar_area(item.obj.area_ha) }}{% else %}—{% endif %}</td>
+          <td>{{ item.obj.tipo_solo or "—" }}</td>
+          <td>{{ item.obj.latitude if item.obj.latitude is not none else "—" }}</td>
+          <td>{{ item.obj.longitude if item.obj.longitude is not none else "—" }}</td>
+          <td>{{ "Sim" if item.coordenada_valida else "Não" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p>Nenhuma gleba cadastrada.</p>{% endif %}
+  </div>
+
+  <div class="relatorio-section">
+    <h2>Culturas</h2>
+    {% if dados.culturas %}
+    <table class="tabela">
+      <thead><tr><th>Nome</th><th>Safra</th><th>Status</th><th>Início</th><th>Fim</th><th>Observações</th></tr></thead>
+      <tbody>
+        {% for c in dados.culturas %}
+        <tr>
+          <td>{{ c.nome }}</td><td>{{ c.safra or "—" }}</td><td>{{ c.status }}</td>
+          <td>{{ c.data_inicio or "—" }}</td><td>{{ c.data_fim or "—" }}</td>
+          <td>{{ c.observacoes or "—" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p>Nenhuma cultura cadastrada.</p>{% endif %}
+  </div>
+
+  <div class="relatorio-section">
+    <h2>Associações Cultura ↔ Gleba</h2>
+    {% if dados.associacoes %}
+    <table class="tabela">
+      <thead><tr><th>Cultura</th><th>Gleba</th><th>Área da gleba</th><th>Status da cultura</th></tr></thead>
+      <tbody>
+        {% for cg in dados.associacoes %}
+        <tr>
+          <td>{{ cg.cultura.nome }}</td><td>{{ cg.gleba.nome }}</td>
+          <td>{% if cg.gleba.area_ha is not none %}{{ formatar_area(cg.gleba.area_ha) }}{% else %}—{% endif %}</td>
+          <td>{{ cg.cultura.status }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p>Nenhuma associação cultura↔gleba.</p>{% endif %}
+  </div>
+
+  <div class="relatorio-section">
+    <h2>Colheitas</h2>
+    <p class="hint">Total: <strong>{{ dados.total_colheitas }}</strong>
+      {% for unidade, qtd in dados.colheita_por_unidade %} · {{ unidade }}: {{ formatar_numero(qtd) }}{% endfor %}
+    </p>
+    {% if dados.colheitas %}
+    <table class="tabela">
+      <thead><tr><th>Data</th><th>Cultura</th><th>Gleba</th><th>Quantidade</th><th>Unidade</th><th>Qualidade</th><th>Observação</th></tr></thead>
+      <tbody>
+        {% for col in dados.colheitas %}
+        <tr>
+          <td>{{ col.data_colheita }}</td>
+          <td>{{ col.cultura_gleba.cultura.nome }}</td>
+          <td>{{ col.cultura_gleba.gleba.nome }}</td>
+          <td>{% if col.quantidade is not none %}{{ formatar_numero(col.quantidade) }}{% else %}—{% endif %}</td>
+          <td>{{ col.unidade or "—" }}</td>
+          <td>{{ col.qualidade or "—" }}</td>
+          <td>{{ col.observacao or "—" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p>Nenhuma colheita registrada.</p>{% endif %}
+  </div>
+</section>
+{% endblock %}
