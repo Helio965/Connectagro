@@ -95,6 +95,18 @@
   apenas pelas rotas protegidas do módulo Upload.
 - RN-23 — O Upload não faz OCR, IA, leitura automática, classificação,
   validação documental avançada ou extração automática de conteúdo nesta etapa.
+- RN-24 — A IA do MVP é **simulada**, baseada em regras simples e dados locais já
+  cadastrados no sistema.
+- RN-25 — A IA simulada não usa LLM, API externa, internet, machine learning,
+  OCR, leitura automática de uploads ou consulta a fontes oficiais em tempo real.
+- RN-26 — A IA simulada não recomenda produtos, não valida dose e não faz
+  diagnóstico agronômico.
+- RN-27 — As respostas da IA são apoio operacional e devem ser escopadas pela
+  propriedade atual.
+- RN-28 — O histórico da IA deve ser visível apenas ao usuário e à propriedade
+  correspondentes.
+- RN-29 — A IA simulada não substitui orientação técnica profissional ou
+  profissional habilitado.
 
 ---
 

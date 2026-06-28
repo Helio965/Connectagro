@@ -35,6 +35,15 @@ Arquivos existentes:
   expõe usuário/e-mail; separa glebas com coordenadas válidas das sem coordenadas
   válidas; ignora GeoJSON inválido sem quebrar; não possui rotas POST; mostra
   estados vazios; e não apresenta recursos avançados como funcionalidade ativa.
+- **`test_ia_simulada.py`** — IA Simulada Operacional: exige login; `/ia/`
+  responde com login; mostra avisos obrigatórios; POST válido salva
+  `IaInteracao`; valida pergunta vazia e limite de 1000 caracteres; vincula
+  usuário/propriedade atuais; histórico não vaza entre usuários/propriedades;
+  respostas por tema cobrem financeiro, glebas, culturas, colheita, aplicações,
+  documentos, catálogo e fallback; e respostas não usam termos proibidos.
+- **`test_ia_simulada_service.py`** — Serviço de IA simulada: classifica intenção,
+  monta contexto operacional, gera alertas, responde resumo e registra/lista
+  interações sem passar pela rota.
 - **`test_glebas_culturas_crud.py`** — CRUD de Glebas e Culturas, associação
   cultura↔gleba, escopo por propriedade e exigência de login.
 - **`test_equipe_financeiro_crud.py`** — CRUD de Equipe e Financeiro, validações,
@@ -69,7 +78,7 @@ Para rodar: `pytest` (a partir da raiz do projeto).
 
 ## Pendente para etapas futuras
 
-- Testes dos módulos ainda pendentes (IA simulada e Relatórios) quando forem implementados.
+- Testes dos módulos ainda pendentes (Relatórios) quando forem implementados.
 - Testes de **permissões finas** por perfil/módulo.
 - Testes de **CSRF/Flask-WTF**, quando essa proteção entrar no escopo.
 - Testes de **fluxos completos** do MVP.

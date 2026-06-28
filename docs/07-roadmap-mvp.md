@@ -181,6 +181,27 @@
 > polígonos, sem medição de área, sem GPS em tempo real, sem PostGIS, sem camadas
 > avançadas e sem dependência Python/NPM nova.
 
+## Fase 6.1 — IA Simulada Operacional ✅
+
+- [x] IA em `/ia/`, protegida por login e escopada pela propriedade atual.
+- [x] Serviço `src/app/services/ia_simulada_service.py` com regras simples e sem
+  dependência externa.
+- [x] Classificação por palavras-chave: resumo, financeiro, glebas, culturas,
+  colheita, aplicações, documentos, catálogo e fallback de ajuda.
+- [x] Respostas baseadas em dados locais da propriedade atual.
+- [x] Alertas operacionais simples para dados incompletos.
+- [x] Registro de perguntas/respostas em `ia_interacao` com `tipo="simulada"`.
+- [x] Histórico das últimas 10 interações filtrado por usuário e propriedade.
+- [x] Avisos obrigatórios: sem recomendação de produto, sem validação de dose,
+  sem diagnóstico agronômico, sem internet/fontes oficiais em tempo real e sem
+  leitura de conteúdo de uploads.
+- [x] Testes (`tests/test_ia_simulada.py` e `tests/test_ia_simulada_service.py`).
+
+> Sem migration nova, sem alteração de models, sem dependência nova, sem LLM/API
+> externa, sem OCR, sem leitura automática de uploads, sem recomendação
+> agronômica, sem validação técnica de dose, sem relatórios/PDF, sem permissões
+> finas e sem CSRF/Flask-WTF.
+
 ## Etapa 5 — Implementação dos módulos
 
 Ordem sugerida (sujeita a ajuste):
@@ -197,7 +218,7 @@ Ordem sugerida (sujeita a ajuste):
 - [x] Equipe (CRUD — ver Etapa 5.3)
 - [x] Colheita (CRUD — ver Etapa 5.4)
 - [x] Mapa real (ver Etapa 5.9)
-- [ ] IA simulada
+- [x] IA simulada (ver Fase 6.1)
 - [ ] Relatórios
 
 ## Etapa 6 — Testes e qualidade
@@ -208,7 +229,7 @@ Ordem sugerida (sujeita a ajuste):
 - [x] Testes de autenticação, CRUDs já entregues, Upload e consulta do catálogo.
 - [x] Dashboard.
 - [x] Mapa real.
-- [ ] IA simulada
+- [x] IA simulada.
 - [ ] Relatórios
 - [ ] Permissões finas por perfil/módulo
 - [ ] CSRF/Flask-WTF
