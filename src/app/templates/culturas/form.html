@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}{{ "Editar" if cultura else "Nova" }} cultura — ConnectAgro{% endblock %}
+
+{% block content %}
+<section class="card">
+  <h1>{{ "Editar cultura" if cultura else "Nova cultura" }}</h1>
+
+  <form method="post" class="form-vertical"
+        action="{{ url_for('culturas.editar', cultura_id=cultura.id) if cultura else url_for('culturas.nova') }}">
+    <label for="nome">Nome *</label>
+    <input type="text" id="nome" name="nome" required value="{{ form.nome or '' }}">
+
+    <label for="variedade">Variedade</label>
+    <input type="text" id="variedade" name="variedade" value="{{ form.variedade or '' }}">
+
+    <label for="safra">Safra</label>
+    <input type="text" id="safra" name="safra" placeholder="2025/2026" value="{{ form.safra or '' }}">
+
+    <label for="data_inicio">Data de início</label>
+    <input type="date" id="data_inicio" name="data_inicio" value="{{ form.data_inicio or '' }}">
+
+    <label for="data_fim">Data de fim</label>
+    <input type="date" id="data_fim" name="data_fim" value="{{ form.data_fim or '' }}">
+
+    <label for="status">Status</label>
+    <select id="status" name="status">
+      {% for s in status_validos %}
+      <option value="{{ s }}" {{ "selected" if (form.status or 'planejada') == s else "" }}>{{ s }}</option>
+      {% endfor %}
+    </select>
+
+    <label>Glebas associadas</label>
+    {% if glebas %}
+    <div class="checkbox-grupo">
+      {% for g in glebas %}
+      <label class="check-inline">
+        <input type="checkbox" name="glebas" value="{{ g.id }}"
+               {{ "checked" if g.id in glebas_sel else "" }}>
+        {{ g.nome }}
+      </label>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="hint">Nenhuma gleba cadastrada. Crie glebas para associá-las a esta cultura.</p>
+    {% endif %}
+
+    <div class="form-acoes">
+      <button type="submit" class="btn-acao">Salvar</button>
+      <a href="{{ url_for('culturas.index') }}">Cancelar</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

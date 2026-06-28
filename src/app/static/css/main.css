@@ -124,3 +124,57 @@ body {
   cursor: pointer;
 }
 .btn-entrar:hover { background: var(--verde-escuro); }
+
+/* Cabeçalho de cartão com ação à direita */
+.card-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.card-head h1 { margin: 0; }
+
+/* Botões de ação */
+.btn-acao {
+  background: var(--verde);
+  color: #fff;
+  text-decoration: none;
+  border: none;
+  padding: .5rem .8rem;
+  border-radius: 6px;
+  font-size: .9rem;
+  cursor: pointer;
+}
+.btn-acao:hover { background: var(--verde-escuro); }
+.btn-link-danger {
+  background: none;
+  border: none;
+  color: #b71c1c;
+  cursor: pointer;
+  font-size: .9rem;
+  padding: 0;
+  text-decoration: underline;
+}
+
+/* Tabelas de listagem */
+.tabela { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+.tabela th, .tabela td {
+  text-align: left;
+  padding: .5rem .6rem;
+  border-bottom: 1px solid var(--borda);
+  font-size: .92rem;
+}
+.tabela th { color: var(--verde-escuro); }
+.acoes { display: flex; gap: .75rem; align-items: center; }
+.acoes form { margin: 0; }
+
+/* Formulários verticais */
+.form-vertical { display: flex; flex-direction: column; gap: .3rem; max-width: 520px; }
+.form-vertical label { font-size: .85rem; font-weight: 600; margin-top: .5rem; }
+.form-vertical input,
+.form-vertical select,
+.form-vertical textarea {
+  padding: .5rem .6rem;
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+  font-size: 1rem;
+}
+.form-acoes { display: flex; gap: 1rem; align-items: center; margin-top: 1rem; }
+.checkbox-grupo { display: flex; flex-wrap: wrap; gap: .5rem 1rem; padding: .3rem 0; }
+.check-inline { font-weight: 400; display: flex; align-items: center; gap: .3rem; }
+.hint { color: #666; font-size: .9rem; }

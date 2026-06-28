@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Culturas — ConnectAgro{% endblock %}
+
+{% block content %}
+<section class="card">
+  <div class="card-head">
+    <h1>Culturas</h1>
+    <a class="btn-acao" href="{{ url_for('culturas.nova') }}">+ Nova cultura</a>
+  </div>
+
+  {% if culturas %}
+  <table class="tabela">
+    <thead>
+      <tr>
+        <th>Nome</th><th>Variedade</th><th>Safra</th><th>Status</th><th>Glebas</th><th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in culturas %}
+      <tr>
+        <td>{{ c.nome }}</td>
+        <td>{{ c.variedade or "—" }}</td>
+        <td>{{ c.safra or "—" }}</td>
+        <td>{{ c.status }}</td>
+        <td>{{ c.cultura_glebas | length }}</td>
+        <td class="acoes">
+          <a href="{{ url_for('culturas.editar', cultura_id=c.id) }}">Editar</a>
+          <form method="post" action="{{ url_for('culturas.remover', cultura_id=c.id) }}"
+                onsubmit="return confirm('Remover esta cultura?');">
+            <button type="submit" class="btn-link-danger">Remover</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>Nenhuma cultura cadastrada ainda. <a href="{{ url_for('culturas.nova') }}">Criar a primeira</a>.</p>
+  {% endif %}
+</section>
+{% endblock %}
