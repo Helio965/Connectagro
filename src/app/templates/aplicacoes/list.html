@@ -6,7 +6,9 @@
 <section class="card">
   <div class="card-head">
     <h1>Aplicações de insumo</h1>
+    {% if can("aplicacoes.create") %}
     <a class="btn-acao" href="{{ url_for('aplicacoes.nova') }}">+ Nova aplicação</a>
+    {% endif %}
   </div>
 
   <p class="hint">
@@ -40,18 +42,23 @@
         <td>{{ a.unidade or "—" }}</td>
         <td>{{ a.responsavel or "—" }}</td>
         <td class="acoes">
+          {% if can("aplicacoes.edit") %}
           <a href="{{ url_for('aplicacoes.editar', aplicacao_id=a.id) }}">Editar</a>
+          {% endif %}
+          {% if can("aplicacoes.delete") %}
           <form method="post" action="{{ url_for('aplicacoes.remover', aplicacao_id=a.id) }}"
                 onsubmit="return confirm('Remover este registro de aplicação?');">
             <button type="submit" class="btn-link-danger">Remover</button>
           </form>
+          {% endif %}
+          {% if not can("aplicacoes.edit") and not can("aplicacoes.delete") %}—{% endif %}
         </td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
   {% else %}
-  <p>Nenhuma aplicação de insumo registrada ainda. <a href="{{ url_for('aplicacoes.nova') }}">Registrar a primeira</a>.</p>
+  <p>Nenhuma aplicação de insumo registrada ainda.{% if can("aplicacoes.create") %} <a href="{{ url_for('aplicacoes.nova') }}">Registrar a primeira</a>.{% endif %}</p>
   {% endif %}
 </section>
 {% endblock %}
