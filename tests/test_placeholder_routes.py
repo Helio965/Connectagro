@@ -15,6 +15,7 @@ ROTAS_PROTEGIDAS = [
     "/glebas/",
     "/defensivos/",
     "/fertilizantes/",
+    "/aplicacoes/",
     "/financeiro/",
     "/upload/",
     "/equipe/",
