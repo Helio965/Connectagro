@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Equipe — ConnectAgro{% endblock %}
+
+{% block content %}
+<section class="card">
+  <div class="card-head">
+    <h1>Equipe</h1>
+    <a class="btn-acao" href="{{ url_for('equipe.novo') }}">+ Novo membro</a>
+  </div>
+
+  {% if membros %}
+  <table class="tabela">
+    <thead>
+      <tr>
+        <th>Nome</th><th>Função</th><th>E-mail</th><th>Telefone</th><th>Status</th><th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in membros %}
+      <tr>
+        <td>{{ m.nome }}</td>
+        <td>{{ m.funcao or "—" }}</td>
+        <td>{{ m.email or "—" }}</td>
+        <td>{{ m.telefone or "—" }}</td>
+        <td>{{ "Ativo" if m.ativo else "Inativo" }}</td>
+        <td class="acoes">
+          <a href="{{ url_for('equipe.editar', membro_id=m.id) }}">Editar</a>
+          <form method="post" action="{{ url_for('equipe.remover', membro_id=m.id) }}"
+                onsubmit="return confirm('Remover este membro?');">
+            <button type="submit" class="btn-link-danger">Remover</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>Nenhum membro cadastrado ainda. <a href="{{ url_for('equipe.novo') }}">Adicionar o primeiro</a>.</p>
+  {% endif %}
+</section>
+{% endblock %}

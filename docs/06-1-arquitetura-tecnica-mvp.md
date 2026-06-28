@@ -2,7 +2,7 @@
 
 ## Status do documento
 
-**Arquitetura técnica — v0.7 (CRUD de Glebas/Culturas; próxima etapa: demais
+**Arquitetura técnica — v0.8 (CRUD de Glebas/Culturas/Equipe/Financeiro; próxima etapa: demais
 CRUDs dos módulos).**
 
 Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetura-do-sistema.md):
@@ -34,8 +34,11 @@ Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetur
 > [dicionário de dados](./05-dicionario-de-dados.md) e dos
 > [requisitos](./02-requisitos-do-sistema.md).
 >
+> **CRUDs entregues:** Glebas, Culturas (+ associação), **Equipe** e
+> **Financeiro** (com totais receitas/despesas/saldo).
+>
 > **Próximo passo oficial:** implementar os **demais CRUDs** módulo a módulo
-> (equipe, financeiro, colheita, upload) e a consulta do catálogo.
+> (colheita, upload), a consulta do catálogo e o registro de aplicação de insumo.
 
 ## Objetivo
 
@@ -301,11 +304,13 @@ Fluxo geral esperado do uso do sistema:
 - **Implementação futura:** mesma consulta do catálogo, filtrando por `classe`;
   genéricos (Ureia, MAP, DAP, Calcário) como tipo técnico.
 
-### Financeiro
+### Financeiro ✅ (CRUD implementado)
 - **Objetivo:** registrar receitas e despesas.
 - **Dados principais:** `financeiro_lancamento` (`tipo` = `receita`/`despesa`).
 - **Blueprint:** `financeiro` (`/financeiro`).
-- **Implementação futura:** CRUD, filtros por período/categoria, totais.
+- **Implementado:** CRUD com validação (tipo, `valor > 0`, data) e **totais**
+  (receitas, despesas, saldo) na listagem.
+- **Futuro:** filtros por período/categoria.
 
 ### Upload
 - **Objetivo:** enviar e armazenar documentos/arquivos.
@@ -314,11 +319,12 @@ Fluxo geral esperado do uso do sistema:
 - **Implementação futura:** `secure_filename`, validação de extensão/tamanho,
   armazenamento em `static/uploads/` (conteúdo ignorado no git).
 
-### Equipe
+### Equipe ✅ (CRUD implementado)
 - **Objetivo:** gerir membros e funções.
 - **Dados principais:** `equipe_membro`.
 - **Blueprint:** `equipe` (`/equipe`).
-- **Implementação futura:** CRUD; `funcao` poderá condicionar permissões.
+- **Implementado:** CRUD (nome, função, e-mail normalizado, telefone, ativo).
+- **Futuro:** `funcao` poderá condicionar permissões finas.
 
 ### Colheita
 - **Objetivo:** registrar e acompanhar a colheita.
@@ -434,11 +440,12 @@ Fluxo geral esperado do uso do sistema:
 - [x] Importação idempotente do catálogo (`flask import-catalog-seed`)
 - [x] Autenticação real (login/logout, sessão, `login_required`, `seed-users`)
 - [x] CRUD de Glebas e Culturas (+ associação cultura↔gleba)
-- [x] Testes de fundação, schema, seed, autenticação e CRUD (glebas/culturas)
+- [x] CRUD de Equipe e Financeiro (com totais receitas/despesas/saldo)
+- [x] Testes de fundação, schema, seed, autenticação e CRUD (glebas/culturas/equipe/financeiro)
 
 **Pendente (Etapa 5):**
 
-- [ ] CRUDs dos demais módulos (equipe, financeiro, colheita, upload) e consulta do catálogo
+- [ ] CRUDs dos demais módulos (colheita, upload), consulta do catálogo e registro de aplicação de insumo
 - [ ] Permissões finas por perfil/módulo
 - [ ] Testes de regras de negócio e fluxos completos
 

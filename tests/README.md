@@ -33,6 +33,10 @@ Arquivos existentes:
   remover, validação de nome obrigatório, associação cultura↔gleba (criação e
   sincronização na edição), escopo por propriedade (um usuário não acessa dados
   de outro → 404) e exigência de login.
+- **`test_equipe_financeiro_crud.py`** — CRUD de Equipe (criar/editar/remover,
+  e-mail normalizado, escopo) e Financeiro (criar receita/despesa, valor com
+  vírgula/ponto, validações de tipo/valor>0/data → 400, totais
+  receitas/despesas/saldo, escopo por propriedade) e exigência de login.
 
 > As rotas protegidas e a rota `/` são testadas também em
 > `test_placeholder_routes.py` (redirecionam sem login; respondem 200 com login).

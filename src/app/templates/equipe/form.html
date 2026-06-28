@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}{{ "Editar" if membro else "Novo" }} membro — ConnectAgro{% endblock %}
+
+{% block content %}
+<section class="card">
+  <h1>{{ "Editar membro" if membro else "Novo membro" }}</h1>
+
+  <form method="post" class="form-vertical"
+        action="{{ url_for('equipe.editar', membro_id=membro.id) if membro else url_for('equipe.novo') }}">
+    <label for="nome">Nome *</label>
+    <input type="text" id="nome" name="nome" required value="{{ form.nome or '' }}">
+
+    <label for="funcao">Função</label>
+    <input type="text" id="funcao" name="funcao" value="{{ form.funcao or '' }}">
+
+    <label for="email">E-mail</label>
+    <input type="email" id="email" name="email" value="{{ form.email or '' }}">
+
+    <label for="telefone">Telefone</label>
+    <input type="text" id="telefone" name="telefone" value="{{ form.telefone or '' }}">
+
+    <label class="check-inline">
+      <input type="checkbox" name="ativo" value="1" {{ "checked" if form.ativo else "" }}>
+      Ativo
+    </label>
+
+    <div class="form-acoes">
+      <button type="submit" class="btn-acao">Salvar</button>
+      <a href="{{ url_for('equipe.index') }}">Cancelar</a>
+    </div>
+  </form>
+</section>
+{% endblock %}
