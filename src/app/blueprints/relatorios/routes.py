@@ -13,6 +13,7 @@ from ...utils.formatters import (
     formatar_numero,
     formatar_tamanho,
 )
+from ...utils.permissions import require_permission
 from ...services.relatorios_service import (
     FiltroInvalidoError,
     montar_relatorio_agricola,
@@ -34,12 +35,14 @@ FMT = {
 
 @relatorios_bp.route("/")
 @login_required
+@require_permission("relatorios.view")
 def index():
     return render_template("relatorios/index.html", propriedade=propriedade_atual(), **FMT)
 
 
 @relatorios_bp.route("/geral")
 @login_required
+@require_permission("relatorios.view")
 def geral():
     propriedade = propriedade_atual()
     dados = montar_relatorio_geral(propriedade)
@@ -48,6 +51,7 @@ def geral():
 
 @relatorios_bp.route("/financeiro")
 @login_required
+@require_permission("relatorios.view")
 def financeiro():
     propriedade = propriedade_atual()
     data_inicio = vazio_para_none(request.args.get("data_inicio"))
@@ -67,6 +71,7 @@ def financeiro():
 
 @relatorios_bp.route("/agricola")
 @login_required
+@require_permission("relatorios.view")
 def agricola():
     propriedade = propriedade_atual()
     dados = montar_relatorio_agricola(propriedade)
@@ -75,6 +80,7 @@ def agricola():
 
 @relatorios_bp.route("/aplicacoes")
 @login_required
+@require_permission("relatorios.view")
 def aplicacoes():
     propriedade = propriedade_atual()
     data_inicio = vazio_para_none(request.args.get("data_inicio"))
@@ -94,6 +100,7 @@ def aplicacoes():
 
 @relatorios_bp.route("/uploads")
 @login_required
+@require_permission("relatorios.view")
 def uploads():
     propriedade = propriedade_atual()
     dados = montar_relatorio_uploads(propriedade)
