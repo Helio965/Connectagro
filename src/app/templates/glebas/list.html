@@ -6,7 +6,9 @@
 <section class="card">
   <div class="card-head">
     <h1>Glebas</h1>
+    {% if can("glebas.create") %}
     <a class="btn-acao" href="{{ url_for('glebas.nova') }}">+ Nova gleba</a>
+    {% endif %}
   </div>
 
   {% if glebas %}
@@ -23,18 +25,23 @@
         <td>{{ g.area_ha if g.area_ha is not none else "—" }}</td>
         <td>{{ g.tipo_solo or "—" }}</td>
         <td class="acoes">
+          {% if can("glebas.edit") %}
           <a href="{{ url_for('glebas.editar', gleba_id=g.id) }}">Editar</a>
+          {% endif %}
+          {% if can("glebas.delete") %}
           <form method="post" action="{{ url_for('glebas.remover', gleba_id=g.id) }}"
                 onsubmit="return confirm('Remover esta gleba?');">
             <button type="submit" class="btn-link-danger">Remover</button>
           </form>
+          {% endif %}
+          {% if not can("glebas.edit") and not can("glebas.delete") %}—{% endif %}
         </td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
   {% else %}
-  <p>Nenhuma gleba cadastrada ainda. <a href="{{ url_for('glebas.nova') }}">Criar a primeira</a>.</p>
+  <p>Nenhuma gleba cadastrada ainda.{% if can("glebas.create") %} <a href="{{ url_for('glebas.nova') }}">Criar a primeira</a>.{% endif %}</p>
   {% endif %}
 </section>
 {% endblock %}
