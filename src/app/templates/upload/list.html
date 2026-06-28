@@ -6,7 +6,9 @@
 <section class="card">
   <div class="card-head">
     <h1>Upload de arquivos</h1>
+    {% if can("upload.create") %}
     <a class="btn-acao" href="{{ url_for('upload.novo') }}">+ Novo arquivo</a>
+    {% endif %}
   </div>
 
   <p class="hint">Envie apenas documentos relacionados à gestão da propriedade.</p>
@@ -29,18 +31,23 @@
         <td>{{ arquivo.descricao or "—" }}</td>
         <td>{{ arquivo.enviado_em }}</td>
         <td class="acoes">
+          {% if can("upload.download") %}
           <a href="{{ url_for('upload.download', arquivo_id=arquivo.id) }}">Baixar</a>
+          {% endif %}
+          {% if can("upload.delete") %}
           <form method="post" action="{{ url_for('upload.remover', arquivo_id=arquivo.id) }}"
                 onsubmit="return confirm('Remover este arquivo?');">
             <button type="submit" class="btn-link-danger">Remover</button>
           </form>
+          {% endif %}
+          {% if not can("upload.download") and not can("upload.delete") %}—{% endif %}
         </td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
   {% else %}
-  <p>Nenhum arquivo enviado ainda. <a href="{{ url_for('upload.novo') }}">Enviar o primeiro</a>.</p>
+  <p>Nenhum arquivo enviado ainda.{% if can("upload.create") %} <a href="{{ url_for('upload.novo') }}">Enviar o primeiro</a>.{% endif %}</p>
   {% endif %}
 </section>
 {% endblock %}

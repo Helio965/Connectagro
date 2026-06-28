@@ -6,6 +6,7 @@ from ...models import EquipeMembro
 from ...models._helpers import iso_now
 from ...utils.auth import login_required
 from ...utils.contexto import propriedade_atual, vazio_para_none
+from ...utils.permissions import require_permission
 from . import equipe_bp
 
 
@@ -24,6 +25,7 @@ def _email_normalizado(valor):
 
 @equipe_bp.route("/")
 @login_required
+@require_permission("equipe.view")
 def index():
     propriedade = propriedade_atual()
     membros = (EquipeMembro.query
@@ -35,6 +37,7 @@ def index():
 
 @equipe_bp.route("/novo", methods=["GET", "POST"])
 @login_required
+@require_permission("equipe.create")
 def novo():
     propriedade = propriedade_atual()
     if request.method == "POST":
@@ -60,6 +63,7 @@ def novo():
 
 @equipe_bp.route("/<int:membro_id>/editar", methods=["GET", "POST"])
 @login_required
+@require_permission("equipe.edit")
 def editar(membro_id):
     propriedade = propriedade_atual()
     membro = _membro_da_propriedade_ou_404(membro_id, propriedade)
@@ -83,6 +87,7 @@ def editar(membro_id):
 
 @equipe_bp.route("/<int:membro_id>/remover", methods=["POST"])
 @login_required
+@require_permission("equipe.delete")
 def remover(membro_id):
     propriedade = propriedade_atual()
     membro = _membro_da_propriedade_ou_404(membro_id, propriedade)

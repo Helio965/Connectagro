@@ -6,6 +6,7 @@ from ...models import FinanceiroLancamento
 from ...models._helpers import iso_now
 from ...utils.auth import login_required
 from ...utils.contexto import parse_float, propriedade_atual, vazio_para_none
+from ...utils.permissions import require_permission
 from . import financeiro_bp
 
 TIPOS_VALIDOS = ("receita", "despesa")
@@ -40,6 +41,7 @@ def _ler_e_validar_form():
 
 @financeiro_bp.route("/")
 @login_required
+@require_permission("financeiro.view")
 def index():
     propriedade = propriedade_atual()
     lancamentos = (FinanceiroLancamento.query
@@ -56,6 +58,7 @@ def index():
 
 @financeiro_bp.route("/novo", methods=["GET", "POST"])
 @login_required
+@require_permission("financeiro.create")
 def novo():
     propriedade = propriedade_atual()
     if request.method == "POST":
@@ -74,6 +77,7 @@ def novo():
 
 @financeiro_bp.route("/<int:lancamento_id>/editar", methods=["GET", "POST"])
 @login_required
+@require_permission("financeiro.edit")
 def editar(lancamento_id):
     propriedade = propriedade_atual()
     lanc = _lancamento_da_propriedade_ou_404(lancamento_id, propriedade)
@@ -98,6 +102,7 @@ def editar(lancamento_id):
 
 @financeiro_bp.route("/<int:lancamento_id>/remover", methods=["POST"])
 @login_required
+@require_permission("financeiro.delete")
 def remover(lancamento_id):
     propriedade = propriedade_atual()
     lanc = _lancamento_da_propriedade_ou_404(lancamento_id, propriedade)

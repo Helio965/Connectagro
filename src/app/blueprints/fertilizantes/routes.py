@@ -10,6 +10,7 @@ from ...utils.catalogo import (
     primeiro_tecnico,
     status_disponiveis,
 )
+from ...utils.permissions import require_permission
 from . import fertilizantes_bp
 
 CLASSE = "fertilizante"
@@ -19,6 +20,7 @@ CAMPOS_LISTA = ("nutrientes_principais", "culturas_comuns")
 
 @fertilizantes_bp.route("/")
 @login_required
+@require_permission("catalogo.view")
 def index():
     q = request.args.get("q") or None
     categoria = request.args.get("categoria") or None
@@ -36,6 +38,7 @@ def index():
 
 @fertilizantes_bp.route("/<slug>")
 @login_required
+@require_permission("catalogo.view")
 def detalhe(slug):
     produto = ProdutoBase.query.filter_by(slug=slug, classe=CLASSE).first()
     if produto is None:

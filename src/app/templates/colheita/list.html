@@ -6,7 +6,9 @@
 <section class="card">
   <div class="card-head">
     <h1>Colheita</h1>
+    {% if can("colheita.create") %}
     <a class="btn-acao" href="{{ url_for('colheita.nova') }}">+ Nova colheita</a>
+    {% endif %}
   </div>
 
   {% if registros %}
@@ -37,18 +39,23 @@
         <td>{{ r.unidade or "—" }}</td>
         <td>{{ r.qualidade or "—" }}</td>
         <td class="acoes">
+          {% if can("colheita.edit") %}
           <a href="{{ url_for('colheita.editar', colheita_id=r.id) }}">Editar</a>
+          {% endif %}
+          {% if can("colheita.delete") %}
           <form method="post" action="{{ url_for('colheita.remover', colheita_id=r.id) }}"
                 onsubmit="return confirm('Remover este registro de colheita?');">
             <button type="submit" class="btn-link-danger">Remover</button>
           </form>
+          {% endif %}
+          {% if not can("colheita.edit") and not can("colheita.delete") %}—{% endif %}
         </td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
   {% else %}
-  <p>Nenhum registro de colheita ainda. <a href="{{ url_for('colheita.nova') }}">Registrar o primeiro</a>.</p>
+  <p>Nenhum registro de colheita ainda.{% if can("colheita.create") %} <a href="{{ url_for('colheita.nova') }}">Registrar o primeiro</a>.{% endif %}</p>
   {% endif %}
 </section>
 {% endblock %}

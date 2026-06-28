@@ -14,7 +14,7 @@ def _login(app_db, email):
 def _criar_usuario_propriedade(email, nome_propriedade):
     from app.models import Propriedade, Usuario
 
-    usuario = Usuario(nome=email, email=email, perfil="tecnico", ativo=True,
+    usuario = Usuario(nome=email, email=email, perfil="admin", ativo=True,
                       senha_hash=gerar_hash_senha("senha123"))
     db.session.add(usuario)
     db.session.commit()

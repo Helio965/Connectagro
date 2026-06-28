@@ -36,12 +36,17 @@ def create_app(config_name=None):
     # Comandos CLI (ex.: flask init-db, seed-users)
     register_commands(app)
 
-    # Dados do usuário logado disponíveis nos templates Jinja.
+    # Dados do usuário logado e autorização disponíveis nos templates Jinja.
     from .utils.auth import is_authenticated, usuario_atual
+    from .utils.permissions import can
 
     @app.context_processor
     def inject_usuario():
-        return {"current_user": usuario_atual(), "is_authenticated": is_authenticated()}
+        return {
+            "current_user": usuario_atual(),
+            "is_authenticated": is_authenticated(),
+            "can": can,
+        }
 
     # Health check
     @app.route("/health")
@@ -49,6 +54,10 @@ def create_app(config_name=None):
         return jsonify({"status": "ok", "app": app.config.get("APP_NAME", "ConnectAgro")})
 
     # Handlers de erro
+    @app.errorhandler(403)
+    def forbidden(error):
+        return render_template("errors/403.html"), 403
+
     @app.errorhandler(404)
     def not_found(error):
         return render_template("errors/404.html"), 404

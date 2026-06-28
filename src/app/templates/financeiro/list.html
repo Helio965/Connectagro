@@ -6,7 +6,9 @@
 <section class="card">
   <div class="card-head">
     <h1>Financeiro</h1>
+    {% if can("financeiro.create") %}
     <a class="btn-acao" href="{{ url_for('financeiro.novo') }}">+ Novo lançamento</a>
+    {% endif %}
   </div>
 
   <div class="fin-totais">
@@ -40,18 +42,23 @@
         <td>{{ l.descricao or "—" }}</td>
         <td>{{ "%.2f"|format(l.valor) }}</td>
         <td class="acoes">
+          {% if can("financeiro.edit") %}
           <a href="{{ url_for('financeiro.editar', lancamento_id=l.id) }}">Editar</a>
+          {% endif %}
+          {% if can("financeiro.delete") %}
           <form method="post" action="{{ url_for('financeiro.remover', lancamento_id=l.id) }}"
                 onsubmit="return confirm('Remover este lançamento?');">
             <button type="submit" class="btn-link-danger">Remover</button>
           </form>
+          {% endif %}
+          {% if not can("financeiro.edit") and not can("financeiro.delete") %}—{% endif %}
         </td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
   {% else %}
-  <p>Nenhum lançamento ainda. <a href="{{ url_for('financeiro.novo') }}">Registrar o primeiro</a>.</p>
+  <p>Nenhum lançamento ainda.{% if can("financeiro.create") %} <a href="{{ url_for('financeiro.novo') }}">Registrar o primeiro</a>.{% endif %}</p>
   {% endif %}
 </section>
 {% endblock %}

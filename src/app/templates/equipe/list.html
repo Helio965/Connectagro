@@ -6,7 +6,9 @@
 <section class="card">
   <div class="card-head">
     <h1>Equipe</h1>
+    {% if can("equipe.create") %}
     <a class="btn-acao" href="{{ url_for('equipe.novo') }}">+ Novo membro</a>
+    {% endif %}
   </div>
 
   {% if membros %}
@@ -25,18 +27,23 @@
         <td>{{ m.telefone or "—" }}</td>
         <td>{{ "Ativo" if m.ativo else "Inativo" }}</td>
         <td class="acoes">
+          {% if can("equipe.edit") %}
           <a href="{{ url_for('equipe.editar', membro_id=m.id) }}">Editar</a>
+          {% endif %}
+          {% if can("equipe.delete") %}
           <form method="post" action="{{ url_for('equipe.remover', membro_id=m.id) }}"
                 onsubmit="return confirm('Remover este membro?');">
             <button type="submit" class="btn-link-danger">Remover</button>
           </form>
+          {% endif %}
+          {% if not can("equipe.edit") and not can("equipe.delete") %}—{% endif %}
         </td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
   {% else %}
-  <p>Nenhum membro cadastrado ainda. <a href="{{ url_for('equipe.novo') }}">Adicionar o primeiro</a>.</p>
+  <p>Nenhum membro cadastrado ainda.{% if can("equipe.create") %} <a href="{{ url_for('equipe.novo') }}">Adicionar o primeiro</a>.{% endif %}</p>
   {% endif %}
 </section>
 {% endblock %}

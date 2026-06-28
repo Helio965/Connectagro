@@ -10,6 +10,7 @@ from ...extensions import db
 from ...models import AplicacaoInsumo, Cultura, CulturaGleba, Gleba, ProdutoBase
 from ...utils.auth import login_required
 from ...utils.contexto import parse_float, propriedade_atual, vazio_para_none
+from ...utils.permissions import require_permission
 from . import aplicacoes_bp
 
 STATUS_BLOQUEADO = "bloqueado_historico"
@@ -122,6 +123,7 @@ def _ler_e_validar_form(propriedade):
 
 @aplicacoes_bp.route("/")
 @login_required
+@require_permission("aplicacoes.view")
 def index():
     propriedade = propriedade_atual()
     ids_validos = _ids_cultura_gleba_validos(propriedade)
@@ -137,6 +139,7 @@ def index():
 
 @aplicacoes_bp.route("/nova", methods=["GET", "POST"])
 @login_required
+@require_permission("aplicacoes.create")
 def nova():
     propriedade = propriedade_atual()
     opcoes_cultura_gleba = _opcoes_cultura_gleba(propriedade)
@@ -164,6 +167,7 @@ def nova():
 
 @aplicacoes_bp.route("/<int:aplicacao_id>/editar", methods=["GET", "POST"])
 @login_required
+@require_permission("aplicacoes.edit")
 def editar(aplicacao_id):
     propriedade = propriedade_atual()
     aplicacao = _aplicacao_da_propriedade_ou_404(aplicacao_id, propriedade)
@@ -199,6 +203,7 @@ def editar(aplicacao_id):
 
 @aplicacoes_bp.route("/<int:aplicacao_id>/remover", methods=["POST"])
 @login_required
+@require_permission("aplicacoes.delete")
 def remover(aplicacao_id):
     propriedade = propriedade_atual()
     aplicacao = _aplicacao_da_propriedade_ou_404(aplicacao_id, propriedade)

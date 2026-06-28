@@ -34,11 +34,13 @@
     <strong class="metric-value">{{ dashboard.culturas.total }}</strong>
     <small>{{ dashboard.culturas.total_associacoes }} associações cultura↔gleba</small>
   </article>
+  {% if can("financeiro.view") %}
   <article class="metric-card">
     <span class="metric-label">Financeiro</span>
     <strong class="metric-value">{{ formatar_moeda(dashboard.financeiro.saldo) }}</strong>
     <small>{{ dashboard.financeiro.total_lancamentos }} lançamentos</small>
   </article>
+  {% endif %}
   <article class="metric-card">
     <span class="metric-label">Colheita</span>
     <strong class="metric-value">{{ dashboard.colheita.total }}</strong>
@@ -54,11 +56,13 @@
     <strong class="metric-value">{{ dashboard.uploads.total }}</strong>
     <small>{{ formatar_tamanho(dashboard.uploads.tamanho_total) }} armazenados</small>
   </article>
+  {% if can("equipe.view") %}
   <article class="metric-card">
     <span class="metric-label">Equipe</span>
     <strong class="metric-value">{{ dashboard.equipe.total }}</strong>
     <small>{{ dashboard.equipe.ativos }} ativos · {{ dashboard.equipe.inativos }} inativos</small>
   </article>
+  {% endif %}
   <article class="metric-card">
     <span class="metric-label">Catálogo</span>
     <strong class="metric-value">{{ dashboard.catalogo.defensivos + dashboard.catalogo.fertilizantes }}</strong>
@@ -67,6 +71,7 @@
 </section>
 
 <div class="dashboard-columns">
+  {% if can("financeiro.view") %}
   <section class="dashboard-section">
     <h2>Financeiro</h2>
     <div class="finance-summary">
@@ -75,6 +80,7 @@
       <span><strong>Saldo</strong>{{ formatar_moeda(dashboard.financeiro.saldo) }}</span>
     </div>
   </section>
+  {% endif %}
 
   <section class="dashboard-section">
     <h2>Culturas por status</h2>
@@ -106,18 +112,19 @@
 <section class="dashboard-section">
   <h2>Atalhos rápidos</h2>
   <div class="quick-actions">
-    <a href="{{ url_for('glebas.nova') }}">Nova Gleba</a>
-    <a href="{{ url_for('culturas.nova') }}">Nova Cultura</a>
-    <a href="{{ url_for('financeiro.novo') }}">Novo Lançamento Financeiro</a>
-    <a href="{{ url_for('colheita.nova') }}">Nova Colheita</a>
-    <a href="{{ url_for('aplicacoes.nova') }}">Nova Aplicação</a>
-    <a href="{{ url_for('upload.novo') }}">Novo Upload</a>
-    <a href="{{ url_for('defensivos.index') }}">Catálogo de Defensivos</a>
-    <a href="{{ url_for('fertilizantes.index') }}">Catálogo de Fertilizantes</a>
+    {% if can("glebas.create") %}<a href="{{ url_for('glebas.nova') }}">Nova Gleba</a>{% endif %}
+    {% if can("culturas.create") %}<a href="{{ url_for('culturas.nova') }}">Nova Cultura</a>{% endif %}
+    {% if can("financeiro.create") %}<a href="{{ url_for('financeiro.novo') }}">Novo Lançamento Financeiro</a>{% endif %}
+    {% if can("colheita.create") %}<a href="{{ url_for('colheita.nova') }}">Nova Colheita</a>{% endif %}
+    {% if can("aplicacoes.create") %}<a href="{{ url_for('aplicacoes.nova') }}">Nova Aplicação</a>{% endif %}
+    {% if can("upload.create") %}<a href="{{ url_for('upload.novo') }}">Novo Upload</a>{% endif %}
+    {% if can("catalogo.view") %}<a href="{{ url_for('defensivos.index') }}">Catálogo de Defensivos</a>{% endif %}
+    {% if can("catalogo.view") %}<a href="{{ url_for('fertilizantes.index') }}">Catálogo de Fertilizantes</a>{% endif %}
   </div>
 </section>
 
 <div class="dashboard-columns">
+  {% if can("financeiro.view") %}
   <section class="dashboard-section">
     <h2>Últimos lançamentos financeiros</h2>
     {% if dashboard.financeiro.ultimos %}
@@ -138,6 +145,7 @@
       <p class="empty-state">Nenhum lançamento financeiro cadastrado.</p>
     {% endif %}
   </section>
+  {% endif %}
 
   <section class="dashboard-section">
     <h2>Últimas colheitas</h2>

@@ -6,6 +6,7 @@ from ...models import Gleba
 from ...models._helpers import iso_now
 from ...utils.auth import login_required
 from ...utils.contexto import parse_float, propriedade_atual, vazio_para_none
+from ...utils.permissions import require_permission
 from . import glebas_bp
 
 
@@ -18,6 +19,7 @@ def _gleba_da_propriedade_ou_404(gleba_id, propriedade):
 
 @glebas_bp.route("/")
 @login_required
+@require_permission("glebas.view")
 def index():
     propriedade = propriedade_atual()
     glebas = (Gleba.query
@@ -29,6 +31,7 @@ def index():
 
 @glebas_bp.route("/nova", methods=["GET", "POST"])
 @login_required
+@require_permission("glebas.create")
 def nova():
     propriedade = propriedade_atual()
     if request.method == "POST":
@@ -54,6 +57,7 @@ def nova():
 
 @glebas_bp.route("/<int:gleba_id>/editar", methods=["GET", "POST"])
 @login_required
+@require_permission("glebas.edit")
 def editar(gleba_id):
     propriedade = propriedade_atual()
     gleba = _gleba_da_propriedade_ou_404(gleba_id, propriedade)
@@ -78,6 +82,7 @@ def editar(gleba_id):
 
 @glebas_bp.route("/<int:gleba_id>/remover", methods=["POST"])
 @login_required
+@require_permission("glebas.delete")
 def remover(gleba_id):
     propriedade = propriedade_atual()
     gleba = _gleba_da_propriedade_ou_404(gleba_id, propriedade)

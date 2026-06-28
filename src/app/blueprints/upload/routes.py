@@ -18,6 +18,7 @@ from ...extensions import db
 from ...models import UploadArquivo
 from ...utils.auth import login_required
 from ...utils.contexto import propriedade_atual, vazio_para_none
+from ...utils.permissions import require_permission
 from . import upload_bp
 
 EXTENSOES_PERMITIDAS = {"pdf", "png", "jpg", "jpeg", "csv", "xlsx", "txt", "docx"}
@@ -136,6 +137,7 @@ def _validar_upload(file_storage):
 
 @upload_bp.route("/")
 @login_required
+@require_permission("upload.view")
 def index():
     propriedade = propriedade_atual()
     arquivos = (UploadArquivo.query
@@ -148,6 +150,7 @@ def index():
 
 @upload_bp.route("/novo", methods=["GET", "POST"])
 @login_required
+@require_permission("upload.create")
 def novo():
     propriedade = propriedade_atual()
     if request.method == "POST":
@@ -185,6 +188,7 @@ def novo():
 
 @upload_bp.route("/<int:arquivo_id>/download")
 @login_required
+@require_permission("upload.download")
 def download(arquivo_id):
     propriedade = propriedade_atual()
     arquivo = _arquivo_da_propriedade_ou_404(arquivo_id, propriedade)
@@ -201,6 +205,7 @@ def download(arquivo_id):
 
 @upload_bp.route("/<int:arquivo_id>/remover", methods=["POST"])
 @login_required
+@require_permission("upload.delete")
 def remover(arquivo_id):
     propriedade = propriedade_atual()
     arquivo = _arquivo_da_propriedade_ou_404(arquivo_id, propriedade)

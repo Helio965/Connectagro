@@ -5,90 +5,48 @@ Testes automatizados do **ConnectAgro** (pytest).
 ## Estado atual
 
 Os testes usam a **Application Factory** (`create_app("testing")`) com banco
-**SQLite em memória** (ver `conftest.py`) e **não** dependem de banco `.db` real.
-Testes de upload usam pasta temporária (`tmp_path`) para não escrever arquivos
-reais no repositório.
+SQLite em memória e não dependem de banco `.db` real. Testes de upload usam pasta
+temporária (`tmp_path`) para não escrever arquivos reais no repositório.
 
-Arquivos existentes:
+Arquivos principais:
 
 - **`conftest.py`** — coloca `src/` no path; fixtures `app` e `client`.
 - **`test_app_factory.py`** — criação da app no modo testing; `/health`; rota `/`.
-- **`test_placeholder_routes.py`** — rotas públicas respondem 200; rotas dos
-  módulos protegidos redirecionam sem login e respondem 200 com login.
-- **`test_models_schema.py`** — registro das 15 tabelas no metadata; colunas
-  principais; `db.create_all()`; inserção mínima; unicidade de `usuario.email` e
-  `produto_base.slug`; `produto_preco`/`produto_imagem` existem mas vazias; seed
-  não importado automaticamente.
-- **`test_catalogo_seed.py`** — Flask-Migrate inicializado sem quebrar a app;
-  validação do seed; importação idempotente; preço/imagem vazios; itens
-  bloqueados ignorados.
-- **`test_auth.py`** — autenticação: `/auth/login`, login válido, senha errada,
-  usuário inativo, logout, rotas protegidas, `/health` público, sessão sem senha,
-  senha armazenada como hash e `seed-users` idempotente.
-- **`test_dashboard_operacional.py`** — Dashboard Operacional: exige login;
-  responde 200 com login; mostra propriedade atual; calcula totais de glebas,
-  culturas, financeiro, equipe, colheita, aplicações e uploads; não vaza dados de
-  outra propriedade; mostra totais globais do catálogo; exibe estados vazios;
-  contém atalhos principais; e não contém termos de venda.
-- **`test_mapa_real.py`** — Mapa real simplificado: exige login; `/mapa/` e
-  `/mapa/dados` respondem com login; JSON é escopado pela propriedade atual e não
-  expõe usuário/e-mail; separa glebas com coordenadas válidas das sem coordenadas
-  válidas; ignora GeoJSON inválido sem quebrar; não possui rotas POST; mostra
-  estados vazios; e não apresenta recursos avançados como funcionalidade ativa.
-- **`test_ia_simulada.py`** — IA Simulada Operacional: exige login; `/ia/`
-  responde com login; mostra avisos obrigatórios; POST válido salva
-  `IaInteracao`; valida pergunta vazia e limite de 1000 caracteres; vincula
-  usuário/propriedade atuais; histórico não vaza entre usuários/propriedades;
-  respostas por tema cobrem financeiro, glebas, culturas, colheita, aplicações,
-  documentos, catálogo e fallback; e respostas não usam termos proibidos.
-- **`test_ia_simulada_service.py`** — Serviço de IA simulada: classifica intenção,
-  monta contexto operacional, gera alertas, responde resumo e registra/lista
-  interações sem passar pela rota.
-- **`test_relatorios_operacionais.py`** — Relatórios HTML (geral, financeiro,
-  agrícola, aplicações, uploads): exige login; totais e filtros (período/tipo/
-  classe) com 400 em filtro inválido; escopo por propriedade (sem vazamento);
-  avisos de não recomendação/validação e de não leitura de uploads; ausência de
-  termos de venda/recomendação; relatórios não criam registros.
-- **`test_relatorios_service.py`** — Serviço de relatórios: validação de período,
-  totais financeiros e erros de tipo/classe inválidos.
-- **`test_glebas_culturas_crud.py`** — CRUD de Glebas e Culturas, associação
-  cultura↔gleba, escopo por propriedade e exigência de login.
-- **`test_equipe_financeiro_crud.py`** — CRUD de Equipe e Financeiro, validações,
-  totais financeiros, escopo por propriedade e exigência de login.
-- **`test_colheita_crud.py`** — CRUD de Colheita, validação de `cultura_gleba_id`,
-  data obrigatória, quantidade opcional com vírgula/ponto e > 0, escopo por
-  propriedade, listagem, orientação sem associação e exigência de login.
-- **`test_catalogo_consulta.py`** — consulta somente leitura do catálogo: exige
-  login; listagens filtram por `classe`; busca e filtros; detalhe por slug e 404;
-  ausência de termos de compra; aviso de preço/imagem pendentes; render de campos
-  JSON; `produto_preco`/`produto_imagem` seguem vazios.
-- **`test_aplicacoes_crud.py`** — CRUD de Aplicações de Insumo: exige login;
-  cria/edita/remove aplicação válida; valida `cultura_gleba_id`, produto e data;
-  bloqueia produto histórico; impede cultura↔gleba de outra propriedade; aceita
-  dose com vírgula/ponto e recusa dose inválida ou não positiva; garante 404 para
-  acesso a aplicação de outra propriedade; evita ações de venda; e confirma que
-  `ProdutoPreco`/`ProdutoImagem` não são criados.
-- **`test_upload_crud.py`** — Upload de Arquivos: exige login; GET `/upload/`
-  com login responde 200; upload válido cria registro e arquivo físico em pasta
-  temporária; nome salvo usa `secure_filename` e UUID; upload sem arquivo ou com
-  extensão proibida retorna 400; extensões permitidas funcionam; nome malicioso
-  não sai da pasta de upload; listagem exibe nome, descrição e download; download
-  próprio funciona; download/remoção de arquivo de outra propriedade retorna 404;
-  remoção apaga registro e arquivo físico; ausência do arquivo físico não quebra
-  remoção; caminho salvo não é absoluto; e upload não cria `ProdutoPreco` nem
-  `ProdutoImagem`.
+- **`test_placeholder_routes.py`** — rotas públicas 200; rotas protegidas
+  redirecionam sem login e respondem com login admin.
+- **`test_models_schema.py`** — tabelas, colunas principais, `db.create_all()`,
+  unicidade e tabelas de preço/imagem vazias.
+- **`test_catalogo_seed.py`** — validação/importação idempotente do seed técnico.
+- **`test_auth.py`** — login/logout, usuário inativo, sessão sem senha,
+  `/health` público e `seed-users`.
+- **`test_permissions.py`** — Fase 6.3: matriz de permissões por perfil,
+  bloqueio backend com 403, menus/botões escondidos, rotas públicas preservadas,
+  usuário sem login redirecionado, escopo por propriedade preservado e garantia
+  de que ação sem permissão não cria registro.
+- **`test_dashboard_operacional.py`** — Dashboard Operacional e escopo por
+  propriedade.
+- **`test_mapa_real.py`** — Mapa real simplificado e endpoint JSON.
+- **`test_ia_simulada.py`** e **`test_ia_simulada_service.py`** — IA simulada por
+  regras e histórico escopado.
+- **`test_relatorios_operacionais.py`** e **`test_relatorios_service.py`** —
+  relatórios HTML e serviços somente leitura.
+- **`test_glebas_culturas_crud.py`** — CRUD de Glebas/Culturas e associação.
+- **`test_equipe_financeiro_crud.py`** — CRUD de Equipe/Financeiro.
+- **`test_colheita_crud.py`** — CRUD de Colheita.
+- **`test_catalogo_consulta.py`** — consulta somente leitura do catálogo.
+- **`test_aplicacoes_crud.py`** — CRUD de Aplicações de Insumo.
+- **`test_upload_crud.py`** — Upload seguro, download e remoção.
 
-> As rotas protegidas e a rota `/` são testadas também em
-> `test_placeholder_routes.py` (redirecionam sem login; respondem 200 com login).
+Para rodar:
 
-Para rodar: `pytest` (a partir da raiz do projeto).
+```bash
+pytest
+```
 
 ## Pendente para etapas futuras
 
-- Testes dos módulos ainda pendentes (Relatórios) quando forem implementados.
-- Testes de **permissões finas** por perfil/módulo.
-- Testes de **CSRF/Flask-WTF**, quando essa proteção entrar no escopo.
-- Testes de **fluxos completos** do MVP.
+- Testes de CSRF/Flask-WTF quando essa proteção entrar no escopo.
+- Testes de fluxos completos finais do MVP.
 
 ## Convenções
 

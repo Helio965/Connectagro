@@ -8,7 +8,7 @@ from app.utils.auth import gerar_hash_senha
 def _criar_usuario(email):
     from app.models import Usuario
 
-    usuario = Usuario(nome=email, email=email, perfil="tecnico", ativo=True,
+    usuario = Usuario(nome=email, email=email, perfil="admin", ativo=True,
                       senha_hash=gerar_hash_senha("senha123"))
     db.session.add(usuario)
     db.session.commit()
