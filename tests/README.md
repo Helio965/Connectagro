@@ -11,42 +11,39 @@ Arquivos existentes:
 
 - **`conftest.py`** — coloca `src/` no path; fixtures `app` e `client`.
 - **`test_app_factory.py`** — criação da app no modo testing; `/health`; rota `/`.
-- **`test_placeholder_routes.py`** — as 14 rotas (incl. `/health` e placeholders)
-  respondem HTTP 200.
+- **`test_placeholder_routes.py`** — rotas públicas respondem 200; rotas dos
+  módulos protegidos redirecionam sem login e respondem 200 com login.
 - **`test_models_schema.py`** — registro das 15 tabelas no metadata; colunas
-  principais; `db.create_all()`; inserção mínima (usuário, propriedade, produto
-  base e técnico); unicidade de `usuario.email` e `produto_base.slug`;
-  `produto_preco`/`produto_imagem` existem mas vazias; seed não importado
-  automaticamente.
+  principais; `db.create_all()`; inserção mínima; unicidade de `usuario.email` e
+  `produto_base.slug`; `produto_preco`/`produto_imagem` existem mas vazias; seed
+  não importado automaticamente.
 - **`test_catalogo_seed.py`** — Flask-Migrate inicializado sem quebrar a app;
   validação do seed (ids/slugs duplicados, FK inválida, preço/imagem não vazios);
   importação idempotente (popula `produto_base`/`produto_tecnico`, não popula
   preço/imagem, ignora itens bloqueados; listas salvas como JSON; campos
   `uso_principal`/`tipo_liberacao`).
-- **`test_auth.py`** — autenticação: `/auth/login` (GET 200), login válido
-  redireciona ao dashboard, senha errada não autentica (401), usuário inativo
-  não loga (403), logout limpa a sessão, rotas protegidas redirecionam sem login,
-  `/health` público, sessão sem senha, senha armazenada como hash, e
-  `seed-users` idempotente (3 usuários, sem duplicar).
-
-- **`test_glebas_culturas_crud.py`** — CRUD de Glebas e Culturas: criar/editar/
-  remover, validação de nome obrigatório, associação cultura↔gleba (criação e
-  sincronização na edição), escopo por propriedade (um usuário não acessa dados
-  de outro → 404) e exigência de login.
-- **`test_equipe_financeiro_crud.py`** — CRUD de Equipe (criar/editar/remover,
-  e-mail normalizado, escopo) e Financeiro (criar receita/despesa, valor com
-  vírgula/ponto, validações de tipo/valor>0/data → 400, totais
-  receitas/despesas/saldo, escopo por propriedade) e exigência de login.
-- **`test_colheita_crud.py`** — CRUD de Colheita: criar/editar/remover, validação
-  de `cultura_gleba_id` (obrigatório/inexistente/de outra propriedade → 400),
-  data obrigatória, quantidade com vírgula/ponto e > 0, escopo por propriedade
-  (404), listagem com cultura/gleba/quantidade/unidade/qualidade, orientação
-  quando não há associação, e exigência de login.
-- **`test_catalogo_consulta.py`** — consulta somente leitura do catálogo:
-  exige login; listagens filtram por `classe`; busca (`q`) e filtros (categoria,
-  status_regulatorio); detalhe por slug e 404; ausência de termos de compra;
-  aviso de preço/imagem pendentes; render de campos JSON (lista) e fallback para
-  JSON inválido; `produto_preco`/`produto_imagem` seguem vazios.
+- **`test_auth.py`** — autenticação: `/auth/login`, login válido, senha errada,
+  usuário inativo, logout, rotas protegidas, `/health` público, sessão sem senha,
+  senha armazenada como hash e `seed-users` idempotente.
+- **`test_glebas_culturas_crud.py`** — CRUD de Glebas e Culturas, associação
+  cultura↔gleba, escopo por propriedade e exigência de login.
+- **`test_equipe_financeiro_crud.py`** — CRUD de Equipe e Financeiro, validações,
+  totais financeiros, escopo por propriedade e exigência de login.
+- **`test_colheita_crud.py`** — CRUD de Colheita, validação de `cultura_gleba_id`,
+  data obrigatória, quantidade opcional com vírgula/ponto e > 0, escopo por
+  propriedade, listagem, orientação sem associação e exigência de login.
+- **`test_catalogo_consulta.py`** — consulta somente leitura do catálogo: exige
+  login; listagens filtram por `classe`; busca e filtros; detalhe por slug e 404;
+  ausência de termos de compra; aviso de preço/imagem pendentes; render de campos
+  JSON; `produto_preco`/`produto_imagem` seguem vazios.
+- **`test_aplicacoes_crud.py`** — CRUD de Aplicações de Insumo: exige login;
+  cria/edita/remove aplicação válida; valida `cultura_gleba_id`, produto e data;
+  bloqueia produto histórico por `status_sistema` ou `status_regulatorio`; impede
+  cultura↔gleba de outra propriedade; aceita dose com vírgula/ponto e recusa dose
+  inválida ou não positiva; garante 404 para acesso a aplicação de outra
+  propriedade; exibe cultura, gleba, produto, dose, unidade e responsável; orienta
+  quando faltam associação ou catálogo; evita ações de venda; e confirma que
+  `ProdutoPreco`/`ProdutoImagem` não são criados.
 
 > As rotas protegidas e a rota `/` são testadas também em
 > `test_placeholder_routes.py` (redirecionam sem login; respondem 200 com login).
@@ -55,9 +52,10 @@ Para rodar: `pytest` (a partir da raiz do projeto).
 
 ## Pendente para etapas futuras
 
-- Testes de **CRUDs** dos demais módulos (equipe, financeiro, colheita, upload).
+- Testes dos módulos ainda pendentes (Upload, Dashboard, Mapa real, IA simulada e
+  Relatórios) quando forem implementados.
 - Testes de **permissões finas** por perfil/módulo.
-- Testes de **regras de negócio** e **fluxos completos** do MVP.
+- Testes de **fluxos completos** do MVP.
 
 ## Convenções
 
