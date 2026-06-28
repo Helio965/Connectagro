@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}IA Simulada — ConnectAgro{% endblock %}
+
+{% block content %}
+<section class="card ia-card">
+  <div class="card-head">
+    <div>
+      <h1>IA Simulada</h1>
+      <p class="hint">Apoio operacional do MVP · {{ propriedade.nome }}</p>
+    </div>
+  </div>
+
+  <div class="ia-aviso">
+    <p>A IA do MVP é simulada, baseada em regras simples e não substitui orientação técnica profissional.</p>
+    <ul>
+      <li>Não recomenda produtos.</li>
+      <li>Não valida dose.</li>
+      <li>Não faz diagnóstico agronômico.</li>
+      <li>Não consulta internet ou fontes oficiais em tempo real.</li>
+      <li>Não lê o conteúdo de arquivos enviados.</li>
+    </ul>
+  </div>
+
+  <div class="ia-layout">
+    <section class="ia-card-bloco">
+      <h2>Perguntar</h2>
+      <form method="post" class="form-vertical">
+        <label for="pergunta">Pergunta</label>
+        <textarea id="pergunta" name="pergunta" rows="5" maxlength="1000">{{ pergunta_atual }}</textarea>
+        <div class="form-acoes">
+          <button class="btn-acao" type="submit">Perguntar</button>
+        </div>
+      </form>
+
+      <div class="ia-atalhos" aria-label="Perguntas rápidas">
+        {% for rotulo, pergunta in [
+          ("Resumo da propriedade", "Faça um resumo da propriedade."),
+          ("Situação financeira", "Como está o financeiro?"),
+          ("Glebas sem coordenadas", "Tenho glebas sem coordenadas?"),
+          ("Culturas e plantios", "Resumo das culturas e plantios."),
+          ("Colheitas", "Resumo das colheitas."),
+          ("Aplicações de insumo", "Resumo das aplicações de insumo."),
+          ("Documentos", "Resumo dos documentos."),
+          ("Catálogo", "O que existe no catálogo?")
+        ] %}
+          <form method="post">
+            <input type="hidden" name="pergunta" value="{{ pergunta }}">
+            <button type="submit">{{ rotulo }}</button>
+          </form>
+        {% endfor %}
+      </div>
+    </section>
+
+    <aside class="ia-card-bloco">
+      <h2>Alertas operacionais</h2>
+      <ul class="ia-alertas">
+        {% for alerta in alertas %}
+          <li>{{ alerta }}</li>
+        {% endfor %}
+      </ul>
+    </aside>
+  </div>
+
+  {% if resposta_atual %}
+    <section class="ia-resposta">
+      <h2>Resposta atual</h2>
+      <pre>{{ resposta_atual }}</pre>
+    </section>
+  {% endif %}
+
+  <section class="ia-resposta">
+    <h2>Resumo automático</h2>
+    <pre>{{ resumo_operacional }}</pre>
+  </section>
+
+  <section class="ia-historico">
+    <h2>Histórico</h2>
+    {% if interacoes %}
+      <ol>
+        {% for interacao in interacoes %}
+          <li>
+            <small>{{ interacao.criado_em }} · {{ interacao.tipo }}</small>
+            <strong>{{ interacao.pergunta }}</strong>
+            {% if interacao.resposta %}
+              <pre>{{ interacao.resposta }}</pre>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ol>
+    {% else %}
+      <p class="empty-state">Nenhuma interação com a IA simulada ainda.</p>
+    {% endif %}
+  </section>
+</section>
+{% endblock %}
