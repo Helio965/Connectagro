@@ -2,7 +2,7 @@
 
 ## Status do documento
 
-**Arquitetura técnica — v0.14 (CRUDs + catálogo + upload seguro + dashboard + mapa real simplificado).**
+**Arquitetura técnica — v0.15 (CRUDs + catálogo + upload seguro + dashboard + mapa + IA simulada).**
 
 Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetura-do-sistema.md):
 
@@ -13,9 +13,10 @@ Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetur
 > **Estado atual:** estão prontos a fundação Flask, modelos SQLAlchemy (15
 > tabelas), migrations, importação do catálogo técnico via CLI, autenticação real,
 > **Dashboard Operacional** somente leitura, **Mapa real simplificado** somente
-> leitura, CRUDs de Glebas, Culturas, Equipe, Financeiro, Colheita, Aplicações de
-> Insumo e **Upload de Arquivos**, além da consulta somente leitura de Defensivos
-> e Fertilizantes. `ProdutoPreco`/`ProdutoImagem` seguem vazios no MVP.
+> leitura, **IA Simulada Operacional** baseada em regras locais, CRUDs de Glebas,
+> Culturas, Equipe, Financeiro, Colheita, Aplicações de Insumo e **Upload de
+> Arquivos**, além da consulta somente leitura de Defensivos e Fertilizantes.
+> `ProdutoPreco`/`ProdutoImagem` seguem vazios no MVP.
 >
 > **Dashboard Operacional:** o módulo agrega dados já existentes da propriedade
 > atual, usando consultas aos módulos operacionais. Ele não cria registros, não
@@ -26,6 +27,11 @@ Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetur
 > operacional em `/mapa/` e expor dados em `/mapa/dados`. Ele não cria registros,
 > não altera models e não exige migration.
 >
+> **IA Simulada Operacional:** o módulo usa `services/ia_simulada_service.py` para
+> gerar respostas por regras simples e consultas locais. Registra perguntas e
+> respostas em `ia_interacao`, escopadas por usuário e propriedade. Não usa LLM,
+> API externa, internet, machine learning ou OCR.
+>
 > **Upload de Arquivos:** o módulo usa `UPLOAD_FOLDER`, salva arquivos localmente
 > fora da pasta pública `static` (`instance/uploads` por padrão), em subpastas por
 > propriedade, aplica `secure_filename`, gera nome único com UUID e grava em
@@ -33,7 +39,7 @@ Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetur
 > por usuários ficam fora do Git e não devem ser servidos diretamente por
 > `/static/uploads`.
 >
-> **Pendente:** IA simulada, Relatórios, permissões finas e CSRF/Flask-WTF.
+> **Pendente:** Relatórios, permissões finas e CSRF/Flask-WTF.
 
 ## Objetivo
 
@@ -70,6 +76,7 @@ Flask (rotas/blueprints)  ──►  Serviços/helpers  ──►  Modelos/Acess
   modifica estado.
 - **Mapa como visualização somente leitura:** usa coordenadas já cadastradas em
   Glebas, não cria dados e não altera schema.
+- **IA simulada por regras:** usa dados locais e não executa integração externa.
 - **Configuração por ambiente** via variáveis de ambiente (`.env`), sem segredos
   versionados.
 - Alinhamento total com os nomes de tabelas/campos do
@@ -89,6 +96,7 @@ Flask (rotas/blueprints)  ──►  Serviços/helpers  ──►  Modelos/Acess
 | Migrations       | Flask-Migrate (Alembic)                      | Pasta `migrations/` versionada                 |
 | Upload local     | Werkzeug `secure_filename` + Flask `send_from_directory` | Arquivos fora de `static` e do Git |
 | Mapa frontend    | Leaflet.js via CDN                           | Sem dependência Python/NPM nova                |
+| IA simulada      | Regras locais em Python                      | Sem LLM/API externa/internet                   |
 | Autenticação     | Sessão Flask + hash de senha (Werkzeug)      | Helpers em `utils/auth.py`                     |
 | Formulários/CSRF | Sem Flask-WTF nesta etapa                    | CSRF dedicado permanece pendente               |
 | Frontend         | HTML, CSS, JavaScript                        | Sem framework JS obrigatório no MVP            |
@@ -113,7 +121,7 @@ src/
     │   ├── financeiro/  upload/  equipe/  colheita/
     │   └── mapa/  ia/  relatorios/
     ├── models/                  # modelos SQLAlchemy de domínio (15 tabelas)
-    ├── services/                # catalogo_seed.py, dashboard_service.py
+    ├── services/                # catalogo_seed.py, dashboard_service.py, ia_simulada_service.py
     ├── utils/                   # auth.py, contexto.py, catalogo.py, formatters.py
     ├── templates/               # base.html, módulos, erros
     └── static/                  # css/, js/ (arquivos públicos)
@@ -176,6 +184,8 @@ instance/
   no schema inicial.
 - **Mapa real simplificado:** não exige migration nova porque usa campos já
   existentes em `gleba`.
+- **IA simulada:** não exige migration nova porque usa a tabela `ia_interacao` já
+  existente.
 
 ### Dashboard operacional
 
@@ -209,6 +219,32 @@ instance/
 - O módulo não cria, edita ou remove glebas, não mede área, não desenha polígonos,
   não importa/exporta GeoJSON, não usa GPS em tempo real, não usa PostGIS e não
   adiciona dependência Python/NPM.
+
+### IA simulada operacional
+
+- `src/app/blueprints/ia/routes.py` expõe `/ia/` com `GET` e `POST`, protegido por
+  `@login_required`.
+- `GET /ia/` renderiza `templates/ia/index.html` com formulário, atalhos rápidos,
+  resumo automático, alertas e últimas 10 interações.
+- `POST /ia/` valida pergunta obrigatória, mínimo de 2 caracteres e máximo de
+  1000 caracteres; entradas inválidas retornam HTTP 400 com flash.
+- `src/app/services/ia_simulada_service.py` contém funções testáveis:
+  `montar_contexto_operacional`, `gerar_resumo_operacional`,
+  `gerar_alertas_operacionais`, `classificar_intencao_simples`,
+  `responder_pergunta_simulada`, `registrar_interacao_ia` e
+  `listar_interacoes_ia`.
+- A IA classifica intenções por palavras-chave: resumo, financeiro, glebas,
+  culturas, colheita, aplicações, documentos, catálogo e fallback de ajuda.
+- Todas as consultas operacionais usam a propriedade atual. Colheita e Aplicações
+  são filtradas por joins com `CulturaGleba`, `Cultura` e `Gleba` da propriedade.
+- O histórico é persistido em `ia_interacao` com `usuario_id`, `propriedade_id`,
+  `pergunta`, `resposta` e `tipo="simulada"`.
+- A listagem do histórico filtra simultaneamente por `usuario_id` e
+  `propriedade_id`, ordenando por `criado_em desc` e `id desc`.
+- A IA não usa LLM, OpenAI, Claude, Gemini, API externa, internet, machine
+  learning, OCR ou leitura automática de uploads.
+- A IA não recomenda produtos, não valida dose, não faz diagnóstico agronômico,
+  não afirma validação oficial AGROFIT/MAPA ou SIPEAGRO/MAPA e não vende produtos.
 
 ### Upload local
 
@@ -245,10 +281,8 @@ instance/
 8. Envia documentos da propriedade no **Upload**.
 9. Registra **colheita**.
 10. Consulta o **mapa** das glebas com coordenadas cadastradas.
-11. Futuramente consulta relatórios e IA simulada.
-
-> **IA simulada:** quando implementada, não deve emitir recomendação agronômica
-> definitiva. Funcionará apenas como apoio textual/informativo e organizacional.
+11. Usa a **IA simulada** para apoio operacional baseado em dados locais.
+12. Futuramente consulta relatórios.
 
 ---
 
@@ -332,9 +366,14 @@ instance/
 - Separa glebas sem coordenadas válidas e ignora GeoJSON inválido com segurança.
 - Sem edição de coordenadas, desenho de polígonos, medição de área, GPS em tempo real, PostGIS ou camadas avançadas.
 
-### IA simulada
-- Apoio informativo por IA simulada.
-- Permanece pendente e não deve gerar recomendação agronômica definitiva.
+### IA simulada ✅
+- Apoio operacional por regras simples em `/ia/`.
+- Usa dados locais da propriedade atual: dashboard operacional, glebas, culturas,
+  financeiro, colheita, aplicações, uploads e catálogo.
+- Persiste histórico em `ia_interacao` com `tipo="simulada"`.
+- Histórico visível apenas para o usuário e propriedade correspondentes.
+- Sem LLM, API externa, internet, OCR, leitura de arquivos, recomendação
+  agronômica, validação de dose ou diagnóstico técnico.
 
 ### Relatórios
 - Relatórios operacionais e financeiros.
@@ -354,6 +393,8 @@ instance/
   Aplicações usam join com `CulturaGleba`, `Cultura` e `Gleba`.
 - Mapa filtra glebas por `propriedade_id` da propriedade atual e não retorna
   e-mail, perfil ou dados sensíveis de usuário em `/mapa/dados`.
+- IA filtra histórico por `usuario_id` e `propriedade_id`; respostas não incluem
+  senha, e-mail ou dados de usuário fora do contexto operacional.
 - Uploads ficam fora da pasta pública `static` por padrão; arquivos devem ser
   acessados apenas pelas rotas protegidas do módulo Upload.
 - Banco real, `.env`, uploads de usuário e arquivos sensíveis não são versionados.
@@ -366,7 +407,7 @@ instance/
 - O app de teste é criado por `create_app("testing")` com SQLite em memória.
 - Testes existentes cobrem: app factory, rotas protegidas, schema/modelos, seed,
   autenticação, CRUDs de Glebas/Culturas, Equipe/Financeiro, Colheita, consulta
-  do catálogo, Aplicações de Insumo, Upload, Dashboard e Mapa real.
+  do catálogo, Aplicações de Insumo, Upload, Dashboard, Mapa real e IA simulada.
 - `tests/test_dashboard_operacional.py` cobre login, resposta 200, nome da
   propriedade, totais por propriedade, culturas por status, financeiro, equipe,
   colheita por unidade, aplicações, uploads, totais globais do catálogo, estados
@@ -374,6 +415,11 @@ instance/
 - `tests/test_mapa_real.py` cobre login, endpoint JSON, escopo por propriedade,
   coordenadas válidas/inválidas, GeoJSON inválido, ausência de POST, estados
   vazios e ausência de recursos avançados como funcionalidade ativa.
+- `tests/test_ia_simulada.py` cobre login, avisos obrigatórios, POST válido,
+  validações de pergunta, persistência em `ia_interacao`, escopo de histórico,
+  respostas por intenção e ausência de termos proibidos.
+- `tests/test_ia_simulada_service.py` cobre classificação de intenção, montagem
+  de contexto, alertas, geração de resposta e registro/listagem do histórico.
 - `tests/test_upload_crud.py` usa pasta temporária para uploads e cobre login,
   envio válido, arquivo físico, nome seguro, extensão proibida/permitida, caminho
   malicioso, listagem, download, remoção, escopo por propriedade, garantia de
@@ -396,6 +442,9 @@ instance/
 - Dashboard deve permanecer somente leitura e sem criação de dados.
 - Mapa deve permanecer como visualização somente leitura no MVP, sem edição de
   coordenadas, medição, desenho de polígonos, PostGIS ou GPS em tempo real.
+- IA deve permanecer simulada por regras no MVP, sem LLM, API externa, internet,
+  OCR, leitura de uploads, recomendação agronômica, validação de dose ou
+  diagnóstico técnico.
 - No MVP, **preço e imagem** devem aparecer como pendentes / não consolidados.
 - A **validação diária do menor preço** pertence ao sistema final.
 - Usar nomes de tabelas e campos compatíveis com o DER e o dicionário de dados.
@@ -434,11 +483,11 @@ instance/
 - [x] CRUD de Aplicações de Insumo (histórico operacional, sem recomendação)
 - [x] Upload de Arquivos (local, seguro, escopado por propriedade)
 - [x] Mapa real simplificado (somente leitura, escopado por propriedade)
-- [x] Testes de fundação, schema, seed, autenticação, CRUDs, Dashboard, Mapa e consulta do catálogo
+- [x] IA Simulada Operacional (regras locais, histórico escopado)
+- [x] Testes de fundação, schema, seed, autenticação, CRUDs, Dashboard, Mapa, IA e consulta do catálogo
 
 **Pendente:**
 
-- [ ] IA simulada
 - [ ] Relatórios
 - [ ] Permissões finas por perfil/módulo
 - [ ] CSRF/Flask-WTF
