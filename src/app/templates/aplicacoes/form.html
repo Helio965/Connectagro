@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}{{ "Editar" if aplicacao else "Nova" }} aplicação — ConnectAgro{% endblock %}
+
+{% block content %}
+<section class="card">
+  <h1>{{ "Editar aplicação de insumo" if aplicacao else "Nova aplicação de insumo" }}</h1>
+
+  <p class="hint">
+    Este registro é apenas histórico operacional. O ConnectAgro não recomenda
+    produtos, não valida dose e não substitui orientação de um profissional habilitado.
+  </p>
+  <p class="hint">
+    O ConnectAgro não vende produtos, não possui carrinho e não emite cotação.
+  </p>
+  <p class="placeholder-tag">
+    Não registre produtos bloqueados/históricos como aplicação válida.
+  </p>
+
+  {% if not opcoes_cultura_gleba %}
+  <p class="placeholder-tag">
+    Você ainda não tem associações <strong>cultura↔gleba</strong>. Cadastre uma
+    <a href="{{ url_for('glebas.nova') }}">gleba</a> e uma
+    <a href="{{ url_for('culturas.nova') }}">cultura</a>, associando a cultura à
+    gleba, antes de registrar uma aplicação de insumo.
+  </p>
+  {% endif %}
+
+  {% if not opcoes_produtos %}
+  <p class="placeholder-tag">
+    Nenhum produto disponível no catálogo para aplicação. Importe o seed técnico com
+    <code>flask --app src/run.py import-catalog-seed</code>.
+  </p>
+  {% endif %}
+
+  {% if opcoes_cultura_gleba and opcoes_produtos %}
+  <form method="post" class="form-vertical"
+        action="{{ url_for('aplicacoes.editar', aplicacao_id=aplicacao.id) if aplicacao else url_for('aplicacoes.nova') }}">
+    <label for="cultura_gleba_id">Cultura ↔ Gleba *</label>
+    <select id="cultura_gleba_id" name="cultura_gleba_id" required>
+      <option value="">Selecione…</option>
+      {% for cg_id, rotulo in opcoes_cultura_gleba %}
+      <option value="{{ cg_id }}"
+        {{ "selected" if (form.cultura_gleba_id|string == cg_id|string) or (selecionado_cg == cg_id) else "" }}>
+        {{ rotulo }}
+      </option>
+      {% endfor %}
+    </select>
+
+    <label for="produto_base_id">Produto do catálogo *</label>
+    <select id="produto_base_id" name="produto_base_id" required>
+      <option value="">Selecione…</option>
+      {% for produto_id, rotulo in opcoes_produtos %}
+      <option value="{{ produto_id }}"
+        {{ "selected" if (form.produto_base_id|string == produto_id|string) or (selecionado_produto == produto_id) else "" }}>
+        {{ rotulo }}
+      </option>
+      {% endfor %}
+    </select>
+
+    <label for="data_aplicacao">Data da aplicação *</label>
+    <input type="date" id="data_aplicacao" name="data_aplicacao" required
+           value="{{ form.data_aplicacao or '' }}">
+
+    <label for="dose">Dose</label>
+    <input type="text" id="dose" name="dose" placeholder="Ex.: 2,5"
+           value="{{ form.dose if form.dose is not none else '' }}">
+
+    <label for="unidade">Unidade</label>
+    <input type="text" id="unidade" name="unidade" placeholder="kg/ha, L/ha"
+           value="{{ form.unidade or '' }}">
+
+    <label for="responsavel">Responsável</label>
+    <input type="text" id="responsavel" name="responsavel" value="{{ form.responsavel or '' }}">
+
+    <label for="observacao">Observação</label>
+    <textarea id="observacao" name="observacao" rows="3">{{ form.observacao or '' }}</textarea>
+
+    <div class="form-acoes">
+      <button type="submit" class="btn-acao">Salvar</button>
+      <a href="{{ url_for('aplicacoes.index') }}">Cancelar</a>
+    </div>
+  </form>
+  {% else %}
+  <p><a href="{{ url_for('aplicacoes.index') }}">Voltar para aplicações</a></p>
+  {% endif %}
+</section>
+{% endblock %}
