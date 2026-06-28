@@ -6,12 +6,12 @@ equipe, colheita e mapa, oferecendo ainda apoio por uma camada de IA e um
 catálogo técnico de produtos agrícolas para consulta rápida.
 
 > **Status do projeto:** fundação Flask, **modelos SQLAlchemy** (15 tabelas),
-> **migrations** (Flask-Migrate), **importação do catálogo técnico** (via CLI) e
-> **autenticação real** (login/logout com sessão Flask + `werkzeug.security`)
-> prontos. O projeto ainda **não** possui CRUD — os módulos seguem como
-> placeholders protegidos por login. `produto_preco`/`produto_imagem` continuam
-> **vazios** no MVP; preço e imagem ficam **pendentes** para o sistema final. O
-> banco populado **não** é versionado.
+> **migrations** (Flask-Migrate), **importação do catálogo técnico** (via CLI),
+> **autenticação real** (login/logout) e o **primeiro CRUD** — **Glebas** e
+> **Culturas** (com associação cultura↔gleba) — prontos. Os demais módulos seguem
+> como placeholders protegidos por login. `produto_preco`/`produto_imagem`
+> continuam **vazios** no MVP; preço e imagem ficam **pendentes** para o sistema
+> final. O banco populado **não** é versionado.
 
 ---
 
@@ -86,11 +86,11 @@ em etapas posteriores, evoluirá para a versão completa.
 │       ├── __init__.py    # create_app
 │       ├── config.py      # configuração por ambiente
 │       ├── extensions.py  # extensões (Flask-SQLAlchemy, Flask-Migrate)
-│       ├── blueprints/    # blueprints dos módulos: auth (login real) + placeholders
+│       ├── blueprints/    # auth (login), glebas/culturas (CRUD) + placeholders
 │       ├── models/        # modelos SQLAlchemy de domínio (15 tabelas)
 │       ├── commands.py    # CLI: init-db, validate/import-catalog-seed, seed-users
 │       ├── services/      # regras de negócio (ex.: catalogo_seed.py)
-│       ├── utils/         # utilitários (ex.: auth.py — sessão/login_required)
+│       ├── utils/         # utilitários (auth.py, contexto.py)
 │       ├── templates/     # HTML (Jinja2)
 │       └── static/        # css/, js/, uploads/
 ├── tests/                 # testes (pytest)

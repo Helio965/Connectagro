@@ -78,14 +78,26 @@
 > Sem cadastro público, recuperação de senha, JWT ou permissões finas por módulo
 > (etapas futuras). Ainda **sem CRUD**.
 
+## Etapa 5.2 — CRUD de Glebas e Culturas ✅
+
+- [x] **CRUD de Glebas** (criar/listar/editar/remover), escopo por propriedade.
+- [x] **CRUD de Culturas** (criar/listar/editar/remover) com `status`.
+- [x] **Associação cultura↔gleba** (`cultura_gleba`) sincronizada no formulário.
+- [x] Propriedade do usuário resolvida em `utils/contexto.py` (padrão criada se
+  não existir).
+- [x] Testes de CRUD e escopo (`tests/test_glebas_culturas_crud.py`).
+
+> Cada usuário opera sobre sua propriedade; um usuário não acessa glebas/culturas
+> de outro (404). Sem permissões finas por perfil ainda.
+
 ## Etapa 5 — Implementação dos módulos
 
 Ordem sugerida (sujeita a ajuste):
 
 - [x] Login (autenticação — ver Etapa 5.1)
 - [ ] Dashboard
-- [ ] Culturas
-- [ ] Glebas
+- [x] Culturas (CRUD — ver Etapa 5.2)
+- [x] Glebas (CRUD — ver Etapa 5.2)
 - [ ] Defensivos
 - [ ] Fertilizantes
 - [ ] Financeiro

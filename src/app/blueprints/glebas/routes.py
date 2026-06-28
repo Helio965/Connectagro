@@ -1,15 +1,90 @@
-"""Rotas do módulo Glebas (placeholder do MVP)."""
-from flask import render_template
+"""CRUD de Glebas (áreas/talhões) — escopo: propriedade do usuário logado."""
+from flask import abort, flash, redirect, render_template, request, url_for
 
-from . import glebas_bp
+from ...extensions import db
+from ...models import Gleba
+from ...models._helpers import iso_now
 from ...utils.auth import login_required
+from ...utils.contexto import parse_float, propriedade_atual, vazio_para_none
+from . import glebas_bp
+
+
+def _gleba_da_propriedade_ou_404(gleba_id, propriedade):
+    gleba = Gleba.query.filter_by(id=gleba_id, propriedade_id=propriedade.id).first()
+    if gleba is None:
+        abort(404)
+    return gleba
 
 
 @glebas_bp.route("/")
 @login_required
 def index():
-    return render_template(
-        "placeholders/modulo.html",
-        modulo="Glebas",
-        descricao="Cadastro e gestão das áreas/talhões.",
-    )
+    propriedade = propriedade_atual()
+    glebas = (Gleba.query
+              .filter_by(propriedade_id=propriedade.id)
+              .order_by(Gleba.nome)
+              .all())
+    return render_template("glebas/list.html", glebas=glebas)
+
+
+@glebas_bp.route("/nova", methods=["GET", "POST"])
+@login_required
+def nova():
+    propriedade = propriedade_atual()
+    if request.method == "POST":
+        nome = vazio_para_none(request.form.get("nome"))
+        if not nome:
+            flash("O nome da gleba é obrigatório.", "error")
+            return render_template("glebas/form.html", gleba=None,
+                                   form=request.form), 400
+        db.session.add(Gleba(
+            propriedade_id=propriedade.id,
+            nome=nome,
+            area_ha=parse_float(request.form.get("area_ha")),
+            latitude=parse_float(request.form.get("latitude")),
+            longitude=parse_float(request.form.get("longitude")),
+            tipo_solo=vazio_para_none(request.form.get("tipo_solo")),
+            observacoes=vazio_para_none(request.form.get("observacoes")),
+        ))
+        db.session.commit()
+        flash("Gleba criada com sucesso.", "success")
+        return redirect(url_for("glebas.index"))
+    return render_template("glebas/form.html", gleba=None, form={})
+
+
+@glebas_bp.route("/<int:gleba_id>/editar", methods=["GET", "POST"])
+@login_required
+def editar(gleba_id):
+    propriedade = propriedade_atual()
+    gleba = _gleba_da_propriedade_ou_404(gleba_id, propriedade)
+    if request.method == "POST":
+        nome = vazio_para_none(request.form.get("nome"))
+        if not nome:
+            flash("O nome da gleba é obrigatório.", "error")
+            return render_template("glebas/form.html", gleba=gleba,
+                                   form=request.form), 400
+        gleba.nome = nome
+        gleba.area_ha = parse_float(request.form.get("area_ha"))
+        gleba.latitude = parse_float(request.form.get("latitude"))
+        gleba.longitude = parse_float(request.form.get("longitude"))
+        gleba.tipo_solo = vazio_para_none(request.form.get("tipo_solo"))
+        gleba.observacoes = vazio_para_none(request.form.get("observacoes"))
+        gleba.atualizado_em = iso_now()
+        db.session.commit()
+        flash("Gleba atualizada.", "success")
+        return redirect(url_for("glebas.index"))
+    return render_template("glebas/form.html", gleba=gleba, form=gleba)
+
+
+@glebas_bp.route("/<int:gleba_id>/remover", methods=["POST"])
+@login_required
+def remover(gleba_id):
+    propriedade = propriedade_atual()
+    gleba = _gleba_da_propriedade_ou_404(gleba_id, propriedade)
+    # Remove vínculos cultura-gleba dependentes (sem CRUD de aplicação/colheita ainda).
+    for cg in list(gleba.cultura_glebas):
+        db.session.delete(cg)
+    db.session.delete(gleba)
+    db.session.commit()
+    flash("Gleba removida.", "success")
+    return redirect(url_for("glebas.index"))

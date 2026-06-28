@@ -2,8 +2,8 @@
 
 ## Status do documento
 
-**Arquitetura técnica — v0.6 (autenticação real; próxima etapa: CRUDs dos
-módulos).**
+**Arquitetura técnica — v0.7 (CRUD de Glebas/Culturas; próxima etapa: demais
+CRUDs dos módulos).**
 
 Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetura-do-sistema.md):
 
@@ -21,16 +21,21 @@ Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetur
 > [`requirements.txt`](../requirements.txt) e **testes** em `tests/` (fundação,
 > schema, seed e autenticação).
 >
-> **Ainda NÃO existem:** CRUDs reais. O **banco populado não é versionado**;
-> `produto_preco`/`produto_imagem` permanecem **vazios** e preço/imagem seguem
-> **pendentes** para o sistema final. Os módulos continuam **placeholders**
-> (porém protegidos por login).
+> **Primeiro CRUD entregue:** **Glebas** e **Culturas** (criar/listar/editar/
+> remover) com associação **cultura↔gleba**, escopados pela propriedade do usuário
+> (`utils/contexto.py`).
+>
+> **Ainda NÃO existem:** CRUDs dos demais módulos. O **banco populado não é
+> versionado**; `produto_preco`/`produto_imagem` permanecem **vazios** e
+> preço/imagem seguem **pendentes** para o sistema final. Os módulos restantes
+> continuam **placeholders** (protegidos por login).
 >
 > Este guia deriva do [DER](./04-modelagem-banco-der.md), do
 > [dicionário de dados](./05-dicionario-de-dados.md) e dos
 > [requisitos](./02-requisitos-do-sistema.md).
 >
-> **Próximo passo oficial:** implementar os **CRUDs** módulo a módulo (Etapa 5).
+> **Próximo passo oficial:** implementar os **demais CRUDs** módulo a módulo
+> (equipe, financeiro, colheita, upload) e a consulta do catálogo.
 
 ## Objetivo
 
@@ -266,19 +271,19 @@ Fluxo geral esperado do uso do sistema:
 - **Blueprint:** `dashboard` (`/`).
 - **Implementação futura:** consultas de leitura/resumo; sem escrita.
 
-### Culturas
+### Culturas ✅ (CRUD implementado)
 - **Objetivo:** cadastrar e acompanhar culturas.
 - **Dados principais:** `cultura`, `cultura_gleba`.
 - **Blueprint:** `culturas` (`/culturas`).
-- **Implementação futura:** CRUD, `status` (`planejada`/`em_andamento`/`colhida`/
-  `cancelada`), associação a glebas.
+- **Implementado:** CRUD com `status` (`planejada`/`em_andamento`/`colhida`/
+  `cancelada`) e associação a glebas (sincronizada no formulário).
 
-### Glebas
+### Glebas ✅ (CRUD implementado)
 - **Objetivo:** cadastrar e gerir áreas/talhões.
 - **Dados principais:** `gleba`, `cultura_gleba`.
 - **Blueprint:** `glebas` (`/glebas`).
-- **Implementação futura:** CRUD; `latitude`/`longitude`/`poligono_geojson` para o
-  mapa; mapa começa simples.
+- **Implementado:** CRUD (nome, área, lat/long, tipo de solo, observações).
+- **Futuro:** `poligono_geojson` para o mapa real.
 
 ### Defensivos
 - **Objetivo:** consultar defensivos do catálogo.
@@ -428,13 +433,14 @@ Fluxo geral esperado do uso do sistema:
 - [x] Validação do seed técnico (`flask validate-catalog-seed`)
 - [x] Importação idempotente do catálogo (`flask import-catalog-seed`)
 - [x] Autenticação real (login/logout, sessão, `login_required`, `seed-users`)
-- [x] Testes de fundação, schema, seed e autenticação
+- [x] CRUD de Glebas e Culturas (+ associação cultura↔gleba)
+- [x] Testes de fundação, schema, seed, autenticação e CRUD (glebas/culturas)
 
 **Pendente (Etapa 5):**
 
-- [ ] Criar CRUDs dos módulos
+- [ ] CRUDs dos demais módulos (equipe, financeiro, colheita, upload) e consulta do catálogo
 - [ ] Permissões finas por perfil/módulo
-- [ ] Testes de CRUD, regras de negócio e fluxos
+- [ ] Testes de regras de negócio e fluxos completos
 
 ---
 

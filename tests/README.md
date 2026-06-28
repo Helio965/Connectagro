@@ -29,6 +29,11 @@ Arquivos existentes:
   `/health` público, sessão sem senha, senha armazenada como hash, e
   `seed-users` idempotente (3 usuários, sem duplicar).
 
+- **`test_glebas_culturas_crud.py`** — CRUD de Glebas e Culturas: criar/editar/
+  remover, validação de nome obrigatório, associação cultura↔gleba (criação e
+  sincronização na edição), escopo por propriedade (um usuário não acessa dados
+  de outro → 404) e exigência de login.
+
 > As rotas protegidas e a rota `/` são testadas também em
 > `test_placeholder_routes.py` (redirecionam sem login; respondem 200 com login).
 
@@ -36,7 +41,7 @@ Para rodar: `pytest` (a partir da raiz do projeto).
 
 ## Pendente para etapas futuras
 
-- Testes de **CRUDs** dos módulos.
+- Testes de **CRUDs** dos demais módulos (equipe, financeiro, colheita, upload).
 - Testes de **permissões finas** por perfil/módulo.
 - Testes de **regras de negócio** e **fluxos completos** do MVP.
 
