@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Novo upload — ConnectAgro{% endblock %}
+
+{% block content %}
+<section class="card">
+  <h1>Novo upload</h1>
+
+  <p class="hint">Envie apenas documentos relacionados à gestão da propriedade.</p>
+  <p class="hint">Arquivos enviados são armazenados localmente no MVP e não devem ser versionados no Git.</p>
+  <p class="placeholder-tag">Não envie executáveis, scripts ou arquivos sensíveis.</p>
+
+  <form method="post" enctype="multipart/form-data" class="form-vertical"
+        action="{{ url_for('upload.novo') }}">
+    <label for="arquivo">Arquivo *</label>
+    <input type="file" id="arquivo" name="arquivo" required>
+
+    <p class="hint">
+      Extensões permitidas: {{ extensoes|join(", ") }}.
+      {% if max_upload_mb %}Tamanho máximo: {{ max_upload_mb }} MB.{% endif %}
+    </p>
+
+    <label for="descricao">Descrição</label>
+    <textarea id="descricao" name="descricao" rows="3">{{ form.descricao or '' }}</textarea>
+
+    <div class="form-acoes">
+      <button type="submit" class="btn-acao">Enviar</button>
+      <a href="{{ url_for('upload.index') }}">Cancelar</a>
+    </div>
+  </form>
+</section>
+{% endblock %}
