@@ -2,20 +2,21 @@
 
 Plataforma web de **gestão agrícola** para pequenos, médios e grandes produtores.
 O ConnectAgro centraliza o controle de culturas, glebas, insumos, finanças,
-equipe, colheita e mapa, oferecendo ainda apoio por uma camada de IA e um
-catálogo técnico de produtos agrícolas para consulta rápida.
+equipe, colheita, upload de documentos e mapa, oferecendo ainda apoio por uma
+camada de IA e um catálogo técnico de produtos agrícolas para consulta rápida.
 
 > **Status do projeto:** fundação Flask, **modelos SQLAlchemy** (15 tabelas),
 > **migrations** (Flask-Migrate), **importação do catálogo técnico** (via CLI),
 > **autenticação real** (login/logout), **CRUDs** de **Glebas**, **Culturas**
 > (com associação cultura↔gleba), **Equipe**, **Financeiro** (com totais),
-> **Colheita** e **Aplicações de Insumo** (registro histórico operacional), além
-> da **consulta somente leitura** do catálogo de **Defensivos** e
-> **Fertilizantes** (busca, filtros e detalhe). Os demais módulos seguem como
-> placeholders protegidos por login. Não há CRUD de produtos;
-> `produto_preco`/`produto_imagem` continuam **vazios** no MVP (preço e imagem
-> **pendentes** para o sistema final). O sistema **não vende produtos**, não
-> recomenda produtos e não valida dose; o banco populado **não** é versionado.
+> **Colheita**, **Aplicações de Insumo** (registro histórico operacional) e
+> **Upload de Arquivos** (armazenamento local com metadados), além da **consulta
+> somente leitura** do catálogo de **Defensivos** e **Fertilizantes**. Dashboard,
+> Mapa, IA e Relatórios seguem pendentes. Não há CRUD de produtos;
+> `produto_preco`/`produto_imagem` continuam **vazios** no MVP. O sistema **não
+> vende produtos**, não recomenda produtos, não valida dose e não faz OCR/IA/
+> extração automática de arquivos; o banco populado e uploads reais **não** são
+> versionados.
 
 ---
 
@@ -23,7 +24,7 @@ catálogo técnico de produtos agrícolas para consulta rápida.
 
 O objetivo do ConnectAgro é dar ao produtor uma ferramenta simples e organizada
 para acompanhar a operação da propriedade do plantio à colheita, com registro
-financeiro, gestão de equipe e visualização em mapa.
+financeiro, gestão de equipe, documentos e visualização em mapa.
 
 O sistema será desenvolvido inicialmente como **MVP** (Produto Mínimo Viável) e,
 em etapas posteriores, evoluirá para a versão completa.
@@ -33,6 +34,7 @@ em etapas posteriores, evoluirá para a versão completa.
 - Uma plataforma de **gestão e consulta**.
 - Um catálogo técnico de produtos agrícolas usado como **base de consulta rápida**.
 - Um sistema para registrar aplicações de insumo como **histórico operacional**.
+- Um sistema para armazenar localmente documentos da propriedade no MVP.
 
 ### O que o ConnectAgro **não é**
 
@@ -40,6 +42,7 @@ em etapas posteriores, evoluirá para a versão completa.
 - Os valores de produtos servem **apenas como consulta rápida**.
 - O catálogo é uma **base técnica inicial**, não uma verdade regulatória definitiva.
 - O registro de aplicação de insumo **não recomenda produtos** e **não valida dose**.
+- O upload **não** faz OCR, IA, extração automática ou validação documental avançada.
 
 > **Importante sobre dados de produtos:** no MVP, **preço e imagem** devem ser
 > tratados como **pendência / dado não consolidado**. A validação diária do menor
@@ -61,7 +64,7 @@ em etapas posteriores, evoluirá para a versão completa.
 | Fertilizantes  | Consulta de fertilizantes a partir do catálogo                  |
 | Aplicações     | Registro histórico operacional de aplicações de insumo          |
 | Financeiro     | Registro de receitas e despesas                                 |
-| Upload         | Envio e armazenamento de documentos/arquivos                    |
+| Upload         | Envio, listagem, download e remoção de arquivos da propriedade  |
 | Equipe         | Gestão de membros e funções                                     |
 | Colheita       | Registro e acompanhamento de colheita                           |
 | Mapa real      | Visualização das glebas em mapa                                 |
@@ -99,7 +102,7 @@ em etapas posteriores, evoluirá para a versão completa.
 │       ├── services/      # regras de negócio (ex.: catalogo_seed.py)
 │       ├── utils/         # utilitários (auth.py, contexto.py)
 │       ├── templates/     # HTML (Jinja2)
-│       └── static/        # css/, js/, uploads/
+│       └── static/        # css/, js/, uploads/ (conteúdo ignorado no Git)
 ├── tests/                 # testes (pytest)
 ├── requirements.txt       # dependências
 └── .env.example           # exemplo de variáveis de ambiente
@@ -143,6 +146,18 @@ O acesso exige **login** (sessão Flask + `werkzeug.security`): a rota `/` e os
 módulos são protegidos e redirecionam para `/auth/login`; `/health` é público. O
 arquivo de banco gerado **não** é versionado.
 
+### Upload de arquivos
+
+O módulo Upload armazena arquivos localmente no MVP usando
+`UPLOAD_FOLDER` (`src/app/static/uploads` por padrão), em subpastas por
+propriedade (`propriedade_<id>/`). O banco guarda apenas metadados e caminho
+relativo seguro; arquivos reais enviados por usuários são ignorados pelo Git.
+
+Extensões permitidas no MVP: `pdf`, `png`, `jpg`, `jpeg`, `csv`, `xlsx`, `txt` e
+`docx`. Executáveis, scripts, compactados e HTML/PHP/Python são bloqueados pela
+allowlist. O módulo não faz OCR, IA, leitura automática, classificação ou
+extração de dados.
+
 ### Usuários de teste (`seed-users`)
 
 | Perfil      | E-mail                       | Senha           |
@@ -174,12 +189,12 @@ arquivo de banco gerado **não** é versionado.
 Concluídos: documentação de produto, modelagem (DER + dicionário), catálogo
 técnico/seed, a **fundação Flask**, os **modelos SQLAlchemy de domínio** (15
 tabelas), migrations, autenticação real, CRUDs de glebas/culturas/equipe/
-financeiro/colheita/aplicações de insumo e consulta somente leitura de defensivos
-/ fertilizantes.
+financeiro/colheita/aplicações de insumo/upload e consulta somente leitura de
+Defensivos/Fertilizantes.
 
-O **próximo passo recomendado** é implementar o módulo de **Upload**, mantendo
-pendentes Dashboard, Mapa real, IA simulada, Relatórios e permissões finas por
-perfil.
+O **próximo passo recomendado** é implementar o **Dashboard operacional**,
+mantendo pendentes Mapa real, IA simulada, Relatórios, permissões finas por perfil
+e CSRF dedicado.
 
 Consulte o [Roadmap do MVP](./docs/07-roadmap-mvp.md) para o detalhamento.
 
