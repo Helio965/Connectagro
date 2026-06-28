@@ -2,7 +2,7 @@
 
 ## Status do documento
 
-**Arquitetura técnica — v0.11 (CRUDs + catálogo + aplicação de insumo).**
+**Arquitetura técnica — v0.12 (CRUDs + catálogo + aplicação de insumo + upload).**
 
 Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetura-do-sistema.md):
 
@@ -10,27 +10,19 @@ Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetur
 - O documento **06.1** (este) é o **guia técnico detalhado** da implementação do
   MVP em Flask.
 
-> **Estado atual:** estão prontos a **fundação Flask** (`src/run.py` + `src/app/`
-> com Application Factory, layout base, `/health`), os **modelos SQLAlchemy** (15
-> tabelas), as **migrations** (Flask-Migrate, pasta `migrations/` versionada), a
-> **importação do catálogo técnico** via CLI (`validate-catalog-seed` /
-> `import-catalog-seed`) e a **autenticação real** (login/logout com sessão Flask
-> + `werkzeug.security`; rotas dos módulos protegidas por `@login_required`;
-> usuários de teste via `seed-users`).
+> **Estado atual:** estão prontos a fundação Flask, modelos SQLAlchemy (15
+> tabelas), migrations, importação do catálogo técnico via CLI, autenticação real,
+> CRUDs de Glebas, Culturas, Equipe, Financeiro, Colheita, Aplicações de Insumo e
+> **Upload de Arquivos**, além da consulta somente leitura de Defensivos e
+> Fertilizantes. `ProdutoPreco`/`ProdutoImagem` seguem vazios no MVP.
 >
-> **CRUDs entregues:** Glebas, Culturas (+ associação cultura↔gleba), Equipe,
-> Financeiro (com totais), Colheita e **Aplicações de Insumo**. A consulta
-> somente leitura do catálogo (**Defensivos**/**Fertilizantes**) usa `ProdutoBase`
-> + `ProdutoTecnico` (busca, filtros e detalhe); `ProdutoPreco`/`ProdutoImagem`
-> seguem **vazios** no MVP.
+> **Upload de Arquivos:** o módulo usa `UPLOAD_FOLDER`, salva arquivos localmente
+> em subpastas por propriedade, aplica `secure_filename`, gera nome único com UUID
+> e grava em `upload_arquivo` apenas metadados e caminho relativo. Arquivos reais
+> enviados por usuários ficam fora do Git.
 >
-> **Aplicações de Insumo:** o módulo liga `CulturaGleba` a `ProdutoBase`, registra
-> histórico operacional e bloqueia produtos com status histórico/bloqueado. Ele
-> **não** é recomendação agronômica, **não** valida dose tecnicamente e **não**
-> cria preço, imagem, venda, carrinho ou cotação.
->
-> **Próximo passo oficial:** implementar o **Upload**. Dashboard, Mapa real, IA
-> simulada e Relatórios seguem pendentes.
+> **Pendente:** Dashboard, Mapa real, IA simulada, Relatórios, permissões finas e
+> CSRF/Flask-WTF.
 
 ## Objetivo
 
@@ -76,17 +68,15 @@ Flask (rotas/blueprints)  ──►  Serviços/helpers  ──►  Modelos/Acess
 |------------------|----------------------------------------------|------------------------------------------------|
 | Linguagem        | Python 3.11+                                 | Versão a confirmar no ambiente local           |
 | Framework web    | Flask                                        | Monólito com blueprints                        |
-| Templates        | Jinja2 (incluído no Flask)                   | SSR                                            |
+| Templates        | Jinja2                                       | SSR                                            |
 | Banco de dados   | SQLite                                       | Arquivo local em `instance/`                   |
 | Acesso a dados   | Flask-SQLAlchemy                             | ORM adotado                                    |
 | Migrations       | Flask-Migrate (Alembic)                      | Pasta `migrations/` versionada                 |
+| Upload local     | Werkzeug `secure_filename` + Flask `send_from_directory` | Arquivos fora do Git           |
 | Autenticação     | Sessão Flask + hash de senha (Werkzeug)      | Helpers em `utils/auth.py`                     |
 | Formulários/CSRF | Sem Flask-WTF nesta etapa                    | CSRF dedicado permanece pendente               |
 | Frontend         | HTML, CSS, JavaScript                        | Sem framework JS obrigatório no MVP            |
-| Testes           | pytest                                       | SQLite em memória                              |
-
-> **Flask**, **Flask-SQLAlchemy**, **Flask-Migrate**, **python-dotenv** e
-> **pytest** estão declarados no [`requirements.txt`](../requirements.txt).
+| Testes           | pytest                                       | SQLite em memória e pasta temporária para upload |
 
 ---
 
@@ -97,7 +87,7 @@ src/
 ├── run.py
 └── app/
     ├── __init__.py              # create_app / Application Factory
-    ├── config.py                # configuração por ambiente
+    ├── config.py                # inclui UPLOAD_FOLDER e MAX_CONTENT_LENGTH
     ├── extensions.py            # db, migrate
     ├── commands.py              # init-db, validate/import-catalog-seed, seed-users
     ├── blueprints/
@@ -110,10 +100,12 @@ src/
     ├── services/                # regras compartilhadas quando necessário
     ├── utils/                   # auth.py, contexto.py, catalogo.py
     ├── templates/               # base.html, módulos, erros
-    └── static/                  # css/, js/, uploads/
+    └── static/                  # css/, js/, uploads/ (conteúdo ignorado)
 ```
 
-> O banco SQLite fica em `instance/` e arquivos `.db` não são versionados.
+> O banco SQLite fica em `instance/` e arquivos `.db` não são versionados. O
+> conteúdo de `src/app/static/uploads/` também é ignorado pelo Git, preservando
+> apenas `.gitkeep` quando existir.
 
 ---
 
@@ -148,7 +140,7 @@ src/
 
 ---
 
-## 6. Acesso a dados e banco SQLite
+## 6. Acesso a dados, banco SQLite e arquivos
 
 - **Banco:** arquivo SQLite em `instance/` ou caminho configurado por ambiente.
 - **ORM:** `Flask-SQLAlchemy`, com instância `db` em `src/app/extensions.py`.
@@ -158,6 +150,27 @@ src/
   vazios no MVP.
 - **Aplicações de Insumo:** não exigem migration nova porque a tabela
   `aplicacao_insumo` já existe no schema inicial.
+- **Upload:** não exige migration nova porque a tabela `upload_arquivo` já existe
+  no schema inicial.
+
+### Upload local
+
+- `UPLOAD_FOLDER` define a pasta base de armazenamento local. O padrão é
+  `src/app/static/uploads`.
+- `MAX_CONTENT_LENGTH` define o limite máximo aceito pela aplicação.
+- Cada propriedade usa subpasta própria: `UPLOAD_FOLDER/propriedade_<id>/`.
+- O arquivo salvo usa `secure_filename` e UUID, por exemplo
+  `uuid4hex_nome-seguro.pdf`.
+- O campo `upload_arquivo.caminho` guarda caminho relativo seguro, por exemplo
+  `propriedade_1/uuid_nome.pdf`, nunca caminho absoluto.
+- Download usa busca por id + validação de `propriedade_id` + resolução dentro de
+  `UPLOAD_FOLDER`, sem aceitar caminho vindo diretamente da URL.
+- Remoção apaga o registro e tenta apagar o arquivo físico; se o arquivo físico
+  já não existir, o registro ainda é removido com aviso simples.
+- Extensões permitidas: `pdf`, `png`, `jpg`, `jpeg`, `csv`, `xlsx`, `txt`, `docx`.
+- Executáveis, scripts, compactados e extensões fora da allowlist são bloqueados.
+- Upload não faz OCR, IA, extração automática, classificação ou validação avançada
+  de conteúdo no MVP.
 
 ---
 
@@ -170,8 +183,9 @@ src/
 5. Consulta o **catálogo** de defensivos/fertilizantes.
 6. Registra **aplicações de insumos** em associações cultura↔gleba.
 7. Registra **despesas/receitas** no financeiro.
-8. Registra **colheita**.
-9. Futuramente consulta mapa, relatórios e IA simulada.
+8. Envia documentos da propriedade no **Upload**.
+9. Registra **colheita**.
+10. Futuramente consulta mapa, relatórios e IA simulada.
 
 > **IA simulada:** quando implementada, não deve emitir recomendação agronômica
 > definitiva. Funcionará apenas como apoio textual/informativo e organizacional.
@@ -201,7 +215,7 @@ src/
 
 ### Dashboard
 - Visão consolidada da propriedade após login.
-- Permanece pendente nesta etapa.
+- Permanece pendente.
 
 ### Culturas ✅
 - CRUD com `status` (`planejada`, `em_andamento`, `colhida`, `cancelada`).
@@ -222,32 +236,22 @@ src/
 - Sem CRUD de produto.
 
 ### Aplicações de Insumo ✅
-- **Objetivo:** registrar histórico operacional de uso de insumos do catálogo.
-- **Dados principais:** `aplicacao_insumo`, `cultura_gleba`, `produto_base`.
-- **Blueprint:** `aplicacoes` (`/aplicacoes`).
-- **Implementado:** CRUD de `AplicacaoInsumo` com listagem, criação, edição e
-  remoção, protegido por login e escopado à propriedade atual.
-- **Vínculo:** cada registro liga uma associação **Cultura↔Gleba** (`cultura_gleba_id`)
-  a um produto do catálogo (`produto_base_id`).
-- **Bloqueio:** produtos com `status_sistema == "bloqueado_historico"` ou
-  `status_regulatorio == "bloqueado_historico"` não aparecem no select e são
-  recusados na validação do POST.
-- **Dose:** aceita vírgula ou ponto e, quando informada, deve ser maior que zero.
-  Essa validação é apenas numérica; não há regra de dose correta, segura, ideal
-  ou recomendada.
-- **Avisos de tela:** o módulo reforça que é histórico operacional, não recomenda
-  produto, não valida dose, não substitui profissional habilitado e não vende
-  produtos.
-- **Sem efeitos colaterais:** não cria `ProdutoPreco`, não cria `ProdutoImagem`,
-  não cria venda, carrinho, cotação ou orçamento.
+- CRUD de `AplicacaoInsumo` vinculado a `CulturaGleba` e `ProdutoBase`.
+- Produto histórico/bloqueado é recusado.
+- Dose é apenas valor histórico/informativo, sem validação agronômica.
+- Não cria preço, imagem, venda, carrinho, cotação ou orçamento.
 
 ### Financeiro ✅
 - CRUD de receitas/despesas com validação de tipo, valor positivo e data.
 - Listagem com totais de receitas, despesas e saldo.
 
-### Upload
-- Envio e armazenamento de documentos/arquivos.
-- Permanece pendente.
+### Upload ✅
+- CRUD operacional de arquivos: listagem, envio, download e remoção.
+- Escopo por propriedade em todas as operações.
+- Arquivos locais organizados em subpasta por propriedade.
+- Metadados em `upload_arquivo`; arquivo físico fora do Git.
+- `secure_filename`, UUID e allowlist de extensões.
+- Sem OCR, IA, APIs externas, antivírus real, armazenamento em nuvem ou extração automática.
 
 ### Equipe ✅
 - CRUD de membros e funções, escopado por propriedade.
@@ -289,11 +293,11 @@ src/
 - O app de teste é criado por `create_app("testing")` com SQLite em memória.
 - Testes existentes cobrem: app factory, rotas protegidas, schema/modelos, seed,
   autenticação, CRUDs de Glebas/Culturas, Equipe/Financeiro, Colheita, consulta
-  do catálogo e Aplicações de Insumo.
-- O arquivo `tests/test_aplicacoes_crud.py` cobre login obrigatório, criação,
-  validações, produto bloqueado, dose numérica, edição, remoção, escopo por
-  propriedade, orientações de tela, ausência de termos de venda e garantia de que
-  `ProdutoPreco`/`ProdutoImagem` não são criados.
+  do catálogo, Aplicações de Insumo e Upload.
+- `tests/test_upload_crud.py` usa pasta temporária para uploads e cobre login,
+  envio válido, arquivo físico, nome seguro, extensão proibida/permitida, caminho
+  malicioso, listagem, download, remoção, escopo por propriedade e garantia de
+  que `ProdutoPreco`/`ProdutoImagem` não são criados.
 
 ---
 
@@ -307,6 +311,7 @@ src/
 - **Não** exibir preço como cotação oficial.
 - **Não** criar CRUD de produto no MVP atual.
 - **Não** recomendar produto nem validar dose tecnicamente no módulo de aplicações.
+- **Não** fazer OCR, IA, extração automática ou validação avançada no Upload do MVP.
 - No MVP, **preço e imagem** devem aparecer como pendentes / não consolidados.
 - A **validação diária do menor preço** pertence ao sistema final.
 - Usar nomes de tabelas e campos compatíveis com o DER e o dicionário de dados.
@@ -341,16 +346,17 @@ src/
 - [x] CRUD de Colheita (vinculada a cultura↔gleba)
 - [x] Consulta do catálogo (Defensivos/Fertilizantes, somente leitura)
 - [x] CRUD de Aplicações de Insumo (histórico operacional, sem recomendação)
+- [x] Upload de Arquivos (local, seguro, escopado por propriedade)
 - [x] Testes de fundação, schema, seed, autenticação, CRUDs e consulta do catálogo
 
 **Pendente:**
 
-- [ ] Upload
 - [ ] Dashboard
 - [ ] Mapa real
 - [ ] IA simulada
 - [ ] Relatórios
 - [ ] Permissões finas por perfil/módulo
+- [ ] CSRF/Flask-WTF
 - [ ] Revisão e ajustes do MVP
 
 ---
