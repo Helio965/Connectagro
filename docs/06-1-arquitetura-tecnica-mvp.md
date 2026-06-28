@@ -2,7 +2,7 @@
 
 ## Status do documento
 
-**Arquitetura técnica — v0.13 (CRUDs + catálogo + upload seguro + dashboard operacional).**
+**Arquitetura técnica — v0.14 (CRUDs + catálogo + upload seguro + dashboard + mapa real simplificado).**
 
 Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetura-do-sistema.md):
 
@@ -12,14 +12,19 @@ Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetur
 
 > **Estado atual:** estão prontos a fundação Flask, modelos SQLAlchemy (15
 > tabelas), migrations, importação do catálogo técnico via CLI, autenticação real,
-> **Dashboard Operacional** somente leitura, CRUDs de Glebas, Culturas, Equipe,
-> Financeiro, Colheita, Aplicações de Insumo e **Upload de Arquivos**, além da
-> consulta somente leitura de Defensivos e Fertilizantes. `ProdutoPreco`/
-> `ProdutoImagem` seguem vazios no MVP.
+> **Dashboard Operacional** somente leitura, **Mapa real simplificado** somente
+> leitura, CRUDs de Glebas, Culturas, Equipe, Financeiro, Colheita, Aplicações de
+> Insumo e **Upload de Arquivos**, além da consulta somente leitura de Defensivos
+> e Fertilizantes. `ProdutoPreco`/`ProdutoImagem` seguem vazios no MVP.
 >
 > **Dashboard Operacional:** o módulo agrega dados já existentes da propriedade
 > atual, usando consultas aos módulos operacionais. Ele não cria registros, não
 > altera models e não exige migration.
+>
+> **Mapa real simplificado:** o módulo usa os campos já existentes em `gleba`
+> (`latitude`, `longitude`, `poligono_geojson`) para renderizar uma visualização
+> operacional em `/mapa/` e expor dados em `/mapa/dados`. Ele não cria registros,
+> não altera models e não exige migration.
 >
 > **Upload de Arquivos:** o módulo usa `UPLOAD_FOLDER`, salva arquivos localmente
 > fora da pasta pública `static` (`instance/uploads` por padrão), em subpastas por
@@ -28,8 +33,7 @@ Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetur
 > por usuários ficam fora do Git e não devem ser servidos diretamente por
 > `/static/uploads`.
 >
-> **Pendente:** Mapa real, IA simulada, Relatórios, permissões finas e
-> CSRF/Flask-WTF.
+> **Pendente:** IA simulada, Relatórios, permissões finas e CSRF/Flask-WTF.
 
 ## Objetivo
 
@@ -64,6 +68,8 @@ Flask (rotas/blueprints)  ──►  Serviços/helpers  ──►  Modelos/Acess
   serviços quando houver regra compartilhada.
 - **Dashboard como agregação somente leitura:** consulta dados existentes e não
   modifica estado.
+- **Mapa como visualização somente leitura:** usa coordenadas já cadastradas em
+  Glebas, não cria dados e não altera schema.
 - **Configuração por ambiente** via variáveis de ambiente (`.env`), sem segredos
   versionados.
 - Alinhamento total com os nomes de tabelas/campos do
@@ -82,6 +88,7 @@ Flask (rotas/blueprints)  ──►  Serviços/helpers  ──►  Modelos/Acess
 | Acesso a dados   | Flask-SQLAlchemy                             | ORM adotado                                    |
 | Migrations       | Flask-Migrate (Alembic)                      | Pasta `migrations/` versionada                 |
 | Upload local     | Werkzeug `secure_filename` + Flask `send_from_directory` | Arquivos fora de `static` e do Git |
+| Mapa frontend    | Leaflet.js via CDN                           | Sem dependência Python/NPM nova                |
 | Autenticação     | Sessão Flask + hash de senha (Werkzeug)      | Helpers em `utils/auth.py`                     |
 | Formulários/CSRF | Sem Flask-WTF nesta etapa                    | CSRF dedicado permanece pendente               |
 | Frontend         | HTML, CSS, JavaScript                        | Sem framework JS obrigatório no MVP            |
@@ -167,6 +174,8 @@ instance/
   `aplicacao_insumo` já existe no schema inicial.
 - **Upload:** não exige migration nova porque a tabela `upload_arquivo` já existe
   no schema inicial.
+- **Mapa real simplificado:** não exige migration nova porque usa campos já
+  existentes em `gleba`.
 
 ### Dashboard operacional
 
@@ -179,6 +188,27 @@ instance/
 - O catálogo é global e aparece apenas como contagem técnica de consulta.
 - O Dashboard é somente leitura: não cria, edita ou remove registros.
 - Não usa biblioteca externa de gráfico e não altera schema.
+
+### Mapa real simplificado
+
+- `src/app/blueprints/mapa/routes.py` resolve a propriedade atual e renderiza
+  `templates/mapa/index.html` em `/mapa/`.
+- `/mapa/dados` retorna JSON somente leitura com `propriedade`, `glebas` e
+  `sem_coordenadas`.
+- A consulta usa somente `Gleba.query.filter_by(propriedade_id=propriedade.id)`,
+  evitando vazamento de dados entre propriedades.
+- Coordenadas válidas exigem latitude e longitude preenchidas, latitude entre
+  `-90` e `90` e longitude entre `-180` e `180`. Valores ausentes ou fora da faixa
+  são tratados como sem coordenadas válidas sem alterar o banco.
+- `poligono_geojson`, quando preenchido com JSON/GeoJSON simples válido, é
+  enviado ao frontend. Conteúdo inválido é ignorado com segurança e retorna nulo.
+- `src/app/static/js/mapa.js` usa Leaflet.js via CDN, centro padrão no Brasil
+  `[-15.7801, -47.9292]`, marcadores, popup e ajuste de bounds.
+- A página renderiza sem internet nos testes; sem a biblioteca Leaflet carregada,
+  o script mostra mensagem de indisponibilidade do mapa visual.
+- O módulo não cria, edita ou remove glebas, não mede área, não desenha polígonos,
+  não importa/exporta GeoJSON, não usa GPS em tempo real, não usa PostGIS e não
+  adiciona dependência Python/NPM.
 
 ### Upload local
 
@@ -214,7 +244,8 @@ instance/
 7. Registra **despesas/receitas** no financeiro.
 8. Envia documentos da propriedade no **Upload**.
 9. Registra **colheita**.
-10. Futuramente consulta mapa, relatórios e IA simulada.
+10. Consulta o **mapa** das glebas com coordenadas cadastradas.
+11. Futuramente consulta relatórios e IA simulada.
 
 > **IA simulada:** quando implementada, não deve emitir recomendação agronômica
 > definitiva. Funcionará apenas como apoio textual/informativo e organizacional.
@@ -255,7 +286,7 @@ instance/
 
 ### Glebas ✅
 - CRUD de áreas/talhões.
-- Futuro: `poligono_geojson` para mapa real.
+- Campos `latitude`, `longitude` e `poligono_geojson` alimentam a visualização do mapa.
 
 ### Defensivos ✅
 - Consulta somente leitura de `ProdutoBase` com classe `defensivo`.
@@ -294,9 +325,12 @@ instance/
 - CRUD vinculado a associação cultura↔gleba.
 - Validação numérica simples de quantidade opcional.
 
-### Mapa real
-- Visualização das glebas em mapa.
-- Permanece pendente.
+### Mapa real ✅
+- Visualização somente leitura das glebas em `/mapa/`.
+- Endpoint `/mapa/dados` com JSON filtrado pela propriedade atual.
+- Usa `latitude`, `longitude` e `poligono_geojson` existentes em `Gleba`.
+- Separa glebas sem coordenadas válidas e ignora GeoJSON inválido com segurança.
+- Sem edição de coordenadas, desenho de polígonos, medição de área, GPS em tempo real, PostGIS ou camadas avançadas.
 
 ### IA simulada
 - Apoio informativo por IA simulada.
@@ -318,6 +352,8 @@ instance/
 - Templates Jinja com escaping padrão.
 - Dashboard filtra dados operacionais pela propriedade atual; Colheita e
   Aplicações usam join com `CulturaGleba`, `Cultura` e `Gleba`.
+- Mapa filtra glebas por `propriedade_id` da propriedade atual e não retorna
+  e-mail, perfil ou dados sensíveis de usuário em `/mapa/dados`.
 - Uploads ficam fora da pasta pública `static` por padrão; arquivos devem ser
   acessados apenas pelas rotas protegidas do módulo Upload.
 - Banco real, `.env`, uploads de usuário e arquivos sensíveis não são versionados.
@@ -330,11 +366,14 @@ instance/
 - O app de teste é criado por `create_app("testing")` com SQLite em memória.
 - Testes existentes cobrem: app factory, rotas protegidas, schema/modelos, seed,
   autenticação, CRUDs de Glebas/Culturas, Equipe/Financeiro, Colheita, consulta
-  do catálogo, Aplicações de Insumo, Upload e Dashboard.
+  do catálogo, Aplicações de Insumo, Upload, Dashboard e Mapa real.
 - `tests/test_dashboard_operacional.py` cobre login, resposta 200, nome da
   propriedade, totais por propriedade, culturas por status, financeiro, equipe,
   colheita por unidade, aplicações, uploads, totais globais do catálogo, estados
   vazios, atalhos principais e ausência de termos de venda.
+- `tests/test_mapa_real.py` cobre login, endpoint JSON, escopo por propriedade,
+  coordenadas válidas/inválidas, GeoJSON inválido, ausência de POST, estados
+  vazios e ausência de recursos avançados como funcionalidade ativa.
 - `tests/test_upload_crud.py` usa pasta temporária para uploads e cobre login,
   envio válido, arquivo físico, nome seguro, extensão proibida/permitida, caminho
   malicioso, listagem, download, remoção, escopo por propriedade, garantia de
@@ -355,6 +394,8 @@ instance/
 - **Não** recomendar produto nem validar dose tecnicamente no módulo de aplicações.
 - **Não** fazer OCR, IA, extração automática ou validação avançada no Upload do MVP.
 - Dashboard deve permanecer somente leitura e sem criação de dados.
+- Mapa deve permanecer como visualização somente leitura no MVP, sem edição de
+  coordenadas, medição, desenho de polígonos, PostGIS ou GPS em tempo real.
 - No MVP, **preço e imagem** devem aparecer como pendentes / não consolidados.
 - A **validação diária do menor preço** pertence ao sistema final.
 - Usar nomes de tabelas e campos compatíveis com o DER e o dicionário de dados.
@@ -392,11 +433,11 @@ instance/
 - [x] Consulta do catálogo (Defensivos/Fertilizantes, somente leitura)
 - [x] CRUD de Aplicações de Insumo (histórico operacional, sem recomendação)
 - [x] Upload de Arquivos (local, seguro, escopado por propriedade)
-- [x] Testes de fundação, schema, seed, autenticação, CRUDs, Dashboard e consulta do catálogo
+- [x] Mapa real simplificado (somente leitura, escopado por propriedade)
+- [x] Testes de fundação, schema, seed, autenticação, CRUDs, Dashboard, Mapa e consulta do catálogo
 
 **Pendente:**
 
-- [ ] Mapa real
 - [ ] IA simulada
 - [ ] Relatórios
 - [ ] Permissões finas por perfil/módulo

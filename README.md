@@ -8,15 +8,16 @@ camada de IA e um catálogo técnico de produtos agrícolas para consulta rápid
 > **Status do projeto:** fundação Flask, **modelos SQLAlchemy** (15 tabelas),
 > **migrations** (Flask-Migrate), **importação do catálogo técnico** (via CLI),
 > **autenticação real** (login/logout), **Dashboard Operacional** somente leitura,
-> **CRUDs** de **Glebas**, **Culturas** (com associação cultura↔gleba), **Equipe**,
-> **Financeiro** (com totais), **Colheita**, **Aplicações de Insumo** (registro
-> histórico operacional) e **Upload de Arquivos** (armazenamento local com
-> metadados), além da **consulta somente leitura** do catálogo de **Defensivos** e
-> **Fertilizantes**. Mapa, IA e Relatórios seguem pendentes. Não há CRUD de
-> produtos; `produto_preco`/`produto_imagem` continuam **vazios** no MVP. O sistema
-> **não vende produtos**, não recomenda produtos, não valida dose e não faz OCR/IA/
-> extração automática de arquivos; o banco populado e uploads reais **não** são
-> versionados.
+> **Mapa real simplificado** somente leitura, **CRUDs** de **Glebas**, **Culturas**
+> (com associação cultura↔gleba), **Equipe**, **Financeiro** (com totais),
+> **Colheita**, **Aplicações de Insumo** (registro histórico operacional) e
+> **Upload de Arquivos** (armazenamento local com metadados), além da **consulta
+> somente leitura** do catálogo de **Defensivos** e **Fertilizantes**. IA e
+> Relatórios seguem pendentes. Não há CRUD de produtos; `produto_preco`/
+> `produto_imagem` continuam **vazios** no MVP. O sistema **não vende produtos**,
+> não recomenda produtos, não valida dose, não faz OCR/IA/extração automática de
+> arquivos e não oferece recursos avançados de mapa; o banco populado e uploads
+> reais **não** são versionados.
 
 ---
 
@@ -36,6 +37,7 @@ em etapas posteriores, evoluirá para a versão completa.
 - Um catálogo técnico de produtos agrícolas usado como **base de consulta rápida**.
 - Um sistema para registrar aplicações de insumo como **histórico operacional**.
 - Um sistema para armazenar localmente documentos da propriedade no MVP.
+- Uma visualização simples das glebas em mapa, baseada nas coordenadas cadastradas.
 
 ### O que o ConnectAgro **não é**
 
@@ -44,6 +46,7 @@ em etapas posteriores, evoluirá para a versão completa.
 - O catálogo é uma **base técnica inicial**, não uma verdade regulatória definitiva.
 - O registro de aplicação de insumo **não recomenda produtos** e **não valida dose**.
 - O upload **não** faz OCR, IA, extração automática ou validação documental avançada.
+- O mapa do MVP **não** mede área, não desenha polígonos e não usa GPS em tempo real.
 
 > **Importante sobre dados de produtos:** no MVP, **preço e imagem** devem ser
 > tratados como **pendência / dado não consolidado**. A validação diária do menor
@@ -167,6 +170,23 @@ Indicadores principais:
 
 O Dashboard não cria dados, não altera schema e não implementa gráficos externos.
 
+### Mapa real simplificado
+
+O módulo Mapa em `/mapa/` é protegido por login e mostra uma visualização somente
+leitura das glebas da propriedade atual usando as coordenadas já cadastradas em
+`Gleba.latitude` e `Gleba.longitude`. A rota `/mapa/dados` entrega JSON escopado
+pela propriedade atual, sem dados de usuário/e-mail e separando glebas sem
+coordenadas válidas.
+
+O frontend usa Leaflet via CDN e renderiza marcadores. Quando `poligono_geojson`
+contém GeoJSON válido, ele pode ser exibido em modo somente leitura; conteúdo
+inválido é ignorado com segurança. A página continua renderizando mesmo sem
+internet, embora o mapa visual dependa da biblioteca externa.
+
+O módulo não cria, edita ou remove glebas, não altera schema, não usa PostGIS,
+não mede área, não desenha polígonos, não importa/exporta GeoJSON e não usa GPS
+em tempo real.
+
 ### Upload de arquivos
 
 O módulo Upload armazena arquivos localmente no MVP usando
@@ -213,12 +233,12 @@ extração de dados.
 
 Concluídos: documentação de produto, modelagem (DER + dicionário), catálogo
 técnico/seed, a **fundação Flask**, os **modelos SQLAlchemy de domínio** (15
-tabelas), migrations, autenticação real, Dashboard Operacional, CRUDs de glebas/
-culturas/equipe/financeiro/colheita/aplicações de insumo/upload e consulta
-somente leitura de Defensivos/Fertilizantes.
+tabelas), migrations, autenticação real, Dashboard Operacional, Mapa real
+simplificado, CRUDs de glebas/culturas/equipe/financeiro/colheita/aplicações de
+insumo/upload e consulta somente leitura de Defensivos/Fertilizantes.
 
-O **próximo passo recomendado** é implementar o **Mapa real**, mantendo pendentes
-IA simulada, Relatórios, permissões finas por perfil e CSRF dedicado.
+O **próximo passo recomendado** é implementar a **IA simulada**, mantendo
+pendentes Relatórios, permissões finas por perfil e CSRF dedicado.
 
 Consulte o [Roadmap do MVP](./docs/07-roadmap-mvp.md) para o detalhamento.
 

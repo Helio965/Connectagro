@@ -30,6 +30,11 @@ Arquivos existentes:
   culturas, financeiro, equipe, colheita, aplicações e uploads; não vaza dados de
   outra propriedade; mostra totais globais do catálogo; exibe estados vazios;
   contém atalhos principais; e não contém termos de venda.
+- **`test_mapa_real.py`** — Mapa real simplificado: exige login; `/mapa/` e
+  `/mapa/dados` respondem com login; JSON é escopado pela propriedade atual e não
+  expõe usuário/e-mail; separa glebas com coordenadas válidas das sem coordenadas
+  válidas; ignora GeoJSON inválido sem quebrar; não possui rotas POST; mostra
+  estados vazios; e não apresenta recursos avançados como funcionalidade ativa.
 - **`test_glebas_culturas_crud.py`** — CRUD de Glebas e Culturas, associação
   cultura↔gleba, escopo por propriedade e exigência de login.
 - **`test_equipe_financeiro_crud.py`** — CRUD de Equipe e Financeiro, validações,
@@ -64,8 +69,7 @@ Para rodar: `pytest` (a partir da raiz do projeto).
 
 ## Pendente para etapas futuras
 
-- Testes dos módulos ainda pendentes (Mapa real, IA simulada e Relatórios) quando
-  forem implementados.
+- Testes dos módulos ainda pendentes (IA simulada e Relatórios) quando forem implementados.
 - Testes de **permissões finas** por perfil/módulo.
 - Testes de **CSRF/Flask-WTF**, quando essa proteção entrar no escopo.
 - Testes de **fluxos completos** do MVP.
