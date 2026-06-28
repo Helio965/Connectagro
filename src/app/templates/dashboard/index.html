@@ -1,15 +1,220 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard — ConnectAgro{% endblock %}
+{% block title %}Dashboard Operacional — ConnectAgro{% endblock %}
 
 {% block content %}
-<section class="card">
-  <h1>Bem-vindo ao ConnectAgro</h1>
+{% set status_labels = {
+  "planejada": "Planejada",
+  "em_andamento": "Em andamento",
+  "colhida": "Colhida",
+  "cancelada": "Cancelada"
+} %}
+
+<section class="dashboard-hero">
+  <div>
+    <h1>Dashboard Operacional</h1>
+    <p>{{ propriedade.nome }}</p>
+  </div>
+</section>
+
+<div class="dashboard-alerts">
+  <p>O Dashboard é um resumo operacional do MVP.</p>
+  <p>O catálogo é apenas consulta técnica; o ConnectAgro não vende produtos.</p>
+  <p>Aplicações de insumo são registros históricos e não representam recomendação agronômica.</p>
+</div>
+
+<section class="dashboard-grid" aria-label="Indicadores principais">
+  <article class="metric-card">
+    <span class="metric-label">Glebas</span>
+    <strong class="metric-value">{{ dashboard.glebas.total }}</strong>
+    <small>{{ formatar_area(dashboard.glebas.area_total) }} no total · {{ dashboard.glebas.sem_area }} sem área</small>
+  </article>
+  <article class="metric-card">
+    <span class="metric-label">Culturas</span>
+    <strong class="metric-value">{{ dashboard.culturas.total }}</strong>
+    <small>{{ dashboard.culturas.total_associacoes }} associações cultura↔gleba</small>
+  </article>
+  <article class="metric-card">
+    <span class="metric-label">Financeiro</span>
+    <strong class="metric-value">{{ formatar_moeda(dashboard.financeiro.saldo) }}</strong>
+    <small>{{ dashboard.financeiro.total_lancamentos }} lançamentos</small>
+  </article>
+  <article class="metric-card">
+    <span class="metric-label">Colheita</span>
+    <strong class="metric-value">{{ dashboard.colheita.total }}</strong>
+    <small>registros de colheita</small>
+  </article>
+  <article class="metric-card">
+    <span class="metric-label">Aplicações</span>
+    <strong class="metric-value">{{ dashboard.aplicacoes.total }}</strong>
+    <small>registros históricos</small>
+  </article>
+  <article class="metric-card">
+    <span class="metric-label">Uploads</span>
+    <strong class="metric-value">{{ dashboard.uploads.total }}</strong>
+    <small>{{ formatar_tamanho(dashboard.uploads.tamanho_total) }} armazenados</small>
+  </article>
+  <article class="metric-card">
+    <span class="metric-label">Equipe</span>
+    <strong class="metric-value">{{ dashboard.equipe.total }}</strong>
+    <small>{{ dashboard.equipe.ativos }} ativos · {{ dashboard.equipe.inativos }} inativos</small>
+  </article>
+  <article class="metric-card">
+    <span class="metric-label">Catálogo</span>
+    <strong class="metric-value">{{ dashboard.catalogo.defensivos + dashboard.catalogo.fertilizantes }}</strong>
+    <small>{{ dashboard.catalogo.defensivos }} defensivos · {{ dashboard.catalogo.fertilizantes }} fertilizantes</small>
+  </article>
+</section>
+
+<div class="dashboard-columns">
+  <section class="dashboard-section">
+    <h2>Financeiro</h2>
+    <div class="finance-summary">
+      <span><strong>Receitas</strong>{{ formatar_moeda(dashboard.financeiro.receitas) }}</span>
+      <span><strong>Despesas</strong>{{ formatar_moeda(dashboard.financeiro.despesas) }}</span>
+      <span><strong>Saldo</strong>{{ formatar_moeda(dashboard.financeiro.saldo) }}</span>
+    </div>
+  </section>
+
+  <section class="dashboard-section">
+    <h2>Culturas por status</h2>
+    {% if dashboard.culturas.total %}
+      <ul class="status-list">
+        {% for status, label in status_labels.items() %}
+          <li><span>{{ label }}</span><strong>{{ dashboard.culturas.por_status[status] }}</strong></li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="empty-state">Nenhuma cultura cadastrada ainda.</p>
+    {% endif %}
+  </section>
+</div>
+
+<section class="dashboard-section">
+  <h2>Produção por unidade</h2>
+  {% if dashboard.colheita.por_unidade %}
+    <ul class="status-list compact-list">
+      {% for unidade, quantidade in dashboard.colheita.por_unidade %}
+        <li><span>{{ unidade }}</span><strong>{{ formatar_numero(quantidade) }}</strong></li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty-state">Nenhum registro de colheita com quantidade informado.</p>
+  {% endif %}
+</section>
+
+<section class="dashboard-section">
+  <h2>Atalhos rápidos</h2>
+  <div class="quick-actions">
+    <a href="{{ url_for('glebas.nova') }}">Nova Gleba</a>
+    <a href="{{ url_for('culturas.nova') }}">Nova Cultura</a>
+    <a href="{{ url_for('financeiro.novo') }}">Novo Lançamento Financeiro</a>
+    <a href="{{ url_for('colheita.nova') }}">Nova Colheita</a>
+    <a href="{{ url_for('aplicacoes.nova') }}">Nova Aplicação</a>
+    <a href="{{ url_for('upload.novo') }}">Novo Upload</a>
+    <a href="{{ url_for('defensivos.index') }}">Catálogo de Defensivos</a>
+    <a href="{{ url_for('fertilizantes.index') }}">Catálogo de Fertilizantes</a>
+  </div>
+</section>
+
+<div class="dashboard-columns">
+  <section class="dashboard-section">
+    <h2>Últimos lançamentos financeiros</h2>
+    {% if dashboard.financeiro.ultimos %}
+      <table class="tabela compact-table">
+        <thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th>Valor</th></tr></thead>
+        <tbody>
+          {% for lanc in dashboard.financeiro.ultimos %}
+            <tr>
+              <td>{{ lanc.data }}</td>
+              <td>{{ lanc.tipo }}</td>
+              <td>{{ lanc.descricao or lanc.categoria or "Sem descrição" }}</td>
+              <td>{{ formatar_moeda(lanc.valor) }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="empty-state">Nenhum lançamento financeiro cadastrado.</p>
+    {% endif %}
+  </section>
+
+  <section class="dashboard-section">
+    <h2>Últimas colheitas</h2>
+    {% if dashboard.colheita.ultimas %}
+      <table class="tabela compact-table">
+        <thead><tr><th>Data</th><th>Cultura</th><th>Gleba</th><th>Quantidade</th></tr></thead>
+        <tbody>
+          {% for colheita in dashboard.colheita.ultimas %}
+            <tr>
+              <td>{{ colheita.data_colheita }}</td>
+              <td>{{ colheita.cultura_gleba.cultura.nome }}</td>
+              <td>{{ colheita.cultura_gleba.gleba.nome }}</td>
+              <td>{% if colheita.quantidade is not none %}{{ formatar_numero(colheita.quantidade) }} {{ colheita.unidade or "" }}{% else %}—{% endif %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="empty-state">Nenhum registro de colheita cadastrado.</p>
+    {% endif %}
+  </section>
+</div>
+
+<div class="dashboard-columns">
+  <section class="dashboard-section">
+    <h2>Últimas aplicações</h2>
+    {% if dashboard.aplicacoes.ultimas %}
+      <table class="tabela compact-table">
+        <thead><tr><th>Data</th><th>Local</th><th>Produto</th><th>Dose</th></tr></thead>
+        <tbody>
+          {% for aplicacao in dashboard.aplicacoes.ultimas %}
+            <tr>
+              <td>{{ aplicacao.data_aplicacao }}</td>
+              <td>{{ aplicacao.cultura_gleba.cultura.nome }} · {{ aplicacao.cultura_gleba.gleba.nome }}</td>
+              <td>{{ aplicacao.produto.nome }}</td>
+              <td>{% if aplicacao.dose is not none %}{{ formatar_numero(aplicacao.dose) }} {{ aplicacao.unidade or "" }}{% else %}—{% endif %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="empty-state">Nenhuma aplicação cadastrada.</p>
+    {% endif %}
+  </section>
+
+  <section class="dashboard-section">
+    <h2>Últimos uploads</h2>
+    {% if dashboard.uploads.ultimos %}
+      <table class="tabela compact-table">
+        <thead><tr><th>Arquivo</th><th>Data</th><th>Tamanho</th></tr></thead>
+        <tbody>
+          {% for arquivo in dashboard.uploads.ultimos %}
+            <tr>
+              <td>{{ arquivo.nome_original }}</td>
+              <td>{{ arquivo.enviado_em[:10] }}</td>
+              <td>{{ formatar_tamanho(arquivo.tamanho) }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="empty-state">Nenhum upload enviado.</p>
+    {% endif %}
+  </section>
+</div>
+
+{% if dashboard.glebas.total == 0 %}
+  <section class="dashboard-section">
+    <p class="empty-state">Nenhuma gleba cadastrada ainda.</p>
+  </section>
+{% endif %}
+
+<section class="dashboard-section">
+  <h2>Catálogo técnico</h2>
   <p>
-    Esta é a fundação inicial da aplicação Flask do MVP. O dashboard consolidará,
-    em etapas futuras, indicadores da propriedade (culturas, glebas, financeiro e
-    colheita).
+    {{ dashboard.catalogo.defensivos }} defensivos, {{ dashboard.catalogo.fertilizantes }} fertilizantes
+    e {{ dashboard.catalogo.bloqueados }} produtos bloqueados/históricos registrados como consulta global.
   </p>
-  <p>Use o menu acima para navegar pelos módulos (atualmente placeholders).</p>
 </section>
 {% endblock %}

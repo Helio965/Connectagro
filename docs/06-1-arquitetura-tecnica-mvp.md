@@ -2,7 +2,7 @@
 
 ## Status do documento
 
-**Arquitetura técnica — v0.12.1 (CRUDs + catálogo + aplicação de insumo + upload seguro).**
+**Arquitetura técnica — v0.13 (CRUDs + catálogo + upload seguro + dashboard operacional).**
 
 Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetura-do-sistema.md):
 
@@ -12,9 +12,14 @@ Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetur
 
 > **Estado atual:** estão prontos a fundação Flask, modelos SQLAlchemy (15
 > tabelas), migrations, importação do catálogo técnico via CLI, autenticação real,
-> CRUDs de Glebas, Culturas, Equipe, Financeiro, Colheita, Aplicações de Insumo e
-> **Upload de Arquivos**, além da consulta somente leitura de Defensivos e
-> Fertilizantes. `ProdutoPreco`/`ProdutoImagem` seguem vazios no MVP.
+> **Dashboard Operacional** somente leitura, CRUDs de Glebas, Culturas, Equipe,
+> Financeiro, Colheita, Aplicações de Insumo e **Upload de Arquivos**, além da
+> consulta somente leitura de Defensivos e Fertilizantes. `ProdutoPreco`/
+> `ProdutoImagem` seguem vazios no MVP.
+>
+> **Dashboard Operacional:** o módulo agrega dados já existentes da propriedade
+> atual, usando consultas aos módulos operacionais. Ele não cria registros, não
+> altera models e não exige migration.
 >
 > **Upload de Arquivos:** o módulo usa `UPLOAD_FOLDER`, salva arquivos localmente
 > fora da pasta pública `static` (`instance/uploads` por padrão), em subpastas por
@@ -23,7 +28,7 @@ Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetur
 > por usuários ficam fora do Git e não devem ser servidos diretamente por
 > `/static/uploads`.
 >
-> **Pendente:** Dashboard, Mapa real, IA simulada, Relatórios, permissões finas e
+> **Pendente:** Mapa real, IA simulada, Relatórios, permissões finas e
 > CSRF/Flask-WTF.
 
 ## Objetivo
@@ -57,6 +62,8 @@ Flask (rotas/blueprints)  ──►  Serviços/helpers  ──►  Modelos/Acess
 - **Blueprints** para isolar cada módulo do MVP.
 - **Separação de responsabilidades:** rotas simples, helpers locais para CRUDs e
   serviços quando houver regra compartilhada.
+- **Dashboard como agregação somente leitura:** consulta dados existentes e não
+  modifica estado.
 - **Configuração por ambiente** via variáveis de ambiente (`.env`), sem segredos
   versionados.
 - Alinhamento total com os nomes de tabelas/campos do
@@ -99,8 +106,8 @@ src/
     │   ├── financeiro/  upload/  equipe/  colheita/
     │   └── mapa/  ia/  relatorios/
     ├── models/                  # modelos SQLAlchemy de domínio (15 tabelas)
-    ├── services/                # regras compartilhadas quando necessário
-    ├── utils/                   # auth.py, contexto.py, catalogo.py
+    ├── services/                # catalogo_seed.py, dashboard_service.py
+    ├── utils/                   # auth.py, contexto.py, catalogo.py, formatters.py
     ├── templates/               # base.html, módulos, erros
     └── static/                  # css/, js/ (arquivos públicos)
 
@@ -130,7 +137,7 @@ instance/
 | Módulo (MVP)       | Blueprint        | Prefixo        | Entidades principais                              |
 |--------------------|------------------|----------------|---------------------------------------------------|
 | Login              | `auth`           | `/auth`        | `usuario`                                         |
-| Dashboard          | `dashboard`      | `/`            | agregações                                        |
+| Dashboard          | `dashboard`      | `/`            | agregações somente leitura                        |
 | Culturas           | `culturas`       | `/culturas`    | `cultura`, `cultura_gleba`                        |
 | Glebas             | `glebas`         | `/glebas`      | `gleba`, `cultura_gleba`                          |
 | Defensivos         | `defensivos`     | `/defensivos`  | `produto_base`, `produto_tecnico`                 |
@@ -154,10 +161,24 @@ instance/
 - **Seeds:** `flask --app src/run.py import-catalog-seed` popula apenas
   `produto_base` + `produto_tecnico`. `produto_preco`/`produto_imagem` continuam
   vazios no MVP.
+- **Dashboard:** não exige migration nova porque apenas consulta tabelas já
+  existentes.
 - **Aplicações de Insumo:** não exigem migration nova porque a tabela
   `aplicacao_insumo` já existe no schema inicial.
 - **Upload:** não exige migration nova porque a tabela `upload_arquivo` já existe
   no schema inicial.
+
+### Dashboard operacional
+
+- `src/app/blueprints/dashboard/routes.py` resolve a propriedade atual e renderiza
+  `dashboard/index.html`.
+- `src/app/services/dashboard_service.py` concentra as consultas e agregações.
+- Todas as métricas operacionais são filtradas por `propriedade_id` ou, no caso
+  de Colheita e Aplicações, via join com `CulturaGleba`, `Cultura` e `Gleba` da
+  propriedade atual.
+- O catálogo é global e aparece apenas como contagem técnica de consulta.
+- O Dashboard é somente leitura: não cria, edita ou remove registros.
+- Não usa biblioteca externa de gráfico e não altera schema.
 
 ### Upload local
 
@@ -186,7 +207,7 @@ instance/
 
 1. Usuário acessa o sistema.
 2. Faz **login**.
-3. Entra no **dashboard**.
+3. Entra no **dashboard operacional**.
 4. Cadastra ou consulta **propriedade / glebas / culturas**.
 5. Consulta o **catálogo** de defensivos/fertilizantes.
 6. Registra **aplicações de insumos** em associações cultura↔gleba.
@@ -221,9 +242,12 @@ instance/
 - Autenticação real com sessão Flask e hash de senha.
 - Rotas protegidas por `@login_required`.
 
-### Dashboard
-- Visão consolidada da propriedade após login.
-- Permanece pendente.
+### Dashboard ✅
+- Painel operacional somente leitura em `/`.
+- Escopo por propriedade atual em dados operacionais.
+- Agrega Glebas, Culturas, Financeiro, Equipe, Colheita, Aplicações e Upload.
+- Exibe totais globais do catálogo técnico sem transformar catálogo em venda.
+- Não cria dados, não altera schema e não usa gráficos externos.
 
 ### Culturas ✅
 - CRUD com `status` (`planejada`, `em_andamento`, `colhida`, `cancelada`).
@@ -292,6 +316,8 @@ instance/
 - Sem permissões finas por perfil no MVP atual.
 - Sem Flask-WTF/CSRF dedicado nesta etapa.
 - Templates Jinja com escaping padrão.
+- Dashboard filtra dados operacionais pela propriedade atual; Colheita e
+  Aplicações usam join com `CulturaGleba`, `Cultura` e `Gleba`.
 - Uploads ficam fora da pasta pública `static` por padrão; arquivos devem ser
   acessados apenas pelas rotas protegidas do módulo Upload.
 - Banco real, `.env`, uploads de usuário e arquivos sensíveis não são versionados.
@@ -304,7 +330,11 @@ instance/
 - O app de teste é criado por `create_app("testing")` com SQLite em memória.
 - Testes existentes cobrem: app factory, rotas protegidas, schema/modelos, seed,
   autenticação, CRUDs de Glebas/Culturas, Equipe/Financeiro, Colheita, consulta
-  do catálogo, Aplicações de Insumo e Upload.
+  do catálogo, Aplicações de Insumo, Upload e Dashboard.
+- `tests/test_dashboard_operacional.py` cobre login, resposta 200, nome da
+  propriedade, totais por propriedade, culturas por status, financeiro, equipe,
+  colheita por unidade, aplicações, uploads, totais globais do catálogo, estados
+  vazios, atalhos principais e ausência de termos de venda.
 - `tests/test_upload_crud.py` usa pasta temporária para uploads e cobre login,
   envio válido, arquivo físico, nome seguro, extensão proibida/permitida, caminho
   malicioso, listagem, download, remoção, escopo por propriedade, garantia de
@@ -324,6 +354,7 @@ instance/
 - **Não** criar CRUD de produto no MVP atual.
 - **Não** recomendar produto nem validar dose tecnicamente no módulo de aplicações.
 - **Não** fazer OCR, IA, extração automática ou validação avançada no Upload do MVP.
+- Dashboard deve permanecer somente leitura e sem criação de dados.
 - No MVP, **preço e imagem** devem aparecer como pendentes / não consolidados.
 - A **validação diária do menor preço** pertence ao sistema final.
 - Usar nomes de tabelas e campos compatíveis com o DER e o dicionário de dados.
@@ -354,17 +385,17 @@ instance/
 - [x] Validação do seed técnico (`flask validate-catalog-seed`)
 - [x] Importação idempotente do catálogo (`flask import-catalog-seed`)
 - [x] Autenticação real (login/logout, sessão, `login_required`, `seed-users`)
+- [x] Dashboard Operacional somente leitura
 - [x] CRUD de Glebas e Culturas (+ associação cultura↔gleba)
 - [x] CRUD de Equipe e Financeiro (com totais receitas/despesas/saldo)
 - [x] CRUD de Colheita (vinculada a cultura↔gleba)
 - [x] Consulta do catálogo (Defensivos/Fertilizantes, somente leitura)
 - [x] CRUD de Aplicações de Insumo (histórico operacional, sem recomendação)
 - [x] Upload de Arquivos (local, seguro, escopado por propriedade)
-- [x] Testes de fundação, schema, seed, autenticação, CRUDs e consulta do catálogo
+- [x] Testes de fundação, schema, seed, autenticação, CRUDs, Dashboard e consulta do catálogo
 
 **Pendente:**
 
-- [ ] Dashboard
 - [ ] Mapa real
 - [ ] IA simulada
 - [ ] Relatórios

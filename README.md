@@ -7,14 +7,14 @@ camada de IA e um catálogo técnico de produtos agrícolas para consulta rápid
 
 > **Status do projeto:** fundação Flask, **modelos SQLAlchemy** (15 tabelas),
 > **migrations** (Flask-Migrate), **importação do catálogo técnico** (via CLI),
-> **autenticação real** (login/logout), **CRUDs** de **Glebas**, **Culturas**
-> (com associação cultura↔gleba), **Equipe**, **Financeiro** (com totais),
-> **Colheita**, **Aplicações de Insumo** (registro histórico operacional) e
-> **Upload de Arquivos** (armazenamento local com metadados), além da **consulta
-> somente leitura** do catálogo de **Defensivos** e **Fertilizantes**. Dashboard,
-> Mapa, IA e Relatórios seguem pendentes. Não há CRUD de produtos;
-> `produto_preco`/`produto_imagem` continuam **vazios** no MVP. O sistema **não
-> vende produtos**, não recomenda produtos, não valida dose e não faz OCR/IA/
+> **autenticação real** (login/logout), **Dashboard Operacional** somente leitura,
+> **CRUDs** de **Glebas**, **Culturas** (com associação cultura↔gleba), **Equipe**,
+> **Financeiro** (com totais), **Colheita**, **Aplicações de Insumo** (registro
+> histórico operacional) e **Upload de Arquivos** (armazenamento local com
+> metadados), além da **consulta somente leitura** do catálogo de **Defensivos** e
+> **Fertilizantes**. Mapa, IA e Relatórios seguem pendentes. Não há CRUD de
+> produtos; `produto_preco`/`produto_imagem` continuam **vazios** no MVP. O sistema
+> **não vende produtos**, não recomenda produtos, não valida dose e não faz OCR/IA/
 > extração automática de arquivos; o banco populado e uploads reais **não** são
 > versionados.
 
@@ -32,6 +32,7 @@ em etapas posteriores, evoluirá para a versão completa.
 ### O que o ConnectAgro **é**
 
 - Uma plataforma de **gestão e consulta**.
+- Um dashboard operacional somente leitura para resumir dados já cadastrados.
 - Um catálogo técnico de produtos agrícolas usado como **base de consulta rápida**.
 - Um sistema para registrar aplicações de insumo como **histórico operacional**.
 - Um sistema para armazenar localmente documentos da propriedade no MVP.
@@ -57,7 +58,7 @@ em etapas posteriores, evoluirá para a versão completa.
 | Módulo         | Descrição resumida                                              |
 | -------------- | --------------------------------------------------------------- |
 | Login          | Autenticação e controle de acesso                               |
-| Dashboard      | Visão consolidada da propriedade                                |
+| Dashboard      | Resumo operacional somente leitura da propriedade atual         |
 | Culturas       | Cadastro e acompanhamento das culturas                          |
 | Glebas         | Cadastro e gestão das áreas/talhões                             |
 | Defensivos     | Consulta de defensivos a partir do catálogo                     |
@@ -97,11 +98,11 @@ em etapas posteriores, evoluirá para a versão completa.
 │       ├── __init__.py    # create_app
 │       ├── config.py      # configuração por ambiente
 │       ├── extensions.py  # extensões (Flask-SQLAlchemy, Flask-Migrate)
-│       ├── blueprints/    # auth + CRUDs + catálogo + placeholders protegidos
+│       ├── blueprints/    # auth + CRUDs + catálogo + módulos protegidos
 │       ├── models/        # modelos SQLAlchemy de domínio (15 tabelas)
 │       ├── commands.py    # CLI: init-db, validate/import-catalog-seed, seed-users
-│       ├── services/      # regras de negócio (ex.: catalogo_seed.py)
-│       ├── utils/         # utilitários (auth.py, contexto.py)
+│       ├── services/      # regras de negócio e agregações (ex.: dashboard_service.py)
+│       ├── utils/         # utilitários (auth.py, contexto.py, formatters.py)
 │       ├── templates/     # HTML (Jinja2)
 │       └── static/        # css/, js/ (arquivos públicos)
 ├── tests/                 # testes (pytest)
@@ -146,6 +147,25 @@ pytest
 O acesso exige **login** (sessão Flask + `werkzeug.security`): a rota `/` e os
 módulos são protegidos e redirecionam para `/auth/login`; `/health` é público. O
 arquivo de banco gerado **não** é versionado.
+
+### Dashboard operacional
+
+O Dashboard em `/` é protegido por login e mostra um resumo somente leitura da
+propriedade atual. Ele agrega dados já existentes de Glebas, Culturas,
+Financeiro, Equipe, Colheita, Aplicações de Insumo, Upload e Catálogo.
+
+Indicadores principais:
+
+- total de glebas, área somada e glebas sem área informada;
+- culturas por status e associações cultura↔gleba;
+- receitas, despesas, saldo e últimos lançamentos financeiros;
+- membros de equipe ativos/inativos;
+- registros e somas de colheita por unidade;
+- aplicações recentes como histórico operacional;
+- total e tamanho aproximado dos uploads;
+- totais globais do catálogo técnico por classe e produtos bloqueados/históricos.
+
+O Dashboard não cria dados, não altera schema e não implementa gráficos externos.
 
 ### Upload de arquivos
 
@@ -193,13 +213,12 @@ extração de dados.
 
 Concluídos: documentação de produto, modelagem (DER + dicionário), catálogo
 técnico/seed, a **fundação Flask**, os **modelos SQLAlchemy de domínio** (15
-tabelas), migrations, autenticação real, CRUDs de glebas/culturas/equipe/
-financeiro/colheita/aplicações de insumo/upload e consulta somente leitura de
-Defensivos/Fertilizantes.
+tabelas), migrations, autenticação real, Dashboard Operacional, CRUDs de glebas/
+culturas/equipe/financeiro/colheita/aplicações de insumo/upload e consulta
+somente leitura de Defensivos/Fertilizantes.
 
-O **próximo passo recomendado** é implementar o **Dashboard operacional**,
-mantendo pendentes Mapa real, IA simulada, Relatórios, permissões finas por perfil
-e CSRF dedicado.
+O **próximo passo recomendado** é implementar o **Mapa real**, mantendo pendentes
+IA simulada, Relatórios, permissões finas por perfil e CSRF dedicado.
 
 Consulte o [Roadmap do MVP](./docs/07-roadmap-mvp.md) para o detalhamento.
 
