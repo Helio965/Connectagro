@@ -6,6 +6,7 @@ from ...models import Cultura, CulturaGleba, Gleba
 from ...models._helpers import iso_now
 from ...utils.auth import login_required
 from ...utils.contexto import propriedade_atual, vazio_para_none
+from ...utils.permissions import require_permission
 from . import culturas_bp
 
 STATUS_VALIDOS = ("planejada", "em_andamento", "colhida", "cancelada")
@@ -42,6 +43,7 @@ def _sincronizar_glebas(cultura, gleba_ids, propriedade):
 
 @culturas_bp.route("/")
 @login_required
+@require_permission("culturas.view")
 def index():
     propriedade = propriedade_atual()
     culturas = (Cultura.query
@@ -53,6 +55,7 @@ def index():
 
 @culturas_bp.route("/nova", methods=["GET", "POST"])
 @login_required
+@require_permission("culturas.create")
 def nova():
     propriedade = propriedade_atual()
     glebas = _glebas_da_propriedade(propriedade)
@@ -88,6 +91,7 @@ def nova():
 
 @culturas_bp.route("/<int:cultura_id>/editar", methods=["GET", "POST"])
 @login_required
+@require_permission("culturas.edit")
 def editar(cultura_id):
     propriedade = propriedade_atual()
     cultura = _cultura_da_propriedade_ou_404(cultura_id, propriedade)
@@ -120,6 +124,7 @@ def editar(cultura_id):
 
 @culturas_bp.route("/<int:cultura_id>/remover", methods=["POST"])
 @login_required
+@require_permission("culturas.delete")
 def remover(cultura_id):
     propriedade = propriedade_atual()
     cultura = _cultura_da_propriedade_ou_404(cultura_id, propriedade)
