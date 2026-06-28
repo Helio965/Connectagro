@@ -145,17 +145,33 @@
 - [x] Allowlist de extensões: `pdf`, `png`, `jpg`, `jpeg`, `csv`, `xlsx`, `txt`, `docx`.
 - [x] Bloqueio de executáveis, scripts, compactados e demais extensões fora da allowlist.
 - [x] Download e remoção retornam 404 para arquivo de outra propriedade.
+- [x] Pasta padrão corrigida para `instance/uploads`, fora de `src/app/static`.
 - [x] Testes (`tests/test_upload_crud.py`).
 
 > Sem migration nova: o modelo/tabela `UploadArquivo` já existia. Sem OCR, IA,
 > extração automática, upload de imagem de produto ou armazenamento em nuvem.
+
+## Etapa 5.8 — Dashboard Operacional ✅
+
+- [x] Dashboard em `/`, protegido por login e escopado pela propriedade atual.
+- [x] Agregações somente leitura via `src/app/services/dashboard_service.py`.
+- [x] Indicadores de Glebas, Culturas, Financeiro, Equipe, Colheita, Aplicações,
+  Upload e Catálogo.
+- [x] Últimos registros financeiros, colheitas, aplicações e uploads.
+- [x] Atalhos rápidos para módulos já existentes.
+- [x] Estados vazios para propriedade sem dados operacionais.
+- [x] Testes de escopo, totais, estados vazios, catálogo global e ausência de
+  termos de venda (`tests/test_dashboard_operacional.py`).
+
+> Sem migration nova, sem models novos, sem CRUD novo, sem gráficos externos,
+> sem mapa, sem IA, sem relatórios/PDF e sem recomendação agronômica.
 
 ## Etapa 5 — Implementação dos módulos
 
 Ordem sugerida (sujeita a ajuste):
 
 - [x] Login (autenticação — ver Etapa 5.1)
-- [ ] Dashboard
+- [x] Dashboard (ver Etapa 5.8)
 - [x] Culturas (CRUD — ver Etapa 5.2)
 - [x] Glebas (CRUD — ver Etapa 5.2)
 - [x] Defensivos (consulta — ver Etapa 5.5)
@@ -175,7 +191,7 @@ Ordem sugerida (sujeita a ajuste):
 - [x] Testes de schema/modelos (15 tabelas, unicidade, schema validável).
 - [x] Testes de validação e importação do seed técnico.
 - [x] Testes de autenticação, CRUDs já entregues, Upload e consulta do catálogo.
-- [ ] Dashboard
+- [x] Dashboard.
 - [ ] Mapa real
 - [ ] IA simulada
 - [ ] Relatórios
