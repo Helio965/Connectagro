@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Upload — ConnectAgro{% endblock %}
+
+{% block content %}
+<section class="card">
+  <div class="card-head">
+    <h1>Upload de arquivos</h1>
+    <a class="btn-acao" href="{{ url_for('upload.novo') }}">+ Novo arquivo</a>
+  </div>
+
+  <p class="hint">Envie apenas documentos relacionados à gestão da propriedade.</p>
+  <p class="hint">Arquivos enviados são armazenados localmente no MVP e não devem ser versionados no Git.</p>
+  <p class="placeholder-tag">Não envie executáveis, scripts ou arquivos sensíveis.</p>
+
+  {% if arquivos %}
+  <table class="tabela">
+    <thead>
+      <tr>
+        <th>Arquivo</th><th>Tipo</th><th>Tamanho</th><th>Descrição</th><th>Enviado em</th><th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for arquivo in arquivos %}
+      <tr>
+        <td>{{ arquivo.nome_original }}</td>
+        <td>{{ arquivo.tipo_mime or "—" }}</td>
+        <td>{{ formatar_tamanho(arquivo.tamanho) }}</td>
+        <td>{{ arquivo.descricao or "—" }}</td>
+        <td>{{ arquivo.enviado_em }}</td>
+        <td class="acoes">
+          <a href="{{ url_for('upload.download', arquivo_id=arquivo.id) }}">Baixar</a>
+          <form method="post" action="{{ url_for('upload.remover', arquivo_id=arquivo.id) }}"
+                onsubmit="return confirm('Remover este arquivo?');">
+            <button type="submit" class="btn-link-danger">Remover</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>Nenhum arquivo enviado ainda. <a href="{{ url_for('upload.novo') }}">Enviar o primeiro</a>.</p>
+  {% endif %}
+</section>
+{% endblock %}
