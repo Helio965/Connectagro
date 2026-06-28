@@ -37,7 +37,9 @@
   `bloqueado_historico`. **Defensivos** começam como `nao_validado_agrofit` (ou
   `atencao_regulatoria`) — **nunca** "validado oficialmente" sem fonte real.
 - RN-09b — **Fertilizantes, corretivos, inoculantes e biofertilizantes** usam
-  `sujeito_a_sipeagro_nao_validado` ou `tipo_tecnico_generico`.
+  `sujeito_a_sipeagro_nao_validado` ou `tipo_tecnico_generico` (este para
+  genéricos como Ureia, MAP, DAP, Calcário Dolomítico, Esterco Bovino, Composto
+  Orgânico), separáveis de produtos comerciais específicos no futuro.
 - RN-09c — **Paraquate**, se citado, é tratado como `bloqueado_historico` (uso
   proibido no Brasil), não recomendado. **Oxamil** não entra como produto
   recomendado no seed inicial.
@@ -57,8 +59,9 @@
 - RN-10b — Senhas são armazenadas como **hash** (`werkzeug.security`); a sessão
   guarda apenas dados mínimos do usuário, **nunca** a senha.
 - RN-11 — **Perfis oficiais do MVP:** `admin`, `tecnico`, `trabalhador`
-  (`usuario.perfil`). A matriz de permissões fica em código no MVP, sem tabela de
-  roles/permissões e sem painel administrativo de usuários.
+  (`usuario.perfil`). A matriz de permissões fica em código no MVP, em
+  `src/app/utils/permissions.py`, sem tabela de roles/permissões, sem painel de
+  administração de usuários e sem dependência externa de RBAC.
 - RN-11a — `admin` pode acessar todos os módulos e criar, editar e remover nos
   CRUDs da **sua propriedade atual**. Admin não acessa dados globais de outras
   propriedades.
@@ -66,17 +69,21 @@
   equipe e financeiro em leitura; pode criar/editar glebas, culturas, colheitas e
   aplicações; pode enviar e baixar uploads. Não pode remover registros críticos,
   remover uploads ou criar/editar/remover equipe e financeiro.
-- RN-11c — `trabalhador` tem acesso operacional restrito: visualiza glebas,
-  culturas, colheitas e aplicações; cria colheitas, aplicações e uploads; baixa
-  uploads. Não acessa equipe/financeiro e não cria/edita/remove glebas/culturas
-  nem edita/remove colheitas, aplicações ou uploads.
+- RN-11c — `trabalhador` tem acesso operacional restrito: pode acessar dashboard,
+  mapa, catálogo, relatórios e IA; visualiza glebas, culturas, colheitas e
+  aplicações; cria colheitas, aplicações e uploads; baixa uploads. Não acessa
+  equipe/financeiro e não cria/edita/remove glebas/culturas nem edita/remove
+  colheitas, aplicações ou uploads.
 - RN-11d — Dashboard, Mapa, IA simulada, Relatórios e Catálogo são acessíveis aos
   perfis autenticados conforme a matriz de permissões.
 - RN-11e — Permissões por perfil **não substituem** o escopo por propriedade. As
   consultas e ações continuam filtradas pela propriedade atual.
-- RN-11f — O backend deve validar permissões com decorators e retornar **403** em
-  ações não autorizadas. Esconder botão no template não é suficiente.
-- RN-11g — As funções de `equipe_membro` poderão refinar permissões futuramente,
+- RN-11f — O backend deve validar permissões com `require_permission(...)` e
+  retornar **403** em ações não autorizadas. Esconder botão no template não é
+  suficiente.
+- RN-11g — `can(...)` nos templates é apoio visual para esconder menus, atalhos e
+  botões não permitidos, mas não é a fonte de segurança da autorização.
+- RN-11h — As funções de `equipe_membro` poderão refinar permissões futuramente,
   mas não controlam autorização nesta fase.
 
 ## Regras operacionais
@@ -103,7 +110,8 @@
 - RN-20 — O Upload do MVP aceita apenas extensões de documentos/imagens simples:
   `pdf`, `png`, `jpg`, `jpeg`, `csv`, `xlsx`, `txt` e `docx`.
 - RN-21 — Executáveis, scripts, compactados e arquivos web executáveis devem ser
-  bloqueados no Upload.
+  bloqueados no Upload. Exemplos proibidos: `exe`, `bat`, `cmd`, `sh`, `ps1`,
+  `js`, `html`, `php`, `py`, `zip`, `rar`, `7z`, `dll`, `msi` e `jar`.
 - RN-22 — Arquivos enviados são armazenados localmente no MVP, fora da pasta
   `static` pública, com nome seguro, sem versionar o conteúdo no Git e com acesso
   apenas pelas rotas protegidas do módulo Upload.
@@ -119,7 +127,8 @@
   propriedade atual.
 - RN-28 — O histórico da IA deve ser visível apenas ao usuário e à propriedade
   correspondentes.
-- RN-29 — A IA simulada não substitui orientação técnica profissional.
+- RN-29 — A IA simulada não substitui orientação técnica profissional ou
+  profissional habilitado.
 - RN-30 — Os **relatórios são somente leitura**: não criam, alteram ou removem
   dados.
 - RN-31 — Os relatórios são **escopados pela propriedade atual**; nenhuma rota de
