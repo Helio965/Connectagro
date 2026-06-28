@@ -9,7 +9,7 @@ def _setup_usuario_com_associacao(email, cultura_nome="Soja", gleba_nome="Talhã
     """Cria usuário + propriedade + gleba + cultura + associação. Retorna ids."""
     from app.models import Usuario, Propriedade, Gleba, Cultura, CulturaGleba
 
-    u = Usuario(nome=email, email=email, perfil="tecnico", ativo=True,
+    u = Usuario(nome=email, email=email, perfil="admin", ativo=True,
                 senha_hash=gerar_hash_senha("senha123"))
     db.session.add(u)
     db.session.commit()
