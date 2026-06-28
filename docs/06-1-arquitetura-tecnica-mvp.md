@@ -2,7 +2,7 @@
 
 ## Status do documento
 
-**Arquitetura técnica — v0.9 (CRUD de Glebas/Culturas/Equipe/Financeiro/Colheita; próxima etapa: demais
+**Arquitetura técnica — v0.10 (CRUDs + consulta do catálogo; próxima etapa: demais
 CRUDs dos módulos).**
 
 Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetura-do-sistema.md):
@@ -35,10 +35,13 @@ Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetur
 > [requisitos](./02-requisitos-do-sistema.md).
 >
 > **CRUDs entregues:** Glebas, Culturas (+ associação), **Equipe**,
-> **Financeiro** (com totais) e **Colheita** (vinculada a cultura↔gleba).
+> **Financeiro** (com totais) e **Colheita**. **Consulta somente leitura** do
+> catálogo (**Defensivos**/**Fertilizantes**) usando `ProdutoBase` +
+> `ProdutoTecnico` (busca, filtros, detalhe); `ProdutoPreco`/`ProdutoImagem`
+> seguem **vazios** no MVP.
 >
-> **Próximo passo oficial:** implementar **Upload**, a **consulta do catálogo**
-> (defensivos/fertilizantes) e o **registro de aplicação de insumo**.
+> **Próximo passo oficial:** implementar o **registro de aplicação de insumo** e
+> o **Upload**.
 
 ## Objetivo
 
@@ -288,21 +291,21 @@ Fluxo geral esperado do uso do sistema:
 - **Implementado:** CRUD (nome, área, lat/long, tipo de solo, observações).
 - **Futuro:** `poligono_geojson` para o mapa real.
 
-### Defensivos
-- **Objetivo:** consultar defensivos do catálogo.
-- **Dados principais:** `produto_base` (classe `defensivo`), `produto_tecnico`,
-  `produto_preco`, `produto_imagem`.
-- **Blueprint:** `defensivos` (`/defensivos`).
-- **Implementação futura:** consulta/busca; preço e imagem como pendência;
-  `status_regulatorio` informativo; itens bloqueados não recomendados.
+### Defensivos ✅ (consulta implementada)
+- **Objetivo:** consultar defensivos do catálogo (somente leitura).
+- **Dados principais:** `produto_base` (classe `defensivo`), `produto_tecnico`.
+- **Blueprint:** `defensivos` (`/defensivos`, `/defensivos/<slug>`).
+- **Implementado:** listagem com busca (`q`) e filtros (`categoria`,
+  `status_regulatorio`) + detalhe; preço/imagem como pendência; `status_regulatorio`
+  informativo (sem validação oficial). **Sem CRUD de produto.**
 
-### Fertilizantes
-- **Objetivo:** consultar fertilizantes do catálogo.
-- **Dados principais:** `produto_base` (classe `fertilizante`) e tabelas
-  `produto_*`.
-- **Blueprint:** `fertilizantes` (`/fertilizantes`).
-- **Implementação futura:** mesma consulta do catálogo, filtrando por `classe`;
-  genéricos (Ureia, MAP, DAP, Calcário) como tipo técnico.
+### Fertilizantes ✅ (consulta implementada)
+- **Objetivo:** consultar fertilizantes do catálogo (somente leitura).
+- **Dados principais:** `produto_base` (classe `fertilizante`), `produto_tecnico`.
+- **Blueprint:** `fertilizantes` (`/fertilizantes`, `/fertilizantes/<slug>`).
+- **Implementado:** mesma consulta (busca/filtros/detalhe) via helpers em
+  `utils/catalogo.py`; genéricos (Ureia, MAP, DAP, Calcário) como tipo técnico.
+  **Sem CRUD de produto.**
 
 ### Financeiro ✅ (CRUD implementado)
 - **Objetivo:** registrar receitas e despesas.
@@ -443,11 +446,12 @@ Fluxo geral esperado do uso do sistema:
 - [x] CRUD de Glebas e Culturas (+ associação cultura↔gleba)
 - [x] CRUD de Equipe e Financeiro (com totais receitas/despesas/saldo)
 - [x] CRUD de Colheita (vinculada a cultura↔gleba)
-- [x] Testes de fundação, schema, seed, autenticação e CRUD (glebas/culturas/equipe/financeiro/colheita)
+- [x] Consulta do catálogo (Defensivos/Fertilizantes, somente leitura)
+- [x] Testes de fundação, schema, seed, autenticação, CRUD e consulta do catálogo
 
 **Pendente (Etapa 5):**
 
-- [ ] CRUDs/telas dos demais módulos (upload), consulta do catálogo e registro de aplicação de insumo
+- [ ] Registro de aplicação de insumo e Upload
 - [ ] Permissões finas por perfil/módulo
 - [ ] Testes de regras de negócio e fluxos completos
 

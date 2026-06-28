@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% set rotulos = {
+  "nutrientes_principais": "Nutrientes principais",
+  "culturas_comuns": "Culturas comuns",
+  "alvos_controle": "Alvos de controle"
+} %}
+
+{% block title %}{{ produto.nome }} — ConnectAgro{% endblock %}
+
+{% block content %}
+<section class="card">
+  <h1>{{ produto.nome }}</h1>
+  <p class="hint">
+    {{ titulo }} — base técnica de consulta. <strong>Não substitui orientação de
+    um profissional habilitado.</strong> O ConnectAgro <strong>não vende
+    produtos</strong>. O status regulatório <strong>não</strong> representa
+    validação oficial automática.
+  </p>
+
+  <h2>Dados principais</h2>
+  <ul class="dados">
+    <li><strong>Categoria:</strong> {{ produto.categoria or "—" }}</li>
+    <li><strong>Descrição:</strong> {{ produto.descricao_curta or "—" }}</li>
+    {% if produto.descricao_completa %}
+    <li><strong>Descrição completa:</strong> {{ produto.descricao_completa }}</li>
+    {% endif %}
+    <li><strong>Status do sistema:</strong> <code>{{ produto.status_sistema }}</code></li>
+    <li><strong>Status regulatório:</strong> <code>{{ produto.status_regulatorio }}</code></li>
+  </ul>
+
+  <h2>Dados técnicos</h2>
+  {% if tecnico %}
+  <ul class="dados">
+    {% if tecnico.grupo_quimico %}<li><strong>Grupo químico:</strong> {{ tecnico.grupo_quimico }}</li>{% endif %}
+    {% if tecnico.composicao %}<li><strong>Composição:</strong> {{ tecnico.composicao }}</li>{% endif %}
+    {% if tecnico.uso_principal %}<li><strong>Uso principal:</strong> {{ tecnico.uso_principal }}</li>{% endif %}
+    {% if tecnico.modo_aplicacao %}<li><strong>Modo de aplicação:</strong> {{ tecnico.modo_aplicacao }}</li>{% endif %}
+    {% if tecnico.tipo_liberacao %}<li><strong>Tipo de liberação:</strong> {{ tecnico.tipo_liberacao }}</li>{% endif %}
+    {% for campo, valores in listas.items() %}
+      {% if valores %}
+      <li><strong>{{ rotulos.get(campo, campo) }}:</strong> {{ valores | join(", ") }}</li>
+      {% endif %}
+    {% endfor %}
+    {% if tecnico.fonte_tecnica %}<li><strong>Fonte técnica:</strong> {{ tecnico.fonte_tecnica }}</li>{% endif %}
+    {% if tecnico.observacoes %}<li><strong>Observações:</strong> {{ tecnico.observacoes }}</li>{% endif %}
+  </ul>
+  {% else %}
+  <p>Sem dados técnicos cadastrados para este produto.</p>
+  {% endif %}
+
+  <h2>Preço e imagem</h2>
+  <p class="placeholder-tag">
+    Preço e imagem permanecem <strong>pendentes no MVP</strong>. O ConnectAgro
+    não vende produtos.
+  </p>
+
+  <p><a href="{{ url_for(voltar_endpoint) }}">← Voltar à listagem</a></p>
+</section>
+{% endblock %}
