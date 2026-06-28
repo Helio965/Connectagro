@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Aplicações de insumo — ConnectAgro{% endblock %}
+
+{% block content %}
+<section class="card">
+  <div class="card-head">
+    <h1>Aplicações de insumo</h1>
+    <a class="btn-acao" href="{{ url_for('aplicacoes.nova') }}">+ Nova aplicação</a>
+  </div>
+
+  <p class="hint">
+    Este registro é apenas histórico operacional. O ConnectAgro não recomenda
+    produtos, não valida dose e não substitui orientação de um profissional habilitado.
+  </p>
+  <p class="hint">
+    O ConnectAgro não vende produtos, não possui carrinho e não emite cotação.
+  </p>
+  <p class="placeholder-tag">
+    Não registre produtos bloqueados/históricos como aplicação válida.
+  </p>
+
+  {% if aplicacoes %}
+  <table class="tabela">
+    <thead>
+      <tr>
+        <th>Data</th><th>Cultura</th><th>Gleba</th><th>Produto</th>
+        <th>Classe</th><th>Dose</th><th>Unidade</th><th>Responsável</th><th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for a in aplicacoes %}
+      <tr>
+        <td>{{ a.data_aplicacao }}</td>
+        <td>{{ a.cultura_gleba.cultura.nome }}</td>
+        <td>{{ a.cultura_gleba.gleba.nome }}</td>
+        <td>{{ a.produto.nome }}</td>
+        <td>{{ a.produto.classe }}</td>
+        <td>{{ "%.2f"|format(a.dose) if a.dose is not none else "—" }}</td>
+        <td>{{ a.unidade or "—" }}</td>
+        <td>{{ a.responsavel or "—" }}</td>
+        <td class="acoes">
+          <a href="{{ url_for('aplicacoes.editar', aplicacao_id=a.id) }}">Editar</a>
+          <form method="post" action="{{ url_for('aplicacoes.remover', aplicacao_id=a.id) }}"
+                onsubmit="return confirm('Remover este registro de aplicação?');">
+            <button type="submit" class="btn-link-danger">Remover</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>Nenhuma aplicação de insumo registrada ainda. <a href="{{ url_for('aplicacoes.nova') }}">Registrar a primeira</a>.</p>
+  {% endif %}
+</section>
+{% endblock %}
