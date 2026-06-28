@@ -33,8 +33,15 @@ def create_app(config_name=None):
     # Blueprints dos módulos do MVP
     register_blueprints(app)
 
-    # Comandos CLI (ex.: flask init-db)
+    # Comandos CLI (ex.: flask init-db, seed-users)
     register_commands(app)
+
+    # Dados do usuário logado disponíveis nos templates Jinja.
+    from .utils.auth import is_authenticated, usuario_atual
+
+    @app.context_processor
+    def inject_usuario():
+        return {"current_user": usuario_atual(), "is_authenticated": is_authenticated()}
 
     # Health check
     @app.route("/health")

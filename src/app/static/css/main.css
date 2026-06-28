@@ -81,3 +81,46 @@ body {
   color: #666;
   padding: 1.5rem 1rem;
 }
+
+/* Usuário na topbar */
+.topbar-user {
+  margin-left: auto;
+  font-size: .85rem;
+  color: #fff;
+}
+.topbar-user a { color: #fff; text-decoration: underline; }
+
+/* Mensagens flash */
+.flashes { list-style: none; padding: 0; margin: 0 0 1rem; }
+.flash {
+  padding: .6rem .8rem;
+  border-radius: 6px;
+  margin-bottom: .5rem;
+  font-size: .9rem;
+  border: 1px solid transparent;
+}
+.flash-success { background: #e8f5e9; border-color: #a5d6a7; color: #1b5e20; }
+.flash-error   { background: #fdecea; border-color: #f5c6c0; color: #b71c1c; }
+.flash-warning { background: #fff8e1; border-color: #ffe082; color: #7a5c00; }
+
+/* Tela de login */
+.login-card { max-width: 380px; margin: 2rem auto; }
+.login-form { display: flex; flex-direction: column; gap: .35rem; }
+.login-form label { font-size: .85rem; font-weight: 600; margin-top: .5rem; }
+.login-form input {
+  padding: .55rem .6rem;
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+  font-size: 1rem;
+}
+.btn-entrar {
+  margin-top: 1rem;
+  background: var(--verde);
+  color: #fff;
+  border: none;
+  padding: .6rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.btn-entrar:hover { background: var(--verde-escuro); }

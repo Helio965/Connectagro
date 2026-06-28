@@ -2,9 +2,11 @@
 from flask import render_template
 
 from . import equipe_bp
+from ...utils.auth import login_required
 
 
 @equipe_bp.route("/")
+@login_required
 def index():
     return render_template(
         "placeholders/modulo.html",

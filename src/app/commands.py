@@ -65,8 +65,43 @@ def import_catalog_seed():
     )
 
 
+# Usuários de teste do MVP (idempotente). Perfis oficiais: admin, tecnico, trabalhador.
+USUARIOS_TESTE = [
+    ("Administrador ConnectAgro", "admin@connectagro.com", "admin123", "admin"),
+    ("Técnico ConnectAgro", "tecnico@connectagro.com", "tecnico123", "tecnico"),
+    ("Trabalhador ConnectAgro", "trabalhador@connectagro.com", "trabalhador123", "trabalhador"),
+]
+
+
+@click.command("seed-users")
+@with_appcontext
+def seed_users():
+    """Cria os usuários de teste do MVP (idempotente; não sobrescreve senha)."""
+    from .models import Usuario
+    from .utils.auth import gerar_hash_senha
+
+    criados, existentes = 0, 0
+    for nome, email, senha, perfil in USUARIOS_TESTE:
+        if Usuario.query.filter_by(email=email).first() is not None:
+            existentes += 1
+            click.echo(f"  já existe: {email} ({perfil})")
+            continue
+        db.session.add(Usuario(
+            nome=nome, email=email, perfil=perfil, ativo=True,
+            senha_hash=gerar_hash_senha(senha),
+        ))
+        criados += 1
+        click.echo(f"  criado:    {email} ({perfil})")
+    db.session.commit()
+    click.echo(
+        f"Usuários de teste — criados: {criados}, já existentes: {existentes}. "
+        "Senhas armazenadas como hash."
+    )
+
+
 def register_commands(app):
     """Registra os comandos CLI na aplicação."""
     app.cli.add_command(init_db)
     app.cli.add_command(validate_catalog_seed)
     app.cli.add_command(import_catalog_seed)
+    app.cli.add_command(seed_users)

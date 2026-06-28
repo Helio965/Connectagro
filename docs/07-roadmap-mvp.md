@@ -60,17 +60,29 @@
   popula `produto_base` + `produto_tecnico`.
 - [x] `produto_preco`/`produto_imagem` permanecem **vazios**; itens
   bloqueados (Paraquate/Oxamil) **não** importados.
-- [ ] CRUDs dos módulos (Etapa 5).
-- [ ] Autenticação real (Etapa 5).
+- [x] `produto_preco`/`produto_imagem` permanecem **vazios**; itens
+  bloqueados (Paraquate/Oxamil) **não** importados.
 
 > O seed é **importado sob demanda** via CLI; o banco populado **não** é
 > versionado. Preço e imagem seguem pendentes para o sistema final.
+
+## Etapa 5.1 — Autenticação real ✅
+
+- [x] Login/logout com **sessão Flask** + **werkzeug.security** (hash de senha).
+- [x] Tela de login (`templates/auth/login.html`) e mensagens flash.
+- [x] **Proteção de rotas** dos módulos (`@login_required`); `/health` público.
+- [x] Usuário atual disponível nos templates (context processor).
+- [x] Comando `flask seed-users` (idempotente) com perfis **admin/tecnico/trabalhador**.
+- [x] Testes de autenticação (`tests/test_auth.py`).
+
+> Sem cadastro público, recuperação de senha, JWT ou permissões finas por módulo
+> (etapas futuras). Ainda **sem CRUD**.
 
 ## Etapa 5 — Implementação dos módulos
 
 Ordem sugerida (sujeita a ajuste):
 
-- [ ] Login
+- [x] Login (autenticação — ver Etapa 5.1)
 - [ ] Dashboard
 - [ ] Culturas
 - [ ] Glebas

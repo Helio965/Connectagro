@@ -23,13 +23,21 @@ Arquivos existentes:
   importação idempotente (popula `produto_base`/`produto_tecnico`, não popula
   preço/imagem, ignora itens bloqueados; listas salvas como JSON; campos
   `uso_principal`/`tipo_liberacao`).
+- **`test_auth.py`** — autenticação: `/auth/login` (GET 200), login válido
+  redireciona ao dashboard, senha errada não autentica (401), usuário inativo
+  não loga (403), logout limpa a sessão, rotas protegidas redirecionam sem login,
+  `/health` público, sessão sem senha, senha armazenada como hash, e
+  `seed-users` idempotente (3 usuários, sem duplicar).
+
+> As rotas protegidas e a rota `/` são testadas também em
+> `test_placeholder_routes.py` (redirecionam sem login; respondem 200 com login).
 
 Para rodar: `pytest` (a partir da raiz do projeto).
 
 ## Pendente para etapas futuras
 
-- Testes de **autenticação real**.
 - Testes de **CRUDs** dos módulos.
+- Testes de **permissões finas** por perfil/módulo.
 - Testes de **regras de negócio** e **fluxos completos** do MVP.
 
 ## Convenções

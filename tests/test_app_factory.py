@@ -16,7 +16,8 @@ def test_health(client):
     assert data["app"] == "ConnectAgro"
 
 
-def test_index(client):
-    """A rota inicial (dashboard) responde 200."""
+def test_index_redireciona_sem_login(client):
+    """A rota inicial (dashboard) é protegida: sem login redireciona ao login."""
     resp = client.get("/")
-    assert resp.status_code == 200
+    assert resp.status_code == 302
+    assert "/auth/login" in resp.headers["Location"]
