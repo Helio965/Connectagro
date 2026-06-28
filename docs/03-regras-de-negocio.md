@@ -82,6 +82,18 @@
 - RN-18 — Cada usuário só acessa aplicações vinculadas à sua própria
   propriedade. Tentativas de editar ou remover aplicação de outra propriedade
   devem retornar **404**.
+- RN-19 — Cada usuário só pode listar, baixar e remover arquivos de upload da
+  própria propriedade. Tentativas de acessar arquivo de outra propriedade devem
+  retornar **404**.
+- RN-20 — O Upload do MVP aceita apenas extensões de documentos/imagens simples:
+  `pdf`, `png`, `jpg`, `jpeg`, `csv`, `xlsx`, `txt` e `docx`.
+- RN-21 — Executáveis, scripts, compactados e arquivos web executáveis devem ser
+  bloqueados no Upload. Exemplos proibidos: `exe`, `bat`, `cmd`, `sh`, `ps1`,
+  `js`, `html`, `php`, `py`, `zip`, `rar`, `7z`, `dll`, `msi` e `jar`.
+- RN-22 — Arquivos enviados são armazenados localmente no MVP, dentro da pasta
+  configurada de uploads, com nome seguro e sem versionar o conteúdo no Git.
+- RN-23 — O Upload não faz OCR, IA, leitura automática, classificação,
+  validação documental avançada ou extração automática de conteúdo nesta etapa.
 
 ---
 

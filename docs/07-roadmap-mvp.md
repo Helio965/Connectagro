@@ -74,7 +74,7 @@
 - [x] Testes de autenticação (`tests/test_auth.py`).
 
 > Sem cadastro público, recuperação de senha, JWT ou permissões finas por módulo
-> (etapas futuras). Ainda **sem CRUD**.
+> (etapas futuras).
 
 ## Etapa 5.2 — CRUD de Glebas e Culturas ✅
 
@@ -84,9 +84,6 @@
 - [x] Propriedade do usuário resolvida em `utils/contexto.py` (padrão criada se
   não existir).
 - [x] Testes de CRUD e escopo (`tests/test_glebas_culturas_crud.py`).
-
-> Cada usuário opera sobre sua propriedade; um usuário não acessa glebas/culturas
-> de outro (404). Sem permissões finas por perfil ainda.
 
 ## Etapa 5.3 — CRUD de Equipe e Financeiro ✅
 
@@ -98,29 +95,22 @@
 - [x] Testes de CRUD, validações, totais e escopo
   (`tests/test_equipe_financeiro_crud.py`).
 
-> Sem migration nova (modelos já existiam). Sem permissões finas por perfil; sem
-> CSRF dedicado (pendência documentada).
-
 ## Etapa 5.4 — CRUD de Colheita ✅
 
 - [x] **CRUD de Colheita** (criar/listar/editar/remover), vinculado a uma
   associação **cultura↔gleba** da propriedade atual.
 - [x] Validações: `cultura_gleba_id` válido e da propriedade, `data` obrigatória,
   `quantidade` (se informada) número > 0 (vírgula/ponto).
-- [x] Listagem com cultura, gleba, quantidade, unidade, qualidade + resumo
-  (total e soma por unidade).
+- [x] Listagem com cultura, gleba, quantidade, unidade, qualidade + resumo.
 - [x] Orientação ao usuário quando não há associação cultura↔gleba.
 - [x] Testes de CRUD, validações e escopo (`tests/test_colheita_crud.py`).
-
-> Sem migration nova. Colheita depende da associação cultura↔gleba (Etapa 5.2).
 
 ## Etapa 5.5 — Consulta do Catálogo (Defensivos/Fertilizantes) ✅
 
 - [x] **Consulta somente leitura** de Defensivos e Fertilizantes (listagem +
   detalhe por `slug`), filtrando por `classe`.
 - [x] Busca textual (`q`) e filtros por `categoria` e `status_regulatorio`.
-- [x] Detalhe com dados de `ProdutoBase` + `ProdutoTecnico`; campos JSON
-  renderizados como lista, com fallback seguro para JSON inválido.
+- [x] Detalhe com dados de `ProdutoBase` + `ProdutoTecnico`.
 - [x] Avisos: base técnica de consulta, **não vende**, preço/imagem pendentes,
   status regulatório **sem** validação oficial automática.
 - [x] Testes (`tests/test_catalogo_consulta.py`).
@@ -134,18 +124,31 @@
   por login e escopado por propriedade.
 - [x] Cada aplicação vincula uma associação **cultura↔gleba** da propriedade
   atual a um `ProdutoBase` do catálogo.
-- [x] Produtos com `status_sistema == "bloqueado_historico"` ou
-  `status_regulatorio == "bloqueado_historico"` não aparecem no select e não
-  podem ser registrados.
-- [x] Validações: cultura↔gleba obrigatória/válida/da propriedade, produto
-  obrigatório/válido/não bloqueado, data obrigatória e dose opcional numérica
-  maior que zero com vírgula ou ponto.
-- [x] Avisos: registro histórico operacional, sem recomendação agronômica, sem
-  validação técnica de dose, sem venda/carrinho/cotação.
+- [x] Produtos com status histórico/bloqueado não aparecem no select e não podem
+  ser registrados.
+- [x] Validações: cultura↔gleba, produto, data e dose opcional numérica maior que zero.
+- [x] Avisos: histórico operacional, sem recomendação agronômica, sem validação
+  técnica de dose e sem venda/carrinho/cotação.
 - [x] Testes (`tests/test_aplicacoes_crud.py`).
 
-> Sem migration nova: o modelo/tabela `AplicacaoInsumo` já existia. Sem CRUD de
-> produto, sem preço, sem imagem e sem recomendação agronômica.
+> Sem migration nova. Sem CRUD de produto, sem preço, sem imagem e sem recomendação agronômica.
+
+## Etapa 5.7 — Upload de Arquivos ✅
+
+- [x] **Upload de Arquivos** com listagem, envio, download e remoção, protegido
+  por login e escopado por propriedade.
+- [x] Arquivos físicos salvos em `UPLOAD_FOLDER`, organizados por subpasta
+  `propriedade_<id>/`.
+- [x] Metadados gravados em `upload_arquivo`: nome original, caminho relativo,
+  MIME, tamanho, descrição e propriedade.
+- [x] Uso de `secure_filename` e nome único com UUID para evitar sobrescrita.
+- [x] Allowlist de extensões: `pdf`, `png`, `jpg`, `jpeg`, `csv`, `xlsx`, `txt`, `docx`.
+- [x] Bloqueio de executáveis, scripts, compactados e demais extensões fora da allowlist.
+- [x] Download e remoção retornam 404 para arquivo de outra propriedade.
+- [x] Testes (`tests/test_upload_crud.py`).
+
+> Sem migration nova: o modelo/tabela `UploadArquivo` já existia. Sem OCR, IA,
+> extração automática, upload de imagem de produto ou armazenamento em nuvem.
 
 ## Etapa 5 — Implementação dos módulos
 
@@ -159,7 +162,7 @@ Ordem sugerida (sujeita a ajuste):
 - [x] Fertilizantes (consulta — ver Etapa 5.5)
 - [x] Aplicações de Insumo (CRUD — ver Etapa 5.6)
 - [x] Financeiro (CRUD — ver Etapa 5.3)
-- [ ] Upload
+- [x] Upload (ver Etapa 5.7)
 - [x] Equipe (CRUD — ver Etapa 5.3)
 - [x] Colheita (CRUD — ver Etapa 5.4)
 - [ ] Mapa real
@@ -168,14 +171,16 @@ Ordem sugerida (sujeita a ajuste):
 
 ## Etapa 6 — Testes e qualidade
 
-> Já existem em `tests/`: testes da fundação (`test_app_factory.py`,
-> `test_placeholder_routes.py`), de schema/modelos (`test_models_schema.py`) e de
-> validação/importação do seed (`test_catalogo_seed.py`).
-
 - [x] Testes da fundação (app factory, `/health`, rotas protegidas).
 - [x] Testes de schema/modelos (15 tabelas, unicidade, schema validável).
 - [x] Testes de validação e importação do seed técnico.
-- [x] Testes de autenticação, CRUDs já entregues e consulta do catálogo.
+- [x] Testes de autenticação, CRUDs já entregues, Upload e consulta do catálogo.
+- [ ] Dashboard
+- [ ] Mapa real
+- [ ] IA simulada
+- [ ] Relatórios
+- [ ] Permissões finas por perfil/módulo
+- [ ] CSRF/Flask-WTF
 - [ ] Revisão e ajustes do MVP.
 
 ---
