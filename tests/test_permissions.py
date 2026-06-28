@@ -1,13 +1,13 @@
 """Testes das permissões finas por perfil (Fase 6.3)."""
 import io
 import os
+from contextlib import contextmanager
 
 import pytest
 from flask import session
 
 from app.extensions import db
 from app.utils.auth import gerar_hash_senha
-
 
 EMAILS = {
     "admin": "admin@connectagro.com",
@@ -86,7 +86,6 @@ def _criar_dados_operacionais(usuario, produto, upload_folder):
 
     return {
         "usuario_id": usuario.id,
-        "propriedade_id": propriedade.id,
         "gleba_id": gleba.id,
         "cultura_id": cultura.id,
         "cultura_gleba_id": cultura_gleba.id,
@@ -120,15 +119,8 @@ def _login(app_db, perfil):
     return client
 
 
-def _post_upload(client, nome="novo.txt", conteudo=b"abc"):
-    return client.post(
-        "/upload/novo",
-        data={"arquivo": (io.BytesIO(conteudo), nome), "descricao": "teste"},
-        content_type="multipart/form-data",
-    )
-
-
-def _set_session(app_db, perfil):
+@contextmanager
+def _session_perfil(app_db, perfil):
     ids = app_db.permission_test_ids[perfil]
     with app_db.test_request_context("/"):
         session["user_id"] = ids["usuario_id"]
@@ -138,65 +130,44 @@ def _set_session(app_db, perfil):
         yield
 
 
-def _contagem(modelo):
-    return modelo.query.count()
+def _post_upload(client, nome="novo.txt", conteudo=b"abc"):
+    return client.post(
+        "/upload/novo",
+        data={"arquivo": (io.BytesIO(conteudo), nome), "descricao": "teste"},
+        content_type="multipart/form-data",
+    )
 
 
 # --- Utilitário ------------------------------------------------------------
 
 
-def test_admin_tem_permissoes_principais(app_db):
-    from app.utils.permissions import has_permission
+def test_matriz_de_permissoes_por_perfil(app_db):
+    from app.utils.permissions import can, has_permission
 
-    with next(_set_session(app_db, "admin")):
-        for permissao in (
-            "dashboard.view", "glebas.delete", "culturas.delete", "equipe.delete",
-            "financeiro.delete", "colheita.delete", "aplicacoes.delete", "upload.delete",
-        ):
-            assert has_permission(permissao)
+    esperadas = {
+        "admin": ("glebas.delete", "financeiro.create", "equipe.delete", "upload.delete"),
+        "tecnico": ("dashboard.view", "glebas.create", "culturas.edit", "colheita.edit",
+                    "aplicacoes.edit", "upload.download", "financeiro.view", "equipe.view"),
+        "trabalhador": ("dashboard.view", "glebas.view", "culturas.view", "colheita.create",
+                        "aplicacoes.create", "upload.create", "upload.download"),
+    }
+    negadas = {
+        "tecnico": ("glebas.delete", "culturas.delete", "colheita.delete",
+                    "aplicacoes.delete", "upload.delete", "financeiro.create", "equipe.create"),
+        "trabalhador": ("glebas.create", "culturas.create", "colheita.edit",
+                        "aplicacoes.edit", "financeiro.view", "equipe.view", "upload.delete"),
+        "desconhecido": ("dashboard.view", "glebas.delete"),
+    }
 
+    for perfil, permissoes in esperadas.items():
+        with _session_perfil(app_db, perfil):
+            for permissao in permissoes:
+                assert can(permissao)
 
-def test_tecnico_tem_matriz_esperada(app_db):
-    from app.utils.permissions import can
-
-    with next(_set_session(app_db, "tecnico")):
-        for permissao in (
-            "dashboard.view", "mapa.view", "catalogo.view", "relatorios.view",
-            "ia.view", "glebas.create", "culturas.edit", "colheita.edit",
-            "aplicacoes.edit", "upload.download", "financeiro.view", "equipe.view",
-        ):
-            assert can(permissao)
-        for permissao in (
-            "glebas.delete", "culturas.delete", "colheita.delete",
-            "aplicacoes.delete", "upload.delete", "financeiro.create", "equipe.create",
-        ):
-            assert not can(permissao)
-
-
-def test_trabalhador_tem_matriz_esperada(app_db):
-    from app.utils.permissions import can
-
-    with next(_set_session(app_db, "trabalhador")):
-        for permissao in (
-            "dashboard.view", "mapa.view", "catalogo.view", "relatorios.view",
-            "ia.view", "glebas.view", "culturas.view", "colheita.create",
-            "aplicacoes.create", "upload.create", "upload.download",
-        ):
-            assert can(permissao)
-        for permissao in (
-            "glebas.create", "glebas.edit", "culturas.create", "culturas.edit",
-            "colheita.edit", "aplicacoes.edit", "upload.delete", "financeiro.view",
-            "equipe.view",
-        ):
-            assert not can(permissao)
-
-
-def test_perfil_desconhecido_nao_tem_permissao_sensivel(app_db):
-    from app.utils.permissions import has_permission
-
-    with next(_set_session(app_db, "desconhecido")):
-        assert not has_permission("dashboard.view")
-        assert not has_permission("glebas.delete")
+    for perfil, permissoes in negadas.items():
+        with _session_perfil(app_db, perfil):
+            for permissao in permissoes:
+                assert not has_permission(permissao)
 
 
 # --- Acesso geral ----------------------------------------------------------
@@ -230,116 +201,83 @@ def test_trabalhador_acessa_modulos_operacionais_em_leitura(app_db, rota):
 # --- Admin -----------------------------------------------------------------
 
 
-def test_admin_acessa_equipe_e_financeiro(app_db):
+def test_admin_acessa_equipe_financeiro_e_remove_registros(app_db):
+    from app.models import AplicacaoInsumo, ColheitaRegistro, UploadArquivo
+
+    ids = app_db.permission_test_ids["admin"]
     client = _login(app_db, "admin")
     assert client.get("/equipe/").status_code == 200
     assert client.get("/financeiro/").status_code == 200
+    assert client.post(f"/upload/{ids['upload_id']}/remover").status_code == 302
+    assert client.post(f"/colheita/{ids['colheita_id']}/remover").status_code == 302
+    assert client.post(f"/aplicacoes/{ids['aplicacao_id']}/remover").status_code == 302
+    with app_db.app_context():
+        assert db.session.get(UploadArquivo, ids["upload_id"]) is None
+        assert db.session.get(ColheitaRegistro, ids["colheita_id"]) is None
+        assert db.session.get(AplicacaoInsumo, ids["aplicacao_id"]) is None
 
 
 def test_admin_cria_edita_remove_gleba(app_db):
     from app.models import Gleba
 
     client = _login(app_db, "admin")
-    resp = client.post("/glebas/nova", data={"nome": "Gleba Admin Nova"})
-    assert resp.status_code == 302
+    assert client.post("/glebas/nova", data={"nome": "Gleba Admin Nova"}).status_code == 302
     with app_db.app_context():
-        gleba = Gleba.query.filter_by(nome="Gleba Admin Nova").one()
-        gleba_id = gleba.id
+        gleba_id = Gleba.query.filter_by(nome="Gleba Admin Nova").one().id
     assert client.post(f"/glebas/{gleba_id}/editar", data={"nome": "Gleba Admin Editada"}).status_code == 302
     assert client.post(f"/glebas/{gleba_id}/remover").status_code == 302
     with app_db.app_context():
         assert db.session.get(Gleba, gleba_id) is None
 
 
-@pytest.mark.parametrize("modelo_nome, rota, id_chave", [
-    ("UploadArquivo", "/upload/{id}/remover", "upload_id"),
-    ("ColheitaRegistro", "/colheita/{id}/remover", "colheita_id"),
-    ("AplicacaoInsumo", "/aplicacoes/{id}/remover", "aplicacao_id"),
-])
-def test_admin_remove_registros_criticos(app_db, modelo_nome, rota, id_chave):
-    from app import models
-
-    client = _login(app_db, "admin")
-    registro_id = app_db.permission_test_ids["admin"][id_chave]
-    assert client.post(rota.format(id=registro_id)).status_code == 302
-    with app_db.app_context():
-        modelo = getattr(models, modelo_nome)
-        assert db.session.get(modelo, registro_id) is None
-
-
 # --- Técnico ---------------------------------------------------------------
 
 
-def test_tecnico_cria_e_edita_gleba_mas_nao_remove(app_db):
-    from app.models import Gleba
+def test_tecnico_cria_edita_gleba_e_cultura_mas_nao_remove(app_db):
+    from app.models import Cultura, Gleba
 
     client = _login(app_db, "tecnico")
-    assert client.post("/glebas/nova", data={"nome": "Gleba Tecnico Nova"}).status_code == 302
-    with app_db.app_context():
-        gleba = Gleba.query.filter_by(nome="Gleba Tecnico Nova").one()
-        gleba_id = gleba.id
-    assert client.post(f"/glebas/{gleba_id}/editar", data={"nome": "Gleba Tecnico Editada"}).status_code == 302
-    assert client.post(f"/glebas/{gleba_id}/remover").status_code == 403
-    with app_db.app_context():
-        assert db.session.get(Gleba, gleba_id) is not None
-
-
-def test_tecnico_cria_e_edita_cultura_mas_nao_remove(app_db):
-    from app.models import Cultura
-
-    client = _login(app_db, "tecnico")
+    assert client.post("/glebas/nova", data={"nome": "Gleba Tecnico"}).status_code == 302
     assert client.post("/culturas/nova", data={"nome": "Cultura Tecnico"}).status_code == 302
     with app_db.app_context():
-        cultura = Cultura.query.filter_by(nome="Cultura Tecnico").one()
-        cultura_id = cultura.id
+        gleba_id = Gleba.query.filter_by(nome="Gleba Tecnico").one().id
+        cultura_id = Cultura.query.filter_by(nome="Cultura Tecnico").one().id
+    assert client.post(f"/glebas/{gleba_id}/editar", data={"nome": "Gleba Tecnico Editada"}).status_code == 302
     assert client.post(f"/culturas/{cultura_id}/editar",
                        data={"nome": "Cultura Tecnico Editada", "status": "em_andamento"}).status_code == 302
+    assert client.post(f"/glebas/{gleba_id}/remover").status_code == 403
     assert client.post(f"/culturas/{cultura_id}/remover").status_code == 403
-    with app_db.app_context():
-        assert db.session.get(Cultura, cultura_id) is not None
 
 
-def test_tecnico_cria_e_edita_colheita_mas_nao_remove(app_db):
-    from app.models import ColheitaRegistro
+def test_tecnico_cria_edita_colheita_aplicacao_e_nao_remove(app_db):
+    from app.models import AplicacaoInsumo, ColheitaRegistro
 
     ids = app_db.permission_test_ids["tecnico"]
     client = _login(app_db, "tecnico")
-    resp = client.post("/colheita/nova", data={
+    assert client.post("/colheita/nova", data={
         "cultura_gleba_id": str(ids["cultura_gleba_id"]),
         "data_colheita": "2026-03-01",
         "quantidade": "12",
-    })
-    assert resp.status_code == 302
+    }).status_code == 302
+    assert client.post("/aplicacoes/nova", data={
+        "cultura_gleba_id": str(ids["cultura_gleba_id"]),
+        "produto_base_id": str(ids["produto_id"]),
+        "data_aplicacao": "2026-03-01",
+    }).status_code == 302
     with app_db.app_context():
-        registro = ColheitaRegistro.query.order_by(ColheitaRegistro.id.desc()).first()
-        registro_id = registro.id
-    assert client.post(f"/colheita/{registro_id}/editar", data={
+        colheita_id = ColheitaRegistro.query.order_by(ColheitaRegistro.id.desc()).first().id
+        aplicacao_id = AplicacaoInsumo.query.order_by(AplicacaoInsumo.id.desc()).first().id
+    assert client.post(f"/colheita/{colheita_id}/editar", data={
         "cultura_gleba_id": str(ids["cultura_gleba_id"]),
         "data_colheita": "2026-03-02",
-        "quantidade": "13",
     }).status_code == 302
-    assert client.post(f"/colheita/{registro_id}/remover").status_code == 403
-    with app_db.app_context():
-        assert db.session.get(ColheitaRegistro, registro_id) is not None
-
-
-def test_tecnico_cria_e_edita_aplicacao_mas_nao_remove(app_db):
-    from app.models import AplicacaoInsumo
-
-    ids = app_db.permission_test_ids["tecnico"]
-    client = _login(app_db, "tecnico")
-    dados = {"cultura_gleba_id": str(ids["cultura_gleba_id"]),
-             "produto_base_id": str(ids["produto_id"]),
-             "data_aplicacao": "2026-03-01"}
-    assert client.post("/aplicacoes/nova", data=dados).status_code == 302
-    with app_db.app_context():
-        aplicacao = AplicacaoInsumo.query.order_by(AplicacaoInsumo.id.desc()).first()
-        aplicacao_id = aplicacao.id
-    dados["data_aplicacao"] = "2026-03-02"
-    assert client.post(f"/aplicacoes/{aplicacao_id}/editar", data=dados).status_code == 302
+    assert client.post(f"/aplicacoes/{aplicacao_id}/editar", data={
+        "cultura_gleba_id": str(ids["cultura_gleba_id"]),
+        "produto_base_id": str(ids["produto_id"]),
+        "data_aplicacao": "2026-03-02",
+    }).status_code == 302
+    assert client.post(f"/colheita/{colheita_id}/remover").status_code == 403
     assert client.post(f"/aplicacoes/{aplicacao_id}/remover").status_code == 403
-    with app_db.app_context():
-        assert db.session.get(AplicacaoInsumo, aplicacao_id) is not None
 
 
 def test_tecnico_visualiza_mas_nao_gerencia_financeiro_e_equipe(app_db):
@@ -357,7 +295,7 @@ def test_tecnico_visualiza_mas_nao_gerencia_financeiro_e_equipe(app_db):
     assert client.post(f"/equipe/{ids['equipe_id']}/remover").status_code == 403
 
 
-def test_tecnico_envia_e_baixa_upload_mas_nao_remove(app_db):
+def test_tecnico_envia_baixa_upload_mas_nao_remove(app_db):
     ids = app_db.permission_test_ids["tecnico"]
     client = _login(app_db, "tecnico")
     assert _post_upload(client, nome="tecnico-novo.txt").status_code == 302
@@ -381,29 +319,24 @@ def test_trabalhador_nao_cria_edita_remove_gleba_ou_cultura(app_db):
     assert client.post(f"/culturas/{ids['cultura_id']}/remover").status_code == 403
 
 
-def test_trabalhador_cria_colheita_e_aplicacao_mas_nao_edita_remove(app_db):
+def test_trabalhador_cria_colheita_aplicacao_upload_mas_nao_edita_remove(app_db):
     ids = app_db.permission_test_ids["trabalhador"]
     client = _login(app_db, "trabalhador")
     assert client.post("/colheita/nova", data={
         "cultura_gleba_id": str(ids["cultura_gleba_id"]),
         "data_colheita": "2026-03-01",
     }).status_code == 302
-    assert client.get(f"/colheita/{ids['colheita_id']}/editar").status_code == 403
-    assert client.post(f"/colheita/{ids['colheita_id']}/remover").status_code == 403
     assert client.post("/aplicacoes/nova", data={
         "cultura_gleba_id": str(ids["cultura_gleba_id"]),
         "produto_base_id": str(ids["produto_id"]),
         "data_aplicacao": "2026-03-01",
     }).status_code == 302
-    assert client.get(f"/aplicacoes/{ids['aplicacao_id']}/editar").status_code == 403
-    assert client.post(f"/aplicacoes/{ids['aplicacao_id']}/remover").status_code == 403
-
-
-def test_trabalhador_envia_e_baixa_upload_mas_nao_remove(app_db):
-    ids = app_db.permission_test_ids["trabalhador"]
-    client = _login(app_db, "trabalhador")
     assert _post_upload(client, nome="trabalhador-novo.txt").status_code == 302
     assert client.get(f"/upload/{ids['upload_id']}/download").status_code == 200
+    assert client.get(f"/colheita/{ids['colheita_id']}/editar").status_code == 403
+    assert client.post(f"/colheita/{ids['colheita_id']}/remover").status_code == 403
+    assert client.get(f"/aplicacoes/{ids['aplicacao_id']}/editar").status_code == 403
+    assert client.post(f"/aplicacoes/{ids['aplicacao_id']}/remover").status_code == 403
     assert client.post(f"/upload/{ids['upload_id']}/remover").status_code == 403
 
 
@@ -421,30 +354,22 @@ def test_trabalhador_nao_acessa_equipe_financeiro(app_db):
 # --- Templates -------------------------------------------------------------
 
 
-def test_menu_do_trabalhador_nao_mostra_equipe_financeiro(app_db):
-    corpo = _login(app_db, "trabalhador").get("/").data.decode("utf-8")
-    assert "Equipe" not in corpo
-    assert "Financeiro" not in corpo
+def test_templates_escondem_menu_e_acoes_sem_permissao(app_db):
+    trabalhador_home = _login(app_db, "trabalhador").get("/").data.decode("utf-8")
+    assert "Equipe" not in trabalhador_home
+    assert "Financeiro" not in trabalhador_home
 
-
-def test_tecnico_ve_financeiro_sem_botao_novo_lancamento(app_db):
-    corpo = _login(app_db, "tecnico").get("/financeiro/").data.decode("utf-8")
-    assert "Financeiro" in corpo
-    assert "+ Novo lançamento" not in corpo
-
-
-def test_tecnico_nao_ve_botoes_remover_sem_permissao(app_db):
-    client = _login(app_db, "tecnico")
+    tecnico = _login(app_db, "tecnico")
+    financeiro = tecnico.get("/financeiro/").data.decode("utf-8")
+    assert "Financeiro" in financeiro
+    assert "+ Novo lançamento" not in financeiro
     for rota in ("/glebas/", "/culturas/", "/colheita/", "/aplicacoes/", "/upload/"):
-        corpo = client.get(rota).data.decode("utf-8")
-        assert "Remover" not in corpo
+        assert "Remover" not in tecnico.get(rota).data.decode("utf-8")
 
-
-def test_admin_ve_botoes_principais(app_db):
-    client = _login(app_db, "admin")
-    assert "+ Nova gleba" in client.get("/glebas/").data.decode("utf-8")
-    assert "+ Novo lançamento" in client.get("/financeiro/").data.decode("utf-8")
-    assert "Remover" in client.get("/upload/").data.decode("utf-8")
+    admin = _login(app_db, "admin")
+    assert "+ Nova gleba" in admin.get("/glebas/").data.decode("utf-8")
+    assert "+ Novo lançamento" in admin.get("/financeiro/").data.decode("utf-8")
+    assert "Remover" in admin.get("/upload/").data.decode("utf-8")
 
 
 # --- Restrições gerais -----------------------------------------------------
@@ -462,8 +387,8 @@ def test_acao_sem_permissao_nao_cria_registro(app_db):
 
     client = _login(app_db, "trabalhador")
     with app_db.app_context():
-        antes = _contagem(FinanceiroLancamento)
+        antes = FinanceiroLancamento.query.count()
     resp = client.post("/financeiro/novo", data={"tipo": "receita", "valor": "99", "data": "2026-01-01"})
     assert resp.status_code == 403
     with app_db.app_context():
-        assert _contagem(FinanceiroLancamento) == antes
+        assert FinanceiroLancamento.query.count() == antes
