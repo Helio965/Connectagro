@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Mapa da propriedade — ConnectAgro{% endblock %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+{% endblock %}
+
+{% block content %}
+<section class="card">
+  <div class="card-head">
+    <div>
+      <h1>Mapa da propriedade</h1>
+      <p class="hint">{{ propriedade.nome }}</p>
+    </div>
+  </div>
+
+  <div class="mapa-aviso">
+    <p>O mapa do MVP usa coordenadas cadastradas nas glebas e serve apenas para visualização operacional.</p>
+    <p>Polígonos, medição de área, GPS em tempo real e camadas avançadas ficam para etapas futuras.</p>
+  </div>
+
+  {% if not glebas %}
+    <p class="mapa-empty">Nenhuma gleba cadastrada ainda.</p>
+  {% endif %}
+
+  <div class="mapa-layout">
+    <div class="mapa-container">
+      <div id="mapa-glebas" data-mapa-url="{{ url_for('mapa.dados') }}">
+        {% if not glebas_com_coordenadas %}
+          <p class="mapa-empty">Nenhuma gleba com coordenadas válidas para exibir no mapa.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <aside class="mapa-sidebar">
+      <section>
+        <h2>Glebas no mapa</h2>
+        <ul class="mapa-lista">
+          {% for gleba in glebas_com_coordenadas %}
+            <li>
+              <strong>{{ gleba.nome }}</strong>
+              {% if gleba.area_ha is not none %}
+                <span>Área: {{ formatar_area(gleba.area_ha) }}</span>
+              {% else %}
+                <span>Área não informada</span>
+              {% endif %}
+              {% if gleba.tipo_solo %}
+                <span>Solo: {{ gleba.tipo_solo }}</span>
+              {% endif %}
+              <small>Lat: {{ gleba.latitude }} · Lon: {{ gleba.longitude }}</small>
+            </li>
+          {% else %}
+            <li class="mapa-empty">Nenhuma gleba com coordenadas válidas para exibir no mapa.</li>
+          {% endfor %}
+        </ul>
+      </section>
+
+      {% if glebas_sem_coordenadas %}
+        <section>
+          <h2>Sem coordenadas válidas</h2>
+          <p class="hint">Edite a gleba e preencha latitude/longitude para aparecer no mapa.</p>
+          <ul class="mapa-lista">
+            {% for gleba in glebas_sem_coordenadas %}
+              <li><strong>{{ gleba.nome }}</strong></li>
+            {% endfor %}
+          </ul>
+        </section>
+      {% endif %}
+    </aside>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="{{ url_for('static', filename='js/mapa.js') }}"></script>
+{% endblock %}
