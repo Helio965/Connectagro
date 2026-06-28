@@ -8,13 +8,14 @@ catálogo técnico de produtos agrícolas para consulta rápida.
 > **Status do projeto:** fundação Flask, **modelos SQLAlchemy** (15 tabelas),
 > **migrations** (Flask-Migrate), **importação do catálogo técnico** (via CLI),
 > **autenticação real** (login/logout), **CRUDs** de **Glebas**, **Culturas**
-> (com associação cultura↔gleba), **Equipe**, **Financeiro** (com totais) e
-> **Colheita**, além da **consulta somente leitura** do catálogo de
-> **Defensivos** e **Fertilizantes** (busca, filtros e detalhe). Os demais
-> módulos seguem como placeholders protegidos por login. Não há CRUD de produtos;
+> (com associação cultura↔gleba), **Equipe**, **Financeiro** (com totais),
+> **Colheita** e **Aplicações de Insumo** (registro histórico operacional), além
+> da **consulta somente leitura** do catálogo de **Defensivos** e
+> **Fertilizantes** (busca, filtros e detalhe). Os demais módulos seguem como
+> placeholders protegidos por login. Não há CRUD de produtos;
 > `produto_preco`/`produto_imagem` continuam **vazios** no MVP (preço e imagem
-> **pendentes** para o sistema final). O sistema **não vende produtos**; o banco
-> populado **não** é versionado.
+> **pendentes** para o sistema final). O sistema **não vende produtos**, não
+> recomenda produtos e não valida dose; o banco populado **não** é versionado.
 
 ---
 
@@ -31,12 +32,14 @@ em etapas posteriores, evoluirá para a versão completa.
 
 - Uma plataforma de **gestão e consulta**.
 - Um catálogo técnico de produtos agrícolas usado como **base de consulta rápida**.
+- Um sistema para registrar aplicações de insumo como **histórico operacional**.
 
 ### O que o ConnectAgro **não é**
 
 - O sistema **não vende** produtos.
 - Os valores de produtos servem **apenas como consulta rápida**.
 - O catálogo é uma **base técnica inicial**, não uma verdade regulatória definitiva.
+- O registro de aplicação de insumo **não recomenda produtos** e **não valida dose**.
 
 > **Importante sobre dados de produtos:** no MVP, **preço e imagem** devem ser
 > tratados como **pendência / dado não consolidado**. A validação diária do menor
@@ -56,6 +59,7 @@ em etapas posteriores, evoluirá para a versão completa.
 | Glebas         | Cadastro e gestão das áreas/talhões                             |
 | Defensivos     | Consulta de defensivos a partir do catálogo                     |
 | Fertilizantes  | Consulta de fertilizantes a partir do catálogo                  |
+| Aplicações     | Registro histórico operacional de aplicações de insumo          |
 | Financeiro     | Registro de receitas e despesas                                 |
 | Upload         | Envio e armazenamento de documentos/arquivos                    |
 | Equipe         | Gestão de membros e funções                                     |
@@ -89,7 +93,7 @@ em etapas posteriores, evoluirá para a versão completa.
 │       ├── __init__.py    # create_app
 │       ├── config.py      # configuração por ambiente
 │       ├── extensions.py  # extensões (Flask-SQLAlchemy, Flask-Migrate)
-│       ├── blueprints/    # auth + CRUD (glebas/culturas/equipe/financeiro/colheita) + catálogo (defensivos/fertilizantes, leitura) + placeholders
+│       ├── blueprints/    # auth + CRUDs + catálogo + placeholders protegidos
 │       ├── models/        # modelos SQLAlchemy de domínio (15 tabelas)
 │       ├── commands.py    # CLI: init-db, validate/import-catalog-seed, seed-users
 │       ├── services/      # regras de negócio (ex.: catalogo_seed.py)
@@ -168,16 +172,14 @@ arquivo de banco gerado **não** é versionado.
 ## Próximos passos
 
 Concluídos: documentação de produto, modelagem (DER + dicionário), catálogo
-técnico/seed, a **fundação Flask** e os **modelos SQLAlchemy de domínio** (15
-tabelas; schema criável via `flask init-db`).
+técnico/seed, a **fundação Flask**, os **modelos SQLAlchemy de domínio** (15
+tabelas), migrations, autenticação real, CRUDs de glebas/culturas/equipe/
+financeiro/colheita/aplicações de insumo e consulta somente leitura de defensivos
+/ fertilizantes.
 
-O **próximo passo não é o CRUD ainda**. A sequência prevista é:
-
-1. ~~Criar os modelos SQLAlchemy~~ — **concluído** (`src/app/models/`).
-2. Configurar **migrations** (Flask-Migrate) e importar o **catálogo de
-   produtos**, que hoje permanece como **seed técnico/documental** (ainda **não**
-   importado no banco). **Preço e imagem continuam pendentes** para a versão final.
-3. Em seguida, autenticação e o **CRUD módulo a módulo**.
+O **próximo passo recomendado** é implementar o módulo de **Upload**, mantendo
+pendentes Dashboard, Mapa real, IA simulada, Relatórios e permissões finas por
+perfil.
 
 Consulte o [Roadmap do MVP](./docs/07-roadmap-mvp.md) para o detalhamento.
 
