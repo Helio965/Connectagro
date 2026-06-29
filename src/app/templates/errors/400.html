@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block title %}Requisição inválida — ConnectAgro{% endblock %}
+
+{% block content %}
+<section class="card">
+  <h1>Requisição inválida</h1>
+  <p>{{ mensagem or "Não foi possível processar a solicitação. Recarregue a página e tente novamente." }}</p>
+</section>
+{% endblock %}

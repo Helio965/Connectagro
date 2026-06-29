@@ -33,6 +33,7 @@
           {% if can("equipe.delete") %}
           <form method="post" action="{{ url_for('equipe.remover', membro_id=m.id) }}"
                 onsubmit="return confirm('Remover este membro?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn-link-danger">Remover</button>
           </form>
           {% endif %}

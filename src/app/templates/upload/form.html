@@ -12,6 +12,8 @@
 
   <form method="post" enctype="multipart/form-data" class="form-vertical"
         action="{{ url_for('upload.novo') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
     <label for="arquivo">Arquivo *</label>
     <input type="file" id="arquivo" name="arquivo" required>
 

@@ -7,7 +7,9 @@ Testes automatizados do **ConnectAgro** (pytest).
 Os testes usam a **Application Factory** (`create_app("testing")`) com banco
 **SQLite em memória** (ver `conftest.py`) e **não** dependem de banco `.db` real.
 Testes de upload usam pasta temporária (`tmp_path`) para não escrever arquivos
-reais no repositório.
+reais no repositório. O `TestingConfig` mantém `WTF_CSRF_ENABLED = False` por
+padrão para preservar os testes existentes; `test_csrf.py` ativa CSRF
+explicitamente quando valida essa proteção.
 
 Arquivos existentes:
 
@@ -30,6 +32,11 @@ Arquivos existentes:
   bloqueio backend com 403, rotas públicas preservadas, usuário sem login
   redirecionado, menus/botões escondidos por `can()`, escopo por propriedade
   preservado e garantia de que ação sem permissão não cria registro.
+- **`test_csrf.py`** — Fase 6.4: CSRF desativado por padrão no `TestingConfig`,
+  inicialização do `CSRFProtect`, token nos formulários POST, POST sem token
+  retornando 400, POST com token válido funcionando, Upload multipart protegido,
+  rotas GET sem token, mensagem amigável de erro e convivência com permissões
+  403 quando o token é válido.
 - **`test_dashboard_operacional.py`** — Dashboard Operacional: exige login;
   responde 200 com login; mostra propriedade atual; calcula totais de glebas,
   culturas, financeiro, equipe, colheita, aplicações e uploads; não vaza dados de
@@ -95,7 +102,6 @@ pytest
 
 ## Pendente para etapas futuras
 
-- Testes de **CSRF/Flask-WTF**, quando essa proteção entrar no escopo.
 - Testes de **fluxos completos finais** do MVP.
 
 ## Convenções

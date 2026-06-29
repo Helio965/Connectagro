@@ -16,6 +16,8 @@
   {% else %}
   <form method="post" class="form-vertical"
         action="{{ url_for('colheita.editar', colheita_id=colheita.id) if colheita else url_for('colheita.nova') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
     <label for="cultura_gleba_id">Cultura ↔ Gleba *</label>
     <select id="cultura_gleba_id" name="cultura_gleba_id" required>
       <option value="">Selecione…</option>

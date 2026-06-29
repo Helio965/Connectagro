@@ -48,6 +48,7 @@
           {% if can("aplicacoes.delete") %}
           <form method="post" action="{{ url_for('aplicacoes.remover', aplicacao_id=a.id) }}"
                 onsubmit="return confirm('Remover este registro de aplicação?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn-link-danger">Remover</button>
           </form>
           {% endif %}

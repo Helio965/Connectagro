@@ -5,9 +5,10 @@ inicializa extensões, registra blueprints, handlers de erro e a rota de
 health check. Nenhum CRUD, banco populado, migration ou seed é executado aqui.
 """
 from flask import Flask, jsonify, render_template
+from flask_wtf.csrf import CSRFError
 
 from .config import get_config
-from .extensions import db, migrate
+from .extensions import csrf, db, migrate
 from .blueprints import register_blueprints
 from .commands import register_commands
 
@@ -23,6 +24,7 @@ def create_app(config_name=None):
 
     # Extensões
     db.init_app(app)
+    csrf.init_app(app)
 
     # Registra os modelos no metadata do SQLAlchemy (não cria tabelas aqui).
     from . import models  # noqa: F401
@@ -54,6 +56,17 @@ def create_app(config_name=None):
         return jsonify({"status": "ok", "app": app.config.get("APP_NAME", "ConnectAgro")})
 
     # Handlers de erro
+    @app.errorhandler(CSRFError)
+    def csrf_error(error):
+        return render_template(
+            "errors/400.html",
+            mensagem="Não foi possível validar a segurança do formulário. Recarregue a página e tente novamente.",
+        ), 400
+
+    @app.errorhandler(400)
+    def bad_request(error):
+        return render_template("errors/400.html"), 400
+
     @app.errorhandler(403)
     def forbidden(error):
         return render_template("errors/403.html"), 403
