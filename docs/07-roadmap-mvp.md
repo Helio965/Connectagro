@@ -216,14 +216,16 @@
 - [x] Relatório de aplicações com filtros de período e classe; avisos de não
   recomendação e não validação de dose.
 - [x] Relatórios geral, agrícola e de uploads (download por rota protegida).
-- [x] Botão "Imprimir" (`window.print()`) e CSS de impressão; sem PDF/exportação.
+- [x] Botão "Imprimir" (`window.print()`) e CSS de impressão; exportações
+  CSV/PDF ficaram para a Fase 7.4 e já foram implementadas.
 - [x] Testes (`tests/test_relatorios_operacionais.py` e
   `tests/test_relatorios_service.py`).
 
 > Somente leitura: não cria/altera/remove dados; escopado por propriedade
 > (nenhuma rota aceita `propriedade_id`). Sem migration, sem model novo, sem
-> dependência nova, sem PDF/CSV/Excel, sem gráficos externos. Pendentes:
-> permissões finas, CSRF/Flask-WTF e revisão final do MVP.
+> dependência nova, sem Excel, sem gráficos externos. Naquele momento ficaram
+> pendentes permissões finas, CSRF/Flask-WTF, exportações CSV/PDF e revisão final;
+> esses itens foram concluídos nas fases seguintes.
 
 ## Fase 6.3 — Permissões finas por perfil ✅
 
@@ -349,9 +351,16 @@ produto, foi aberto o **MVP ampliado** (Fase 7) antes do encerramento definitivo
 - [x] Sem migration/model/tabela/dependência Python nova; testes em
   `tests/test_mapa_avancado.py`.
 
-### Fase 7.6 — Revisão final do MVP ampliado ⏳ (planejado)
+### Fase 7.6 — Revisão final do MVP ampliado ✅ (concluída)
 
-- [ ] Revisão e validação final do MVP ampliado.
+- [x] Suíte completa validada: `python -m pytest` com **475 passed**.
+- [x] `flask --app src/run.py db upgrade` validado.
+- [x] `flask --app src/run.py seed-users` validado.
+- [x] README, requisitos, regras, arquitetura, roadmap e documentação de testes
+  revisados para refletir o MVP ampliado concluído.
+- [x] Checklist final do MVP ampliado criado em
+  `docs/10-checklist-final-mvp-ampliado.md`.
+- [x] Sem recurso novo, CRUD novo, model, migration, tabela ou dependência.
 
 ## Etapa 5 — Implementação dos módulos
 
@@ -375,7 +384,7 @@ Ordem concluída:
 ## Etapa 6 — Testes e qualidade
 
 - [x] Testes da fundação (app factory, `/health`, rotas protegidas).
-- [x] Testes de schema/modelos (16 tabelas, unicidade, schema validável).
+- [x] Testes de schema/modelos (18 tabelas, unicidade, schema validável).
 - [x] Testes de validação e importação do seed técnico.
 - [x] Testes de autenticação, CRUDs já entregues, Upload e consulta do catálogo.
 - [x] Dashboard.
@@ -390,12 +399,12 @@ Ordem concluída:
 
 ## Próximo passo recomendado
 
-**Fase 7.6 — Revisão final do MVP ampliado.**
+**Pós-MVP — priorização de evoluções futuras.**
 
 O MVP foi ampliado: painel de usuários, recuperação de senha, auditoria/logs,
 PDF/exportações e mapa avançado **fazem parte do MVP ampliado** (Fase 7) e **não**
-são mais pós-MVP. As Fases 7.1 a 7.5 já foram entregues; resta a **revisão final
-do MVP ampliado** (Fase 7.6).
+são mais pós-MVP. As Fases 7.1 a 7.6 foram entregues e o **MVP ampliado está
+concluído**.
 
 Permanecem como **pós-MVP** (avaliados depois):
 

@@ -2,7 +2,7 @@
 
 ## Status do documento
 
-**Arquitetura técnica — v0.25 (MVP base consolidado + MVP ampliado em andamento: painel de usuários + recuperação de senha + auditoria/logs + PDF/exportações + mapa avançado + CRUDs + catálogo + upload + dashboard + IA simulada + relatórios operacionais + permissões finas + CSRF + revisão final).**
+**Arquitetura técnica — v0.26 (MVP base consolidado + MVP ampliado concluído: painel de usuários + recuperação de senha + auditoria/logs + PDF/exportações + mapa avançado + CRUDs + catálogo + upload + dashboard + IA simulada + relatórios operacionais + permissões finas + CSRF + revisão final).**
 
 > **Mapa avançado (Fase 7.5):** o módulo Mapa passa a permitir **editar, salvar e
 > limpar** o polígono (`gleba.poligono_geojson`) de cada gleba, com Leaflet +
@@ -12,6 +12,10 @@
 > visualiza), CSRF (token via header `X-CSRFToken`), escopo por propriedade e
 > auditoria (`mapa.poligono.update`/`delete`/`falha`). **Sem** migration/model/
 > tabela/dependência Python nova — usa o campo já existente.
+>
+> **Revisão final do MVP ampliado (Fase 7.6):** valida a suíte completa, corrige
+> documentação contraditória, cria o checklist final do MVP ampliado e encerra a
+> Fase 7 sem criar rota funcional, model, migration, tabela ou dependência.
 
 > **PDF/exportações (Fase 7.4):** o MVP ampliado adiciona
 > `services/exportacoes_service.py` e rotas `/relatorios/<slug>/exportar.csv` e
@@ -76,9 +80,9 @@
 > **Relatórios Operacionais (Fase 6.2):** `services/relatorios_service.py` reúne
 > agregações **somente leitura** (geral, financeiro, agrícola, aplicações,
 > uploads), reutilizando helpers de consulta do `dashboard_service` e escopando
-> tudo pela propriedade atual. Renderização em HTML (Jinja2); **sem PDF/exportação**
-> nesta fase — a impressão é feita pelo navegador (`window.print()`). Os
-> relatórios não criam/alteram/removem dados.
+> tudo pela propriedade atual. Na Fase 6.2 a renderização era HTML (Jinja2) com
+> impressão pelo navegador (`window.print()`); as exportações CSV/PDF foram
+> adicionadas depois na Fase 7.4. Os relatórios não criam/alteram/removem dados.
 
 Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetura-do-sistema.md):
 
@@ -86,14 +90,16 @@ Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetur
 - O documento **06.1** (este) é o **guia técnico detalhado** da implementação do
   MVP em Flask.
 
-> **Estado atual:** estão prontos a fundação Flask, modelos SQLAlchemy (16
+> **Estado final do MVP ampliado:** estão prontos a fundação Flask, modelos SQLAlchemy (18
 > tabelas), migrations, importação do catálogo técnico via CLI, autenticação real,
 > permissões finas por perfil, proteção **CSRF/Flask-WTF**, **Dashboard
-> Operacional** somente leitura, **Mapa real simplificado** somente leitura,
+> Operacional** somente leitura, **Mapa avançado operacional** com edição de
+> polígonos por admin/técnico,
 > **IA Simulada Operacional** baseada em
-> regras locais, **Relatórios Operacionais HTML**, CRUDs de Glebas, Culturas,
+> regras locais, **Relatórios Operacionais HTML + exportações CSV/PDF**, CRUDs de Glebas, Culturas,
 > Equipe, Financeiro, Colheita, Aplicações de Insumo, **Upload de Arquivos** e
-> **Painel de Usuários**,
+> **Painel de Usuários**, **Recuperação de Senha**, **Auditoria/logs**,
+> **Exportações CSV/PDF** e **Mapa avançado**,
 > além da consulta somente leitura de Defensivos e Fertilizantes.
 > `ProdutoPreco`/`ProdutoImagem` seguem vazios no MVP.
 >
@@ -101,10 +107,11 @@ Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetur
 > usando consultas aos módulos operacionais. Ele não cria registros, não altera
 > models e não exige migration.
 >
-> **Mapa real simplificado:** usa os campos já existentes em `gleba` (`latitude`,
+> **Mapa avançado:** usa os campos já existentes em `gleba` (`latitude`,
 > `longitude`, `poligono_geojson`) para renderizar uma visualização operacional em
-> `/mapa/` e expor dados em `/mapa/dados`. Ele não cria registros, não altera
-> models e não exige migration.
+> `/mapa/`, expor dados em `/mapa/dados` e editar/salvar/limpar polígonos com
+> permissão `mapa.edit`. Ele não cria registros, não altera models e não exige
+> migration.
 >
 > **IA Simulada Operacional:** usa `services/ia_simulada_service.py` para gerar
 > respostas por regras simples e consultas locais. Registra perguntas e respostas
@@ -118,9 +125,8 @@ Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetur
 > por usuários ficam fora do Git e não devem ser servidos diretamente por
 > `/static/uploads`.
 >
-> **Estado atual:** MVP base consolidado e MVP ampliado em andamento. Recursos
-> como recuperação de senha, auditoria/logs, PDF/exportações e mapa avançado
-> seguem nas próximas fases 7.x; validação regulatória real, preço/imagem real,
+> **Estado final:** MVP base consolidado e MVP ampliado concluído. Validação
+> regulatória real, preço/imagem real,
 > OCR, deploy completo e IA externa ficam fora do MVP ampliado.
 
 ## Objetivo
@@ -156,10 +162,12 @@ Flask (rotas/blueprints)  ──►  Serviços/helpers  ──►  Modelos/Acess
   serviços quando houver regra compartilhada.
 - **Dashboard como agregação somente leitura:** consulta dados existentes e não
   modifica estado.
-- **Mapa como visualização somente leitura:** usa coordenadas já cadastradas em
-  Glebas, não cria dados e não altera schema.
+- **Mapa avançado operacional:** usa coordenadas e `poligono_geojson` já
+  cadastrados em Glebas; admin/técnico editam polígonos com validação e sem
+  alterar schema.
 - **IA simulada por regras:** usa dados locais e não executa integração externa.
-- **Relatórios como consultas HTML somente leitura:** sem exportação/PDF nesta fase.
+- **Relatórios como consultas HTML somente leitura + exportações CSV/PDF:**
+  exportações são operacionais, em memória e sem documento comercial.
 - **Autorização por perfil em código:** protege rotas no backend e ajuda a
   renderizar menus/botões conforme perfil.
 - **CSRF em formulários POST:** proteção global com Flask-WTF/CSRFProtect e
@@ -184,7 +192,7 @@ Flask (rotas/blueprints)  ──►  Serviços/helpers  ──►  Modelos/Acess
 | Upload local     | Werkzeug `secure_filename` + Flask `send_from_directory` | Arquivos fora de `static` e do Git |
 | Mapa frontend    | Leaflet.js + Leaflet.draw via CDN            | Edição de polígono; sem dependência Python/NPM |
 | IA simulada      | Regras locais em Python                      | Sem LLM/API externa/internet                   |
-| Relatórios       | Serviços Python + Jinja2                     | HTML somente leitura                           |
+| Relatórios       | Serviços Python + Jinja2                     | HTML somente leitura + CSV/PDF operacional     |
 | Exportações      | `csv` (lib padrão) + ReportLab (PDF)         | CSV/PDF em memória; `exportacoes_service.py`   |
 | Autenticação     | Sessão Flask + hash de senha (Werkzeug)      | Helpers em `utils/auth.py`                     |
 | Autorização      | Matriz em código                             | `utils/permissions.py`; sem tabela de roles    |
@@ -282,8 +290,8 @@ instance/
   `aplicacao_insumo` já existe no schema inicial.
 - **Upload:** não exige migration nova porque a tabela `upload_arquivo` já existe
   no schema inicial.
-- **Mapa real simplificado:** não exige migration nova porque usa campos já
-  existentes em `gleba`.
+- **Mapa inicial / mapa avançado:** não exige migration nova porque usa campos
+  já existentes em `gleba`.
 - **IA simulada:** não exige migration nova porque usa a tabela `ia_interacao` já
   existente.
 - **Relatórios:** não exigem migration nova porque apenas consultam dados já
@@ -315,11 +323,11 @@ instance/
 - O Dashboard é somente leitura: não cria, edita ou remove registros.
 - Não usa biblioteca externa de gráfico e não altera schema.
 
-### Mapa real simplificado
+### Mapa avançado operacional
 
 - `src/app/blueprints/mapa/routes.py` resolve a propriedade atual e renderiza
   `templates/mapa/index.html` em `/mapa/`.
-- `/mapa/dados` retorna JSON somente leitura com `propriedade`, `glebas` e
+- `/mapa/dados` retorna JSON de leitura com `propriedade`, `glebas` e
   `sem_coordenadas`.
 - A consulta usa somente `Gleba.query.filter_by(propriedade_id=propriedade.id)`,
   evitando vazamento de dados entre propriedades.
@@ -352,7 +360,8 @@ instance/
   **sem** gravar GeoJSON/coordenadas no log.
 - O mapa **não** mede área, não importa/exporta arquivos geográficos
   (shapefile/KML), não usa GPS em tempo real nem PostGIS, e não adiciona
-  dependência Python/NPM (Leaflet.draw é via CDN).
+  dependência Python/NPM (Leaflet.draw é via CDN). A edição de polígonos é apoio
+  operacional e não substitui medição técnica ou georreferenciamento oficial.
 
 ### IA simulada operacional
 
@@ -687,12 +696,15 @@ Matriz resumida:
 - Validação numérica simples de quantidade opcional.
 - Criar/editar/remover respeitam permissão por perfil.
 
-### Mapa real ✅
-- Visualização somente leitura das glebas em `/mapa/`.
+### Mapa avançado ✅
+- Visualização das glebas em `/mapa/` com edição de polígonos por admin/técnico.
 - Endpoint `/mapa/dados` com JSON filtrado pela propriedade atual.
 - Usa `latitude`, `longitude` e `poligono_geojson` existentes em `Gleba`.
 - Separa glebas sem coordenadas válidas e ignora GeoJSON inválido com segurança.
-- Sem edição de coordenadas, desenho de polígonos, medição de área, GPS em tempo real, PostGIS ou camadas avançadas.
+- Permite desenhar, salvar e limpar um polígono por gleba com validação backend,
+  CSRF e auditoria. Trabalhador apenas visualiza.
+- Sem medição de área, GPS em tempo real, PostGIS, shapefile/KML ou
+  georreferenciamento oficial.
 
 ### IA simulada ✅
 - Apoio operacional por regras simples em `/ia/`.
@@ -707,9 +719,11 @@ Matriz resumida:
 - Central em `/relatorios/`.
 - Relatórios geral, financeiro, agrícola, aplicações e uploads.
 - Filtros de período/tipo/classe onde aplicável.
-- HTML somente leitura, escopado por propriedade.
-- Sem PDF, CSV, Excel, exportação automática, alteração de dados, recomendação de
-  produto, validação de dose ou leitura de conteúdo dos uploads.
+- HTML somente leitura, escopado por propriedade, com exportação CSV/PDF
+  operacional em memória.
+- Sem Excel/XLSX, exportação automática/agendada, alteração de dados,
+  recomendação de produto, validação de dose, leitura de conteúdo dos uploads,
+  cotação, venda ou documento comercial.
 
 ---
 
@@ -820,13 +834,15 @@ Matriz resumida:
 - **Não** recomendar produto nem validar dose tecnicamente no módulo de aplicações.
 - **Não** fazer OCR, IA, extração automática ou validação avançada no Upload do MVP.
 - Dashboard deve permanecer somente leitura e sem criação de dados.
-- Mapa deve permanecer como visualização somente leitura no MVP, sem edição de
-  coordenadas, medição, desenho de polígonos, PostGIS ou GPS em tempo real.
+- Mapa avançado deve permanecer operacional: admin/técnico podem editar
+  polígonos, trabalhador visualiza, e o recurso não substitui medição técnica ou
+  georreferenciamento oficial.
 - IA deve permanecer simulada por regras no MVP, sem LLM, API externa, internet,
   OCR, leitura de uploads, recomendação agronômica, validação de dose ou
   diagnóstico técnico.
-- Relatórios devem permanecer HTML somente leitura no MVP, sem PDF/exportação e
-  sem alteração de dados.
+- Relatórios devem permanecer HTML somente leitura, com CSV/PDF operacional em
+  memória, sem alteração de dados, Excel/XLSX, cotação, venda ou documento
+  comercial.
 - Permissões devem bloquear no backend com 403; `can()` em template é apenas
   apoio visual.
 - Permissões por perfil não substituem escopo por propriedade.
@@ -857,8 +873,8 @@ Matriz resumida:
 - [x] Decisão final sobre ORM: Flask-SQLAlchemy
 - [x] Fundação Flask criada (`src/run.py` + `src/app/`)
 - [x] Blueprints placeholders criados
-- [x] Modelos SQLAlchemy de domínio criados (15 tabelas iniciais; 16 no schema
-  atual após `usuario_propriedade`)
+- [x] Modelos SQLAlchemy de domínio criados (15 tabelas iniciais; 18 no schema
+  atual após `usuario_propriedade`, `senha_reset_token` e `log_auditoria`)
 - [x] Schema validável por `db.create_all()` e comando `flask init-db`
 - [x] Flask-Migrate/Alembic configurado e migration inicial versionada
 - [x] Validação do seed técnico (`flask validate-catalog-seed`)
@@ -871,9 +887,9 @@ Matriz resumida:
 - [x] Consulta do catálogo (Defensivos/Fertilizantes, somente leitura)
 - [x] CRUD de Aplicações de Insumo (histórico operacional, sem recomendação)
 - [x] Upload de Arquivos (local, seguro, escopado por propriedade)
-- [x] Mapa real simplificado (somente leitura, escopado por propriedade)
+- [x] Mapa avançado operacional (edição de polígonos por admin/técnico, escopado por propriedade)
 - [x] IA Simulada Operacional (regras locais, histórico escopado)
-- [x] Relatórios Operacionais HTML (somente leitura)
+- [x] Relatórios Operacionais HTML + exportações CSV/PDF
 - [x] Permissões finas por perfil (matriz em código, backend 403, `can()` em templates)
 - [x] CSRF/Flask-WTF nos formulários POST
 - [x] Testes de fundação, schema, seed, autenticação, CRUDs, Dashboard, Mapa, IA, Relatórios, Permissões, CSRF e consulta do catálogo
@@ -887,6 +903,7 @@ Matriz resumida:
 - [x] Auditoria/logs administrativos (Fase 7.3)
 - [x] PDF/exportações (Fase 7.4)
 - [x] Mapa avançado (Fase 7.5)
+- [x] Revisão final do MVP ampliado (Fase 7.6)
 
 **Fora do MVP ampliado (avaliados depois):**
 
@@ -902,9 +919,8 @@ Matriz resumida:
 
 ## 14. Arquitetura do MVP ampliado
 
-> Esta seção descreve, em **alto nível**, a arquitetura pretendida para as fases
-> 7.x. As Fases 7.1 a 7.5 já estão implementadas; as demais decisões definitivas
-> serão tomadas em cada fase específica.
+> Esta seção descreve, em **alto nível**, a arquitetura implementada nas fases
+> 7.x. As Fases 7.1 a 7.6 estão concluídas.
 
 ### Painel de usuários (Fase 7.1 — implementado)
 
@@ -916,8 +932,8 @@ Matriz resumida:
   compatibilidade com bases antigas.
 - Mantém as **permissões por perfil** (`utils/permissions.py`); a gestão de
   usuários exige permissões `usuarios.*`, concedidas apenas ao `admin`.
-- Não inclui recuperação de senha, auditoria/logs, remoção física de usuário nem
-  tabela de roles/permissões.
+- Não inclui remoção física de usuário nem tabela de roles/permissões. Recuperação
+  de senha e auditoria/logs foram entregues em fluxos próprios.
 
 ### Recuperação de senha (Fase 7.2 — implementado)
 
@@ -932,8 +948,8 @@ Matriz resumida:
 
 - Tabela `log_auditoria` (migration própria) para eventos sensíveis.
 - Eventos: criação/edição/remoção dos CRUDs, login/logout, recuperação de senha,
-  painel de usuários, acesso negado e upload/download/remoção. `exportacao.gerada`
-  fica preparada para a Fase 7.4.
+  painel de usuários, acesso negado, upload/download/remoção e exportações
+  (`exportacao.gerada`/`exportacao.falha`).
 - Registro **sem** senha, token, hash, CSRF ou conteúdo de formulário/arquivo;
   escopado por propriedade; consulta em `/auditoria/` apenas pelo `admin`.
   Detalhes na seção "Auditoria/logs" acima.
@@ -958,6 +974,16 @@ Matriz resumida:
   de área aproximada **não** foi implementado nesta fase. Detalhes na seção
   "Edição de polígonos (Fase 7.5)" acima.
 
+### Revisão final do MVP ampliado (Fase 7.6 — implementado)
+
+- Validação completa com `python -m pytest`, `flask --app src/run.py db upgrade`
+  e `flask --app src/run.py seed-users`.
+- Correção de documentação contraditória sobre mapa, exportações, contagem de
+  tabelas e status do MVP ampliado.
+- Criação do checklist final em `docs/10-checklist-final-mvp-ampliado.md`.
+- Sem rota funcional nova, model, migration, tabela, dependência ou recurso
+  pós-MVP.
+
 ### Fora do MVP ampliado
 
 Permanecem fora do MVP ampliado, como pós-MVP: **IA real/LLM**, **validação
@@ -978,4 +1004,5 @@ entram no produto.
 - [07 — Roadmap do MVP](./07-roadmap-mvp.md)
 - [08 — Checklist Final do MVP](./08-checklist-final-mvp.md)
 - [09 — Roadmap do MVP Ampliado](./09-roadmap-mvp-ampliado.md)
+- [10 — Checklist Final do MVP Ampliado](./10-checklist-final-mvp-ampliado.md)
 - [Catálogo de Produtos](./catalogo-produtos/README.md)

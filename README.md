@@ -14,8 +14,9 @@ agrícolas para consulta rápida.
 > **Painel de Usuários** interno por propriedade,
 > **Auditoria/logs** administrativos (somente admin),
 > **exportações CSV/PDF** dos relatórios operacionais,
-> **Dashboard Operacional** somente leitura, **Mapa real simplificado** somente
-> leitura, **IA Simulada Operacional** baseada em regras locais, **CRUDs** de
+> **Dashboard Operacional** somente leitura, **Mapa avançado operacional** com
+> edição de polígonos por admin/técnico, **IA Simulada Operacional** baseada em
+> regras locais, **CRUDs** de
 > **Glebas**, **Culturas** (com associação cultura↔gleba), **Equipe**,
 > **Financeiro** (com totais), **Colheita**, **Aplicações de Insumo** (registro
 > histórico operacional) e **Upload de Arquivos** (armazenamento local com
@@ -33,14 +34,15 @@ agrícolas para consulta rápida.
 > validação da suíte automatizada, limpeza dos avisos legados simples e checklist
 > de entrega.
 >
-> **MVP ampliado (em andamento):** após decisão de produto, foi aberto o **MVP
+> **MVP ampliado concluído:** após decisão de produto, foi aberto o **MVP
 > ampliado** (Fase 7). A Fase 7.0 registrou a decisão de escopo, a **Fase 7.1
 > implementa o painel de usuários** interno da propriedade, a **Fase 7.2
 > implementa a recuperação de senha** (token seguro/expirável, sem envio real de
 > e-mail), a **Fase 7.3 implementa a auditoria/logs administrativos** (somente
 > admin, sem dados sensíveis), a **Fase 7.4 implementa as exportações CSV/PDF**
 > dos relatórios (operacionais, nunca cotação/venda) e a **Fase 7.5 implementa o
-> mapa avançado** (edição do polígono da gleba). Resta a revisão final (Fase 7.6).
+> mapa avançado** (edição do polígono da gleba). A **Fase 7.6 conclui a revisão
+> final** do MVP ampliado.
 > Continuam **fora do MVP ampliado** IA real/LLM, validação regulatória real
 > do catálogo, preço/imagem com fontes reais, OCR/leitura automática de uploads e
 > deploy/produção completo. **Venda, carrinho, checkout e cotação nunca entram no
@@ -55,8 +57,8 @@ para acompanhar a operação da propriedade do plantio à colheita, com registro
 financeiro, gestão de equipe, documentos, relatórios, apoio operacional por IA
 simulada e visualização em mapa.
 
-O sistema será desenvolvido inicialmente como **MVP** (Produto Mínimo Viável) e,
-em etapas posteriores, evoluirá para a versão completa.
+O **MVP base** e o **MVP ampliado** estão consolidados. Evoluções futuras ficam
+como pós-MVP e devem preservar os limites de produto abaixo.
 
 ### O que o ConnectAgro **é**
 
@@ -65,9 +67,11 @@ em etapas posteriores, evoluirá para a versão completa.
 - Um catálogo técnico de produtos agrícolas usado como **base de consulta rápida**.
 - Um sistema para registrar aplicações de insumo como **histórico operacional**.
 - Um sistema para armazenar localmente documentos da propriedade no MVP.
-- Uma visualização simples das glebas em mapa, baseada nas coordenadas cadastradas.
+- Um mapa avançado operacional das glebas, com edição/salvamento/limpeza de
+  polígono por admin/técnico e visualização por trabalhador.
 - Uma IA simulada por regras para apoiar a leitura operacional dos dados locais da propriedade.
-- Um conjunto de relatórios HTML somente leitura, escopados pela propriedade atual.
+- Um conjunto de relatórios HTML somente leitura, escopados pela propriedade atual,
+  com exportação CSV/PDF operacional.
 - Um controle básico de acesso por perfil (`admin`, `tecnico`, `trabalhador`).
 - Um painel interno para o `admin` gerenciar usuários vinculados à propriedade.
 
@@ -80,8 +84,10 @@ em etapas posteriores, evoluirá para a versão completa.
 - A IA simulada **não** usa LLM/API externa, não substitui profissional habilitado,
   não recomenda produtos, não valida dose e não faz diagnóstico agronômico.
 - O upload **não** faz OCR, IA, extração automática ou validação documental avançada.
-- O mapa do MVP **não** mede área, não desenha polígonos e não usa GPS em tempo real.
-- Os relatórios do MVP **não** geram PDF, CSV, Excel ou exportação automática.
+- O mapa avançado **não** substitui medição técnica ou georreferenciamento oficial
+  e não usa PostGIS, GPS em tempo real, shapefile/KML ou integração geográfica oficial.
+- Os relatórios geram CSV/PDF operacional, mas **não** geram Excel/XLSX, envio
+  automático, agendamento, cotação, venda, checkout ou documento comercial.
 
 > **Importante sobre dados de produtos:** no MVP, **preço e imagem** devem ser
 > tratados como **pendência / dado não consolidado**. A validação diária do menor
@@ -144,9 +150,9 @@ em etapas posteriores, evoluirá para a versão completa.
 │   └── app/               # package Flask (Application Factory)
 │       ├── __init__.py    # create_app
 │       ├── config.py      # configuração por ambiente
-│       ├── extensions.py  # extensões (Flask-SQLAlchemy, Flask-Migrate)
+│       ├── extensions.py  # extensões (Flask-SQLAlchemy, Flask-Migrate, CSRF)
 │       ├── blueprints/    # auth + CRUDs + catálogo + módulos protegidos
-│       ├── models/        # modelos SQLAlchemy de domínio (16 tabelas)
+│       ├── models/        # modelos SQLAlchemy de domínio (18 tabelas)
 │       ├── commands.py    # CLI: init-db, validate/import-catalog-seed, seed-users
 │       ├── services/      # regras de negócio e agregações (dashboard, IA, relatórios)
 │       ├── utils/         # auth.py, contexto.py, formatters.py, permissions.py
@@ -341,8 +347,8 @@ propriedade.
 A Fase 7.1 adiciona o módulo `/usuarios/`, disponível somente para `admin`.
 Ele permite listar usuários vinculados à propriedade atual, criar usuário com
 senha temporária, editar nome/perfil/status e inativar acesso. Não há cadastro
-público, remoção física de usuário, recuperação de senha, auditoria ou painel de
-roles nesta fase.
+público, remoção física de usuário ou painel de roles nesta fase. Recuperação de
+senha e auditoria foram entregues em fluxos próprios nas Fases 7.2 e 7.3.
 
 O vínculo entre conta e propriedade passa pela tabela `usuario_propriedade`.
 `propriedade.usuario_id` continua preservado para compatibilidade; quando uma
@@ -416,6 +422,7 @@ logs, retenção automática, SIEM ou integração externa nesta fase.
 - [07 — Roadmap do MVP](./docs/07-roadmap-mvp.md)
 - [08 — Checklist Final do MVP](./docs/08-checklist-final-mvp.md)
 - [09 — Roadmap do MVP Ampliado](./docs/09-roadmap-mvp-ampliado.md)
+- [10 — Checklist Final do MVP Ampliado](./docs/10-checklist-final-mvp-ampliado.md)
 - [Catálogo de Produtos](./docs/catalogo-produtos/README.md) — inclui o [catálogo técnico](./docs/catalogo-produtos/catalogo-tecnico-connectagro-mvp.md) e o **seed técnico** ([`data/seeds/`](./data/seeds/README.md))
 
 ---
@@ -431,10 +438,10 @@ Operacional, IA Simulada Operacional, Relatórios Operacionais HTML, CRUDs de
 glebas/culturas/equipe/financeiro/colheita/aplicações de insumo/upload, Painel de
 Usuários interno e consulta somente leitura de Defensivos/Fertilizantes.
 
-O **MVP base está consolidado** e o projeto segue na fase de **MVP ampliado**
+O **MVP base está consolidado** e o **MVP ampliado está concluído**
 (Fase 7). As Fases **7.1 — Painel de usuários**, **7.2 — Recuperação de senha**,
-**7.3 — Auditoria/logs**, **7.4 — PDF/exportações** e **7.5 — Mapa avançado**
-estão implementadas. Resta a **Fase 7.6 — Revisão final do MVP ampliado**.
+**7.3 — Auditoria/logs**, **7.4 — PDF/exportações**, **7.5 — Mapa avançado**
+e **7.6 — Revisão final do MVP ampliado** estão implementadas.
 
 Continuam **fora do MVP ampliado** (avaliados depois): IA real/LLM, validação
 regulatória real do catálogo, preço/imagem com fontes reais e atualização
@@ -446,9 +453,11 @@ explicitamente aprovada): **venda, carrinho, checkout e cotação**. O ConnectAg
 permanece uma plataforma de gestão agrícola e consulta técnica, **sem
 marketplace e sem comércio**.
 
-O **próximo passo técnico** é a **Fase 7.6 — Revisão final do MVP ampliado**. Consulte o
-[Roadmap do MVP](./docs/07-roadmap-mvp.md) e o
-[Roadmap do MVP Ampliado](./docs/09-roadmap-mvp-ampliado.md) para o detalhamento.
+O **próximo passo recomendado** é pós-MVP: escolher, priorizar e especificar
+eventuais evoluções futuras sem reabrir o escopo do MVP ampliado. Consulte o
+[Roadmap do MVP](./docs/07-roadmap-mvp.md), o
+[Roadmap do MVP Ampliado](./docs/09-roadmap-mvp-ampliado.md) e o
+[Checklist Final do MVP Ampliado](./docs/10-checklist-final-mvp-ampliado.md).
 
 ---
 

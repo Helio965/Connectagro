@@ -5,10 +5,10 @@
 
 ## Objetivo do MVP
 
-Entregar uma versão funcional mínima do ConnectAgro que permita ao produtor
-gerenciar culturas, glebas, finanças, equipe e colheita, consultar um catálogo
-técnico de insumos e visualizar suas áreas em mapa, com apoio de uma camada de
-IA simulada e geração de relatórios.
+Entregar uma versão funcional do ConnectAgro que permita ao produtor gerenciar
+culturas, glebas, finanças, equipe e colheita, consultar um catálogo técnico de
+insumos, registrar documentos e aplicações, visualizar suas áreas em mapa, usar
+IA simulada e gerar relatórios operacionais.
 
 ## Escopo incluído (MVP)
 
@@ -52,21 +52,23 @@ etapas futuras:
 
 ## Escopo do MVP ampliado
 
-O **MVP base** está consolidado. Por decisão de produto, foi aberto o **MVP
-ampliado** (Fase 7), que incorpora ao escopo do MVP — em fases 7.x, ainda a
-implementar:
+O **MVP base** está consolidado. Por decisão de produto, foi aberto e concluído
+o **MVP ampliado** (Fase 7), que incorpora ao escopo do MVP:
 
 - **Painel de usuários** — gestão interna dos usuários da propriedade pelo
   admin (listar, criar, editar perfil/status, inativar). **Não** é cadastro
-  público.
+  público. **Concluído na Fase 7.1.**
 - **Recuperação de senha** — solicitação de redefinição com token seguro e
-  expirável, sem expor senha.
+  expirável, sem expor senha e sem envio real de e-mail. **Concluída na Fase 7.2.**
 - **Auditoria/logs administrativos** — registro de ações sensíveis (login/
   logout, criação/edição/remoção, upload/download, acesso negado e exportações).
+  **Concluída na Fase 7.3.**
 - **PDF/exportações** — exportar relatórios operacionais, respeitando
   propriedade atual e permissões. Exportação **não** é cotação/venda.
+  **Concluída na Fase 7.4.**
 - **Mapa avançado** — edição e salvamento do polígono da gleba e melhor
   visualização, sem PostGIS obrigatório nem GPS em tempo real obrigatório.
+  **Concluída na Fase 7.5.**
 
 ## Fora do MVP ampliado
 
@@ -93,10 +95,9 @@ marketplace e **não** um sistema de comércio.
 
 ## Premissas
 
-- O desenvolvimento ocorre em etapas; este repositório está na etapa de
-  organização e documentação.
-- O catálogo de produtos será fornecido **corrigido** em etapa posterior, sem
-  dados inventados.
+- O desenvolvimento ocorre em etapas e o MVP ampliado foi concluído na Fase 7.6.
+- O catálogo técnico é consulta inicial; preço/imagem reais e validação
+  regulatória oficial seguem fora do MVP ampliado.
 
 ## Restrições
 

@@ -59,8 +59,8 @@
 
 > Os requisitos abaixo descrevem o **escopo do MVP ampliado** (Fase 7). As Fases
 > 7.1 (painel de usuários), 7.2 (recuperação de senha), 7.3 (auditoria/logs),
-> 7.4 (PDF/exportações) e 7.5 (mapa avançado) já estão implementadas. Falta apenas
-> a revisão final (Fase 7.6). Nenhum item inclui venda, carrinho, checkout ou cotação.
+> 7.4 (PDF/exportações), 7.5 (mapa avançado) e 7.6 (revisão final) já estão
+> implementadas. Nenhum item inclui venda, carrinho, checkout ou cotação.
 
 ### Painel de usuários (Fase 7.1)
 - RF-17 — Permitir que o **admin** liste os usuários da sua propriedade.
@@ -93,9 +93,9 @@
   (`upload.create/download/delete`).
 - RF-28 — Registrar tentativas de **acesso negado** (`permissao.negada`,
   resultado `negado`).
-- RF-29 — Registrar acesso à central de relatórios (`relatorios.view`); a ação
-  `exportacao.gerada` fica **documentada/preparada** para a Fase 7.4 (PDF/
-  exportações), ainda não emitida.
+- RF-29 — Registrar acesso à central de relatórios (`relatorios.view`) e
+  exportações (`exportacao.gerada`/`exportacao.falha`) quando CSV/PDF forem
+  solicitados.
 - RF-29a — Os logs são consultados em `/auditoria/` **apenas pelo `admin`**
   (`auditoria.view`), escopados pela propriedade atual, com filtros simples
   (ação, resultado, entidade, usuário). Logs **não** armazenam senha, token
@@ -140,7 +140,7 @@
 - RNF-06 — **Portabilidade:** execução local simples para o MVP (SQLite, sem
   dependência de serviços externos obrigatórios).
 
-### RNF planejados — MVP ampliado
+### RNF — MVP ampliado concluído
 
 - RNF-07 — **Segurança da recuperação de senha:** tokens devem ser
   armazenados/comparados com segurança (sem expor senha ou token em claro) e
@@ -153,6 +153,9 @@
 - RNF-10 — **Integridade das exportações:** PDF/exportações são relatórios
   operacionais e **não** podem ser apresentados como cotação ou documento
   comercial.
+- RNF-11 — **Limites pós-MVP:** IA real/LLM, OCR, deploy completo, validação
+  regulatória real e preço/imagem com fontes reais permanecem fora do MVP
+  ampliado.
 
 ---
 

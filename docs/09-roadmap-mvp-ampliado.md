@@ -8,7 +8,8 @@
 > implementa a auditoria/logs administrativos (somente admin, sem dados sensíveis)
 > a **Fase 7.4** implementa as exportações CSV/PDF dos relatórios (operacionais,
 > nunca cotação/venda) e a **Fase 7.5** implementa o mapa avançado (edição do
-> polígono da gleba, apoio operacional, sem georreferenciamento oficial).
+> polígono da gleba, apoio operacional, sem georreferenciamento oficial) e a
+> **Fase 7.6** conclui a revisão final do MVP ampliado.
 
 ## 1. Decisão de produto
 
@@ -18,7 +19,8 @@ ao escopo do MVP cinco frentes antes tratadas como pós-MVP — painel de usuár
 recuperação de senha, auditoria/logs, PDF/exportações e mapa avançado.
 
 Esta decisão **não desfaz** o MVP base: ele continua válido, testado e
-consolidado. O MVP ampliado é uma **continuação** organizada em fases 7.x.
+consolidado. O MVP ampliado foi uma **continuação** organizada em fases 7.x e
+está concluído.
 
 ## 2. MVP base consolidado
 
@@ -54,6 +56,7 @@ flask --app src/run.py seed-users
 | 7.3 | Auditoria/logs | **Concluído:** tabela `log_auditoria`, serviço central, eventos sensíveis (auth, reset, CRUDs, usuários, upload, permissão negada); tela `/auditoria/` só admin, escopo por propriedade, sem dados sensíveis. |
 | 7.4 | PDF/exportações | **Concluído:** CSV (lib padrão) + PDF (ReportLab) dos 5 relatórios, em memória; escopo por propriedade/permissão; filtros preservados; auditoria `exportacao.gerada`; nunca cotação/venda. |
 | 7.5 | Mapa avançado | **Concluído:** edição/salvamento/limpeza do polígono da gleba (Leaflet.draw), `mapa.edit` (admin/técnico), validação GeoJSON no backend, CSRF, auditoria; sem PostGIS/GPS/shapefile. |
+| 7.6 | Revisão final | **Concluído:** validação final, saneamento documental, checklist final e encerramento do MVP ampliado sem recurso funcional novo. |
 
 ## 4. Fora do MVP ampliado
 
@@ -87,7 +90,7 @@ O ConnectAgro permanece uma plataforma de **gestão agrícola e consulta técnic
 - **Fase 7.3 — Auditoria/logs** ✅
 - **Fase 7.4 — PDF/exportações** ✅
 - **Fase 7.5 — Mapa avançado** ✅
-- **Fase 7.6 — Revisão final do MVP ampliado** ⏳
+- **Fase 7.6 — Revisão final do MVP ampliado** ✅
 
 ## 7. Critérios de aceite por fase
 
@@ -112,7 +115,8 @@ Por fase:
 - **7.5 Mapa avançado:** edição/validação de `poligono_geojson`; sem PostGIS
   obrigatório nem GPS em tempo real obrigatório.
 - **7.6 Revisão final:** suíte completa validada; documentação e checklist do MVP
-  ampliado atualizados.
+  ampliado atualizados; sem rota funcional nova, model, migration, tabela ou
+  dependência.
 
 ## 8. Riscos técnicos
 
@@ -135,11 +139,15 @@ Por fase:
 3. Fase 7.3 — Auditoria/logs (concluída).
 4. Fase 7.4 — PDF/exportações (concluída).
 5. Fase 7.5 — Mapa avançado (concluída).
-6. Fase 7.6 — Revisão final do MVP ampliado.
+6. Fase 7.6 — Revisão final do MVP ampliado (concluída).
 
 ## 10. Próximo passo
 
-**Fase 7.6 — Revisão final do MVP ampliado.**
+**Pós-MVP — priorização de evoluções futuras.**
+
+O MVP ampliado está concluído. Próximos trabalhos devem ser tratados como
+pós-MVP, com escopo próprio e sem transformar venda, carrinho, checkout ou
+cotação em funcionalidades do produto.
 
 ---
 

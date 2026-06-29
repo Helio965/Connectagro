@@ -53,8 +53,9 @@
 
 - RN-10 — O acesso aos módulos exige **usuário autenticado** (login com e-mail e
   senha; sessão Flask). Sem login, as rotas dos módulos redirecionam para
-  `/auth/login`. Rotas públicas: `/auth/login`, `/auth/logout`, `/health` e
-  arquivos estáticos.
+  `/auth/login`. Rotas públicas: `/auth/login`, `/auth/logout`,
+  `/auth/esqueci-senha`, `/auth/redefinir-senha/<token>`, `/health` e arquivos
+  estáticos.
 - RN-10a — **Usuário inativo** (`ativo = 0`) **não** consegue autenticar.
 - RN-10b — Senhas são armazenadas como **hash** (`werkzeug.security`); a sessão
   guarda apenas dados mínimos do usuário, **nunca** a senha.
@@ -99,8 +100,8 @@
   propriedade atual por `usuario_propriedade`; usuários de outra propriedade não
   podem ser editados/inativados e retornam **404** quando o perfil tem permissão.
 - RN-11o — Criar usuário pelo painel exige e-mail único, perfil oficial e senha
-  temporária com hash. Não há cadastro público nem redefinição de senha nesta
-  fase.
+  temporária com hash. Não há cadastro público; a redefinição de senha ocorre
+  apenas pelo fluxo próprio da Fase 7.2.
 - RN-11p — Inativar usuário desativa o login e o vínculo com a propriedade, sem
   remoção física do registro. A propriedade deve manter pelo menos um `admin`
   ativo.
@@ -248,7 +249,8 @@
 - RN-37 — O **MVP base** continua válido e testado; a abertura do **MVP ampliado**
   (Fase 7) é uma **nova decisão de escopo** e **não** desfaz o MVP base.
 - RN-38 — O **MVP ampliado** inclui **painel de usuários**, **recuperação de
-  senha**, **auditoria/logs**, **PDF/exportações** e **mapa avançado**.
+  senha**, **auditoria/logs**, **PDF/exportações** e **mapa avançado**, todos
+  concluídos nas Fases 7.1 a 7.5 e revisados na Fase 7.6.
 - RN-39 — Ficam **fora do MVP ampliado** (avaliados depois): **IA real/LLM**,
   **validação regulatória real** do catálogo, **preço/imagem real** com
   atualização periódica, **OCR/leitura automática** de uploads e
@@ -265,9 +267,11 @@
   gerar associação ativa automaticamente quando uma base antiga não possui
   vínculo explícito.
 - RN-43 — A **recuperação de senha** deve respeitar a segurança e **não** expor
-  senha nem token; o token deve ser seguro e expirável.
+  senha nem token; o token deve ser seguro, expirável, de uso único e armazenado
+  apenas como hash.
 - RN-44 — A **auditoria** deve registrar ações sensíveis **sem** armazenar senha
-  ou dados sensíveis desnecessários.
+  token, hash, CSRF, payload de formulário/arquivo ou dados sensíveis
+  desnecessários.
 - RN-45 — O **mapa avançado** apoia a gestão operacional e **não** substitui
   medição profissional ou georreferenciamento oficial.
 

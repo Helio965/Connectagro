@@ -6,6 +6,10 @@
 > auditoria/logs, PDF/exportações e mapa avançado — passaram a integrar o MVP
 > ampliado (ver a seção “Escopo do MVP ampliado” e o
 > [09 — Roadmap do MVP Ampliado](./09-roadmap-mvp-ampliado.md)).
+>
+> **Nota (Fase 7.6):** este arquivo permanece como checklist histórico do
+> **MVP base**. O checklist final do MVP ampliado está em
+> [10 — Checklist Final do MVP Ampliado](./10-checklist-final-mvp-ampliado.md).
 
 ## 1. Status geral
 
@@ -46,8 +50,8 @@ ampliado** (Fase 7).
 
 ## 4. Dados e banco
 
-- [x] SQLAlchemy com 15 tabelas no MVP base; schema atual com 16 tabelas após
-  `usuario_propriedade` na Fase 7.1.
+- [x] SQLAlchemy com 15 tabelas no MVP base; schema atual do MVP ampliado com
+  18 tabelas após `usuario_propriedade`, `senha_reset_token` e `log_auditoria`.
 - [x] Flask-Migrate/Alembic configurado.
 - [x] Migration inicial versionada.
 - [x] SQLite como banco padrão do MVP.
@@ -163,6 +167,7 @@ Itens que **passaram a integrar o MVP** (Fase 7), antes tratados como pós-MVP:
 - Auditoria/logs administrativos (Fase 7.3).
 - PDF/exportações (Fase 7.4).
 - Mapa avançado (Fase 7.5).
+- Revisão final do MVP ampliado (Fase 7.6 concluída; ver checklist próprio).
 
 **Fora do MVP ampliado** (pós-MVP, avaliados depois):
 
