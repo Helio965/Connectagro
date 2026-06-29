@@ -1,4 +1,4 @@
-"""Blueprint do módulo Dashboard (placeholder do MVP)."""
+"""Blueprint do módulo Dashboard do MVP."""
 from flask import Blueprint
 
 dashboard_bp = Blueprint(

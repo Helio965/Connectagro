@@ -1,4 +1,4 @@
-"""Blueprint do módulo Fertilizantes (placeholder do MVP)."""
+"""Blueprint do módulo Fertilizantes do MVP."""
 from flask import Blueprint
 
 fertilizantes_bp = Blueprint(

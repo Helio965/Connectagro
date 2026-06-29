@@ -147,10 +147,23 @@
 - RN-34 — Os relatórios **financeiros** são informativos e **não substituem
   contabilidade formal**.
 
+## Regras de fechamento do MVP
+
+- RN-35 — A revisão final consolida o MVP sem transformar limitações conhecidas
+  em funcionalidades. Continuam fora do MVP: venda, carrinho, checkout, cotação
+  oficial, recomendação agronômica, validação técnica de dose, validação oficial
+  automática AGROFIT/MAPA, OCR, leitura automática de uploads, PDF/exportação,
+  painel de usuários, recuperação de senha, auditoria avançada, deploy/produção,
+  LLM/API externa e mapa avançado.
+- RN-36 — Qualquer evolução pós-MVP deve preservar autenticação, permissões por
+  perfil, CSRF, escopo por propriedade e os avisos de limites técnicos já
+  documentados.
+
 ---
 
 ## Documentos relacionados
 
 - [02 — Requisitos do Sistema](./02-requisitos-do-sistema.md)
 - [04 — Modelagem do Banco (DER)](./04-modelagem-banco-der.md)
+- [08 — Checklist Final do MVP](./08-checklist-final-mvp.md)
 - [Catálogo de Produtos](./catalogo-produtos/README.md)

@@ -11,6 +11,10 @@ reais no repositório. O `TestingConfig` mantém `WTF_CSRF_ENABLED = False` por
 padrão para preservar os testes existentes; `test_csrf.py` ativa CSRF
 explicitamente quando valida essa proteção.
 
+Na Fase 6.5, a suíte foi usada como validação final do MVP e os avisos simples
+de `LegacyAPIWarning` em `test_ia_simulada_service.py` foram removidos usando
+`db.session.get(...)`, sem alterar models ou comportamento funcional.
+
 Arquivos existentes:
 
 - **`conftest.py`** — coloca `src/` no path; fixtures `app` e `client`.
@@ -100,9 +104,12 @@ Para rodar:
 pytest
 ```
 
-## Pendente para etapas futuras
+## Evolução pós-MVP
 
-- Testes de **fluxos completos finais** do MVP.
+- Testes end-to-end de interface, caso o projeto passe a ter uma camada de
+  validação visual/navegador.
+- Testes para funcionalidades futuras, como PDF/exportações, painel de usuários,
+  auditoria, deploy, mapa avançado ou integrações externas.
 
 ## Convenções
 

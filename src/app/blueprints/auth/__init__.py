@@ -1,4 +1,4 @@
-"""Blueprint do módulo Login (placeholder do MVP)."""
+"""Blueprint do módulo Login do MVP."""
 from flask import Blueprint
 
 auth_bp = Blueprint(

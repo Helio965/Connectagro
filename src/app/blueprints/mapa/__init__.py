@@ -1,4 +1,4 @@
-"""Blueprint do módulo Mapa real (placeholder do MVP)."""
+"""Blueprint do módulo Mapa real do MVP."""
 from flask import Blueprint
 
 mapa_bp = Blueprint(

@@ -1,4 +1,4 @@
-"""Blueprint do módulo Defensivos (placeholder do MVP)."""
+"""Blueprint do módulo Defensivos do MVP."""
 from flask import Blueprint
 
 defensivos_bp = Blueprint(

@@ -1,4 +1,4 @@
-"""Blueprint do módulo Upload (placeholder do MVP)."""
+"""Blueprint do módulo Upload do MVP."""
 from flask import Blueprint
 
 upload_bp = Blueprint(

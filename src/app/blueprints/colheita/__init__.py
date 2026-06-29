@@ -1,4 +1,4 @@
-"""Blueprint do módulo Colheita (placeholder do MVP)."""
+"""Blueprint do módulo Colheita do MVP."""
 from flask import Blueprint
 
 colheita_bp = Blueprint(
