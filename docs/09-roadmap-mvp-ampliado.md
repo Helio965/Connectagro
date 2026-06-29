@@ -2,8 +2,8 @@
 
 > Este documento guia a evolução do ConnectAgro após a consolidação do **MVP
 > base**. Ele define o escopo do **MVP ampliado** (Fase 7), o que fica de fora e o
-> que **nunca** entra no produto. A **Fase 7.0** é somente documental: registra a
-> decisão de escopo, **sem** implementar funcionalidade nova.
+> que **nunca** entra no produto. A **Fase 7.0** foi somente documental e a
+> **Fase 7.1** implementa o painel interno de usuários da propriedade.
 
 ## 1. Decisão de produto
 
@@ -44,7 +44,7 @@ flask --app src/run.py seed-users
 
 | Fase | Item | Resumo |
 | ---- | ---- | ------ |
-| 7.1 | Painel de usuários | Admin lista, cria, edita perfil/status e inativa usuários da propriedade. **Sem cadastro público.** |
+| 7.1 | Painel de usuários | **Concluído:** admin lista, cria, edita perfil/status e inativa usuários da propriedade. **Sem cadastro público.** |
 | 7.2 | Recuperação de senha | Solicitação com token seguro e expirável; redefinição sem expor senha. |
 | 7.3 | Auditoria/logs | Registro de login/logout, criação/edição/remoção, upload/download, acesso negado e exportações. |
 | 7.4 | PDF/exportações | Exportar relatórios operacionais, escopados por propriedade e permissões; nunca cotação/venda. |
@@ -75,9 +75,9 @@ O ConnectAgro permanece uma plataforma de **gestão agrícola e consulta técnic
 
 ## 6. Fases planejadas
 
-- **Fase 7.0 — Redefinição oficial do MVP ampliado** ✅ (em andamento): apenas
+- **Fase 7.0 — Redefinição oficial do MVP ampliado** ✅ (concluída): apenas
   documentação/roadmap/regras/checklist; sem código funcional novo.
-- **Fase 7.1 — Painel de usuários** ⏳
+- **Fase 7.1 — Painel de usuários** ✅
 - **Fase 7.2 — Recuperação de senha** ⏳
 - **Fase 7.3 — Auditoria/logs** ⏳
 - **Fase 7.4 — PDF/exportações** ⏳
@@ -96,7 +96,8 @@ Por fase:
 
 - **7.1 Painel de usuários:** admin lista/cria/edita/inativa usuários da
   propriedade; não há cadastro público; ações exigem perfil `admin` e respeitam o
-  escopo por propriedade.
+  escopo por propriedade. Implementado com `usuario_propriedade`,
+  `usuarios_bp`, permissões `usuarios.*` e testes próprios.
 - **7.2 Recuperação de senha:** token seguro e expirável; senha/token nunca
   expostos; redefinição válida apenas com token válido e não expirado.
 - **7.3 Auditoria/logs:** eventos sensíveis registrados com data/hora, usuário e
@@ -110,9 +111,9 @@ Por fase:
 
 ## 8. Riscos técnicos
 
-- **Vínculo usuário↔propriedade:** o painel de usuários pode exigir repensar o
-  vínculo atual (propriedade padrão resolvida em `utils/contexto.py`) e,
-  possivelmente, uma tabela de associação — com migration própria.
+- **Vínculo usuário↔propriedade:** a Fase 7.1 criou `usuario_propriedade` e
+  adaptou `utils/contexto.py` para priorizar vínculos ativos, mantendo backfill
+  de bases legadas por `propriedade.usuario_id`.
 - **Tokens e segurança:** recuperação de senha exige geração/armazenamento
   seguros de token e expiração; erro aqui é risco de segurança.
 - **Volume de auditoria:** logs podem crescer; definir o que registrar sem
@@ -124,7 +125,7 @@ Por fase:
 
 ## 9. Ordem recomendada
 
-1. Fase 7.1 — Painel de usuários (base para administração e auditoria).
+1. Fase 7.1 — Painel de usuários (concluída).
 2. Fase 7.2 — Recuperação de senha.
 3. Fase 7.3 — Auditoria/logs.
 4. Fase 7.4 — PDF/exportações.
@@ -133,7 +134,7 @@ Por fase:
 
 ## 10. Próximo passo
 
-**Fase 7.1 — Painel de usuários.**
+**Fase 7.2 — Recuperação de senha.**
 
 ---
 

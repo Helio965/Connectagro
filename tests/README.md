@@ -15,9 +15,9 @@ Na Fase 6.5, a suíte foi usada como validação final do **MVP base** e os avis
 simples de `LegacyAPIWarning` em `test_ia_simulada_service.py` foram removidos
 usando `db.session.get(...)`, sem alterar models ou comportamento funcional. A
 Fase 6.5 encerrou o **MVP base**, não o produto: por decisão de produto, foi
-aberto o **MVP ampliado** (Fase 7) e cada nova fase 7.x deverá **adicionar seus
-próprios testes** (painel de usuários, recuperação de senha, auditoria/logs,
-PDF/exportações e mapa avançado).
+aberto o **MVP ampliado** (Fase 7). A Fase 7.1 adicionou testes próprios para o
+painel de usuários; cada nova fase 7.x deverá manter essa regra (recuperação de
+senha, auditoria/logs, PDF/exportações e mapa avançado).
 
 Arquivos existentes:
 
@@ -26,7 +26,7 @@ Arquivos existentes:
 - **`test_placeholder_routes.py`** — rotas públicas respondem 200; rotas dos
   módulos protegidos redirecionam sem login e respondem 200 com login quando o
   perfil possui permissão.
-- **`test_models_schema.py`** — registro das 15 tabelas no metadata; colunas
+- **`test_models_schema.py`** — registro das 16 tabelas no metadata; colunas
   principais; `db.create_all()`; inserção mínima; unicidade de `usuario.email` e
   `produto_base.slug`; `produto_preco`/`produto_imagem` existem mas vazias; seed
   não importado automaticamente.
@@ -45,6 +45,11 @@ Arquivos existentes:
   retornando 400, POST com token válido funcionando, Upload multipart protegido,
   rotas GET sem token, mensagem amigável de erro e convivência com permissões
   403 quando o token é válido.
+- **`test_usuarios_painel.py`** — Fase 7.1: painel interno de usuários; exige
+  `admin`; cria/edita/inativa usuários; valida dados obrigatórios; preserva
+  escopo por propriedade; impede inativar o último admin ativo; testa
+  `usuario_propriedade`, compatibilidade com base legada, `seed-users`
+  idempotente e convivência com CSRF/permissões.
 - **`test_dashboard_operacional.py`** — Dashboard Operacional: exige login;
   responde 200 com login; mostra propriedade atual; calcula totais de glebas,
   culturas, financeiro, equipe, colheita, aplicações e uploads; não vaza dados de
@@ -108,12 +113,12 @@ Para rodar:
 pytest
 ```
 
-## Testes do MVP ampliado (Fase 7 — planejado)
+## Testes do MVP ampliado (Fase 7)
 
 Cada fase do MVP ampliado deverá adicionar seus próprios testes, mantendo toda a
 suíte atual passando:
 
-- Painel de usuários (Fase 7.1) — listagem/criação/edição/inativação por `admin`,
+- Painel de usuários (Fase 7.1) — concluído; listagem/criação/edição/inativação por `admin`,
   escopo por propriedade e permissões.
 - Recuperação de senha (Fase 7.2) — token seguro/expirável, sem expor senha/token.
 - Auditoria/logs (Fase 7.3) — registro de ações sensíveis sem dados sensíveis.

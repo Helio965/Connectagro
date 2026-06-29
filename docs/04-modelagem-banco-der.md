@@ -2,19 +2,20 @@
 
 ## Status do documento
 
-**DER do MVP — v0.3 (alinhado aos modelos SQLAlchemy implementados).**
+**DER do MVP — v0.4 (alinhado aos modelos SQLAlchemy implementados, incluindo Fase 7.1).**
 
 Este documento descreve a modelagem de dados do ConnectAgro e serve como
 **referência documental dos modelos SQLAlchemy já implementados** em
-`src/app/models/`. O schema pode ser criado localmente via `flask init-db`.
-Refinamentos ainda são possíveis em etapas futuras. **Migrations e seed importado
-ainda não foram implementados; o banco real não é versionado.**
+`src/app/models/`. O schema deve ser evoluído por migrations
+(`flask --app src/run.py db upgrade`) ou criado localmente via `flask init-db` em
+uso pontual. Refinamentos ainda são possíveis em etapas futuras; o banco real
+não é versionado.
 
 ## Objetivo
 
 Definir as **entidades**, seus **atributos** e os **relacionamentos** do
-ConnectAgro, cobrindo os módulos do MVP: gestão e acesso, operação agrícola,
-catálogo de produtos, financeiro, upload e IA (simulada).
+ConnectAgro, cobrindo os módulos do MVP: gestão e acesso, painel de usuários,
+operação agrícola, catálogo de produtos, financeiro, upload e IA simulada.
 
 ## Convenções
 
@@ -49,8 +50,7 @@ Usuários que acessam o sistema (autenticação e dono das propriedades).
 - `nome` — nome do usuário.
 - `email` — e-mail de login (**único**).
 - `senha_hash` — hash da senha (**nunca** em texto puro).
-- `perfil` — perfil de acesso. Inicialmente simples: `admin`, `produtor`,
-  `membro`.
+- `perfil` — perfil de acesso oficial: `admin`, `tecnico`, `trabalhador`.
 - `ativo` — usuário ativo (`BOOLEAN`).
 - `criado_em`, `atualizado_em` — controle temporal.
 
@@ -63,6 +63,21 @@ Propriedade rural gerida no sistema. Um usuário pode ter mais de uma.
 - `municipio`, `uf` — localização (opcionais).
 - `area_total_ha` — área total em hectares (opcional).
 - `criado_em`, `atualizado_em` — controle temporal.
+
+Observação: `usuario_id` permanece como dono/responsável legado da propriedade.
+No MVP ampliado, o acesso de usuários internos usa também `usuario_propriedade`.
+
+### `usuario_propriedade`
+Associação explícita entre usuários e propriedades, criada na Fase 7.1.
+
+- `id` — PK.
+- `usuario_id` — FK → `usuario`.
+- `propriedade_id` — FK → `propriedade`.
+- `ativo` — vínculo ativo (`BOOLEAN`).
+- `criado_por_id` — FK → `usuario` que criou o vínculo (opcional).
+- `criado_em`, `atualizado_em` — controle temporal.
+
+Restrição: o par (`usuario_id`, `propriedade_id`) é único.
 
 ### `equipe_membro`
 Membros da equipe vinculados a uma propriedade e suas funções.
@@ -299,7 +314,9 @@ Registro das interações com a camada de IA. **No MVP a IA é simulada.**
 ## Relacionamentos
 
 - `usuario` **1:N** `propriedade`.
+- `usuario` **1:N** `usuario_propriedade`.
 - `usuario` **1:N** `ia_interacao`.
+- `propriedade` **1:N** `usuario_propriedade`.
 - `propriedade` **1:N** `equipe_membro`, `cultura`, `gleba`,
   `financeiro_lancamento`, `upload_arquivo`, `ia_interacao`.
 - `cultura` **1:N** `cultura_gleba`.
@@ -316,8 +333,10 @@ Registro das interações com a camada de IA. **No MVP a IA é simulada.**
 ```mermaid
 erDiagram
     usuario ||--o{ propriedade : possui
+    usuario ||--o{ usuario_propriedade : vincula
     usuario ||--o{ ia_interacao : gera
 
+    propriedade ||--o{ usuario_propriedade : recebe
     propriedade ||--o{ equipe_membro : tem
     propriedade ||--o{ cultura : tem
     propriedade ||--o{ gleba : tem
@@ -341,7 +360,8 @@ erDiagram
 ## Pendências e decisões em aberto
 
 - Formato definitivo e validação do `poligono_geojson` (mapa real).
-- Modelo de **permissões** por `perfil`/`funcao`.
+- Eventual tabela de roles/permissões fora do escopo atual; o MVP usa matriz em
+  código por `usuario.perfil`.
 - Normalização futura dos campos de **lista** (JSON → tabelas auxiliares).
 - Separação formal entre **produto técnico/genérico** e **produto comercial
   específico** no sistema final.

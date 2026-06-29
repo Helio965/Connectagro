@@ -19,6 +19,11 @@ migration.
 A Fase 6.5 também não altera schema: a revisão final consolida documentação,
 testes e checklist de entrega sem criar model, migration, tabela ou dependência.
 
+A Fase 7.1 adiciona a tabela `usuario_propriedade`, usada pelo painel interno de
+usuários para vincular contas à propriedade atual. O campo
+`propriedade.usuario_id` permanece no schema para compatibilidade com bases
+anteriores.
+
 ## Objetivo
 
 Documentar, de forma padronizada, cada tabela do MVP e seus campos: nome, tipo,
@@ -83,6 +88,27 @@ Propriedade rural gerida pelo usuário.
 | area_total_ha | REAL    | Não         |       | Área total em hectares   |                        |
 | criado_em     | TEXT    | Sim         |       | Data/hora de criação     | ISO 8601               |
 | atualizado_em | TEXT    | Não         |       | Data/hora de atualização | ISO 8601               |
+
+Observação: `usuario_id` continua indicando o dono legado/original da propriedade.
+O acesso operacional do painel de usuários usa a associação explícita em
+`usuario_propriedade`.
+
+### Tabela: `usuario_propriedade`
+Associação entre usuários e propriedades no MVP ampliado.
+
+| Campo          | Tipo    | Obrigatório | Chave | Descrição                         | Observações                                |
+|----------------|---------|-------------|-------|-----------------------------------|--------------------------------------------|
+| id             | INTEGER | Sim         | PK    | Identificador único               | Autoincremento                             |
+| usuario_id     | INTEGER | Sim         | FK    | Usuário vinculado                 | FK para `usuario(id)`                      |
+| propriedade_id | INTEGER | Sim         | FK    | Propriedade vinculada             | FK para `propriedade(id)`                  |
+| ativo          | BOOLEAN | Sim         |       | Vínculo ativo                     | `0`/`1`; acompanha inativação pelo painel  |
+| criado_por_id  | INTEGER | Não         | FK    | Usuário que criou o vínculo       | FK para `usuario(id)`                      |
+| criado_em      | TEXT    | Sim         |       | Data/hora de criação              | ISO 8601                                   |
+| atualizado_em  | TEXT    | Não         |       | Data/hora da última atualização   | ISO 8601                                   |
+
+Restrições: o par (`usuario_id`, `propriedade_id`) é único. O painel não faz
+remoção física de usuários; a inativação marca `usuario.ativo = 0` e
+`usuario_propriedade.ativo = 0`.
 
 ### Tabela: `equipe_membro`
 Membros da equipe vinculados a uma propriedade.

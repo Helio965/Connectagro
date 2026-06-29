@@ -108,6 +108,7 @@ def test_paginas_com_formularios_post_renderizam_csrf_token(app_csrf):
         "/colheita/nova",
         "/aplicacoes/nova",
         "/upload/novo",
+        "/usuarios/novo",
         "/ia/",
         "/glebas/",
     ):

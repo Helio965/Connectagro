@@ -123,7 +123,7 @@ def test_senha_armazenada_como_hash(usuarios):
 
 def test_seed_users_idempotente(db_app):
     """O comando seed-users cria os 3 usuários e não duplica em nova execução."""
-    from app.models import Usuario
+    from app.models import Propriedade, Usuario, UsuarioPropriedade
 
     runner = db_app.test_cli_runner()
 
@@ -131,6 +131,9 @@ def test_seed_users_idempotente(db_app):
     assert r1.exit_code == 0
     with db_app.app_context():
         assert Usuario.query.count() == 3
+        assert Propriedade.query.count() == 1
+        assert Propriedade.query.one().nome == "Propriedade Demo ConnectAgro"
+        assert UsuarioPropriedade.query.count() == 3
         for u in Usuario.query.all():
             assert u.senha_hash and u.senha_hash != ""
 
@@ -139,3 +142,5 @@ def test_seed_users_idempotente(db_app):
     assert r2.exit_code == 0
     with db_app.app_context():
         assert Usuario.query.count() == 3
+        assert Propriedade.query.count() == 1
+        assert UsuarioPropriedade.query.count() == 3

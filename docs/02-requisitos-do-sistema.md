@@ -55,17 +55,20 @@
 
 ---
 
-## Requisitos Funcionais planejados — MVP ampliado
+## Requisitos Funcionais — MVP ampliado
 
-> Os requisitos abaixo descrevem o **escopo planejado** do MVP ampliado (Fase 7).
-> Eles ainda **não** estão implementados; serão entregues em fases 7.x. Nenhum
-> deles inclui venda, carrinho, checkout ou cotação.
+> Os requisitos abaixo descrevem o **escopo do MVP ampliado** (Fase 7). A Fase
+> 7.1 já implementa o painel de usuários; os demais itens seguem planejados para
+> fases 7.x. Nenhum deles inclui venda, carrinho, checkout ou cotação.
 
 ### Painel de usuários (Fase 7.1)
 - RF-17 — Permitir que o **admin** liste os usuários da sua propriedade.
 - RF-18 — Permitir que o **admin** crie usuário (sem cadastro público).
 - RF-19 — Permitir que o **admin** edite perfil e status do usuário.
 - RF-20 — Permitir que o **admin** inative um usuário.
+- RF-20a — Vincular usuários à propriedade por `usuario_propriedade`, preservando
+  `propriedade.usuario_id` para compatibilidade com bases anteriores.
+- RF-20b — Impedir que o painel deixe a propriedade sem nenhum `admin` ativo.
 
 ### Recuperação de senha (Fase 7.2)
 - RF-21 — Permitir que o usuário solicite redefinição de senha.

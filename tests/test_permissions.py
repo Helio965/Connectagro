@@ -145,7 +145,9 @@ def test_matriz_de_permissoes_por_perfil(app_db):
     from app.utils.permissions import can, has_permission
 
     esperadas = {
-        "admin": ("glebas.delete", "financeiro.create", "equipe.delete", "upload.delete"),
+        "admin": ("glebas.delete", "financeiro.create", "equipe.delete", "upload.delete",
+                  "usuarios.view", "usuarios.create", "usuarios.edit",
+                  "usuarios.deactivate"),
         "tecnico": ("dashboard.view", "glebas.create", "culturas.edit", "colheita.edit",
                     "aplicacoes.edit", "upload.download", "financeiro.view", "equipe.view"),
         "trabalhador": ("dashboard.view", "glebas.view", "culturas.view", "colheita.create",
@@ -153,9 +155,11 @@ def test_matriz_de_permissoes_por_perfil(app_db):
     }
     negadas = {
         "tecnico": ("glebas.delete", "culturas.delete", "colheita.delete",
-                    "aplicacoes.delete", "upload.delete", "financeiro.create", "equipe.create"),
+                    "aplicacoes.delete", "upload.delete", "financeiro.create",
+                    "equipe.create", "usuarios.view", "usuarios.create"),
         "trabalhador": ("glebas.create", "culturas.create", "colheita.edit",
-                        "aplicacoes.edit", "financeiro.view", "equipe.view", "upload.delete"),
+                        "aplicacoes.edit", "financeiro.view", "equipe.view",
+                        "upload.delete", "usuarios.view", "usuarios.create"),
         "desconhecido": ("dashboard.view", "glebas.delete"),
     }
 
@@ -208,6 +212,7 @@ def test_admin_acessa_equipe_financeiro_e_remove_registros(app_db):
     client = _login(app_db, "admin")
     assert client.get("/equipe/").status_code == 200
     assert client.get("/financeiro/").status_code == 200
+    assert client.get("/usuarios/").status_code == 200
     assert client.post(f"/upload/{ids['upload_id']}/remover").status_code == 302
     assert client.post(f"/colheita/{ids['colheita_id']}/remover").status_code == 302
     assert client.post(f"/aplicacoes/{ids['aplicacao_id']}/remover").status_code == 302
@@ -358,8 +363,10 @@ def test_templates_escondem_menu_e_acoes_sem_permissao(app_db):
     trabalhador_home = _login(app_db, "trabalhador").get("/").data.decode("utf-8")
     assert "Equipe" not in trabalhador_home
     assert "Financeiro" not in trabalhador_home
+    assert "Usuários" not in trabalhador_home
 
     tecnico = _login(app_db, "tecnico")
+    assert "Usuários" not in tecnico.get("/").data.decode("utf-8")
     financeiro = tecnico.get("/financeiro/").data.decode("utf-8")
     assert "Financeiro" in financeiro
     assert "+ Novo lançamento" not in financeiro
@@ -367,6 +374,7 @@ def test_templates_escondem_menu_e_acoes_sem_permissao(app_db):
         assert "Remover" not in tecnico.get(rota).data.decode("utf-8")
 
     admin = _login(app_db, "admin")
+    assert "Usuários" in admin.get("/").data.decode("utf-8")
     assert "+ Nova gleba" in admin.get("/glebas/").data.decode("utf-8")
     assert "+ Novo lançamento" in admin.get("/financeiro/").data.decode("utf-8")
     assert "Remover" in admin.get("/upload/").data.decode("utf-8")

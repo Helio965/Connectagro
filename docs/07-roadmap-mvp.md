@@ -46,7 +46,8 @@
 
 ## Etapa 4.1 — Modelos e banco SQLite ✅
 
-- [x] **Modelos SQLAlchemy de domínio** (`src/app/models/`, 15 tabelas).
+- [x] **Modelos SQLAlchemy de domínio** (`src/app/models/`, 15 tabelas iniciais;
+  schema atual com 16 após a Fase 7.1).
 - [x] **Schema validável** por `db.create_all()` nos testes e via `flask init-db`.
 
 > Adotado **Flask-SQLAlchemy** como ORM. O banco real **não** é versionado.
@@ -54,7 +55,8 @@
 ## Etapa 4.2 — Migrations e importação do seed técnico ✅
 
 - [x] **Flask-Migrate/Alembic** configurado (`migrations/` versionada).
-- [x] **Migration inicial** das 15 tabelas (`flask db upgrade`).
+- [x] **Migration inicial** das 15 tabelas (`flask db upgrade`) e migration
+  posterior de `usuario_propriedade` na Fase 7.1.
 - [x] **Validação** do seed técnico (`flask validate-catalog-seed`).
 - [x] **Importação idempotente** do catálogo (`flask import-catalog-seed`):
   popula `produto_base` + `produto_tecnico`.
@@ -281,16 +283,20 @@ produto, foi aberto o **MVP ampliado** (Fase 7) antes do encerramento definitivo
 > fases abaixo passam a fazer parte do MVP (não são mais pós-MVP). Ver detalhes em
 > [09 — Roadmap do MVP Ampliado](./09-roadmap-mvp-ampliado.md).
 
-### Fase 7.0 — Redefinição oficial do MVP ampliado ✅ (em andamento)
+### Fase 7.0 — Redefinição oficial do MVP ampliado ✅ (concluída)
 
 - [x] Documentação, roadmap, regras e checklist alinhados ao MVP ampliado.
 - [x] Escopo ampliado registrado (entra / fica fora do ampliado / fora do produto).
 - [x] **Nenhuma** funcionalidade nova implementada (fase somente documental).
 
-### Fase 7.1 — Painel de usuários ⏳ (planejado)
+### Fase 7.1 — Painel de usuários ✅ (concluída)
 
-- [ ] Admin lista usuários da propriedade; cria, edita perfil/status e inativa.
-- [ ] Sem cadastro público; mantém permissões por perfil e escopo por propriedade.
+- [x] Admin lista usuários da propriedade; cria, edita perfil/status e inativa.
+- [x] Sem cadastro público; mantém permissões por perfil e escopo por propriedade.
+- [x] Associação `usuario_propriedade` criada com migration e compatibilidade com
+  `propriedade.usuario_id`.
+- [x] `seed-users` garante propriedade demo e vínculos dos usuários de teste.
+- [x] Testes em `tests/test_usuarios_painel.py`.
 
 ### Fase 7.2 — Recuperação de senha ⏳ (planejado)
 
@@ -337,7 +343,7 @@ Ordem concluída:
 ## Etapa 6 — Testes e qualidade
 
 - [x] Testes da fundação (app factory, `/health`, rotas protegidas).
-- [x] Testes de schema/modelos (15 tabelas, unicidade, schema validável).
+- [x] Testes de schema/modelos (16 tabelas, unicidade, schema validável).
 - [x] Testes de validação e importação do seed técnico.
 - [x] Testes de autenticação, CRUDs já entregues, Upload e consulta do catálogo.
 - [x] Dashboard.
@@ -352,11 +358,12 @@ Ordem concluída:
 
 ## Próximo passo recomendado
 
-**Fase 7.1 — Painel de usuários.**
+**Fase 7.2 — Recuperação de senha.**
 
 O MVP foi ampliado: painel de usuários, recuperação de senha, auditoria/logs,
 PDF/exportações e mapa avançado **fazem parte do MVP ampliado** (Fase 7) e **não**
-são mais pós-MVP.
+são mais pós-MVP. A Fase 7.1 já entregou o painel interno de usuários; a próxima
+frente é recuperação de senha.
 
 Permanecem como **pós-MVP** (avaliados depois):
 

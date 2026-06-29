@@ -18,6 +18,11 @@ class Usuario(db.Model):
 
     # Relacionamentos
     propriedades = db.relationship("Propriedade", back_populates="usuario")
+    vinculos_propriedade = db.relationship(
+        "UsuarioPropriedade",
+        foreign_keys="UsuarioPropriedade.usuario_id",
+        back_populates="usuario",
+    )
     interacoes_ia = db.relationship("IaInteracao", back_populates="usuario")
 
     def __repr__(self):
