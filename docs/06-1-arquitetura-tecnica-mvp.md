@@ -2,7 +2,17 @@
 
 ## Status do documento
 
-**Arquitetura técnica — v0.21 (MVP base consolidado + MVP ampliado em andamento: painel de usuários + CRUDs + catálogo + upload + dashboard + mapa + IA simulada + relatórios operacionais + permissões finas + CSRF + revisão final).**
+**Arquitetura técnica — v0.22 (MVP base consolidado + MVP ampliado em andamento: painel de usuários + recuperação de senha + CRUDs + catálogo + upload + dashboard + mapa + IA simulada + relatórios operacionais + permissões finas + CSRF + revisão final).**
+
+> **Recuperação de senha (Fase 7.2):** o MVP ampliado adiciona o modelo
+> `SenhaResetToken` (tabela `senha_reset_token`, migration própria),
+> `services/password_reset_service.py` e as rotas públicas
+> `/auth/esqueci-senha` e `/auth/redefinir-senha/<token>`. O token é seguro
+> (`secrets.token_urlsafe`), expirável e de **uso único**; apenas o **hash**
+> (SHA-256) é armazenado. **Sem envio real de e-mail**: o link de redefinição
+> aparece em tela apenas em local/dev/teste (`PASSWORD_RESET_SHOW_DEV_LINK`).
+> Usuário inativo não recupera senha e não é reativado; a tabela `usuario` não
+> é alterada.
 
 > **Redefinição do MVP ampliado (Fase 7.0):** por decisão de produto, o MVP foi
 > ampliado. As fases 7.x passam a incluir painel de usuários, recuperação de
@@ -173,8 +183,8 @@ src/
     │   ├── financeiro/  upload/  equipe/  colheita/
     │   ├── mapa/  ia/  relatorios/
     │   └── usuarios/
-    ├── models/                  # modelos SQLAlchemy de domínio (16 tabelas)
-    ├── services/                # catalogo_seed.py, dashboard_service.py, ia_simulada_service.py, relatorios_service.py, usuarios_service.py
+    ├── models/                  # modelos SQLAlchemy de domínio (17 tabelas)
+    ├── services/                # catalogo_seed.py, dashboard_service.py, ia_simulada_service.py, relatorios_service.py, usuarios_service.py, password_reset_service.py
     ├── utils/                   # auth.py, contexto.py, catalogo.py, formatters.py, permissions.py
     ├── templates/               # base.html, módulos, erros
     └── static/                  # css/, js/ (arquivos públicos)
@@ -210,7 +220,7 @@ instance/
 
 | Módulo (MVP)       | Blueprint        | Prefixo        | Entidades principais                              |
 |--------------------|------------------|----------------|---------------------------------------------------|
-| Login              | `auth`           | `/auth`        | `usuario`                                         |
+| Login / Senha      | `auth`           | `/auth`        | `usuario`, `senha_reset_token`                    |
 | Dashboard          | `dashboard`      | `/`            | agregações somente leitura                        |
 | Culturas           | `culturas`       | `/culturas`    | `cultura`, `cultura_gleba`                        |
 | Glebas             | `glebas`         | `/glebas`      | `gleba`, `cultura_gleba`                          |
@@ -255,6 +265,9 @@ instance/
   altera schema.
 - **Painel de Usuários:** exige migration própria para `usuario_propriedade`, com
   backfill a partir de `propriedade.usuario_id`.
+- **Recuperação de senha:** exige migration própria para `senha_reset_token`
+  (índice em `usuario_id`, unicidade em `token_hash`); **não** altera a tabela
+  `usuario`.
 
 ### Dashboard operacional
 
@@ -397,6 +410,35 @@ Matriz resumida:
   selecionáveis.
 - A inativação marca `usuario.ativo = 0` e `usuario_propriedade.ativo = 0`; o
   serviço impede deixar a propriedade sem nenhum `admin` ativo.
+
+### Recuperação de senha
+
+- `src/app/blueprints/auth/routes.py` expõe as rotas **públicas**
+  `/auth/esqueci-senha` (GET/POST) e `/auth/redefinir-senha/<token>` (GET/POST);
+  o login tem o link "Esqueci minha senha".
+- `src/app/services/password_reset_service.py` concentra a lógica:
+  `gerar_token_reset`, `hash_token`, `solicitar_reset_por_email`,
+  `validar_token_reset`, `redefinir_senha_com_token`,
+  `invalidar_tokens_abertos_do_usuario`, `token_expirado` e
+  `limpar_tokens_expirados_opcional`.
+- `src/app/models/senha_reset_token.py` (`SenhaResetToken`) guarda apenas o
+  **hash** (SHA-256) do token, `expira_em`, `usado`/`usado_em` e dados mínimos da
+  solicitação (`ip_solicitacao`, `user_agent_solicitacao`). O token puro nunca é
+  persistido e nenhuma senha é gravada nessa tabela.
+- O token é gerado com `secrets.token_urlsafe(32)`, expira conforme
+  `PASSWORD_RESET_TOKEN_MINUTES` (padrão 30) e é de **uso único**. Solicitar novo
+  reset invalida os tokens abertos anteriores do usuário.
+- A solicitação responde sempre com **mensagem genérica** (sem enumeração de
+  e-mails). E-mail inexistente ou usuário inativo **não** geram token válido.
+- **Sem envio real de e-mail nesta fase.** Em local/dev/teste
+  (`PASSWORD_RESET_SHOW_DEV_LINK`), a tela exibe o link de redefinição para uso
+  manual; em produção, nunca.
+- A redefinição valida o token novamente, exige nova senha (mínimo 6 caracteres)
+  e confirmação, grava o **hash** da nova senha, marca o token como usado, **não
+  reativa** usuário inativo e **não** autentica automaticamente (redireciona ao
+  login).
+- Todas as rotas POST enviam token CSRF; `TestingConfig` mantém CSRF desativado
+  por padrão e `tests/test_password_reset.py` ativa a proteção quando valida CSRF.
 
 ### CSRF/Flask-WTF
 
@@ -633,6 +675,11 @@ Matriz resumida:
   criação/edição/inativação de usuários, vínculo por propriedade, bloqueio do
   último admin ativo, compatibilidade com base legada, `seed-users` idempotente e
   convivência com CSRF/permissões.
+- `tests/test_password_reset.py` cobre link "Esqueci minha senha", mensagem
+  genérica (sem enumeração), criação de token só para usuário ativo, hash do
+  token sem token puro, expiração, link dev exibido/ocultado por configuração,
+  validação/expiração/uso único do token, validações de nova senha, login com
+  senha antiga/nova após redefinir, usuário inativado depois e CSRF nos POSTs.
 
 ---
 
@@ -711,7 +758,7 @@ Matriz resumida:
 **MVP ampliado (Fase 7):**
 
 - [x] Painel de usuários (Fase 7.1)
-- [ ] Recuperação de senha (Fase 7.2)
+- [x] Recuperação de senha (Fase 7.2)
 - [ ] Auditoria/logs administrativos (Fase 7.3)
 - [ ] PDF/exportações (Fase 7.4)
 - [ ] Mapa avançado (Fase 7.5)
@@ -731,8 +778,8 @@ Matriz resumida:
 ## 14. Arquitetura do MVP ampliado
 
 > Esta seção descreve, em **alto nível**, a arquitetura pretendida para as fases
-> 7.x. A Fase 7.1 já está implementada; as demais decisões definitivas serão
-> tomadas em cada fase específica.
+> 7.x. As Fases 7.1 e 7.2 já estão implementadas; as demais decisões definitivas
+> serão tomadas em cada fase específica.
 
 ### Painel de usuários (Fase 7.1 — implementado)
 
@@ -747,12 +794,14 @@ Matriz resumida:
 - Não inclui recuperação de senha, auditoria/logs, remoção física de usuário nem
   tabela de roles/permissões.
 
-### Recuperação de senha (Fase 7.2)
+### Recuperação de senha (Fase 7.2 — implementado)
 
-- Provável **tabela de tokens** de redefinição com **expiração**.
-- Token armazenado/comparado com **hash**, nunca em claro.
-- Fluxo que **não expõe** senha nem token; envio de e-mail pode ser
-  **simulado/local** no MVP ampliado.
+- Tabela de tokens `senha_reset_token` (migration própria) com **expiração**.
+- Token **armazenado apenas como hash** (SHA-256), nunca em claro; uso único.
+- Fluxo que **não expõe** senha nem token; **sem envio real de e-mail** — link de
+  redefinição visível só em local/dev/teste (`PASSWORD_RESET_SHOW_DEV_LINK`).
+- Mensagem genérica (sem enumeração); usuário inativo não recupera senha e não é
+  reativado. Detalhes na seção "Recuperação de senha" acima.
 
 ### Auditoria/logs (Fase 7.3)
 

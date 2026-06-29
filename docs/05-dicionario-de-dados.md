@@ -24,6 +24,10 @@ usuários para vincular contas à propriedade atual. O campo
 `propriedade.usuario_id` permanece no schema para compatibilidade com bases
 anteriores.
 
+A Fase 7.2 adiciona a tabela `senha_reset_token`, usada pela recuperação de
+senha. Apenas o **hash** do token é armazenado (nunca o token puro) e nenhuma
+senha é gravada nessa tabela. Com isso, o MVP passa a **17 tabelas**.
+
 ## Objetivo
 
 Documentar, de forma padronizada, cada tabela do MVP e seus campos: nome, tipo,
@@ -124,6 +128,26 @@ Membros da equipe vinculados a uma propriedade.
 | ativo          | BOOLEAN | Sim         |       | Membro ativo             | `0`/`1`; padrão `1`          |
 | criado_em      | TEXT    | Sim         |       | Data/hora de criação     | ISO 8601                     |
 | atualizado_em  | TEXT    | Não         |       | Data/hora de atualização | ISO 8601                     |
+
+### Tabela: `senha_reset_token`
+Tokens de recuperação/redefinição de senha (Fase 7.2). Armazena apenas o **hash**
+do token; o token puro **nunca** é persistido e **nenhuma senha** é gravada aqui.
+
+| Campo                  | Tipo    | Obrigatório | Chave | Descrição                          | Observações                                  |
+|------------------------|---------|-------------|-------|------------------------------------|----------------------------------------------|
+| id                     | INTEGER | Sim         | PK    | Identificador único                | Autoincremento                               |
+| usuario_id             | INTEGER | Sim         | FK    | Usuário do token                   | FK para `usuario(id)`; indexado              |
+| token_hash             | TEXT    | Sim         | UQ    | Hash SHA-256 do token              | Único; nunca o token puro                    |
+| usado                  | BOOLEAN | Sim         |       | Token já utilizado                 | `0`/`1`; padrão `0`; uso único               |
+| criado_em              | TEXT    | Sim         |       | Data/hora de criação               | ISO 8601                                     |
+| expira_em              | TEXT    | Sim         |       | Data/hora de expiração             | ISO 8601; validade configurável              |
+| usado_em               | TEXT    | Não         |       | Data/hora de uso                   | ISO 8601                                     |
+| ip_solicitacao         | TEXT    | Não         |       | IP da solicitação                  | Dado mínimo de rastreio                      |
+| user_agent_solicitacao | TEXT    | Não         |       | User-Agent da solicitação          | Dado mínimo de rastreio                      |
+
+Restrições: `token_hash` é único. Solicitar um novo token invalida (marca como
+usados) os tokens abertos anteriores do mesmo usuário. Tokens expirados, usados
+ou de usuário inativo são recusados.
 
 ---
 

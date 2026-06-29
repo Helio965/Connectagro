@@ -57,9 +57,10 @@
 
 ## Requisitos Funcionais — MVP ampliado
 
-> Os requisitos abaixo descrevem o **escopo do MVP ampliado** (Fase 7). A Fase
-> 7.1 já implementa o painel de usuários; os demais itens seguem planejados para
-> fases 7.x. Nenhum deles inclui venda, carrinho, checkout ou cotação.
+> Os requisitos abaixo descrevem o **escopo do MVP ampliado** (Fase 7). As Fases
+> 7.1 (painel de usuários) e 7.2 (recuperação de senha) já estão implementadas;
+> os demais itens seguem planejados para fases 7.x. Nenhum deles inclui venda,
+> carrinho, checkout ou cotação.
 
 ### Painel de usuários (Fase 7.1)
 - RF-17 — Permitir que o **admin** liste os usuários da sua propriedade.
@@ -70,12 +71,16 @@
   `propriedade.usuario_id` para compatibilidade com bases anteriores.
 - RF-20b — Impedir que o painel deixe a propriedade sem nenhum `admin` ativo.
 
-### Recuperação de senha (Fase 7.2)
-- RF-21 — Permitir que o usuário solicite redefinição de senha.
-- RF-22 — Gerar **token seguro** de redefinição, com **expiração**.
-- RF-23 — Permitir redefinir a senha mediante token válido, sem expor a senha.
-- RF-24 — O envio de e-mail pode ser **simulado/local** no MVP ampliado, se
-  necessário.
+### Recuperação de senha (Fase 7.2) ✅
+- RF-21 — Permitir que o usuário solicite redefinição de senha em
+  `/auth/esqueci-senha`, com **mensagem genérica** (sem enumeração de e-mails).
+- RF-22 — Gerar **token seguro** (`secrets.token_urlsafe`) de redefinição, com
+  **expiração** configurável; armazenar apenas o **hash** do token.
+- RF-23 — Permitir redefinir a senha mediante token válido em
+  `/auth/redefinir-senha/<token>`, sem expor a senha; token de **uso único**.
+- RF-24 — **Sem envio real de e-mail** nesta fase: em ambiente local/dev/teste o
+  link de redefinição é exibido na tela (`PASSWORD_RESET_SHOW_DEV_LINK`); em
+  produção, nunca. Usuário inativo não recupera senha e não é reativado.
 
 ### Auditoria/logs (Fase 7.3)
 - RF-25 — Registrar eventos de **login/logout**.

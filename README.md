@@ -6,9 +6,10 @@ equipe, colheita, upload de documentos e mapa, oferecendo ainda apoio por uma
 camada de IA simulada, relatórios operacionais e um catálogo técnico de produtos
 agrícolas para consulta rápida.
 
-> **Status do projeto:** fundação Flask, **modelos SQLAlchemy** (16 tabelas),
+> **Status do projeto:** fundação Flask, **modelos SQLAlchemy** (17 tabelas),
 > **migrations** (Flask-Migrate), **importação do catálogo técnico** (via CLI),
-> **autenticação real** (login/logout), **permissões finas por perfil**,
+> **autenticação real** (login/logout), **recuperação de senha** (token seguro,
+> sem e-mail real), **permissões finas por perfil**,
 > **CSRF/Flask-WTF** nos formulários POST,
 > **Painel de Usuários** interno por propriedade,
 > **Dashboard Operacional** somente leitura, **Mapa real simplificado** somente
@@ -30,9 +31,10 @@ agrícolas para consulta rápida.
 > de entrega.
 >
 > **MVP ampliado (em andamento):** após decisão de produto, foi aberto o **MVP
-> ampliado** (Fase 7). A Fase 7.0 registrou a decisão de escopo e a **Fase 7.1
-> implementa o painel de usuários** interno da propriedade. Seguem no escopo do
-> MVP ampliado: **recuperação de senha**, **auditoria/logs administrativos**,
+> ampliado** (Fase 7). A Fase 7.0 registrou a decisão de escopo, a **Fase 7.1
+> implementa o painel de usuários** interno da propriedade e a **Fase 7.2
+> implementa a recuperação de senha** (token seguro/expirável, sem envio real de
+> e-mail). Seguem no escopo do MVP ampliado: **auditoria/logs administrativos**,
 > **PDF/exportações** e **mapa avançado**. Continuam **fora do MVP ampliado** IA real/LLM, validação regulatória real
 > do catálogo, preço/imagem com fontes reais, OCR/leitura automática de uploads e
 > deploy/produção completo. **Venda, carrinho, checkout e cotação nunca entram no
@@ -88,6 +90,7 @@ em etapas posteriores, evoluirá para a versão completa.
 | Módulo         | Descrição resumida                                              |
 | -------------- | --------------------------------------------------------------- |
 | Login          | Autenticação e controle de acesso                               |
+| Recuperar senha| Redefinição por token seguro/expirável, sem e-mail real         |
 | Permissões     | Matriz por perfil (`admin`, `tecnico`, `trabalhador`)           |
 | CSRF           | Token CSRF em formulários POST com Flask-WTF                    |
 | Usuários       | Painel interno de usuários da propriedade, sem cadastro público |
@@ -317,6 +320,26 @@ base antiga ainda não tem vínculo, `propriedade_atual()` cria a associação a
 automaticamente. O comando `seed-users` também cria uma propriedade demo e
 vincula os três usuários de teste de forma idempotente.
 
+### Recuperação de senha
+
+A Fase 7.2 adiciona um fluxo seguro de redefinição de senha, **sem envio real de
+e-mail** nesta etapa. No login há o link **"Esqueci minha senha"**
+(`/auth/esqueci-senha`): o usuário informa o e-mail e o sistema responde sempre
+com a **mesma mensagem genérica**, evitando revelar se o e-mail existe.
+
+Se o usuário existir e estiver **ativo**, é gerado um **token seguro**
+(`secrets.token_urlsafe`), **expirável** (`PASSWORD_RESET_TOKEN_MINUTES`, padrão
+30) e de **uso único**. O banco (`senha_reset_token`) guarda apenas o **hash**
+(SHA-256) do token — o token puro nunca é persistido e nenhuma senha é gravada
+nessa tabela. Solicitar um novo reset invalida os tokens abertos anteriores.
+
+Em ambiente **local/dev/teste** (`PASSWORD_RESET_SHOW_DEV_LINK`), o link de
+redefinição é exibido na própria tela para teste manual; em **produção, nunca**.
+A redefinição (`/auth/redefinir-senha/<token>`) valida o token, exige nova senha
+(mínimo 6 caracteres) e confirmação, grava o hash, marca o token como usado,
+**não reativa** usuário inativo e **não** faz login automático — redireciona ao
+login. Não há SMTP/Flask-Mail, fila, agendador ou deploy nesta fase.
+
 ### Usuários de teste (`seed-users`)
 
 | Perfil      | E-mail                       | Senha           |
@@ -351,19 +374,18 @@ vincula os três usuários de teste de forma idempotente.
 ## Próximos passos
 
 Concluídos: documentação de produto, modelagem (DER + dicionário), catálogo
-técnico/seed, a **fundação Flask**, os **modelos SQLAlchemy de domínio** (16
-tabelas), migrations, autenticação real, permissões finas por perfil,
-CSRF/Flask-WTF nos formulários POST, Dashboard
+técnico/seed, a **fundação Flask**, os **modelos SQLAlchemy de domínio** (17
+tabelas), migrations, autenticação real, recuperação de senha, permissões finas
+por perfil, CSRF/Flask-WTF nos formulários POST, Dashboard
 Operacional, Mapa real simplificado, IA Simulada Operacional, Relatórios
 Operacionais HTML, CRUDs de glebas/culturas/equipe/financeiro/colheita/aplicações
 de insumo/upload, Painel de Usuários interno e consulta somente leitura de
 Defensivos/Fertilizantes.
 
-O **MVP base está consolidado** e o projeto entra agora na fase de **MVP
-ampliado** (Fase 7). A **Fase 7.1 — Painel de usuários** está implementada. O
-MVP ampliado ainda incorporará, em fases 7.x:
+O **MVP base está consolidado** e o projeto segue na fase de **MVP ampliado**
+(Fase 7). As Fases **7.1 — Painel de usuários** e **7.2 — Recuperação de senha**
+estão implementadas. O MVP ampliado ainda incorporará, em fases 7.x:
 
-- recuperação de senha;
 - auditoria/logs administrativos;
 - PDF/exportações dos relatórios operacionais;
 - mapa avançado (edição/salvamento de polígono da gleba).
@@ -378,7 +400,7 @@ explicitamente aprovada): **venda, carrinho, checkout e cotação**. O ConnectAg
 permanece uma plataforma de gestão agrícola e consulta técnica, **sem
 marketplace e sem comércio**.
 
-O **próximo passo técnico** é a **Fase 7.2 — Recuperação de senha**. Consulte o
+O **próximo passo técnico** é a **Fase 7.3 — Auditoria/logs**. Consulte o
 [Roadmap do MVP](./docs/07-roadmap-mvp.md) e o
 [Roadmap do MVP Ampliado](./docs/09-roadmap-mvp-ampliado.md) para o detalhamento.
 
