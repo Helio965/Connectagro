@@ -14,6 +14,7 @@ PERFIS_OFICIAIS = ("admin", "tecnico", "trabalhador")
 _ADMIN_PERMISSIONS = {
     "dashboard.view",
     "mapa.view",
+    "mapa.edit",
     "catalogo.view",
     "relatorios.view",
     "ia.view",
@@ -55,6 +56,7 @@ _ADMIN_PERMISSIONS = {
 _TECNICO_PERMISSIONS = {
     "dashboard.view",
     "mapa.view",
+    "mapa.edit",
     "catalogo.view",
     "relatorios.view",
     "ia.view",

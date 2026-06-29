@@ -23,10 +23,11 @@ agrícolas para consulta rápida.
 > **Fertilizantes** e dos **Relatórios Operacionais HTML** (geral, financeiro,
 > agrícola, aplicações e uploads), somente leitura. Não há CRUD de produtos;
 > `produto_preco`/`produto_imagem` continuam **vazios** no MVP. Os relatórios
-> agora têm **exportação CSV/PDF** operacional (Fase 7.4). O sistema **não
-> vende produtos**, não recomenda produtos, não valida dose, não usa LLM/API
-> externa, não faz OCR/IA/extração automática de arquivos e não oferece recursos
-> avançados de mapa; o banco populado e uploads reais **não** são versionados.
+> têm **exportação CSV/PDF** operacional (Fase 7.4) e o mapa permite **editar o
+> polígono** da gleba (Fase 7.5). O sistema **não vende produtos**, não recomenda
+> produtos, não valida dose, não usa LLM/API externa, não faz OCR/IA/extração
+> automática de arquivos e não substitui georreferenciamento oficial; o banco
+> populado e uploads reais **não** são versionados.
 >
 > **MVP base consolidado:** a Fase 6.5 conclui a revisão final do MVP base, com
 > validação da suíte automatizada, limpeza dos avisos legados simples e checklist
@@ -37,9 +38,10 @@ agrícolas para consulta rápida.
 > implementa o painel de usuários** interno da propriedade, a **Fase 7.2
 > implementa a recuperação de senha** (token seguro/expirável, sem envio real de
 > e-mail), a **Fase 7.3 implementa a auditoria/logs administrativos** (somente
-> admin, sem dados sensíveis) e a **Fase 7.4 implementa as exportações CSV/PDF**
-> dos relatórios (operacionais, nunca cotação/venda). Segue no escopo do MVP
-> ampliado: **mapa avançado**. Continuam **fora do MVP ampliado** IA real/LLM, validação regulatória real
+> admin, sem dados sensíveis), a **Fase 7.4 implementa as exportações CSV/PDF**
+> dos relatórios (operacionais, nunca cotação/venda) e a **Fase 7.5 implementa o
+> mapa avançado** (edição do polígono da gleba). Resta a revisão final (Fase 7.6).
+> Continuam **fora do MVP ampliado** IA real/LLM, validação regulatória real
 > do catálogo, preço/imagem com fontes reais, OCR/leitura automática de uploads e
 > deploy/produção completo. **Venda, carrinho, checkout e cotação nunca entram no
 > produto.**
@@ -109,7 +111,7 @@ em etapas posteriores, evoluirá para a versão completa.
 | Upload         | Envio, listagem, download e remoção de arquivos da propriedade  |
 | Equipe         | Gestão de membros e funções                                     |
 | Colheita       | Registro e acompanhamento de colheita                           |
-| Mapa real      | Visualização das glebas em mapa                                 |
+| Mapa           | Visualização das glebas + edição do polígono (admin/técnico)    |
 | IA simulada    | Apoio operacional por regras, com histórico por propriedade     |
 | Relatórios     | Relatórios operacionais HTML + exportação CSV/PDF               |
 
@@ -121,6 +123,7 @@ em etapas posteriores, evoluirá para a versão completa.
 - **Banco de dados:** SQLite + Flask-SQLAlchemy + Flask-Migrate
 - **Segurança de formulários:** Flask-WTF / CSRFProtect
 - **Exportações:** `csv` (biblioteca padrão) + ReportLab (PDF)
+- **Mapa:** Leaflet + Leaflet.draw (via CDN)
 - **Frontend:** HTML, CSS, JavaScript, Jinja2
 - **Testes:** pytest
 
@@ -211,22 +214,29 @@ Indicadores principais:
 
 O Dashboard não cria dados, não altera schema e não implementa gráficos externos.
 
-### Mapa real simplificado
+### Mapa avançado
 
-O módulo Mapa em `/mapa/` é protegido por login e mostra uma visualização somente
-leitura das glebas da propriedade atual usando as coordenadas já cadastradas em
-`Gleba.latitude` e `Gleba.longitude`. A rota `/mapa/dados` entrega JSON escopado
-pela propriedade atual, sem dados de usuário/e-mail e separando glebas sem
-coordenadas válidas.
+O módulo Mapa em `/mapa/` é protegido por login e mostra as glebas da propriedade
+atual usando as coordenadas já cadastradas em `Gleba.latitude`/`Gleba.longitude`.
+A rota `/mapa/dados` entrega JSON escopado pela propriedade atual, sem dados de
+usuário/e-mail e separando glebas sem coordenadas válidas.
 
-O frontend usa Leaflet via CDN e renderiza marcadores. Quando `poligono_geojson`
-contém GeoJSON válido, ele pode ser exibido em modo somente leitura; conteúdo
-inválido é ignorado com segurança. A página continua renderizando mesmo sem
-internet, embora o mapa visual dependa da biblioteca externa.
+O frontend usa **Leaflet + Leaflet.draw** via CDN. Além de marcadores e polígonos
+existentes, a **Fase 7.5** permite **desenhar, editar, salvar e limpar** o
+polígono (`poligono_geojson`) de cada gleba — um polígono por gleba. A edição
+exige a permissão **`mapa.edit`** (admin e técnico); o **trabalhador apenas
+visualiza** (os controles de edição nem aparecem).
 
-O módulo não cria, edita ou remove glebas, não altera schema, não usa PostGIS,
-não mede área, não desenha polígonos, não importa/exporta GeoJSON e não usa GPS
-em tempo real.
+O salvamento é um `POST` protegido (`/mapa/glebas/<id>/poligono` e
+`.../poligono/limpar`) com **CSRF** (token via header `X-CSRFToken`). O **GeoJSON
+é validado no backend** (Polygon/MultiPolygon/Feature, coordenadas em faixa,
+tamanho limitado); inválido retorna 400 e não é salvo. Gleba de outra propriedade
+retorna 404 e cada alteração gera **auditoria** (`mapa.poligono.update`/`delete`),
+sem gravar o GeoJSON no log.
+
+O mapa é **apoio operacional**: não substitui medição técnica nem
+georreferenciamento oficial. Sem PostGIS, GPS em tempo real, shapefile/KML,
+importação/exportação geográfica ou alteração de schema.
 
 ### IA simulada operacional
 
@@ -415,18 +425,16 @@ logs, retenção automática, SIEM ou integração externa nesta fase.
 Concluídos: documentação de produto, modelagem (DER + dicionário), catálogo
 técnico/seed, a **fundação Flask**, os **modelos SQLAlchemy de domínio** (18
 tabelas), migrations, autenticação real, recuperação de senha, auditoria/logs,
-exportações CSV/PDF dos relatórios, permissões finas por perfil, CSRF/Flask-WTF
-nos formulários POST, Dashboard Operacional, Mapa real simplificado, IA Simulada
-Operacional, Relatórios Operacionais HTML, CRUDs de
+exportações CSV/PDF dos relatórios, mapa avançado (edição de polígonos),
+permissões finas por perfil, CSRF/Flask-WTF nos formulários POST, Dashboard
+Operacional, IA Simulada Operacional, Relatórios Operacionais HTML, CRUDs de
 glebas/culturas/equipe/financeiro/colheita/aplicações de insumo/upload, Painel de
 Usuários interno e consulta somente leitura de Defensivos/Fertilizantes.
 
 O **MVP base está consolidado** e o projeto segue na fase de **MVP ampliado**
 (Fase 7). As Fases **7.1 — Painel de usuários**, **7.2 — Recuperação de senha**,
-**7.3 — Auditoria/logs** e **7.4 — PDF/exportações** estão implementadas. O MVP
-ampliado ainda incorporará, em fases 7.x:
-
-- mapa avançado (edição/salvamento de polígono da gleba).
+**7.3 — Auditoria/logs**, **7.4 — PDF/exportações** e **7.5 — Mapa avançado**
+estão implementadas. Resta a **Fase 7.6 — Revisão final do MVP ampliado**.
 
 Continuam **fora do MVP ampliado** (avaliados depois): IA real/LLM, validação
 regulatória real do catálogo, preço/imagem com fontes reais e atualização
@@ -438,7 +446,7 @@ explicitamente aprovada): **venda, carrinho, checkout e cotação**. O ConnectAg
 permanece uma plataforma de gestão agrícola e consulta técnica, **sem
 marketplace e sem comércio**.
 
-O **próximo passo técnico** é a **Fase 7.5 — Mapa avançado**. Consulte o
+O **próximo passo técnico** é a **Fase 7.6 — Revisão final do MVP ampliado**. Consulte o
 [Roadmap do MVP](./docs/07-roadmap-mvp.md) e o
 [Roadmap do MVP Ampliado](./docs/09-roadmap-mvp-ampliado.md) para o detalhamento.
 

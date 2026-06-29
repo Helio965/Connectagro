@@ -4,6 +4,7 @@
 
 {% block extra_head %}
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css">
 {% endblock %}
 
 {% block content %}
@@ -16,8 +17,10 @@
   </div>
 
   <div class="mapa-aviso">
-    <p>O mapa do MVP usa coordenadas cadastradas nas glebas e serve apenas para visualização operacional.</p>
-    <p>Polígonos, medição de área, GPS em tempo real e camadas avançadas ficam para etapas futuras.</p>
+    <p>O mapa do MVP usa coordenadas cadastradas nas glebas e permite a
+       <strong>edição do polígono</strong> de cada gleba para apoio operacional.</p>
+    <p>É apoio operacional: <strong>não substitui medição técnica ou
+       georreferenciamento oficial</strong> e não usa GPS em tempo real.</p>
   </div>
 
   {% if not glebas %}
@@ -26,7 +29,10 @@
 
   <div class="mapa-layout">
     <div class="mapa-container">
-      <div id="mapa-glebas" data-mapa-url="{{ url_for('mapa.dados') }}">
+      <div id="mapa-glebas"
+           data-mapa-url="{{ url_for('mapa.dados') }}"
+           data-csrf-token="{{ csrf_token() }}"
+           data-can-edit="{{ '1' if can('mapa.edit') else '0' }}">
         {% if not glebas_com_coordenadas %}
           <p class="mapa-empty">Nenhuma gleba com coordenadas válidas para exibir no mapa.</p>
         {% endif %}
@@ -34,6 +40,24 @@
     </div>
 
     <aside class="mapa-sidebar">
+      {% if can("mapa.edit") %}
+      <section class="mapa-edicao" id="mapa-edicao">
+        <h2>Editar polígono</h2>
+        <p class="hint">Selecione uma gleba, desenhe ou ajuste o polígono e salve.</p>
+        <label for="mapa-gleba-select">Gleba</label>
+        <select id="mapa-gleba-select"></select>
+        <div class="mapa-edicao-acoes">
+          <button type="button" id="mapa-salvar" class="btn-acao">Salvar polígono</button>
+          <button type="button" id="mapa-limpar">Limpar polígono</button>
+        </div>
+        <p class="mapa-status" id="mapa-status" role="status"></p>
+      </section>
+      {% else %}
+      <section class="mapa-edicao-readonly">
+        <p class="hint">Seu perfil pode <strong>visualizar</strong> o mapa, mas não editar polígonos.</p>
+      </section>
+      {% endif %}
+
       <section>
         <h2>Glebas no mapa</h2>
         <ul class="mapa-lista">
@@ -74,5 +98,6 @@
 
 {% block extra_scripts %}
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
   <script src="{{ url_for('static', filename='js/mapa.js') }}"></script>
 {% endblock %}

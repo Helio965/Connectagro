@@ -158,6 +158,23 @@
   venda, checkout nem documento comercial, e **não** validam dose ou recomendação
   agronômica. Cada PDF/CSV traz aviso explícito nesse sentido.
 
+## Regras de mapa avançado (Fase 7.5)
+
+- RN-11ai — O mapa permite **editar, salvar e limpar** o polígono
+  (`gleba.poligono_geojson`) de cada gleba, com **um polígono por gleba**.
+- RN-11aj — A edição de polígono exige a permissão **`mapa.edit`** (admin e
+  técnico). O **trabalhador apenas visualiza** (tem `mapa.view`, não `mapa.edit`).
+- RN-11ak — O **GeoJSON é validado no backend** (Polygon/MultiPolygon/Feature;
+  coordenadas em faixa; tamanho limitado). GeoJSON inválido **não** é salvo e
+  retorna 400; FeatureCollection/GeometryCollection são recusados nesta fase.
+- RN-11al — Salvar/limpar polígono respeita **escopo por propriedade** (gleba de
+  outra propriedade retorna 404), exige **CSRF** e registra **auditoria**
+  (`mapa.poligono.update`/`mapa.poligono.delete`), sem gravar o GeoJSON/coordenadas
+  no log.
+- RN-11am — O mapa avançado é **apoio operacional** e **não** substitui medição
+  técnica ou georreferenciamento oficial. Não há **PostGIS**, **GPS em tempo
+  real**, **shapefile/KML** nem integração com CAR/SIGEF/INCRA nesta fase.
+
 ## Regras operacionais
 
 - RN-12 — Uma **cultura** está associada a uma ou mais **glebas**.

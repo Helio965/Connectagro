@@ -488,6 +488,19 @@ body {
   padding: .4rem .5rem; border: 1px solid var(--borda); border-radius: 6px;
 }
 
+/* Mapa avançado — edição de polígonos (Fase 7.5) */
+.mapa-edicao, .mapa-edicao-readonly {
+  border: 1px solid var(--borda); border-radius: 8px; padding: .75rem;
+  margin-bottom: 1rem; background: #f8faf8;
+}
+.mapa-edicao h2 { margin-top: 0; }
+.mapa-edicao select { width: 100%; padding: .4rem .5rem; border: 1px solid var(--borda);
+  border-radius: 6px; margin-bottom: .5rem; }
+.mapa-edicao-acoes { display: flex; flex-wrap: wrap; gap: .5rem; }
+.mapa-status { margin: .5rem 0 0; font-size: .85rem; min-height: 1.1rem; }
+.mapa-status-ok { color: #1b5e20; }
+.mapa-status-erro { color: #b3261e; }
+
 @media print {
   .topbar, .menu, .footer, .no-print { display: none !important; }
   .card { border: none; box-shadow: none; }

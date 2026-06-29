@@ -336,10 +336,18 @@ produto, foi aberto o **MVP ampliado** (Fase 7) antes do encerramento definitivo
 - [x] Dependência nova **ReportLab>=4.0**; sem nova tabela/migration/model.
 - [x] Testes em `tests/test_exportacoes.py`.
 
-### Fase 7.5 — Mapa avançado ⏳ (planejado)
+### Fase 7.5 — Mapa avançado ✅ (concluída)
 
-- [ ] Edição/salvamento de polígono da gleba e melhor visualização; sem PostGIS
-  obrigatório nem GPS em tempo real obrigatório.
+- [x] Edição/salvamento/limpeza do polígono da gleba (`poligono_geojson`) no mapa,
+  com Leaflet + Leaflet.draw (CDN); um polígono por gleba.
+- [x] Rotas POST `/mapa/glebas/<id>/poligono` e `.../poligono/limpar` com login,
+  `mapa.edit`, CSRF e escopo por propriedade (404 fora da propriedade).
+- [x] Validação de GeoJSON no backend (`services/mapa_service.py`): Polygon/
+  MultiPolygon/Feature, faixa de coordenadas e tamanho; inválido → 400.
+- [x] Permissão nova `mapa.edit` (admin/técnico); trabalhador só visualiza.
+- [x] Auditoria `mapa.poligono.update`/`delete`/`falha` sem gravar GeoJSON.
+- [x] Sem migration/model/tabela/dependência Python nova; testes em
+  `tests/test_mapa_avancado.py`.
 
 ### Fase 7.6 — Revisão final do MVP ampliado ⏳ (planejado)
 
@@ -382,13 +390,12 @@ Ordem concluída:
 
 ## Próximo passo recomendado
 
-**Fase 7.5 — Mapa avançado.**
+**Fase 7.6 — Revisão final do MVP ampliado.**
 
 O MVP foi ampliado: painel de usuários, recuperação de senha, auditoria/logs,
 PDF/exportações e mapa avançado **fazem parte do MVP ampliado** (Fase 7) e **não**
-são mais pós-MVP. As Fases 7.1 (painel de usuários), 7.2 (recuperação de senha),
-7.3 (auditoria/logs) e 7.4 (PDF/exportações) já foram entregues; a próxima frente
-é mapa avançado.
+são mais pós-MVP. As Fases 7.1 a 7.5 já foram entregues; resta a **revisão final
+do MVP ampliado** (Fase 7.6).
 
 Permanecem como **pós-MVP** (avaliados depois):
 

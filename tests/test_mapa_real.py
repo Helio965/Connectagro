@@ -112,8 +112,9 @@ def test_mapa_mostra_propriedade_atual_sem_vazar_outra(app_db):
 
 def test_mapa_renderiza_avisos_e_assets_sem_depender_do_backend(app_db):
     _, corpo = _corpo_mapa(app_db)
-    assert "visualização operacional" in corpo
-    assert "GPS em tempo real e camadas avançadas ficam para etapas futuras" in corpo
+    # Fase 7.5: o mapa agora permite edição de polígono (apoio operacional).
+    assert "edição do polígono" in corpo
+    assert "não substitui medição técnica ou" in corpo
     assert "leaflet" in corpo.lower()
     assert "js/mapa.js" in corpo
 
@@ -190,14 +191,17 @@ def test_mapa_nao_tem_rotas_post(app_db):
     assert client.post("/mapa/dados").status_code == 405
 
 
-def test_mapa_nao_apresenta_recursos_avancados_como_funcionalidade_ativa(app_db):
+def test_mapa_nao_apresenta_recursos_fora_de_escopo(app_db):
+    # Fase 7.5: edição de polígono é funcionalidade ativa, mas recursos fora de
+    # escopo (PostGIS, importação/exportação geográfica, satélite) não são oferecidos.
     _, corpo = _corpo_mapa(app_db)
+    assert "data-can-edit" in corpo
     corpo = corpo.lower()
     for proibido in (
         "postgis",
-        "desenhar polígono",
         "importar geojson",
         "exportar geojson",
+        "shapefile",
         "camada de satélite",
     ):
         assert proibido not in corpo
