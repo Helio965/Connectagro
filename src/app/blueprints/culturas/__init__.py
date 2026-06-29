@@ -1,4 +1,4 @@
-"""Blueprint do módulo Culturas (placeholder do MVP)."""
+"""Blueprint do módulo Culturas do MVP."""
 from flask import Blueprint
 
 culturas_bp = Blueprint(

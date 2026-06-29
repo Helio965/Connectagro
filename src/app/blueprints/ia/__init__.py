@@ -1,4 +1,4 @@
-"""Blueprint do módulo IA simulada (placeholder do MVP)."""
+"""Blueprint do módulo IA simulada do MVP."""
 from flask import Blueprint
 
 ia_bp = Blueprint(

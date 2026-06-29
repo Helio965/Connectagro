@@ -23,6 +23,9 @@ agrícolas para consulta rápida.
 > externa, não faz OCR/IA/extração automática de arquivos, não gera PDF/exportação
 > e não oferece recursos avançados de mapa; o banco populado e uploads reais
 > **não** são versionados.
+>
+> **MVP consolidado:** a Fase 6.5 conclui a revisão final do MVP, com validação da
+> suíte automatizada, limpeza dos avisos legados simples e checklist de entrega.
 
 ---
 
@@ -308,6 +311,7 @@ propriedade.
 - [06 — Arquitetura do Sistema](./docs/06-arquitetura-do-sistema.md) — **visão conceitual**
 - [06.1 — Arquitetura Técnica do MVP](./docs/06-1-arquitetura-tecnica-mvp.md) — **guia técnico detalhado do MVP**
 - [07 — Roadmap do MVP](./docs/07-roadmap-mvp.md)
+- [08 — Checklist Final do MVP](./docs/08-checklist-final-mvp.md)
 - [Catálogo de Produtos](./docs/catalogo-produtos/README.md) — inclui o [catálogo técnico](./docs/catalogo-produtos/catalogo-tecnico-connectagro-mvp.md) e o **seed técnico** ([`data/seeds/`](./data/seeds/README.md))
 
 ---
@@ -322,8 +326,11 @@ Operacional, Mapa real simplificado, IA Simulada Operacional, Relatórios
 Operacionais HTML, CRUDs de glebas/culturas/equipe/financeiro/colheita/aplicações
 de insumo/upload e consulta somente leitura de Defensivos/Fertilizantes.
 
-O **próximo passo recomendado** é a **revisão final do MVP**, incluindo ajustes
-visuais finais e limpeza opcional dos avisos legados do SQLAlchemy.
+O **MVP está consolidado para apresentação e continuidade**. Os próximos passos
+recomendados são pós-MVP: revisão visual avançada, PDF/exportações, painel de
+usuários, recuperação de senha, auditoria/logs, deploy/produção, mapa avançado,
+integrações externas e eventual IA real/LLM, se o produto decidir avançar nessa
+direção.
 
 Consulte o [Roadmap do MVP](./docs/07-roadmap-mvp.md) para o detalhamento.
 

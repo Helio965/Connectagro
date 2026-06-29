@@ -1,8 +1,8 @@
 """Utilitário de autenticação do ConnectAgro (MVP).
 
 Autenticação simples baseada em **sessão Flask** + **werkzeug.security**.
-Sem Flask-Login, JWT ou permissões finas por módulo (etapa futura). A sessão
-guarda apenas dados mínimos do usuário — **nunca** a senha.
+As permissões finas por perfil ficam em ``utils.permissions``. A sessão guarda
+apenas dados mínimos do usuário — **nunca** a senha.
 """
 from functools import wraps
 

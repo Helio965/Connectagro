@@ -50,7 +50,7 @@ def test_montar_contexto_operacional(app_db):
 
     app, _, propriedade_id = app_db
     with app.app_context():
-        propriedade = Propriedade.query.get(propriedade_id)
+        propriedade = db.session.get(Propriedade, propriedade_id)
         contexto = montar_contexto_operacional(propriedade)
         assert contexto["glebas"]["total"] == 1
         assert contexto["glebas"]["area_total"] == pytest.approx(12)
@@ -66,7 +66,7 @@ def test_gerar_alertas_operacionais(app_db):
 
     app, _, propriedade_id = app_db
     with app.app_context():
-        propriedade = Propriedade.query.get(propriedade_id)
+        propriedade = db.session.get(Propriedade, propriedade_id)
         alertas = gerar_alertas_operacionais(propriedade)
         assert "Existem 1 glebas sem coordenadas válidas." in alertas
         assert "Nenhum registro de colheita cadastrado." in alertas
@@ -79,7 +79,7 @@ def test_responder_pergunta_simulada(app_db):
 
     app, _, propriedade_id = app_db
     with app.app_context():
-        propriedade = Propriedade.query.get(propriedade_id)
+        propriedade = db.session.get(Propriedade, propriedade_id)
         resposta = responder_pergunta_simulada(propriedade, "Faça um resumo da propriedade")
         assert "Resumo operacional da propriedade" in resposta
         assert "Glebas cadastradas: 1" in resposta
@@ -93,8 +93,8 @@ def test_registrar_e_listar_interacao_ia(app_db):
 
     app, usuario_id, propriedade_id = app_db
     with app.app_context():
-        usuario = Usuario.query.get(usuario_id)
-        propriedade = Propriedade.query.get(propriedade_id)
+        usuario = db.session.get(Usuario, usuario_id)
+        propriedade = db.session.get(Propriedade, propriedade_id)
         registrar_interacao_ia(usuario, propriedade, "Pergunta teste", "Resposta teste")
         interacoes = listar_interacoes_ia(usuario, propriedade)
         assert len(interacoes) == 1

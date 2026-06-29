@@ -1,4 +1,4 @@
-"""Blueprint do módulo Financeiro (placeholder do MVP)."""
+"""Blueprint do módulo Financeiro do MVP."""
 from flask import Blueprint
 
 financeiro_bp = Blueprint(

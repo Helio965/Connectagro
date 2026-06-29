@@ -1,4 +1,4 @@
-"""Blueprint do módulo Glebas (placeholder do MVP)."""
+"""Blueprint do módulo Glebas do MVP."""
 from flask import Blueprint
 
 glebas_bp = Blueprint(

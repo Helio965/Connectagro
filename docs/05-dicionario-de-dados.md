@@ -16,6 +16,9 @@ A Fase 6.3 não altera schema: as permissões finas usam o campo já existente
 `src/app/utils/permissions.py`, sem tabela nova de roles/permissões e sem
 migration.
 
+A Fase 6.5 também não altera schema: a revisão final consolida documentação,
+testes e checklist de entrega sem criar model, migration, tabela ou dependência.
+
 ## Objetivo
 
 Documentar, de forma padronizada, cada tabela do MVP e seus campos: nome, tipo,
@@ -323,4 +326,5 @@ Interações com a camada de IA. **No MVP a IA é simulada.**
 
 - [04 — Modelagem do Banco (DER)](./04-modelagem-banco-der.md)
 - [03 — Regras de Negócio](./03-regras-de-negocio.md)
+- [08 — Checklist Final do MVP](./08-checklist-final-mvp.md)
 - [Catálogo de Produtos](./catalogo-produtos/README.md)

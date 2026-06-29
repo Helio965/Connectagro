@@ -2,7 +2,12 @@
 
 ## Status do documento
 
-**Arquitetura técnica — v0.18 (CRUDs + catálogo + upload + dashboard + mapa + IA simulada + relatórios operacionais + permissões finas + CSRF).**
+**Arquitetura técnica — v0.19 (MVP consolidado: CRUDs + catálogo + upload + dashboard + mapa + IA simulada + relatórios operacionais + permissões finas + CSRF + revisão final).**
+
+> **Revisão Final do MVP (Fase 6.5):** o MVP foi revisado como conjunto
+> funcional, com validação da suíte automatizada, conferência de formulários POST
+> com CSRF, permissões por perfil, textos de interface, documentação final e
+> checklist de entrega em `docs/08-checklist-final-mvp.md`.
 
 > **CSRF/Flask-WTF (Fase 6.4):** `Flask-WTF` foi adicionado às dependências e
 > `CSRFProtect` é inicializado pela Application Factory. Todos os formulários
@@ -62,7 +67,10 @@ Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetur
 > por usuários ficam fora do Git e não devem ser servidos diretamente por
 > `/static/uploads`.
 >
-> **Pendente:** revisão final do MVP.
+> **Estado atual:** MVP consolidado para apresentação e continuidade. Recursos
+> como PDF/exportações, painel de usuários, recuperação de senha, auditoria
+> avançada, deploy, mapa avançado, validação regulatória real e IA externa ficam
+> como evolução pós-MVP.
 
 ## Objetivo
 
@@ -652,10 +660,20 @@ Matriz resumida:
 - [x] Permissões finas por perfil (matriz em código, backend 403, `can()` em templates)
 - [x] CSRF/Flask-WTF nos formulários POST
 - [x] Testes de fundação, schema, seed, autenticação, CRUDs, Dashboard, Mapa, IA, Relatórios, Permissões, CSRF e consulta do catálogo
+- [x] Revisão e ajustes finais do MVP
+- [x] Checklist final de entrega do MVP (`docs/08-checklist-final-mvp.md`)
 
-**Pendente:**
+**Pós-MVP:**
 
-- [ ] Revisão e ajustes finais do MVP
+- [ ] PDF/exportações
+- [ ] Melhorias visuais avançadas
+- [ ] Painel de usuários e recuperação de senha
+- [ ] Auditoria/logs administrativos
+- [ ] Deploy/produção
+- [ ] Validação regulatória real do catálogo
+- [ ] Preço/imagem com fontes reais e atualização periódica
+- [ ] Mapa avançado
+- [ ] IA real/LLM, se futuramente aprovado
 
 ---
 
@@ -667,4 +685,5 @@ Matriz resumida:
 - [05 — Dicionário de Dados](./05-dicionario-de-dados.md)
 - [06 — Arquitetura do Sistema (visão conceitual)](./06-arquitetura-do-sistema.md)
 - [07 — Roadmap do MVP](./07-roadmap-mvp.md)
+- [08 — Checklist Final do MVP](./08-checklist-final-mvp.md)
 - [Catálogo de Produtos](./catalogo-produtos/README.md)

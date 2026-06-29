@@ -255,6 +255,26 @@
 > model novo, sem alteração de permissões, sem CRUD novo e sem mudança em seed,
 > catálogo, preço ou imagem.
 
+## Fase 6.5 — Revisão Final do MVP ✅
+
+- [x] Suíte completa validada antes e depois dos ajustes finais.
+- [x] Textos de interface revisados para refletir o MVP consolidado.
+- [x] Formulários POST conferidos com token CSRF.
+- [x] Navegação e botões revisados conforme permissões por perfil.
+- [x] Limpeza simples dos `LegacyAPIWarning` em testes, sem alterar models.
+- [x] README, arquitetura técnica, regras, roadmap e documentação de testes alinhados.
+- [x] Checklist final de entrega criado em `docs/08-checklist-final-mvp.md`.
+
+> Sem recurso pós-MVP, sem migration, sem model novo, sem dependência nova, sem
+> CRUD novo, sem alteração de permissões e sem mudança no seed técnico.
+
+## MVP consolidado
+
+O MVP fica consolidado com autenticação, permissões finas, CSRF, CRUDs
+operacionais, catálogo em consulta, upload seguro, dashboard, mapa simplificado,
+IA simulada e relatórios HTML. A partir daqui, novas frentes devem ser tratadas
+como evolução pós-MVP.
+
 ## Etapa 5 — Implementação dos módulos
 
 Ordem concluída:
@@ -286,15 +306,24 @@ Ordem concluída:
 - [x] Relatórios operacionais HTML.
 - [x] Permissões finas por perfil/módulo.
 - [x] CSRF/Flask-WTF.
-- [ ] Revisão e ajustes finais do MVP.
+- [x] Revisão e ajustes finais do MVP.
 
 ---
 
-## Próximo passo recomendado
+## Próximo passo recomendado pós-MVP
 
-**Revisão final do MVP**, incluindo ajustes visuais finais, validação geral dos
-fluxos principais e limpeza opcional dos `LegacyAPIWarning` do SQLAlchemy. PDF,
-exportações avançadas e integrações externas seguem como evolução futura/pós-MVP.
+Priorizar conforme decisão de produto:
+
+- PDF/exportações;
+- melhorias visuais avançadas;
+- painel de usuários;
+- recuperação de senha;
+- auditoria/logs administrativos;
+- validação regulatória real do catálogo;
+- preço/imagem com fontes reais e atualização periódica;
+- mapa avançado;
+- IA real/LLM, se futuramente aprovado;
+- deploy/produção.
 
 ---
 
@@ -303,3 +332,4 @@ exportações avançadas e integrações externas seguem como evolução futura/
 - [01 — Escopo do Projeto](./01-escopo-do-projeto.md)
 - [06 — Arquitetura do Sistema](./06-arquitetura-do-sistema.md)
 - [06.1 — Arquitetura Técnica do MVP](./06-1-arquitetura-tecnica-mvp.md)
+- [08 — Checklist Final do MVP](./08-checklist-final-mvp.md)

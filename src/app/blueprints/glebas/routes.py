@@ -86,7 +86,7 @@ def editar(gleba_id):
 def remover(gleba_id):
     propriedade = propriedade_atual()
     gleba = _gleba_da_propriedade_ou_404(gleba_id, propriedade)
-    # Remove vínculos cultura-gleba dependentes (sem CRUD de aplicação/colheita ainda).
+    # Remove vínculos cultura-gleba dependentes antes de excluir a gleba.
     for cg in list(gleba.cultura_glebas):
         db.session.delete(cg)
     db.session.delete(gleba)
