@@ -1,5 +1,2 @@
-// ConnectAgro — JavaScript base do MVP.
-// Sem dependências externas nesta etapa.
-document.addEventListener("DOMContentLoaded", function () {
-  console.log("ConnectAgro MVP — fundação Flask carregada.");
-});
+// ConnectAgro — JavaScript base compartilhado pelas páginas.
+// Comportamentos específicos (ex.: mapa) ficam em seus próprios arquivos.

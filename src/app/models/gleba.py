@@ -12,7 +12,7 @@ class Gleba(db.Model):
     area_ha = db.Column(db.Float, nullable=True)
     latitude = db.Column(db.Float, nullable=True)
     longitude = db.Column(db.Float, nullable=True)
-    # GeoJSON do polígono armazenado como TEXT (mapa real futuro)
+    # GeoJSON do polígono (TEXT); editável pelo mapa avançado (Fase 7.5)
     poligono_geojson = db.Column(db.Text, nullable=True)
     tipo_solo = db.Column(db.String(80), nullable=True)
     observacoes = db.Column(db.Text, nullable=True)
