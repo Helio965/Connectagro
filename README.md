@@ -24,8 +24,19 @@ agrícolas para consulta rápida.
 > e não oferece recursos avançados de mapa; o banco populado e uploads reais
 > **não** são versionados.
 >
-> **MVP consolidado:** a Fase 6.5 conclui a revisão final do MVP, com validação da
-> suíte automatizada, limpeza dos avisos legados simples e checklist de entrega.
+> **MVP base consolidado:** a Fase 6.5 conclui a revisão final do MVP base, com
+> validação da suíte automatizada, limpeza dos avisos legados simples e checklist
+> de entrega.
+>
+> **MVP ampliado (em andamento):** após decisão de produto, foi aberto o **MVP
+> ampliado** (Fase 7). Ele incorpora ao escopo do MVP, em fases 7.x, **painel de
+> usuários**, **recuperação de senha**, **auditoria/logs administrativos**,
+> **PDF/exportações** e **mapa avançado**. A Fase 7.0 é **somente documental**:
+> registra a decisão de escopo e o roadmap, **sem** implementar funcionalidade
+> nova. Continuam **fora do MVP ampliado** IA real/LLM, validação regulatória real
+> do catálogo, preço/imagem com fontes reais, OCR/leitura automática de uploads e
+> deploy/produção completo. **Venda, carrinho, checkout e cotação nunca entram no
+> produto.**
 
 ---
 
@@ -312,6 +323,7 @@ propriedade.
 - [06.1 — Arquitetura Técnica do MVP](./docs/06-1-arquitetura-tecnica-mvp.md) — **guia técnico detalhado do MVP**
 - [07 — Roadmap do MVP](./docs/07-roadmap-mvp.md)
 - [08 — Checklist Final do MVP](./docs/08-checklist-final-mvp.md)
+- [09 — Roadmap do MVP Ampliado](./docs/09-roadmap-mvp-ampliado.md)
 - [Catálogo de Produtos](./docs/catalogo-produtos/README.md) — inclui o [catálogo técnico](./docs/catalogo-produtos/catalogo-tecnico-connectagro-mvp.md) e o **seed técnico** ([`data/seeds/`](./data/seeds/README.md))
 
 ---
@@ -326,13 +338,28 @@ Operacional, Mapa real simplificado, IA Simulada Operacional, Relatórios
 Operacionais HTML, CRUDs de glebas/culturas/equipe/financeiro/colheita/aplicações
 de insumo/upload e consulta somente leitura de Defensivos/Fertilizantes.
 
-O **MVP está consolidado para apresentação e continuidade**. Os próximos passos
-recomendados são pós-MVP: revisão visual avançada, PDF/exportações, painel de
-usuários, recuperação de senha, auditoria/logs, deploy/produção, mapa avançado,
-integrações externas e eventual IA real/LLM, se o produto decidir avançar nessa
-direção.
+O **MVP base está consolidado** e o projeto entra agora na fase de **MVP
+ampliado** (Fase 7). O **MVP ampliado** incorporará, em fases 7.x:
 
-Consulte o [Roadmap do MVP](./docs/07-roadmap-mvp.md) para o detalhamento.
+- painel de usuários (gestão interna pelo admin, sem cadastro público);
+- recuperação de senha;
+- auditoria/logs administrativos;
+- PDF/exportações dos relatórios operacionais;
+- mapa avançado (edição/salvamento de polígono da gleba).
+
+Continuam **fora do MVP ampliado** (avaliados depois): IA real/LLM, validação
+regulatória real do catálogo, preço/imagem com fontes reais e atualização
+periódica, OCR/leitura automática de uploads e deploy/produção completo. A IA
+**simulada** continua sendo a IA oficial também no MVP ampliado.
+
+**Nunca entram no produto** (regra permanente, salvo mudança radical de produto
+explicitamente aprovada): **venda, carrinho, checkout e cotação**. O ConnectAgro
+permanece uma plataforma de gestão agrícola e consulta técnica, **sem
+marketplace e sem comércio**.
+
+O **próximo passo técnico** é a **Fase 7.1 — Painel de usuários**. Consulte o
+[Roadmap do MVP](./docs/07-roadmap-mvp.md) e o
+[Roadmap do MVP Ampliado](./docs/09-roadmap-mvp-ampliado.md) para o detalhamento.
 
 ---
 

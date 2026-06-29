@@ -55,6 +55,46 @@
 
 ---
 
+## Requisitos Funcionais planejados — MVP ampliado
+
+> Os requisitos abaixo descrevem o **escopo planejado** do MVP ampliado (Fase 7).
+> Eles ainda **não** estão implementados; serão entregues em fases 7.x. Nenhum
+> deles inclui venda, carrinho, checkout ou cotação.
+
+### Painel de usuários (Fase 7.1)
+- RF-17 — Permitir que o **admin** liste os usuários da sua propriedade.
+- RF-18 — Permitir que o **admin** crie usuário (sem cadastro público).
+- RF-19 — Permitir que o **admin** edite perfil e status do usuário.
+- RF-20 — Permitir que o **admin** inative um usuário.
+
+### Recuperação de senha (Fase 7.2)
+- RF-21 — Permitir que o usuário solicite redefinição de senha.
+- RF-22 — Gerar **token seguro** de redefinição, com **expiração**.
+- RF-23 — Permitir redefinir a senha mediante token válido, sem expor a senha.
+- RF-24 — O envio de e-mail pode ser **simulado/local** no MVP ampliado, se
+  necessário.
+
+### Auditoria/logs (Fase 7.3)
+- RF-25 — Registrar eventos de **login/logout**.
+- RF-26 — Registrar **criação/edição/remoção** de registros.
+- RF-27 — Registrar **upload/download** de arquivos.
+- RF-28 — Registrar tentativas de **acesso negado**.
+- RF-29 — Registrar **exportações** quando o recurso existir.
+
+### PDF/exportações (Fase 7.4)
+- RF-30 — Exportar relatórios operacionais (ex.: PDF/CSV).
+- RF-31 — Exportações respeitam a **propriedade atual**.
+- RF-32 — Exportações respeitam as **permissões por perfil**.
+- RF-33 — Exportações **nunca** geram cotação/venda; são relatórios operacionais.
+
+### Mapa avançado (Fase 7.5)
+- RF-34 — Editar e **salvar o polígono** da gleba (`poligono_geojson`).
+- RF-35 — Melhorar a visualização dos polígonos no mapa.
+- RF-36 — Calcular **área aproximada**, se implementado.
+- RF-37 — Sem **PostGIS** obrigatório e sem **GPS em tempo real** obrigatório.
+
+---
+
 ## Requisitos Não Funcionais (RNF)
 
 - RNF-01 — **Tecnologia:** backend em Python/Flask, banco SQLite, frontend em
@@ -68,6 +108,20 @@
   acompanhando a evolução.
 - RNF-06 — **Portabilidade:** execução local simples para o MVP (SQLite, sem
   dependência de serviços externos obrigatórios).
+
+### RNF planejados — MVP ampliado
+
+- RNF-07 — **Segurança da recuperação de senha:** tokens devem ser
+  armazenados/comparados com segurança (sem expor senha ou token em claro) e
+  devem **expirar**.
+- RNF-08 — **Rastreabilidade:** a auditoria deve registrar ações sensíveis com
+  data/hora, usuário e propriedade, **sem** armazenar senha ou dados sensíveis
+  desnecessários.
+- RNF-09 — **Escopo por propriedade:** painel de usuários, exportações e mapa
+  avançado continuam restritos à propriedade atual e às permissões por perfil.
+- RNF-10 — **Integridade das exportações:** PDF/exportações são relatórios
+  operacionais e **não** podem ser apresentados como cotação ou documento
+  comercial.
 
 ---
 

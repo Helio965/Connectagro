@@ -149,15 +149,41 @@
 
 ## Regras de fechamento do MVP
 
-- RN-35 — A revisão final consolida o MVP sem transformar limitações conhecidas
-  em funcionalidades. Continuam fora do MVP: venda, carrinho, checkout, cotação
-  oficial, recomendação agronômica, validação técnica de dose, validação oficial
-  automática AGROFIT/MAPA, OCR, leitura automática de uploads, PDF/exportação,
-  painel de usuários, recuperação de senha, auditoria avançada, deploy/produção,
-  LLM/API externa e mapa avançado.
-- RN-36 — Qualquer evolução pós-MVP deve preservar autenticação, permissões por
-  perfil, CSRF, escopo por propriedade e os avisos de limites técnicos já
+- RN-35 — A revisão final consolida o **MVP base** sem transformar limitações
+  conhecidas em funcionalidades. No fechamento do MVP base ficaram fora: venda,
+  carrinho, checkout, cotação oficial, recomendação agronômica, validação técnica
+  de dose, validação oficial automática AGROFIT/MAPA, OCR, leitura automática de
+  uploads, PDF/exportação, painel de usuários, recuperação de senha, auditoria
+  avançada, deploy/produção, LLM/API externa e mapa avançado. **Parte desses
+  itens foi posteriormente movida para o MVP ampliado** (ver “Regras de escopo do
+  MVP ampliado”, RN-37 a RN-45).
+- RN-36 — Qualquer evolução pós-MVP base deve preservar autenticação, permissões
+  por perfil, CSRF, escopo por propriedade e os avisos de limites técnicos já
   documentados.
+
+## Regras de escopo do MVP ampliado
+
+- RN-37 — O **MVP base** continua válido e testado; a abertura do **MVP ampliado**
+  (Fase 7) é uma **nova decisão de escopo** e **não** desfaz o MVP base.
+- RN-38 — O **MVP ampliado** inclui **painel de usuários**, **recuperação de
+  senha**, **auditoria/logs**, **PDF/exportações** e **mapa avançado**.
+- RN-39 — Ficam **fora do MVP ampliado** (avaliados depois): **IA real/LLM**,
+  **validação regulatória real** do catálogo, **preço/imagem real** com
+  atualização periódica, **OCR/leitura automática** de uploads e
+  **deploy/produção completo**. A IA do produto continua **simulada**.
+- RN-40 — **Venda, carrinho, checkout e cotação** são **proibidos** como regra
+  permanente do produto, salvo mudança radical de produto explicitamente
+  aprovada.
+- RN-41 — **Exportações não podem ser usadas como cotação oficial**: PDF/
+  exportações são relatórios operacionais, **não** documentos comerciais.
+- RN-42 — **Painel de usuários não é cadastro público**: a criação de usuários é
+  uma ação administrativa interna, escopada à propriedade.
+- RN-43 — A **recuperação de senha** deve respeitar a segurança e **não** expor
+  senha nem token; o token deve ser seguro e expirável.
+- RN-44 — A **auditoria** deve registrar ações sensíveis **sem** armazenar senha
+  ou dados sensíveis desnecessários.
+- RN-45 — O **mapa avançado** apoia a gestão operacional e **não** substitui
+  medição profissional ou georreferenciamento oficial.
 
 ---
 

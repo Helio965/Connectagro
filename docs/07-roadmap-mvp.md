@@ -268,12 +268,52 @@
 > Sem recurso pós-MVP, sem migration, sem model novo, sem dependência nova, sem
 > CRUD novo, sem alteração de permissões e sem mudança no seed técnico.
 
-## MVP consolidado
+## MVP base consolidado
 
-O MVP fica consolidado com autenticação, permissões finas, CSRF, CRUDs
+O **MVP base** fica consolidado com autenticação, permissões finas, CSRF, CRUDs
 operacionais, catálogo em consulta, upload seguro, dashboard, mapa simplificado,
-IA simulada e relatórios HTML. A partir daqui, novas frentes devem ser tratadas
-como evolução pós-MVP.
+IA simulada e relatórios HTML. Ele continua válido e testado. Por decisão de
+produto, foi aberto o **MVP ampliado** (Fase 7) antes do encerramento definitivo.
+
+## Fase 7 — MVP ampliado
+
+> Decisão de produto: o MVP base está consolidado e o escopo foi **ampliado**. As
+> fases abaixo passam a fazer parte do MVP (não são mais pós-MVP). Ver detalhes em
+> [09 — Roadmap do MVP Ampliado](./09-roadmap-mvp-ampliado.md).
+
+### Fase 7.0 — Redefinição oficial do MVP ampliado ✅ (em andamento)
+
+- [x] Documentação, roadmap, regras e checklist alinhados ao MVP ampliado.
+- [x] Escopo ampliado registrado (entra / fica fora do ampliado / fora do produto).
+- [x] **Nenhuma** funcionalidade nova implementada (fase somente documental).
+
+### Fase 7.1 — Painel de usuários ⏳ (planejado)
+
+- [ ] Admin lista usuários da propriedade; cria, edita perfil/status e inativa.
+- [ ] Sem cadastro público; mantém permissões por perfil e escopo por propriedade.
+
+### Fase 7.2 — Recuperação de senha ⏳ (planejado)
+
+- [ ] Solicitação de redefinição com token seguro e expirável; sem expor senha.
+
+### Fase 7.3 — Auditoria/logs ⏳ (planejado)
+
+- [ ] Registro de login/logout, criação/edição/remoção, upload/download, acesso
+  negado e exportações.
+
+### Fase 7.4 — PDF/exportações ⏳ (planejado)
+
+- [ ] Exportação de relatórios operacionais, escopada por propriedade e
+  permissões; nunca como cotação/venda.
+
+### Fase 7.5 — Mapa avançado ⏳ (planejado)
+
+- [ ] Edição/salvamento de polígono da gleba e melhor visualização; sem PostGIS
+  obrigatório nem GPS em tempo real obrigatório.
+
+### Fase 7.6 — Revisão final do MVP ampliado ⏳ (planejado)
+
+- [ ] Revisão e validação final do MVP ampliado.
 
 ## Etapa 5 — Implementação dos módulos
 
@@ -310,20 +350,26 @@ Ordem concluída:
 
 ---
 
-## Próximo passo recomendado pós-MVP
+## Próximo passo recomendado
 
-Priorizar conforme decisão de produto:
+**Fase 7.1 — Painel de usuários.**
 
-- PDF/exportações;
-- melhorias visuais avançadas;
-- painel de usuários;
-- recuperação de senha;
-- auditoria/logs administrativos;
+O MVP foi ampliado: painel de usuários, recuperação de senha, auditoria/logs,
+PDF/exportações e mapa avançado **fazem parte do MVP ampliado** (Fase 7) e **não**
+são mais pós-MVP.
+
+Permanecem como **pós-MVP** (avaliados depois):
+
+- IA real/LLM, se futuramente aprovado;
 - validação regulatória real do catálogo;
 - preço/imagem com fontes reais e atualização periódica;
-- mapa avançado;
-- IA real/LLM, se futuramente aprovado;
-- deploy/produção.
+- OCR/leitura automática de uploads;
+- deploy/produção completo;
+- melhorias avançadas que não entrarem na Fase 7.
+
+> **Observação:** venda, carrinho, checkout e cotação **não** são pós-MVP — são
+> **fora do produto** (regra permanente), salvo mudança radical de produto
+> explicitamente aprovada.
 
 ---
 
@@ -333,3 +379,4 @@ Priorizar conforme decisão de produto:
 - [06 — Arquitetura do Sistema](./06-arquitetura-do-sistema.md)
 - [06.1 — Arquitetura Técnica do MVP](./06-1-arquitetura-tecnica-mvp.md)
 - [08 — Checklist Final do MVP](./08-checklist-final-mvp.md)
+- [09 — Roadmap do MVP Ampliado](./09-roadmap-mvp-ampliado.md)

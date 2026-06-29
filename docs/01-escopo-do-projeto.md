@@ -50,6 +50,47 @@ etapas futuras:
 - Integrações externas com ERPs, bancos ou marketplaces.
 - Aplicativo mobile nativo.
 
+## Escopo do MVP ampliado
+
+O **MVP base** está consolidado. Por decisão de produto, foi aberto o **MVP
+ampliado** (Fase 7), que incorpora ao escopo do MVP — em fases 7.x, ainda a
+implementar:
+
+- **Painel de usuários** — gestão interna dos usuários da propriedade pelo
+  admin (listar, criar, editar perfil/status, inativar). **Não** é cadastro
+  público.
+- **Recuperação de senha** — solicitação de redefinição com token seguro e
+  expirável, sem expor senha.
+- **Auditoria/logs administrativos** — registro de ações sensíveis (login/
+  logout, criação/edição/remoção, upload/download, acesso negado e exportações).
+- **PDF/exportações** — exportar relatórios operacionais, respeitando
+  propriedade atual e permissões. Exportação **não** é cotação/venda.
+- **Mapa avançado** — edição e salvamento do polígono da gleba e melhor
+  visualização, sem PostGIS obrigatório nem GPS em tempo real obrigatório.
+
+## Fora do MVP ampliado
+
+Itens reconhecidos, mas **não** incluídos no MVP ampliado (avaliados depois):
+
+- IA real/LLM (a IA do produto permanece **simulada**).
+- Validação regulatória real do catálogo (AGROFIT/MAPA/SIPEAGRO).
+- Preço/imagem com fontes reais e atualização periódica.
+- OCR/leitura automática de uploads.
+- Deploy/produção completo.
+
+## Fora do produto
+
+Itens **proibidos** como regra permanente do produto, salvo mudança radical de
+produto explicitamente aprovada:
+
+- Venda.
+- Carrinho.
+- Checkout.
+- Cotação.
+
+O ConnectAgro é uma plataforma de gestão agrícola e consulta técnica, **não** um
+marketplace e **não** um sistema de comércio.
+
 ## Premissas
 
 - O desenvolvimento ocorre em etapas; este repositório está na etapa de

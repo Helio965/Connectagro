@@ -25,6 +25,24 @@ desconexos. O ConnectAgro propõe um ambiente organizado para:
 
 Produtores rurais de pequeno, médio e grande porte e suas equipes de gestão.
 
+## Estado do produto
+
+- **MVP base consolidado.** A base funcional está concluída e testada:
+  autenticação, permissões por perfil, CSRF, dashboard, glebas, culturas,
+  equipe, financeiro, colheita, catálogo em consulta, aplicações de insumo,
+  upload seguro, mapa real simplificado, IA simulada e relatórios HTML.
+- **MVP ampliado em andamento.** Por decisão de produto, o MVP foi ampliado
+  antes de ser encerrado em definitivo. O **MVP ampliado** passa a incluir, em
+  fases 7.x, **painel de usuários**, **recuperação de senha**, **auditoria/logs
+  administrativos**, **PDF/exportações** e **mapa avançado**.
+- **Fora do MVP ampliado** (avaliados depois): IA real/LLM, validação
+  regulatória real do catálogo, preço/imagem com fontes reais, OCR/leitura
+  automática de uploads e deploy/produção completo. A IA do produto continua
+  **simulada** também no MVP ampliado.
+- **Limite permanente do produto:** o ConnectAgro **não** terá venda, carrinho,
+  checkout ou cotação. Ele é uma plataforma de **gestão e consulta técnica**, não
+  um marketplace, salvo mudança radical de produto explicitamente aprovada.
+
 ## Princípios e limites do projeto
 
 Estes princípios orientam todas as decisões de produto e devem ser respeitados
