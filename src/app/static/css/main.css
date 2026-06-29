@@ -301,7 +301,7 @@ body {
 .compact-table td { font-size: .85rem; vertical-align: top; }
 .empty-state { color: #666; margin: .3rem 0; }
 
-/* Mapa real simplificado */
+/* Mapa operacional */
 .mapa-layout {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);

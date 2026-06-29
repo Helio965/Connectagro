@@ -2,7 +2,7 @@
 
 ## Status do documento
 
-**Dicionário de Dados — v0.4 (alinhado aos modelos SQLAlchemy implementados).**
+**Dicionário de Dados — v0.5 (MVP ampliado concluído; 18 tabelas).**
 
 Detalha as tabelas e campos derivados do [DER](./04-modelagem-banco-der.md) e está
 **alinhado** a ele (mesmos nomes de tabelas e campos), servindo como **referência
@@ -26,7 +26,7 @@ anteriores.
 
 A Fase 7.2 adiciona a tabela `senha_reset_token`, usada pela recuperação de
 senha. Apenas o **hash** do token é armazenado (nunca o token puro) e nenhuma
-senha é gravada nessa tabela. Com isso, o MVP passa a **17 tabelas**.
+senha é gravada nessa tabela.
 
 A Fase 7.3 adiciona a tabela `log_auditoria`, usada pela auditoria/logs
 administrativos. Ela guarda apenas **dados mínimos** (sem senha, token, hash,
@@ -39,6 +39,10 @@ usam apenas dados já existentes, gerados em memória a partir do
 A Fase 7.5 (mapa avançado) também **não** altera o schema: a edição de polígonos
 usa o campo já existente `gleba.poligono_geojson` (TEXT, GeoJSON). O total
 permanece em **18 tabelas**.
+
+A Fase 7.6 (revisão final do MVP ampliado) **não** altera o schema: não cria
+model, migration, tabela ou dependência. O total final do MVP ampliado permanece
+em **18 tabelas**.
 
 ## Objetivo
 

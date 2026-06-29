@@ -17,8 +17,8 @@ usando `db.session.get(...)`, sem alterar models ou comportamento funcional. A
 Fase 6.5 encerrou o **MVP base**, não o produto: por decisão de produto, foi
 aberto o **MVP ampliado** (Fase 7). As Fases 7.1 (painel de usuários), 7.2
 (recuperação de senha), 7.3 (auditoria/logs), 7.4 (PDF/exportações) e 7.5 (mapa
-avançado) adicionaram testes próprios; a Fase 7.6 (revisão final) deverá manter
-toda a suíte passando.
+avançado) adicionaram testes próprios; a Fase 7.6 (revisão final) manteve toda
+a suíte passando sem adicionar funcionalidade nova.
 
 Arquivos existentes:
 
@@ -27,7 +27,7 @@ Arquivos existentes:
 - **`test_placeholder_routes.py`** — rotas públicas respondem 200; rotas dos
   módulos protegidos redirecionam sem login e respondem 200 com login quando o
   perfil possui permissão.
-- **`test_models_schema.py`** — registro das 16 tabelas no metadata; colunas
+- **`test_models_schema.py`** — registro das 18 tabelas no metadata; colunas
   principais; `db.create_all()`; inserção mínima; unicidade de `usuario.email` e
   `produto_base.slug`; `produto_preco`/`produto_imagem` existem mas vazias; seed
   não importado automaticamente.
@@ -156,6 +156,8 @@ suíte atual passando:
   propriedade/permissão, filtros preservados, auditoria, nunca cotação/venda.
 - Mapa avançado (Fase 7.5) — concluído; edição/validação de `poligono_geojson`,
   `mapa.edit` (admin/técnico), CSRF, auditoria sem GeoJSON, escopo por propriedade.
+- Revisão final do MVP ampliado (Fase 7.6) — concluída; saneamento documental e
+  validação da suíte completa sem adicionar funcionalidade nova.
 
 ## Evolução pós-MVP
 
