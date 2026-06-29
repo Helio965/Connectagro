@@ -7,6 +7,10 @@
   <h1>Relatório de Aplicações de Insumo</h1>
   <p class="hint">Propriedade: <strong>{{ propriedade.nome }}</strong></p>
   {% include "relatorios/_acoes.html" %}
+  <div class="relatorio-export no-print">
+    <a class="btn-acao" href="{{ url_for('relatorios.aplicacoes_exportar_csv', data_inicio=filtros.data_inicio, data_fim=filtros.data_fim, classe=filtros.classe) }}">Exportar CSV</a>
+    <a class="btn-acao" href="{{ url_for('relatorios.aplicacoes_exportar_pdf', data_inicio=filtros.data_inicio, data_fim=filtros.data_fim, classe=filtros.classe) }}">Exportar PDF</a>
+  </div>
   <p class="relatorio-aviso no-print">
     Aplicações de insumo são <strong>registros históricos operacionais</strong>.
     O ConnectAgro <strong>não recomenda produtos</strong> e <strong>não valida

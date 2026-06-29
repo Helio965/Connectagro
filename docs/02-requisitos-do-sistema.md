@@ -58,9 +58,9 @@
 ## Requisitos Funcionais — MVP ampliado
 
 > Os requisitos abaixo descrevem o **escopo do MVP ampliado** (Fase 7). As Fases
-> 7.1 (painel de usuários), 7.2 (recuperação de senha) e 7.3 (auditoria/logs) já
-> estão implementadas; os demais itens seguem planejados para fases 7.x. Nenhum
-> deles inclui venda, carrinho, checkout ou cotação.
+> 7.1 (painel de usuários), 7.2 (recuperação de senha), 7.3 (auditoria/logs) e
+> 7.4 (PDF/exportações) já estão implementadas; o item restante (mapa avançado)
+> segue planejado. Nenhum deles inclui venda, carrinho, checkout ou cotação.
 
 ### Painel de usuários (Fase 7.1)
 - RF-17 — Permitir que o **admin** liste os usuários da sua propriedade.
@@ -101,11 +101,17 @@
   (ação, resultado, entidade, usuário). Logs **não** armazenam senha, token
   puro, hash, CSRF ou conteúdo de formulário/arquivo.
 
-### PDF/exportações (Fase 7.4)
-- RF-30 — Exportar relatórios operacionais (ex.: PDF/CSV).
-- RF-31 — Exportações respeitam a **propriedade atual**.
-- RF-32 — Exportações respeitam as **permissões por perfil**.
-- RF-33 — Exportações **nunca** geram cotação/venda; são relatórios operacionais.
+### PDF/exportações (Fase 7.4) ✅
+- RF-30 — Exportar os relatórios operacionais (geral, financeiro, agrícola,
+  aplicações, uploads) em **CSV** (biblioteca padrão) e **PDF** (ReportLab),
+  gerados **em memória**.
+- RF-31 — Exportações respeitam a **propriedade atual** (mesmas consultas dos
+  relatórios HTML, via `relatorios_service`).
+- RF-32 — Exportações respeitam as **permissões por perfil** (`relatorios.view`)
+  e os **mesmos filtros** dos relatórios (período/tipo no financeiro, período/
+  classe nas aplicações); filtro inválido retorna **400** sem gerar arquivo.
+- RF-33 — Exportações **nunca** geram cotação/venda; são relatórios operacionais
+  com aviso explícito e registram auditoria `exportacao.gerada`.
 
 ### Mapa avançado (Fase 7.5)
 - RF-34 — Editar e **salvar o polígono** da gleba (`poligono_geojson`).

@@ -32,6 +32,10 @@ A Fase 7.3 adiciona a tabela `log_auditoria`, usada pela auditoria/logs
 administrativos. Ela guarda apenas **dados mínimos** (sem senha, token, hash,
 CSRF ou conteúdo de formulário/arquivo). Com isso, o MVP passa a **18 tabelas**.
 
+A Fase 7.4 (PDF/exportações) **não** altera o schema: as exportações CSV/PDF
+usam apenas dados já existentes, gerados em memória a partir do
+`relatorios_service`. O total permanece em **18 tabelas**.
+
 ## Objetivo
 
 Documentar, de forma padronizada, cada tabela do MVP e seus campos: nome, tipo,

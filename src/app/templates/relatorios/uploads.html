@@ -7,6 +7,10 @@
   <h1>Relatório de Uploads / Documentos</h1>
   <p class="hint">Propriedade: <strong>{{ propriedade.nome }}</strong></p>
   {% include "relatorios/_acoes.html" %}
+  <div class="relatorio-export no-print">
+    <a class="btn-acao" href="{{ url_for('relatorios.uploads_exportar_csv') }}">Exportar CSV</a>
+    <a class="btn-acao" href="{{ url_for('relatorios.uploads_exportar_pdf') }}">Exportar PDF</a>
+  </div>
   <p class="relatorio-aviso no-print">
     O ConnectAgro <strong>não lê automaticamente</strong> o conteúdo dos uploads
     no MVP. O Upload não faz OCR, IA, classificação ou extração automática.

@@ -13,6 +13,7 @@ agrícolas para consulta rápida.
 > **CSRF/Flask-WTF** nos formulários POST,
 > **Painel de Usuários** interno por propriedade,
 > **Auditoria/logs** administrativos (somente admin),
+> **exportações CSV/PDF** dos relatórios operacionais,
 > **Dashboard Operacional** somente leitura, **Mapa real simplificado** somente
 > leitura, **IA Simulada Operacional** baseada em regras locais, **CRUDs** de
 > **Glebas**, **Culturas** (com associação cultura↔gleba), **Equipe**,
@@ -21,11 +22,11 @@ agrícolas para consulta rápida.
 > metadados), além da **consulta somente leitura** do catálogo de **Defensivos** e
 > **Fertilizantes** e dos **Relatórios Operacionais HTML** (geral, financeiro,
 > agrícola, aplicações e uploads), somente leitura. Não há CRUD de produtos;
-> `produto_preco`/`produto_imagem` continuam **vazios** no MVP. O sistema **não
+> `produto_preco`/`produto_imagem` continuam **vazios** no MVP. Os relatórios
+> agora têm **exportação CSV/PDF** operacional (Fase 7.4). O sistema **não
 > vende produtos**, não recomenda produtos, não valida dose, não usa LLM/API
-> externa, não faz OCR/IA/extração automática de arquivos, não gera PDF/exportação
-> e não oferece recursos avançados de mapa; o banco populado e uploads reais
-> **não** são versionados.
+> externa, não faz OCR/IA/extração automática de arquivos e não oferece recursos
+> avançados de mapa; o banco populado e uploads reais **não** são versionados.
 >
 > **MVP base consolidado:** a Fase 6.5 conclui a revisão final do MVP base, com
 > validação da suíte automatizada, limpeza dos avisos legados simples e checklist
@@ -35,9 +36,10 @@ agrícolas para consulta rápida.
 > ampliado** (Fase 7). A Fase 7.0 registrou a decisão de escopo, a **Fase 7.1
 > implementa o painel de usuários** interno da propriedade, a **Fase 7.2
 > implementa a recuperação de senha** (token seguro/expirável, sem envio real de
-> e-mail) e a **Fase 7.3 implementa a auditoria/logs administrativos** (somente
-> admin, sem dados sensíveis). Seguem no escopo do MVP ampliado:
-> **PDF/exportações** e **mapa avançado**. Continuam **fora do MVP ampliado** IA real/LLM, validação regulatória real
+> e-mail), a **Fase 7.3 implementa a auditoria/logs administrativos** (somente
+> admin, sem dados sensíveis) e a **Fase 7.4 implementa as exportações CSV/PDF**
+> dos relatórios (operacionais, nunca cotação/venda). Segue no escopo do MVP
+> ampliado: **mapa avançado**. Continuam **fora do MVP ampliado** IA real/LLM, validação regulatória real
 > do catálogo, preço/imagem com fontes reais, OCR/leitura automática de uploads e
 > deploy/produção completo. **Venda, carrinho, checkout e cotação nunca entram no
 > produto.**
@@ -109,7 +111,7 @@ em etapas posteriores, evoluirá para a versão completa.
 | Colheita       | Registro e acompanhamento de colheita                           |
 | Mapa real      | Visualização das glebas em mapa                                 |
 | IA simulada    | Apoio operacional por regras, com histórico por propriedade     |
-| Relatórios     | Relatórios operacionais HTML somente leitura                    |
+| Relatórios     | Relatórios operacionais HTML + exportação CSV/PDF               |
 
 ---
 
@@ -118,6 +120,7 @@ em etapas posteriores, evoluirá para a versão completa.
 - **Backend:** Python + Flask
 - **Banco de dados:** SQLite + Flask-SQLAlchemy + Flask-Migrate
 - **Segurança de formulários:** Flask-WTF / CSRFProtect
+- **Exportações:** `csv` (biblioteca padrão) + ReportLab (PDF)
 - **Frontend:** HTML, CSS, JavaScript, Jinja2
 - **Testes:** pytest
 
@@ -263,10 +266,24 @@ Em `/relatorios/` há uma central com cinco relatórios **HTML somente leitura**
 escopados pela propriedade atual: **geral**, **financeiro** (com filtros de
 período e tipo), **agrícola**, **aplicações** (com filtros de período e classe) e
 **uploads**. Os relatórios apenas consultam dados já existentes — não criam,
-alteram ou removem nada. Não há geração de PDF nem exportação CSV/Excel nesta
-fase; a impressão usa o recurso do próprio navegador (`window.print()`). Os
-relatórios não recomendam produtos, não validam dose e não leem o conteúdo dos
-uploads.
+alteram ou removem nada. Além da impressão pelo navegador (`window.print()`),
+cada relatório oferece **exportação CSV/PDF** (Fase 7.4). Os relatórios não
+recomendam produtos, não validam dose e não leem o conteúdo dos uploads.
+
+### Exportações de relatórios (CSV/PDF)
+
+A Fase 7.4 adiciona exportação **CSV** e **PDF** para os cinco relatórios, em
+rotas como `/relatorios/financeiro/exportar.csv` e `.../exportar.pdf`. O CSV usa
+a biblioteca padrão do Python e o PDF usa **ReportLab** (única dependência nova);
+ambos são gerados **em memória**, sem gravar arquivo no disco.
+
+As exportações reutilizam o mesmo serviço dos relatórios (`relatorios_service`),
+exigem a permissão `relatorios.view`, respeitam o **escopo por propriedade** e os
+**mesmos filtros** (período/tipo no financeiro, período/classe nas aplicações);
+um filtro inválido retorna **400** sem gerar arquivo. Cada exportação registra
+auditoria `exportacao.gerada` (sem gravar o conteúdo do relatório) e traz o aviso
+de que é um **relatório operacional** — não cotação, venda, checkout ou documento
+comercial. Sem Excel/XLSX, sem nova tabela/migration e sem armazenamento de PDFs.
 
 ### Permissões por perfil
 
@@ -398,18 +415,17 @@ logs, retenção automática, SIEM ou integração externa nesta fase.
 Concluídos: documentação de produto, modelagem (DER + dicionário), catálogo
 técnico/seed, a **fundação Flask**, os **modelos SQLAlchemy de domínio** (18
 tabelas), migrations, autenticação real, recuperação de senha, auditoria/logs,
-permissões finas por perfil, CSRF/Flask-WTF nos formulários POST, Dashboard
-Operacional, Mapa real simplificado, IA Simulada Operacional, Relatórios
-Operacionais HTML, CRUDs de glebas/culturas/equipe/financeiro/colheita/aplicações
-de insumo/upload, Painel de Usuários interno e consulta somente leitura de
-Defensivos/Fertilizantes.
+exportações CSV/PDF dos relatórios, permissões finas por perfil, CSRF/Flask-WTF
+nos formulários POST, Dashboard Operacional, Mapa real simplificado, IA Simulada
+Operacional, Relatórios Operacionais HTML, CRUDs de
+glebas/culturas/equipe/financeiro/colheita/aplicações de insumo/upload, Painel de
+Usuários interno e consulta somente leitura de Defensivos/Fertilizantes.
 
 O **MVP base está consolidado** e o projeto segue na fase de **MVP ampliado**
-(Fase 7). As Fases **7.1 — Painel de usuários**, **7.2 — Recuperação de senha** e
-**7.3 — Auditoria/logs** estão implementadas. O MVP ampliado ainda incorporará,
-em fases 7.x:
+(Fase 7). As Fases **7.1 — Painel de usuários**, **7.2 — Recuperação de senha**,
+**7.3 — Auditoria/logs** e **7.4 — PDF/exportações** estão implementadas. O MVP
+ampliado ainda incorporará, em fases 7.x:
 
-- PDF/exportações dos relatórios operacionais;
 - mapa avançado (edição/salvamento de polígono da gleba).
 
 Continuam **fora do MVP ampliado** (avaliados depois): IA real/LLM, validação
@@ -422,7 +438,7 @@ explicitamente aprovada): **venda, carrinho, checkout e cotação**. O ConnectAg
 permanece uma plataforma de gestão agrícola e consulta técnica, **sem
 marketplace e sem comércio**.
 
-O **próximo passo técnico** é a **Fase 7.4 — PDF/exportações**. Consulte o
+O **próximo passo técnico** é a **Fase 7.5 — Mapa avançado**. Consulte o
 [Roadmap do MVP](./docs/07-roadmap-mvp.md) e o
 [Roadmap do MVP Ampliado](./docs/09-roadmap-mvp-ampliado.md) para o detalhamento.
 

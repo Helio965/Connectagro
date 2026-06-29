@@ -7,6 +7,10 @@
   <h1>Relatório Agrícola</h1>
   <p class="hint">Propriedade: <strong>{{ propriedade.nome }}</strong></p>
   {% include "relatorios/_acoes.html" %}
+  <div class="relatorio-export no-print">
+    <a class="btn-acao" href="{{ url_for('relatorios.agricola_exportar_csv') }}">Exportar CSV</a>
+    <a class="btn-acao" href="{{ url_for('relatorios.agricola_exportar_pdf') }}">Exportar PDF</a>
+  </div>
   {% include "relatorios/_avisos.html" %}
 
   <div class="relatorio-section">

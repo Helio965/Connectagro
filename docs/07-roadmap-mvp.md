@@ -324,10 +324,17 @@ produto, foi aberto o **MVP ampliado** (Fase 7) antes do encerramento definitivo
 - [x] Logs sem senha, token, hash, CSRF ou conteúdo de formulário/arquivo.
 - [x] Testes em `tests/test_auditoria.py`.
 
-### Fase 7.4 — PDF/exportações ⏳ (planejado)
+### Fase 7.4 — PDF/exportações ✅ (concluída)
 
-- [ ] Exportação de relatórios operacionais, escopada por propriedade e
-  permissões; nunca como cotação/venda.
+- [x] Exportação **CSV** (biblioteca padrão) e **PDF** (ReportLab) dos cinco
+  relatórios (geral, financeiro, agrícola, aplicações, uploads), gerados em
+  memória; serviço `exportacoes_service.py`.
+- [x] Reaproveita `relatorios_service` e os mesmos filtros; escopo por
+  propriedade; filtro inválido → 400 sem gerar arquivo.
+- [x] Permissão `relatorios.view`; botões "Exportar CSV/PDF" preservando filtros.
+- [x] Auditoria `exportacao.gerada` (e `exportacao.falha` em filtro inválido).
+- [x] Dependência nova **ReportLab>=4.0**; sem nova tabela/migration/model.
+- [x] Testes em `tests/test_exportacoes.py`.
 
 ### Fase 7.5 — Mapa avançado ⏳ (planejado)
 
@@ -375,12 +382,13 @@ Ordem concluída:
 
 ## Próximo passo recomendado
 
-**Fase 7.4 — PDF/exportações.**
+**Fase 7.5 — Mapa avançado.**
 
 O MVP foi ampliado: painel de usuários, recuperação de senha, auditoria/logs,
 PDF/exportações e mapa avançado **fazem parte do MVP ampliado** (Fase 7) e **não**
-são mais pós-MVP. As Fases 7.1 (painel de usuários), 7.2 (recuperação de senha) e
-7.3 (auditoria/logs) já foram entregues; a próxima frente é PDF/exportações.
+são mais pós-MVP. As Fases 7.1 (painel de usuários), 7.2 (recuperação de senha),
+7.3 (auditoria/logs) e 7.4 (PDF/exportações) já foram entregues; a próxima frente
+é mapa avançado.
 
 Permanecem como **pós-MVP** (avaliados depois):
 

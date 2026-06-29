@@ -142,6 +142,22 @@
 - RN-11ac — A auditoria **não** substitui backup, segurança de infraestrutura
   nem monitoramento de produção (SIEM); é um registro interno simples.
 
+## Regras de PDF/exportações (Fase 7.4)
+
+- RN-11ad — Os relatórios operacionais (geral, financeiro, agrícola, aplicações,
+  uploads) podem ser **exportados em CSV e PDF**, gerados em memória.
+- RN-11ae — As exportações **respeitam a propriedade atual** e usam as mesmas
+  consultas somente leitura dos relatórios HTML; não criam, alteram ou removem
+  dados.
+- RN-11af — As exportações **respeitam as permissões** (`relatorios.view`) e os
+  mesmos **filtros** dos relatórios; filtro inválido retorna **400** e **não**
+  gera arquivo nem registra exportação como sucesso.
+- RN-11ag — Toda exportação bem-sucedida registra auditoria `exportacao.gerada`
+  (entidade `relatorio`), sem armazenar o conteúdo do relatório.
+- RN-11ah — As exportações são **relatórios operacionais**: **não** são cotação,
+  venda, checkout nem documento comercial, e **não** validam dose ou recomendação
+  agronômica. Cada PDF/CSV traz aviso explícito nesse sentido.
+
 ## Regras operacionais
 
 - RN-12 — Uma **cultura** está associada a uma ou mais **glebas**.
