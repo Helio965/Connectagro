@@ -14,6 +14,7 @@ from ...utils.formatters import (
     formatar_tamanho,
 )
 from ...utils.permissions import require_permission
+from ...services.auditoria_service import registrar_sucesso
 from ...services.relatorios_service import (
     FiltroInvalidoError,
     montar_relatorio_agricola,
@@ -37,7 +38,13 @@ FMT = {
 @login_required
 @require_permission("relatorios.view")
 def index():
-    return render_template("relatorios/index.html", propriedade=propriedade_atual(), **FMT)
+    propriedade = propriedade_atual()
+    # Auditamos apenas o acesso à central de relatórios (decisão: evitar ruído
+    # de auditoria a cada sub-relatório/GET).
+    registrar_sucesso("relatorios.view", entidade="relatorios",
+                      descricao="Acesso à central de relatórios",
+                      propriedade_id=propriedade.id, request=request)
+    return render_template("relatorios/index.html", propriedade=propriedade, **FMT)
 
 
 @relatorios_bp.route("/geral")

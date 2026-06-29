@@ -28,6 +28,10 @@ A Fase 7.2 adiciona a tabela `senha_reset_token`, usada pela recuperação de
 senha. Apenas o **hash** do token é armazenado (nunca o token puro) e nenhuma
 senha é gravada nessa tabela. Com isso, o MVP passa a **17 tabelas**.
 
+A Fase 7.3 adiciona a tabela `log_auditoria`, usada pela auditoria/logs
+administrativos. Ela guarda apenas **dados mínimos** (sem senha, token, hash,
+CSRF ou conteúdo de formulário/arquivo). Com isso, o MVP passa a **18 tabelas**.
+
 ## Objetivo
 
 Documentar, de forma padronizada, cada tabela do MVP e seus campos: nome, tipo,
@@ -369,6 +373,25 @@ Interações com a camada de IA. **No MVP a IA é simulada.**
 | resposta       | TEXT    | Não         |       | Resposta gerada         | Apoio informativo, não recomendação definitiva |
 | tipo           | TEXT    | Sim         |       | Tipo da interação       | `simulada`, `apoio`, `relatorio`, `duvida` |
 | criado_em      | TEXT    | Sim         |       | Data/hora de criação    | ISO 8601                               |
+
+### Tabela: `log_auditoria`
+Auditoria de ações sensíveis (Fase 7.3). Registra **dados mínimos** e **nunca**
+senha, token, hash, CSRF ou conteúdo de formulário/arquivo. Logs são escopados
+por propriedade e consultados apenas pelo `admin`.
+
+| Campo          | Tipo    | Obrigatório | Chave | Descrição                          | Observações                                  |
+|----------------|---------|-------------|-------|------------------------------------|----------------------------------------------|
+| id             | INTEGER | Sim         | PK    | Identificador único                | Autoincremento                               |
+| usuario_id     | INTEGER | Não         | FK    | Usuário da ação                    | FK para `usuario(id)`; indexado; nulo em evento público |
+| propriedade_id | INTEGER | Não         | FK    | Propriedade de contexto            | FK para `propriedade(id)`; indexado          |
+| acao           | TEXT    | Sim         |       | Ação auditada                      | Indexado; ex.: `glebas.create`, `auth.login.sucesso` |
+| entidade       | TEXT    | Não         |       | Tipo da entidade afetada           | Ex.: `gleba`, `usuario`                      |
+| entidade_id    | TEXT    | Não         |       | Identificador da entidade          | Texto curto                                  |
+| resultado      | TEXT    | Sim         |       | Resultado da ação                  | `sucesso`, `falha`, `negado`                 |
+| descricao      | TEXT    | Não         |       | Descrição curta                    | Até 500 chars; sem dados sensíveis           |
+| ip             | TEXT    | Não         |       | IP da requisição                   | Dado mínimo de rastreio                      |
+| user_agent     | TEXT    | Não         |       | User-Agent da requisição           | Dado mínimo de rastreio                      |
+| criado_em      | TEXT    | Sim         |       | Data/hora do evento                | ISO 8601; indexado                           |
 
 ---
 

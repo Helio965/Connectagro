@@ -2,7 +2,16 @@
 
 ## Status do documento
 
-**Arquitetura técnica — v0.22 (MVP base consolidado + MVP ampliado em andamento: painel de usuários + recuperação de senha + CRUDs + catálogo + upload + dashboard + mapa + IA simulada + relatórios operacionais + permissões finas + CSRF + revisão final).**
+**Arquitetura técnica — v0.23 (MVP base consolidado + MVP ampliado em andamento: painel de usuários + recuperação de senha + auditoria/logs + CRUDs + catálogo + upload + dashboard + mapa + IA simulada + relatórios operacionais + permissões finas + CSRF + revisão final).**
+
+> **Auditoria/logs (Fase 7.3):** o MVP ampliado adiciona o modelo `LogAuditoria`
+> (tabela `log_auditoria`, migration própria), `services/auditoria_service.py`,
+> o blueprint `/auditoria/` (somente `admin`, permissão `auditoria.view`) e a
+> instrumentação das rotas sensíveis (autenticação, recuperação de senha, painel
+> de usuários, CRUDs, upload/download e permissão negada). Os logs guardam apenas
+> dados mínimos — **nunca** senha, token, hash, CSRF ou conteúdo de
+> formulário/arquivo —, são escopados por propriedade e a auditoria **nunca**
+> quebra o fluxo principal.
 
 > **Recuperação de senha (Fase 7.2):** o MVP ampliado adiciona o modelo
 > `SenhaResetToken` (tabela `senha_reset_token`, migration própria),
@@ -182,9 +191,9 @@ src/
     │   ├── defensivos/  fertilizantes/  aplicacoes/
     │   ├── financeiro/  upload/  equipe/  colheita/
     │   ├── mapa/  ia/  relatorios/
-    │   └── usuarios/
-    ├── models/                  # modelos SQLAlchemy de domínio (17 tabelas)
-    ├── services/                # catalogo_seed.py, dashboard_service.py, ia_simulada_service.py, relatorios_service.py, usuarios_service.py, password_reset_service.py
+    │   └── usuarios/  auditoria/
+    ├── models/                  # modelos SQLAlchemy de domínio (18 tabelas)
+    ├── services/                # catalogo_seed.py, dashboard_service.py, ia_simulada_service.py, relatorios_service.py, usuarios_service.py, password_reset_service.py, auditoria_service.py
     ├── utils/                   # auth.py, contexto.py, catalogo.py, formatters.py, permissions.py
     ├── templates/               # base.html, módulos, erros
     └── static/                  # css/, js/ (arquivos públicos)
@@ -235,6 +244,7 @@ instance/
 | Mapa real          | `mapa`           | `/mapa`        | `gleba`                                           |
 | IA simulada        | `ia`             | `/ia`          | `ia_interacao`                                    |
 | Relatórios         | `relatorios`     | `/relatorios`  | leitura de múltiplas entidades                    |
+| Auditoria          | `auditoria`      | `/auditoria`   | `log_auditoria` (somente `admin`)                 |
 
 ---
 
@@ -268,6 +278,9 @@ instance/
 - **Recuperação de senha:** exige migration própria para `senha_reset_token`
   (índice em `usuario_id`, unicidade em `token_hash`); **não** altera a tabela
   `usuario`.
+- **Auditoria/logs:** exige migration própria para `log_auditoria` (índices em
+  `usuario_id`, `propriedade_id`, `acao` e `criado_em`); **não** altera as
+  tabelas existentes.
 
 ### Dashboard operacional
 
@@ -386,7 +399,7 @@ Matriz resumida:
 
 | Perfil | Resumo |
 |--------|--------|
-| `admin` | Acessa todos os módulos; cria, edita e remove registros nos CRUDs da sua propriedade; envia, baixa e remove uploads; gerencia usuários internos da propriedade. |
+| `admin` | Acessa todos os módulos; cria, edita e remove registros nos CRUDs da sua propriedade; envia, baixa e remove uploads; gerencia usuários internos da propriedade; consulta a auditoria/logs (`auditoria.view`). |
 | `tecnico` | Acessa dashboard, mapa, catálogo, relatórios, IA, equipe e financeiro em leitura; cria/edita glebas, culturas, colheitas e aplicações; envia e baixa uploads; não remove registros críticos nem gerencia equipe/financeiro. |
 | `trabalhador` | Acessa dashboard, mapa, catálogo, relatórios e IA; visualiza glebas, culturas, colheitas e aplicações; cria colheitas, aplicações e uploads; baixa uploads; não acessa equipe/financeiro e não edita/remove registros críticos. |
 
@@ -439,6 +452,35 @@ Matriz resumida:
   login).
 - Todas as rotas POST enviam token CSRF; `TestingConfig` mantém CSRF desativado
   por padrão e `tests/test_password_reset.py` ativa a proteção quando valida CSRF.
+
+### Auditoria/logs
+
+- `src/app/models/log_auditoria.py` (`LogAuditoria`) define a tabela
+  `log_auditoria` com `acao`, `entidade`, `entidade_id`, `resultado`
+  (`sucesso`/`falha`/`negado`), `descricao`, `ip`, `user_agent`, `usuario_id`,
+  `propriedade_id` e `criado_em`.
+- `src/app/services/auditoria_service.py` concentra `registrar_evento`,
+  `registrar_sucesso`, `registrar_falha`, `registrar_negado`, `listar_logs`,
+  `normalizar_descricao`, `mascarar_email` e `_extrair_request_info`.
+- **Nunca quebra o fluxo principal:** toda a gravação fica em `try/except` com
+  `rollback`; uma falha de auditoria retorna `None` sem propagar exceção. Eventos
+  públicos (login falho, e-mail inexistente) **não** resolvem/criam propriedade.
+- O serviço grava apenas **dados mínimos** e limita a descrição (≤ 500 chars).
+  As rotas passam descrições curtas e **nunca** `request.form`, senha, token,
+  hash ou `csrf_token`. E-mails em descrições são **mascarados**
+  (`a***@dominio.com`).
+- Instrumentação: `auth` (login sucesso/falha, logout, reset solicitado/
+  redefinido/token inválido), `usuarios` (create/edit/deactivate), CRUDs de
+  glebas/culturas/equipe/financeiro/colheita/aplicações (create/edit/delete),
+  `upload` (create/download/delete), `relatorios` (acesso à central) e
+  `permissao.negada` (registrada em `require_permission` antes do `abort(403)`,
+  com import local para evitar ciclo).
+- `src/app/blueprints/auditoria/routes.py` expõe `/auditoria/` (somente `admin`,
+  permissão `auditoria.view`), com filtros simples (ação, resultado, entidade,
+  usuário) e limite de 100 registros mais recentes, escopados pela propriedade
+  atual. O template trunca o user-agent e não exibe dados sensíveis.
+- A ação `exportacao.gerada` fica **preparada/documentada** para a Fase 7.4
+  (PDF/exportações) e ainda não é emitida.
 
 ### CSRF/Flask-WTF
 
@@ -680,6 +722,12 @@ Matriz resumida:
   token sem token puro, expiração, link dev exibido/ocultado por configuração,
   validação/expiração/uso único do token, validações de nova senha, login com
   senha antiga/nova após redefinir, usuário inativado depois e CSRF nos POSTs.
+- `tests/test_auditoria.py` cobre model/schema, o serviço (criação de log,
+  truncamento, resultado inválido → sucesso, falha de auditoria não quebra o
+  fluxo, máscara de e-mail), a tela `/auditoria/` (login, admin 200, técnico/
+  trabalhador 403, link no menu por perfil, filtro), eventos de autenticação,
+  recuperação de senha, painel de usuários, permissão negada, upload e CRUDs,
+  escopo por propriedade e ausência de senha/token/CSRF nos logs.
 
 ---
 
@@ -759,7 +807,7 @@ Matriz resumida:
 
 - [x] Painel de usuários (Fase 7.1)
 - [x] Recuperação de senha (Fase 7.2)
-- [ ] Auditoria/logs administrativos (Fase 7.3)
+- [x] Auditoria/logs administrativos (Fase 7.3)
 - [ ] PDF/exportações (Fase 7.4)
 - [ ] Mapa avançado (Fase 7.5)
 
@@ -778,7 +826,7 @@ Matriz resumida:
 ## 14. Arquitetura do MVP ampliado
 
 > Esta seção descreve, em **alto nível**, a arquitetura pretendida para as fases
-> 7.x. As Fases 7.1 e 7.2 já estão implementadas; as demais decisões definitivas
+> 7.x. As Fases 7.1, 7.2 e 7.3 já estão implementadas; as demais decisões definitivas
 > serão tomadas em cada fase específica.
 
 ### Painel de usuários (Fase 7.1 — implementado)
@@ -803,13 +851,15 @@ Matriz resumida:
 - Mensagem genérica (sem enumeração); usuário inativo não recupera senha e não é
   reativado. Detalhes na seção "Recuperação de senha" acima.
 
-### Auditoria/logs (Fase 7.3)
+### Auditoria/logs (Fase 7.3 — implementado)
 
-- Provável tabela `log_auditoria` para eventos sensíveis.
-- Eventos: criação, edição, remoção, login/logout, acesso negado, upload,
-  download e exportação.
-- Registro **sem** senha e sem dados sensíveis desnecessários; escopado por
-  propriedade/usuário.
+- Tabela `log_auditoria` (migration própria) para eventos sensíveis.
+- Eventos: criação/edição/remoção dos CRUDs, login/logout, recuperação de senha,
+  painel de usuários, acesso negado e upload/download/remoção. `exportacao.gerada`
+  fica preparada para a Fase 7.4.
+- Registro **sem** senha, token, hash, CSRF ou conteúdo de formulário/arquivo;
+  escopado por propriedade; consulta em `/auditoria/` apenas pelo `admin`.
+  Detalhes na seção "Auditoria/logs" acima.
 
 ### PDF/exportações (Fase 7.4)
 

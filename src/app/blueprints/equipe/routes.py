@@ -5,6 +5,7 @@ from ...extensions import db
 from ...models import EquipeMembro
 from ...models._helpers import iso_now
 from ...utils.auth import login_required
+from ...services.auditoria_service import registrar_sucesso
 from ...utils.contexto import propriedade_atual, vazio_para_none
 from ...utils.permissions import require_permission
 from . import equipe_bp
@@ -46,15 +47,19 @@ def novo():
             flash("O nome do membro é obrigatório.", "error")
             return render_template("equipe/form.html", membro=None,
                                    form=request.form), 400
-        db.session.add(EquipeMembro(
+        membro = EquipeMembro(
             propriedade_id=propriedade.id,
             nome=nome,
             funcao=vazio_para_none(request.form.get("funcao")),
             email=_email_normalizado(request.form.get("email")),
             telefone=vazio_para_none(request.form.get("telefone")),
             ativo=bool(request.form.get("ativo")),
-        ))
+        )
+        db.session.add(membro)
         db.session.commit()
+        registrar_sucesso("equipe.create", entidade="equipe_membro",
+                          entidade_id=membro.id, descricao="Membro de equipe criado",
+                          propriedade_id=propriedade.id, request=request)
         flash("Membro adicionado.", "success")
         return redirect(url_for("equipe.index"))
     # GET: novo membro começa ativo por padrão
@@ -80,6 +85,9 @@ def editar(membro_id):
         membro.ativo = bool(request.form.get("ativo"))
         membro.atualizado_em = iso_now()
         db.session.commit()
+        registrar_sucesso("equipe.edit", entidade="equipe_membro",
+                          entidade_id=membro.id, descricao="Membro de equipe editado",
+                          propriedade_id=propriedade.id, request=request)
         flash("Membro atualizado.", "success")
         return redirect(url_for("equipe.index"))
     return render_template("equipe/form.html", membro=membro, form=membro)
@@ -93,5 +101,8 @@ def remover(membro_id):
     membro = _membro_da_propriedade_ou_404(membro_id, propriedade)
     db.session.delete(membro)
     db.session.commit()
+    registrar_sucesso("equipe.delete", entidade="equipe_membro",
+                      entidade_id=membro_id, descricao="Membro de equipe removido",
+                      propriedade_id=propriedade.id, request=request)
     flash("Membro removido.", "success")
     return redirect(url_for("equipe.index"))

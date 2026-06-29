@@ -16,12 +16,14 @@ from .financeiro import FinanceiroLancamento
 from .upload import UploadArquivo
 from .ia import IaInteracao
 from .senha_reset_token import SenhaResetToken
+from .log_auditoria import LogAuditoria
 
 __all__ = [
     "Usuario",
     "Propriedade",
     "UsuarioPropriedade",
     "SenhaResetToken",
+    "LogAuditoria",
     "EquipeMembro",
     "Cultura",
     "CulturaGleba",

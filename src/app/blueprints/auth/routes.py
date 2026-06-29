@@ -9,6 +9,12 @@ from flask import (
 )
 
 from ...models import Usuario
+from ...services.auditoria_service import (
+    mascarar_email,
+    registrar_evento,
+    registrar_falha,
+    registrar_sucesso,
+)
 from ...services.password_reset_service import (
     redefinir_senha_com_token,
     solicitar_reset_por_email,
@@ -18,6 +24,7 @@ from ...utils.auth import (
     is_authenticated,
     login_usuario,
     logout_usuario,
+    usuario_atual,
     verificar_senha,
 )
 from . import auth_bp
@@ -50,14 +57,38 @@ def login():
 
         # Mensagem genérica para credenciais inválidas (não vaza detalhes).
         if usuario is None or not verificar_senha(usuario.senha_hash, senha):
+            registrar_falha(
+                "auth.login.falha",
+                entidade="usuario",
+                entidade_id=(usuario.id if usuario else None),
+                descricao=f"Falha de login para {mascarar_email(email)}",
+                usuario_id=(usuario.id if usuario else None),
+                request=request,
+            )
             flash("E-mail ou senha inválidos.", "error")
             return render_template("auth/login.html"), 401
 
         if not usuario.ativo:
+            registrar_falha(
+                "auth.login.falha",
+                entidade="usuario",
+                entidade_id=usuario.id,
+                descricao="Login bloqueado: usuário inativo",
+                usuario_id=usuario.id,
+                request=request,
+            )
             flash("Usuário inativo. Procure o administrador.", "error")
             return render_template("auth/login.html"), 403
 
         login_usuario(usuario)
+        registrar_sucesso(
+            "auth.login.sucesso",
+            entidade="usuario",
+            entidade_id=usuario.id,
+            descricao=f"Login de {mascarar_email(usuario.email)}",
+            usuario_id=usuario.id,
+            request=request,
+        )
         flash(f"Bem-vindo(a), {usuario.nome}.", "success")
         return redirect(url_for("dashboard.index"))
 
@@ -66,6 +97,17 @@ def login():
 
 @auth_bp.route("/logout")
 def logout():
+    atual = usuario_atual()
+    usuario_id = atual["id"] if atual else None
+    if usuario_id is not None:
+        registrar_sucesso(
+            "auth.logout",
+            entidade="usuario",
+            entidade_id=usuario_id,
+            descricao="Logout de sessão",
+            usuario_id=usuario_id,
+            request=request,
+        )
     logout_usuario()
     flash("Sessão encerrada.", "success")
     return redirect(url_for("auth.login"))
@@ -83,6 +125,18 @@ def esqueci_senha():
         email = request.form.get("email") or ""
         resultado = solicitar_reset_por_email(email, request=request)
 
+        email_norm = (email or "").strip().lower()
+        usuario = Usuario.query.filter_by(email=email_norm).first() if email_norm else None
+        registrar_evento(
+            "auth.password_reset.solicitado",
+            entidade="usuario",
+            entidade_id=(usuario.id if usuario else None),
+            resultado="sucesso",
+            descricao=f"Solicitação de redefinição para {mascarar_email(email_norm)}",
+            usuario_id=(usuario.id if usuario else None),
+            request=request,
+        )
+
         dev_link = None
         if current_app.config.get("PASSWORD_RESET_SHOW_DEV_LINK") and resultado.get("token"):
             dev_link = url_for("auth.redefinir_senha", token=resultado["token"])
@@ -98,10 +152,18 @@ def redefinir_senha(token):
     """Redefinição de senha mediante token válido, expirável e de uso único."""
     registro = validar_token_reset(token)
     if registro is None:
+        registrar_falha(
+            "auth.password_reset.token_invalido",
+            entidade="senha_reset_token",
+            descricao="Tentativa com token inválido, expirado ou usado",
+            request=request,
+        )
         flash(MENSAGEM_TOKEN_INVALIDO, "error")
         return render_template(
             "auth/redefinir_senha.html", token=token, token_valido=False
         ), 400
+
+    usuario_id_token = registro.usuario_id
 
     if request.method == "POST":
         nova_senha = request.form.get("nova_senha") or ""
@@ -116,6 +178,14 @@ def redefinir_senha(token):
             return render_template(
                 "auth/redefinir_senha.html", token=token, token_valido=ainda_valido
             ), 400
+        registrar_sucesso(
+            "auth.password_reset.redefinido",
+            entidade="usuario",
+            entidade_id=usuario_id_token,
+            descricao="Senha redefinida via token",
+            usuario_id=usuario_id_token,
+            request=request,
+        )
         flash("Senha redefinida com sucesso. Faça login novamente.", "success")
         return redirect(url_for("auth.login"))
 

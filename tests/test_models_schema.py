@@ -28,11 +28,12 @@ TABELAS_ESPERADAS = {
     "upload_arquivo",
     "ia_interacao",
     "senha_reset_token",
+    "log_auditoria",
 }
 
 
 def test_todas_as_tabelas_registradas(app):
-    """Todas as 17 tabelas esperadas estão registradas no metadata."""
+    """Todas as 18 tabelas esperadas estão registradas no metadata."""
     tabelas = set(db.metadata.tables.keys())
     faltando = TABELAS_ESPERADAS - tabelas
     assert not faltando, f"tabelas ausentes: {faltando}"
@@ -52,6 +53,9 @@ def test_todas_as_tabelas_registradas(app):
         ("senha_reset_token", "token_hash"),
         ("senha_reset_token", "usado"),
         ("senha_reset_token", "expira_em"),
+        ("log_auditoria", "acao"),
+        ("log_auditoria", "resultado"),
+        ("log_auditoria", "criado_em"),
     ],
 )
 def test_colunas_principais(app, tabela, coluna):

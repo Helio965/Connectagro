@@ -5,6 +5,7 @@ from ...extensions import db
 from ...models import FinanceiroLancamento
 from ...models._helpers import iso_now
 from ...utils.auth import login_required
+from ...services.auditoria_service import registrar_sucesso
 from ...utils.contexto import parse_float, propriedade_atual, vazio_para_none
 from ...utils.permissions import require_permission
 from . import financeiro_bp
@@ -67,8 +68,12 @@ def novo():
             flash(erro, "error")
             return render_template("financeiro/form.html", lancamento=None,
                                    form=request.form, tipos=TIPOS_VALIDOS), 400
-        db.session.add(FinanceiroLancamento(propriedade_id=propriedade.id, **dados))
+        lanc = FinanceiroLancamento(propriedade_id=propriedade.id, **dados)
+        db.session.add(lanc)
         db.session.commit()
+        registrar_sucesso("financeiro.create", entidade="financeiro_lancamento",
+                          entidade_id=lanc.id, descricao=f"Lançamento {dados['tipo']} criado",
+                          propriedade_id=propriedade.id, request=request)
         flash("Lançamento registrado.", "success")
         return redirect(url_for("financeiro.index"))
     return render_template("financeiro/form.html", lancamento=None, form={},
@@ -94,6 +99,9 @@ def editar(lancamento_id):
         lanc.data = dados["data"]
         lanc.atualizado_em = iso_now()
         db.session.commit()
+        registrar_sucesso("financeiro.edit", entidade="financeiro_lancamento",
+                          entidade_id=lanc.id, descricao="Lançamento editado",
+                          propriedade_id=propriedade.id, request=request)
         flash("Lançamento atualizado.", "success")
         return redirect(url_for("financeiro.index"))
     return render_template("financeiro/form.html", lancamento=lanc, form=lanc,
@@ -108,5 +116,8 @@ def remover(lancamento_id):
     lanc = _lancamento_da_propriedade_ou_404(lancamento_id, propriedade)
     db.session.delete(lanc)
     db.session.commit()
+    registrar_sucesso("financeiro.delete", entidade="financeiro_lancamento",
+                      entidade_id=lancamento_id, descricao="Lançamento removido",
+                      propriedade_id=propriedade.id, request=request)
     flash("Lançamento removido.", "success")
     return redirect(url_for("financeiro.index"))

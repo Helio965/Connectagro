@@ -11,6 +11,7 @@ from ...extensions import db
 from ...models import ColheitaRegistro, Cultura, CulturaGleba, Gleba
 from ...models._helpers import iso_now
 from ...utils.auth import login_required
+from ...services.auditoria_service import registrar_sucesso
 from ...utils.contexto import parse_float, propriedade_atual, vazio_para_none
 from ...utils.permissions import require_permission
 from . import colheita_bp
@@ -111,8 +112,12 @@ def nova():
             return render_template("colheita/form.html", colheita=None,
                                    form=request.form, opcoes=opcoes,
                                    selecionado=None), 400
-        db.session.add(ColheitaRegistro(**dados))
+        registro = ColheitaRegistro(**dados)
+        db.session.add(registro)
         db.session.commit()
+        registrar_sucesso("colheita.create", entidade="colheita_registro",
+                          entidade_id=registro.id, descricao="Colheita registrada",
+                          propriedade_id=propriedade.id, request=request)
         flash("Colheita registrada.", "success")
         return redirect(url_for("colheita.index"))
     return render_template("colheita/form.html", colheita=None, form={},
@@ -140,6 +145,9 @@ def editar(colheita_id):
         colheita.qualidade = dados["qualidade"]
         colheita.observacao = dados["observacao"]
         db.session.commit()
+        registrar_sucesso("colheita.edit", entidade="colheita_registro",
+                          entidade_id=colheita.id, descricao="Colheita editada",
+                          propriedade_id=propriedade.id, request=request)
         flash("Colheita atualizada.", "success")
         return redirect(url_for("colheita.index"))
     return render_template("colheita/form.html", colheita=colheita, form=colheita,
@@ -154,5 +162,8 @@ def remover(colheita_id):
     colheita = _colheita_da_propriedade_ou_404(colheita_id, propriedade)
     db.session.delete(colheita)
     db.session.commit()
+    registrar_sucesso("colheita.delete", entidade="colheita_registro",
+                      entidade_id=colheita_id, descricao="Colheita removida",
+                      propriedade_id=propriedade.id, request=request)
     flash("Colheita removida.", "success")
     return redirect(url_for("colheita.index"))

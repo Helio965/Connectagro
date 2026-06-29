@@ -49,6 +49,7 @@ _ADMIN_PERMISSIONS = {
     "usuarios.create",
     "usuarios.edit",
     "usuarios.deactivate",
+    "auditoria.view",
 }
 
 _TECNICO_PERMISSIONS = {
@@ -128,6 +129,19 @@ def require_permission(permission):
                 flash("É necessário fazer login para acessar esta página.", "warning")
                 return redirect(url_for("auth.login"))
             if not has_permission(permission):
+                # Auditoria de permissão negada (import local evita ciclo).
+                try:
+                    from flask import request
+                    from ..services.auditoria_service import registrar_negado
+                    registrar_negado(
+                        "permissao.negada",
+                        entidade="permission",
+                        entidade_id=permission,
+                        descricao=f"Permissão negada: {permission}",
+                        request=request,
+                    )
+                except Exception:
+                    pass
                 flash("Você não tem permissão para acessar esta ação.", "error")
                 abort(403)
             return view(*args, **kwargs)

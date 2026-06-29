@@ -8,6 +8,7 @@ from ...services.usuarios_service import (
     listar_usuarios_da_propriedade,
     obter_vinculo_usuario,
 )
+from ...services.auditoria_service import registrar_sucesso
 from ...utils.auth import login_required, usuario_atual
 from ...utils.contexto import propriedade_atual
 from ...utils.permissions import PERFIS_OFICIAIS, require_permission
@@ -51,6 +52,9 @@ def novo():
                 form=request.form,
                 perfis=PERFIS_OFICIAIS,
             ), 400
+        registrar_sucesso("usuarios.create", entidade="usuario",
+                          entidade_id=usuario.id, descricao="Usuário criado pelo painel",
+                          propriedade_id=propriedade.id, request=request)
         flash(f"Usuário {usuario.email} criado e vinculado à propriedade.", "success")
         return redirect(url_for("usuarios.index"))
     return render_template(
@@ -81,6 +85,9 @@ def editar(usuario_id):
                 form=form,
                 perfis=PERFIS_OFICIAIS,
             ), 400
+        registrar_sucesso("usuarios.edit", entidade="usuario",
+                          entidade_id=usuario.id, descricao="Usuário editado pelo painel",
+                          propriedade_id=propriedade.id, request=request)
         flash("Usuário atualizado.", "success")
         return redirect(url_for("usuarios.index"))
     return render_template(
@@ -107,5 +114,8 @@ def inativar(usuario_id):
             vinculos=vinculos,
             propriedade=propriedade,
         ), 400
+    registrar_sucesso("usuarios.deactivate", entidade="usuario",
+                      entidade_id=usuario_id, descricao="Usuário inativado pelo painel",
+                      propriedade_id=propriedade.id, request=request)
     flash("Usuário inativado.", "success")
     return redirect(url_for("usuarios.index"))

@@ -5,6 +5,7 @@ from ...extensions import db
 from ...models import Gleba
 from ...models._helpers import iso_now
 from ...utils.auth import login_required
+from ...services.auditoria_service import registrar_sucesso
 from ...utils.contexto import parse_float, propriedade_atual, vazio_para_none
 from ...utils.permissions import require_permission
 from . import glebas_bp
@@ -40,7 +41,7 @@ def nova():
             flash("O nome da gleba é obrigatório.", "error")
             return render_template("glebas/form.html", gleba=None,
                                    form=request.form), 400
-        db.session.add(Gleba(
+        gleba = Gleba(
             propriedade_id=propriedade.id,
             nome=nome,
             area_ha=parse_float(request.form.get("area_ha")),
@@ -48,8 +49,12 @@ def nova():
             longitude=parse_float(request.form.get("longitude")),
             tipo_solo=vazio_para_none(request.form.get("tipo_solo")),
             observacoes=vazio_para_none(request.form.get("observacoes")),
-        ))
+        )
+        db.session.add(gleba)
         db.session.commit()
+        registrar_sucesso("glebas.create", entidade="gleba", entidade_id=gleba.id,
+                          descricao="Gleba criada", propriedade_id=propriedade.id,
+                          request=request)
         flash("Gleba criada com sucesso.", "success")
         return redirect(url_for("glebas.index"))
     return render_template("glebas/form.html", gleba=None, form={})
@@ -75,6 +80,9 @@ def editar(gleba_id):
         gleba.observacoes = vazio_para_none(request.form.get("observacoes"))
         gleba.atualizado_em = iso_now()
         db.session.commit()
+        registrar_sucesso("glebas.edit", entidade="gleba", entidade_id=gleba.id,
+                          descricao="Gleba editada", propriedade_id=propriedade.id,
+                          request=request)
         flash("Gleba atualizada.", "success")
         return redirect(url_for("glebas.index"))
     return render_template("glebas/form.html", gleba=gleba, form=gleba)
@@ -91,5 +99,8 @@ def remover(gleba_id):
         db.session.delete(cg)
     db.session.delete(gleba)
     db.session.commit()
+    registrar_sucesso("glebas.delete", entidade="gleba", entidade_id=gleba_id,
+                      descricao="Gleba removida", propriedade_id=propriedade.id,
+                      request=request)
     flash("Gleba removida.", "success")
     return redirect(url_for("glebas.index"))

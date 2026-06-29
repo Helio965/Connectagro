@@ -9,6 +9,7 @@ from flask import abort, flash, redirect, render_template, request, url_for
 from ...extensions import db
 from ...models import AplicacaoInsumo, Cultura, CulturaGleba, Gleba, ProdutoBase
 from ...utils.auth import login_required
+from ...services.auditoria_service import registrar_sucesso
 from ...utils.contexto import parse_float, propriedade_atual, vazio_para_none
 from ...utils.permissions import require_permission
 from . import aplicacoes_bp
@@ -154,8 +155,12 @@ def nova():
                                    opcoes_produtos=opcoes_produtos,
                                    selecionado_cg=None,
                                    selecionado_produto=None), 400
-        db.session.add(AplicacaoInsumo(**dados))
+        aplicacao = AplicacaoInsumo(**dados)
+        db.session.add(aplicacao)
         db.session.commit()
+        registrar_sucesso("aplicacoes.create", entidade="aplicacao_insumo",
+                          entidade_id=aplicacao.id, descricao="Aplicação registrada",
+                          propriedade_id=propriedade.id, request=request)
         flash("Aplicação de insumo registrada.", "success")
         return redirect(url_for("aplicacoes.index"))
     return render_template("aplicacoes/form.html", aplicacao=None, form={},
@@ -191,6 +196,9 @@ def editar(aplicacao_id):
         aplicacao.responsavel = dados["responsavel"]
         aplicacao.observacao = dados["observacao"]
         db.session.commit()
+        registrar_sucesso("aplicacoes.edit", entidade="aplicacao_insumo",
+                          entidade_id=aplicacao.id, descricao="Aplicação editada",
+                          propriedade_id=propriedade.id, request=request)
         flash("Aplicação de insumo atualizada.", "success")
         return redirect(url_for("aplicacoes.index"))
     return render_template("aplicacoes/form.html", aplicacao=aplicacao,
@@ -209,5 +217,8 @@ def remover(aplicacao_id):
     aplicacao = _aplicacao_da_propriedade_ou_404(aplicacao_id, propriedade)
     db.session.delete(aplicacao)
     db.session.commit()
+    registrar_sucesso("aplicacoes.delete", entidade="aplicacao_insumo",
+                      entidade_id=aplicacao_id, descricao="Aplicação removida",
+                      propriedade_id=propriedade.id, request=request)
     flash("Aplicação de insumo removida.", "success")
     return redirect(url_for("aplicacoes.index"))
