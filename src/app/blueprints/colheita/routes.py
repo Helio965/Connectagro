@@ -8,8 +8,7 @@ from collections import defaultdict
 from flask import abort, flash, redirect, render_template, request, url_for
 
 from ...extensions import db
-from ...models import ColheitaRegistro, Cultura, CulturaGleba, Gleba
-from ...models._helpers import iso_now
+from ...models import ColheitaRegistro, Cultura, CulturaGleba
 from ...utils.auth import login_required
 from ...services.auditoria_service import registrar_sucesso
 from ...utils.contexto import parse_float, propriedade_atual, vazio_para_none

@@ -130,6 +130,10 @@ Arquivos existentes:
   remoção apaga registro e arquivo físico; ausência do arquivo físico não quebra
   remoção; caminho salvo não é absoluto; e upload não cria `ProdutoPreco` nem
   `ProdutoImagem`.
+- **`test_revisao_tecnica_final.py`** — Pós-MVP 0.1: confirma que
+  `docs/11-revisao-tecnica-final.md` existe e é referenciado no README, que o
+  template morto `templates/placeholders/` foi removido e que o JS base não tem
+  `console.log` de debug.
 
 > As rotas protegidas e a rota `/` são testadas também em
 > `test_placeholder_routes.py` e `test_permissions.py` (redirecionam sem login;

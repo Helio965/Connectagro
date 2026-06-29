@@ -423,6 +423,7 @@ logs, retenção automática, SIEM ou integração externa nesta fase.
 - [08 — Checklist Final do MVP](./docs/08-checklist-final-mvp.md)
 - [09 — Roadmap do MVP Ampliado](./docs/09-roadmap-mvp-ampliado.md)
 - [10 — Checklist Final do MVP Ampliado](./docs/10-checklist-final-mvp-ampliado.md)
+- [11 — Revisão Técnica Final Pós-MVP](./docs/11-revisao-tecnica-final.md)
 - [Catálogo de Produtos](./docs/catalogo-produtos/README.md) — inclui o [catálogo técnico](./docs/catalogo-produtos/catalogo-tecnico-connectagro-mvp.md) e o **seed técnico** ([`data/seeds/`](./data/seeds/README.md))
 
 ---
