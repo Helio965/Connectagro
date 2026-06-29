@@ -101,7 +101,8 @@ git diff --check
 ## 9. Resultado dos testes
 
 - Antes da revisão: **475 passed**.
-- Depois da revisão: **475 passed** (comportamento preservado).
+- Depois da revisão: **479 passed** (475 testes anteriores + 4 testes documentais
+  da revisão Pós-MVP 0.1; comportamento funcional preservado).
 
 ## 10. Riscos evitados
 
