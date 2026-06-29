@@ -15,9 +15,9 @@ Na Fase 6.5, a suíte foi usada como validação final do **MVP base** e os avis
 simples de `LegacyAPIWarning` em `test_ia_simulada_service.py` foram removidos
 usando `db.session.get(...)`, sem alterar models ou comportamento funcional. A
 Fase 6.5 encerrou o **MVP base**, não o produto: por decisão de produto, foi
-aberto o **MVP ampliado** (Fase 7). A Fase 7.1 adicionou testes próprios para o
-painel de usuários; cada nova fase 7.x deverá manter essa regra (recuperação de
-senha, auditoria/logs, PDF/exportações e mapa avançado).
+aberto o **MVP ampliado** (Fase 7). As Fases 7.1 (painel de usuários) e 7.2
+(recuperação de senha) adicionaram testes próprios; cada nova fase 7.x deverá
+manter essa regra (auditoria/logs, PDF/exportações e mapa avançado).
 
 Arquivos existentes:
 
@@ -50,6 +50,12 @@ Arquivos existentes:
   escopo por propriedade; impede inativar o último admin ativo; testa
   `usuario_propriedade`, compatibilidade com base legada, `seed-users`
   idempotente e convivência com CSRF/permissões.
+- **`test_password_reset.py`** — Fase 7.2: recuperação de senha; link "Esqueci
+  minha senha"; mensagem genérica (sem enumeração); token criado só para usuário
+  ativo, com hash (sem token puro) e expiração; link dev exibido/ocultado por
+  configuração; validação/expiração/uso único do token; validações de nova senha;
+  login com senha antiga falha e com nova funciona; usuário inativado depois não
+  redefine; novo token invalida anteriores; e CSRF nos POSTs.
 - **`test_dashboard_operacional.py`** — Dashboard Operacional: exige login;
   responde 200 com login; mostra propriedade atual; calcula totais de glebas,
   culturas, financeiro, equipe, colheita, aplicações e uploads; não vaza dados de
@@ -120,7 +126,8 @@ suíte atual passando:
 
 - Painel de usuários (Fase 7.1) — concluído; listagem/criação/edição/inativação por `admin`,
   escopo por propriedade e permissões.
-- Recuperação de senha (Fase 7.2) — token seguro/expirável, sem expor senha/token.
+- Recuperação de senha (Fase 7.2) — concluído; token seguro/expirável, hash sem
+  token puro, uso único, mensagem genérica e link dev só em local/teste.
 - Auditoria/logs (Fase 7.3) — registro de ações sensíveis sem dados sensíveis.
 - PDF/exportações (Fase 7.4) — escopo por propriedade/permissão; nunca cotação/venda.
 - Mapa avançado (Fase 7.5) — edição/validação de `poligono_geojson`.

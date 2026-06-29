@@ -47,7 +47,7 @@
 ## Etapa 4.1 — Modelos e banco SQLite ✅
 
 - [x] **Modelos SQLAlchemy de domínio** (`src/app/models/`, 15 tabelas iniciais;
-  schema atual com 16 após a Fase 7.1).
+  schema atual com 17 após as Fases 7.1 e 7.2).
 - [x] **Schema validável** por `db.create_all()` nos testes e via `flask init-db`.
 
 > Adotado **Flask-SQLAlchemy** como ORM. O banco real **não** é versionado.
@@ -55,8 +55,8 @@
 ## Etapa 4.2 — Migrations e importação do seed técnico ✅
 
 - [x] **Flask-Migrate/Alembic** configurado (`migrations/` versionada).
-- [x] **Migration inicial** das 15 tabelas (`flask db upgrade`) e migration
-  posterior de `usuario_propriedade` na Fase 7.1.
+- [x] **Migration inicial** das 15 tabelas (`flask db upgrade`) e migrations
+  posteriores de `usuario_propriedade` (Fase 7.1) e `senha_reset_token` (Fase 7.2).
 - [x] **Validação** do seed técnico (`flask validate-catalog-seed`).
 - [x] **Importação idempotente** do catálogo (`flask import-catalog-seed`):
   popula `produto_base` + `produto_tecnico`.
@@ -298,9 +298,18 @@ produto, foi aberto o **MVP ampliado** (Fase 7) antes do encerramento definitivo
 - [x] `seed-users` garante propriedade demo e vínculos dos usuários de teste.
 - [x] Testes em `tests/test_usuarios_painel.py`.
 
-### Fase 7.2 — Recuperação de senha ⏳ (planejado)
+### Fase 7.2 — Recuperação de senha ✅ (concluída)
 
-- [ ] Solicitação de redefinição com token seguro e expirável; sem expor senha.
+- [x] Fluxo `/auth/esqueci-senha` e `/auth/redefinir-senha/<token>`, com link
+  "Esqueci minha senha" no login.
+- [x] Token seguro (`secrets.token_urlsafe`), expirável e de **uso único**;
+  armazenado apenas como **hash** (SHA-256) em `senha_reset_token`.
+- [x] Mensagem genérica (sem enumeração de e-mails); usuário inativo não recupera
+  senha e não é reativado.
+- [x] Sem envio real de e-mail: link de redefinição visível apenas em
+  local/dev/teste (`PASSWORD_RESET_SHOW_DEV_LINK`).
+- [x] Migration `senha_reset_token` (sem alterar `usuario`); CSRF nos POSTs.
+- [x] Testes em `tests/test_password_reset.py`.
 
 ### Fase 7.3 — Auditoria/logs ⏳ (planejado)
 
@@ -358,12 +367,12 @@ Ordem concluída:
 
 ## Próximo passo recomendado
 
-**Fase 7.2 — Recuperação de senha.**
+**Fase 7.3 — Auditoria/logs.**
 
 O MVP foi ampliado: painel de usuários, recuperação de senha, auditoria/logs,
 PDF/exportações e mapa avançado **fazem parte do MVP ampliado** (Fase 7) e **não**
-são mais pós-MVP. A Fase 7.1 já entregou o painel interno de usuários; a próxima
-frente é recuperação de senha.
+são mais pós-MVP. As Fases 7.1 (painel de usuários) e 7.2 (recuperação de senha)
+já foram entregues; a próxima frente é auditoria/logs.
 
 Permanecem como **pós-MVP** (avaliados depois):
 

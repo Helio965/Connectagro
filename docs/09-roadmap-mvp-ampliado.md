@@ -2,8 +2,9 @@
 
 > Este documento guia a evolução do ConnectAgro após a consolidação do **MVP
 > base**. Ele define o escopo do **MVP ampliado** (Fase 7), o que fica de fora e o
-> que **nunca** entra no produto. A **Fase 7.0** foi somente documental e a
-> **Fase 7.1** implementa o painel interno de usuários da propriedade.
+> que **nunca** entra no produto. A **Fase 7.0** foi somente documental, a
+> **Fase 7.1** implementa o painel interno de usuários e a **Fase 7.2** implementa
+> a recuperação de senha (token seguro, sem envio real de e-mail).
 
 ## 1. Decisão de produto
 
@@ -45,7 +46,7 @@ flask --app src/run.py seed-users
 | Fase | Item | Resumo |
 | ---- | ---- | ------ |
 | 7.1 | Painel de usuários | **Concluído:** admin lista, cria, edita perfil/status e inativa usuários da propriedade. **Sem cadastro público.** |
-| 7.2 | Recuperação de senha | Solicitação com token seguro e expirável; redefinição sem expor senha. |
+| 7.2 | Recuperação de senha | **Concluído:** token seguro/expirável, armazenado só como hash, uso único; mensagem genérica; sem envio real de e-mail (link dev em local/teste). |
 | 7.3 | Auditoria/logs | Registro de login/logout, criação/edição/remoção, upload/download, acesso negado e exportações. |
 | 7.4 | PDF/exportações | Exportar relatórios operacionais, escopados por propriedade e permissões; nunca cotação/venda. |
 | 7.5 | Mapa avançado | Edição/salvamento de polígono da gleba e melhor visualização; sem PostGIS obrigatório. |
@@ -78,7 +79,7 @@ O ConnectAgro permanece uma plataforma de **gestão agrícola e consulta técnic
 - **Fase 7.0 — Redefinição oficial do MVP ampliado** ✅ (concluída): apenas
   documentação/roadmap/regras/checklist; sem código funcional novo.
 - **Fase 7.1 — Painel de usuários** ✅
-- **Fase 7.2 — Recuperação de senha** ⏳
+- **Fase 7.2 — Recuperação de senha** ✅
 - **Fase 7.3 — Auditoria/logs** ⏳
 - **Fase 7.4 — PDF/exportações** ⏳
 - **Fase 7.5 — Mapa avançado** ⏳
@@ -126,7 +127,7 @@ Por fase:
 ## 9. Ordem recomendada
 
 1. Fase 7.1 — Painel de usuários (concluída).
-2. Fase 7.2 — Recuperação de senha.
+2. Fase 7.2 — Recuperação de senha (concluída).
 3. Fase 7.3 — Auditoria/logs.
 4. Fase 7.4 — PDF/exportações.
 5. Fase 7.5 — Mapa avançado.
@@ -134,7 +135,7 @@ Por fase:
 
 ## 10. Próximo passo
 
-**Fase 7.2 — Recuperação de senha.**
+**Fase 7.3 — Auditoria/logs.**
 
 ---
 

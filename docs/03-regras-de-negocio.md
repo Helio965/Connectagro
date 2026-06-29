@@ -105,6 +105,26 @@
   remoção física do registro. A propriedade deve manter pelo menos um `admin`
   ativo.
 
+## Regras de recuperação de senha (Fase 7.2)
+
+- RN-11q — A recuperação de senha usa **token seguro** (`secrets.token_urlsafe`)
+  e **expirável** (validade configurável por `PASSWORD_RESET_TOKEN_MINUTES`).
+- RN-11r — O **token puro nunca é armazenado**: o banco guarda apenas o **hash**
+  (SHA-256) em `senha_reset_token`. Nenhuma senha é gravada nessa tabela.
+- RN-11s — A senha **nunca** é armazenada em texto; a nova senha é gravada como
+  **hash** (`werkzeug.security`), com mínimo de 6 caracteres e confirmação.
+- RN-11t — A solicitação de redefinição responde com **mensagem genérica** e não
+  revela se o e-mail existe (evita enumeração de e-mails).
+- RN-11u — **Usuário inativo não recupera senha**: não recebe token válido, não
+  redefine senha por token e **não é reativado** pela redefinição.
+- RN-11v — O token é de **uso único** e, ao solicitar novo reset, os tokens
+  abertos anteriores do usuário são invalidados. Token usado/expirado/inválido é
+  recusado, e a redefinição **não** autentica o usuário automaticamente.
+- RN-11w — Exibir o **link/token de redefinição em tela** só é permitido em
+  ambiente **local/dev/teste** (`PASSWORD_RESET_SHOW_DEV_LINK`). Em produção,
+  nunca. **Não há envio real de e-mail** nesta fase; SMTP/serviço de e-mail e
+  deploy ficam fora do escopo.
+
 ## Regras operacionais
 
 - RN-12 — Uma **cultura** está associada a uma ou mais **glebas**.

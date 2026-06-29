@@ -27,11 +27,12 @@ TABELAS_ESPERADAS = {
     "financeiro_lancamento",
     "upload_arquivo",
     "ia_interacao",
+    "senha_reset_token",
 }
 
 
 def test_todas_as_tabelas_registradas(app):
-    """Todas as 16 tabelas esperadas estão registradas no metadata."""
+    """Todas as 17 tabelas esperadas estão registradas no metadata."""
     tabelas = set(db.metadata.tables.keys())
     faltando = TABELAS_ESPERADAS - tabelas
     assert not faltando, f"tabelas ausentes: {faltando}"
@@ -48,6 +49,9 @@ def test_todas_as_tabelas_registradas(app):
         ("produto_base", "status_regulatorio"),
         ("produto_preco", "status_validacao"),
         ("produto_imagem", "status_validacao"),
+        ("senha_reset_token", "token_hash"),
+        ("senha_reset_token", "usado"),
+        ("senha_reset_token", "expira_em"),
     ],
 )
 def test_colunas_principais(app, tabela, coluna):

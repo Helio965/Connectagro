@@ -15,11 +15,13 @@ from .colheita import ColheitaRegistro
 from .financeiro import FinanceiroLancamento
 from .upload import UploadArquivo
 from .ia import IaInteracao
+from .senha_reset_token import SenhaResetToken
 
 __all__ = [
     "Usuario",
     "Propriedade",
     "UsuarioPropriedade",
+    "SenhaResetToken",
     "EquipeMembro",
     "Cultura",
     "CulturaGleba",

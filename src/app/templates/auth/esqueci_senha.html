@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Esqueci minha senha — ConnectAgro{% endblock %}
+
+{% block content %}
+<section class="card login-card">
+  <h1>Recuperar senha</h1>
+  <p>
+    Informe o e-mail da sua conta. Por segurança, a mesma mensagem é exibida
+    independentemente de o e-mail estar cadastrado.
+  </p>
+  <p class="muted">
+    Esta fase do MVP ampliado <strong>não envia e-mail real</strong>. Em
+    ambiente local/de desenvolvimento, o link de redefinição é exibido aqui
+    mesmo para teste manual.
+  </p>
+
+  <form method="post" action="{{ url_for('auth.esqueci_senha') }}" class="login-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <label for="email">E-mail</label>
+    <input type="email" id="email" name="email" required autofocus
+           autocomplete="username" placeholder="voce@exemplo.com">
+
+    <button type="submit" class="btn-entrar">Enviar</button>
+  </form>
+
+  {% if dev_link %}
+  <div class="dev-reset-link">
+    <h2>Link de redefinição para ambiente local</h2>
+    <p>Disponível apenas em desenvolvimento/teste. Não aparece em produção.</p>
+    <p><a href="{{ dev_link }}">{{ dev_link }}</a></p>
+  </div>
+  {% endif %}
+
+  <p class="login-links">
+    <a href="{{ url_for('auth.login') }}">Voltar ao login</a>
+  </p>
+</section>
+{% endblock %}

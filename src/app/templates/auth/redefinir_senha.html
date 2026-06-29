@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Redefinir senha — ConnectAgro{% endblock %}
+
+{% block content %}
+<section class="card login-card">
+  <h1>Redefinir senha</h1>
+
+  {% if token_valido %}
+  <p>Defina uma nova senha para a sua conta.</p>
+
+  <form method="post"
+        action="{{ url_for('auth.redefinir_senha', token=token) }}"
+        class="login-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <label for="nova_senha">Nova senha</label>
+    <input type="password" id="nova_senha" name="nova_senha" required
+           autocomplete="new-password" minlength="6"
+           placeholder="Mínimo de 6 caracteres">
+
+    <label for="confirmar_senha">Confirmar nova senha</label>
+    <input type="password" id="confirmar_senha" name="confirmar_senha" required
+           autocomplete="new-password" placeholder="Repita a nova senha">
+
+    <button type="submit" class="btn-entrar">Redefinir senha</button>
+  </form>
+  {% else %}
+  <p>
+    Este link de redefinição é inválido, expirou ou já foi utilizado. Solicite
+    um novo link para continuar.
+  </p>
+  <p class="login-links">
+    <a href="{{ url_for('auth.esqueci_senha') }}">Solicitar novo link</a>
+  </p>
+  {% endif %}
+
+  <p class="login-links">
+    <a href="{{ url_for('auth.login') }}">Voltar ao login</a>
+  </p>
+</section>
+{% endblock %}
