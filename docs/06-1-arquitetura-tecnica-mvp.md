@@ -2,7 +2,14 @@
 
 ## Status do documento
 
-**Arquitetura técnica — v0.19 (MVP consolidado: CRUDs + catálogo + upload + dashboard + mapa + IA simulada + relatórios operacionais + permissões finas + CSRF + revisão final).**
+**Arquitetura técnica — v0.20 (MVP base consolidado + abertura do MVP ampliado: CRUDs + catálogo + upload + dashboard + mapa + IA simulada + relatórios operacionais + permissões finas + CSRF + revisão final).**
+
+> **Redefinição do MVP ampliado (Fase 7.0):** por decisão de produto, o MVP foi
+> ampliado. As fases 7.x passam a incluir painel de usuários, recuperação de
+> senha, auditoria/logs, PDF/exportações e mapa avançado (ver a seção
+> [14 — Arquitetura planejada para o MVP ampliado](#14-arquitetura-planejada-para-o-mvp-ampliado)
+> e o [09 — Roadmap do MVP Ampliado](./09-roadmap-mvp-ampliado.md)). A Fase 7.0 é
+> **somente documental** — não há implementação de funcionalidade nova.
 
 > **Revisão Final do MVP (Fase 6.5):** o MVP foi revisado como conjunto
 > funcional, com validação da suíte automatizada, conferência de formulários POST
@@ -663,17 +670,80 @@ Matriz resumida:
 - [x] Revisão e ajustes finais do MVP
 - [x] Checklist final de entrega do MVP (`docs/08-checklist-final-mvp.md`)
 
-**Pós-MVP:**
+**MVP ampliado (Fase 7 — planejado):**
 
-- [ ] PDF/exportações
-- [ ] Melhorias visuais avançadas
-- [ ] Painel de usuários e recuperação de senha
-- [ ] Auditoria/logs administrativos
-- [ ] Deploy/produção
+- [ ] Painel de usuários (Fase 7.1)
+- [ ] Recuperação de senha (Fase 7.2)
+- [ ] Auditoria/logs administrativos (Fase 7.3)
+- [ ] PDF/exportações (Fase 7.4)
+- [ ] Mapa avançado (Fase 7.5)
+
+**Fora do MVP ampliado (avaliados depois):**
+
 - [ ] Validação regulatória real do catálogo
 - [ ] Preço/imagem com fontes reais e atualização periódica
-- [ ] Mapa avançado
+- [ ] OCR/leitura automática de uploads
+- [ ] Deploy/produção completo
 - [ ] IA real/LLM, se futuramente aprovado
+
+**Fora do produto (regra permanente):** venda, carrinho, checkout e cotação.
+
+---
+
+## 14. Arquitetura planejada para o MVP ampliado
+
+> Esta seção descreve, em **alto nível**, a arquitetura pretendida para as fases
+> 7.x. **Nenhum** destes itens está implementado ainda — a Fase 7.0 é apenas
+> documental. As decisões definitivas serão tomadas em cada fase específica.
+
+### Painel de usuários (Fase 7.1)
+
+- Gestão interna dos usuários da propriedade pelo `admin` (listar, criar, editar
+  perfil/status, inativar); **sem** cadastro público.
+- Provável necessidade de **repensar o vínculo usuário↔propriedade** (hoje cada
+  usuário resolve uma propriedade padrão em `utils/contexto.py`).
+- Possível **tabela de associação** futura (ex.: usuário↔propriedade) — a ser
+  decidida na fase, com migration própria.
+- Mantém as **permissões por perfil** (`utils/permissions.py`); a gestão de
+  usuários exige permissão de `admin`.
+
+### Recuperação de senha (Fase 7.2)
+
+- Provável **tabela de tokens** de redefinição com **expiração**.
+- Token armazenado/comparado com **hash**, nunca em claro.
+- Fluxo que **não expõe** senha nem token; envio de e-mail pode ser
+  **simulado/local** no MVP ampliado.
+
+### Auditoria/logs (Fase 7.3)
+
+- Provável tabela `log_auditoria` para eventos sensíveis.
+- Eventos: criação, edição, remoção, login/logout, acesso negado, upload,
+  download e exportação.
+- Registro **sem** senha e sem dados sensíveis desnecessários; escopado por
+  propriedade/usuário.
+
+### PDF/exportações (Fase 7.4)
+
+- **Reutilizar** os serviços de relatórios (`services/relatorios_service.py`).
+- Exportações **escopadas por propriedade** e por permissão.
+- **CSV** pode usar biblioteca padrão; **PDF** pode exigir dependência futura
+  **controlada**.
+- Exportação é relatório operacional, **nunca** cotação/venda.
+
+### Mapa avançado (Fase 7.5)
+
+- Evoluir o campo já existente `gleba.poligono_geojson`.
+- **Edição visual** do polígono com Leaflet e **validação de GeoJSON**.
+- **Sem PostGIS obrigatório** e sem GPS em tempo real obrigatório no MVP
+  ampliado; cálculo de área aproximada é opcional.
+
+### Fora do MVP ampliado
+
+Permanecem fora do MVP ampliado, como pós-MVP: **IA real/LLM**, **validação
+regulatória real** do catálogo, **preço/imagem real** com atualização periódica,
+**OCR/leitura automática** de uploads e **deploy/produção completo**. A IA do
+produto continua **simulada**. **Venda, carrinho, checkout e cotação** nunca
+entram no produto.
 
 ---
 
@@ -686,4 +756,5 @@ Matriz resumida:
 - [06 — Arquitetura do Sistema (visão conceitual)](./06-arquitetura-do-sistema.md)
 - [07 — Roadmap do MVP](./07-roadmap-mvp.md)
 - [08 — Checklist Final do MVP](./08-checklist-final-mvp.md)
+- [09 — Roadmap do MVP Ampliado](./09-roadmap-mvp-ampliado.md)
 - [Catálogo de Produtos](./catalogo-produtos/README.md)

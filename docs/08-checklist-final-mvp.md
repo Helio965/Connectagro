@@ -1,11 +1,19 @@
 # 08 — Checklist Final do MVP
 
+> **Nota (Fase 7.0):** este checklist registra o **MVP base consolidado**. Após
+> nova decisão de produto, foi aberto o **MVP ampliado** na **Fase 7**. Os itens
+> antes listados como pós-MVP — painel de usuários, recuperação de senha,
+> auditoria/logs, PDF/exportações e mapa avançado — passaram a integrar o MVP
+> ampliado (ver a seção “Escopo do MVP ampliado” e o
+> [09 — Roadmap do MVP Ampliado](./09-roadmap-mvp-ampliado.md)).
+
 ## 1. Status geral
 
-O MVP do ConnectAgro está consolidado para apresentação e continuidade. A base
-inclui autenticação, permissões por perfil, CSRF, CRUDs operacionais, catálogo em
-consulta, upload seguro, dashboard, mapa simplificado, IA simulada e relatórios
-HTML somente leitura.
+O MVP **base** do ConnectAgro está consolidado para apresentação e continuidade.
+A base inclui autenticação, permissões por perfil, CSRF, CRUDs operacionais,
+catálogo em consulta, upload seguro, dashboard, mapa simplificado, IA simulada e
+relatórios HTML somente leitura. A partir daqui o projeto segue no **MVP
+ampliado** (Fase 7).
 
 ## 2. Módulos concluídos
 
@@ -125,38 +133,47 @@ flask --app src/run.py db upgrade
 flask --app src/run.py seed-users
 ```
 
-## 12. Limitações conhecidas do MVP
+## 12. Limitações conhecidas do MVP base
 
-- Sem venda.
-- Sem carrinho.
-- Sem checkout.
-- Sem cotação oficial.
-- Sem recomendação agronômica.
-- Sem validação técnica de dose.
-- Sem validação oficial automática AGROFIT/MAPA.
-- Preço e imagem de produto pendentes.
-- Sem OCR.
-- Sem leitura automática de upload.
-- Sem PDF/exportação.
-- Sem painel de usuários.
-- Sem recuperação de senha.
-- Sem auditoria avançada.
-- Sem deploy/produção.
-- Sem LLM/API externa.
-- Sem mapa avançado.
+Recursos **ainda não implementados** no MVP base. Os itens marcados com
+**(MVP ampliado)** foram movidos para a Fase 7 e serão entregues em fases 7.x:
 
-## 13. Pendências pós-MVP
+- Sem painel de usuários. **(MVP ampliado — Fase 7.1)**
+- Sem recuperação de senha. **(MVP ampliado — Fase 7.2)**
+- Sem auditoria/logs administrativos. **(MVP ampliado — Fase 7.3)**
+- Sem PDF/exportação. **(MVP ampliado — Fase 7.4)**
+- Sem mapa avançado. **(MVP ampliado — Fase 7.5)**
+- Sem validação oficial automática AGROFIT/MAPA. **(fora do MVP ampliado)**
+- Preço e imagem de produto pendentes. **(fora do MVP ampliado)**
+- Sem OCR / leitura automática de upload. **(fora do MVP ampliado)**
+- Sem LLM/API externa (IA permanece simulada). **(fora do MVP ampliado)**
+- Sem deploy/produção completo. **(fora do MVP ampliado)**
+- Sem recomendação agronômica. **(limite permanente)**
+- Sem validação técnica de dose. **(limite permanente)**
+- Sem venda, carrinho, checkout ou cotação. **(fora do produto — permanente)**
 
-- PDF/exportações.
-- Melhorias visuais avançadas.
-- Painel de usuários.
-- Recuperação de senha.
-- Auditoria/logs administrativos.
+## 13. Escopo do MVP ampliado
+
+Itens que **passaram a integrar o MVP** (Fase 7), antes tratados como pós-MVP:
+
+- Painel de usuários (Fase 7.1).
+- Recuperação de senha (Fase 7.2).
+- Auditoria/logs administrativos (Fase 7.3).
+- PDF/exportações (Fase 7.4).
+- Mapa avançado (Fase 7.5).
+
+**Fora do MVP ampliado** (pós-MVP, avaliados depois):
+
+- IA real/LLM, se futuramente aprovado.
 - Validação regulatória real do catálogo.
 - Preço/imagem com fontes reais e atualização periódica.
-- Mapa avançado.
-- IA real/LLM, se futuramente aprovado.
-- Deploy/produção.
+- OCR/leitura automática de uploads.
+- Deploy/produção completo.
+- Melhorias avançadas que não entrarem na Fase 7.
+
+**Fora do produto** (regra permanente, salvo mudança radical aprovada):
+
+- Venda, carrinho, checkout e cotação.
 
 ## 14. Critério de aceite final
 

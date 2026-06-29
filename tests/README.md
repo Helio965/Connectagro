@@ -11,9 +11,13 @@ reais no repositório. O `TestingConfig` mantém `WTF_CSRF_ENABLED = False` por
 padrão para preservar os testes existentes; `test_csrf.py` ativa CSRF
 explicitamente quando valida essa proteção.
 
-Na Fase 6.5, a suíte foi usada como validação final do MVP e os avisos simples
-de `LegacyAPIWarning` em `test_ia_simulada_service.py` foram removidos usando
-`db.session.get(...)`, sem alterar models ou comportamento funcional.
+Na Fase 6.5, a suíte foi usada como validação final do **MVP base** e os avisos
+simples de `LegacyAPIWarning` em `test_ia_simulada_service.py` foram removidos
+usando `db.session.get(...)`, sem alterar models ou comportamento funcional. A
+Fase 6.5 encerrou o **MVP base**, não o produto: por decisão de produto, foi
+aberto o **MVP ampliado** (Fase 7) e cada nova fase 7.x deverá **adicionar seus
+próprios testes** (painel de usuários, recuperação de senha, auditoria/logs,
+PDF/exportações e mapa avançado).
 
 Arquivos existentes:
 
@@ -104,12 +108,24 @@ Para rodar:
 pytest
 ```
 
+## Testes do MVP ampliado (Fase 7 — planejado)
+
+Cada fase do MVP ampliado deverá adicionar seus próprios testes, mantendo toda a
+suíte atual passando:
+
+- Painel de usuários (Fase 7.1) — listagem/criação/edição/inativação por `admin`,
+  escopo por propriedade e permissões.
+- Recuperação de senha (Fase 7.2) — token seguro/expirável, sem expor senha/token.
+- Auditoria/logs (Fase 7.3) — registro de ações sensíveis sem dados sensíveis.
+- PDF/exportações (Fase 7.4) — escopo por propriedade/permissão; nunca cotação/venda.
+- Mapa avançado (Fase 7.5) — edição/validação de `poligono_geojson`.
+
 ## Evolução pós-MVP
 
 - Testes end-to-end de interface, caso o projeto passe a ter uma camada de
   validação visual/navegador.
-- Testes para funcionalidades futuras, como PDF/exportações, painel de usuários,
-  auditoria, deploy, mapa avançado ou integrações externas.
+- Testes para itens fora do MVP ampliado: IA real/LLM, validação regulatória real,
+  preço/imagem real, OCR/leitura automática de uploads e deploy/produção.
 
 ## Convenções
 
@@ -124,3 +140,4 @@ pytest
 - [02 — Requisitos do Sistema](../docs/02-requisitos-do-sistema.md)
 - [06.1 — Arquitetura Técnica do MVP](../docs/06-1-arquitetura-tecnica-mvp.md)
 - [07 — Roadmap do MVP](../docs/07-roadmap-mvp.md)
+- [09 — Roadmap do MVP Ampliado](../docs/09-roadmap-mvp-ampliado.md)
