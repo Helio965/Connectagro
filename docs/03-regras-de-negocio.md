@@ -125,6 +125,23 @@
   nunca. **Não há envio real de e-mail** nesta fase; SMTP/serviço de e-mail e
   deploy ficam fora do escopo.
 
+## Regras de auditoria/logs (Fase 7.3)
+
+- RN-11x — **Ações sensíveis devem ser auditadas**: autenticação (login/logout),
+  recuperação de senha, criação/edição/remoção nos CRUDs principais, painel de
+  usuários, upload/download/remoção e permissão negada.
+- RN-11y — Os **logs são acessíveis apenas ao `admin`** (`auditoria.view`), na
+  tela `/auditoria/`; técnico e trabalhador **não** acessam.
+- RN-11z — Os logs são **escopados pela propriedade atual**; um admin não vê
+  logs de outra propriedade.
+- RN-11aa — Os logs **não** guardam senha, nova senha, `senha_hash`, token puro,
+  `token_hash`, `csrf_token`, conteúdo de arquivo, corpo completo de formulário
+  nem dados sensíveis desnecessários. E-mails, quando úteis, são **mascarados**.
+- RN-11ab — A auditoria **nunca** quebra o fluxo principal: falha ao gravar log
+  não impede a ação do usuário.
+- RN-11ac — A auditoria **não** substitui backup, segurança de infraestrutura
+  nem monitoramento de produção (SIEM); é um registro interno simples.
+
 ## Regras operacionais
 
 - RN-12 — Uma **cultura** está associada a uma ou mais **glebas**.

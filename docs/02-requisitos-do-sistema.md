@@ -58,9 +58,9 @@
 ## Requisitos Funcionais — MVP ampliado
 
 > Os requisitos abaixo descrevem o **escopo do MVP ampliado** (Fase 7). As Fases
-> 7.1 (painel de usuários) e 7.2 (recuperação de senha) já estão implementadas;
-> os demais itens seguem planejados para fases 7.x. Nenhum deles inclui venda,
-> carrinho, checkout ou cotação.
+> 7.1 (painel de usuários), 7.2 (recuperação de senha) e 7.3 (auditoria/logs) já
+> estão implementadas; os demais itens seguem planejados para fases 7.x. Nenhum
+> deles inclui venda, carrinho, checkout ou cotação.
 
 ### Painel de usuários (Fase 7.1)
 - RF-17 — Permitir que o **admin** liste os usuários da sua propriedade.
@@ -82,12 +82,24 @@
   link de redefinição é exibido na tela (`PASSWORD_RESET_SHOW_DEV_LINK`); em
   produção, nunca. Usuário inativo não recupera senha e não é reativado.
 
-### Auditoria/logs (Fase 7.3)
-- RF-25 — Registrar eventos de **login/logout**.
-- RF-26 — Registrar **criação/edição/remoção** de registros.
-- RF-27 — Registrar **upload/download** de arquivos.
-- RF-28 — Registrar tentativas de **acesso negado**.
-- RF-29 — Registrar **exportações** quando o recurso existir.
+### Auditoria/logs (Fase 7.3) ✅
+- RF-25 — Registrar eventos de **login/logout** (`auth.login.sucesso`,
+  `auth.login.falha`, `auth.logout`) e de **recuperação de senha**
+  (`auth.password_reset.solicitado/redefinido/token_invalido`).
+- RF-26 — Registrar **criação/edição/remoção** nos CRUDs principais (glebas,
+  culturas, equipe, financeiro, colheita, aplicações) e no painel de usuários
+  (`usuarios.create/edit/deactivate`).
+- RF-27 — Registrar **upload/download/remoção** de arquivos
+  (`upload.create/download/delete`).
+- RF-28 — Registrar tentativas de **acesso negado** (`permissao.negada`,
+  resultado `negado`).
+- RF-29 — Registrar acesso à central de relatórios (`relatorios.view`); a ação
+  `exportacao.gerada` fica **documentada/preparada** para a Fase 7.4 (PDF/
+  exportações), ainda não emitida.
+- RF-29a — Os logs são consultados em `/auditoria/` **apenas pelo `admin`**
+  (`auditoria.view`), escopados pela propriedade atual, com filtros simples
+  (ação, resultado, entidade, usuário). Logs **não** armazenam senha, token
+  puro, hash, CSRF ou conteúdo de formulário/arquivo.
 
 ### PDF/exportações (Fase 7.4)
 - RF-30 — Exportar relatórios operacionais (ex.: PDF/CSV).

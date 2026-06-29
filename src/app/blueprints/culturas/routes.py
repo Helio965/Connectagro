@@ -5,6 +5,7 @@ from ...extensions import db
 from ...models import Cultura, CulturaGleba, Gleba
 from ...models._helpers import iso_now
 from ...utils.auth import login_required
+from ...services.auditoria_service import registrar_sucesso
 from ...utils.contexto import propriedade_atual, vazio_para_none
 from ...utils.permissions import require_permission
 from . import culturas_bp
@@ -82,6 +83,9 @@ def nova():
         db.session.flush()  # garante cultura.id
         _sincronizar_glebas(cultura, request.form.getlist("glebas"), propriedade)
         db.session.commit()
+        registrar_sucesso("culturas.create", entidade="cultura",
+                          entidade_id=cultura.id, descricao="Cultura criada",
+                          propriedade_id=propriedade.id, request=request)
         flash("Cultura criada com sucesso.", "success")
         return redirect(url_for("culturas.index"))
     return render_template("culturas/form.html", cultura=None, form={},
@@ -114,6 +118,9 @@ def editar(cultura_id):
         cultura.atualizado_em = iso_now()
         _sincronizar_glebas(cultura, request.form.getlist("glebas"), propriedade)
         db.session.commit()
+        registrar_sucesso("culturas.edit", entidade="cultura",
+                          entidade_id=cultura.id, descricao="Cultura editada",
+                          propriedade_id=propriedade.id, request=request)
         flash("Cultura atualizada.", "success")
         return redirect(url_for("culturas.index"))
     sel = {cg.gleba_id for cg in cultura.cultura_glebas}
@@ -132,5 +139,8 @@ def remover(cultura_id):
         db.session.delete(cg)
     db.session.delete(cultura)
     db.session.commit()
+    registrar_sucesso("culturas.delete", entidade="cultura",
+                      entidade_id=cultura_id, descricao="Cultura removida",
+                      propriedade_id=propriedade.id, request=request)
     flash("Cultura removida.", "success")
     return redirect(url_for("culturas.index"))

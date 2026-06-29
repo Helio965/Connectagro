@@ -17,6 +17,7 @@ from werkzeug.utils import secure_filename
 from ...extensions import db
 from ...models import UploadArquivo
 from ...utils.auth import login_required
+from ...services.auditoria_service import registrar_sucesso
 from ...utils.contexto import propriedade_atual, vazio_para_none
 from ...utils.permissions import require_permission
 from . import upload_bp
@@ -169,15 +170,19 @@ def novo():
         file_storage.save(caminho_absoluto)
 
         caminho_relativo = f"{pasta_relativa}/{dados_upload['nome_salvo']}"
-        db.session.add(UploadArquivo(
+        arquivo = UploadArquivo(
             propriedade_id=propriedade.id,
             nome_original=dados_upload["nome_original"],
             caminho=caminho_relativo,
             tipo_mime=file_storage.mimetype,
             tamanho=dados_upload["tamanho"],
             descricao=vazio_para_none(request.form.get("descricao")),
-        ))
+        )
+        db.session.add(arquivo)
         db.session.commit()
+        registrar_sucesso("upload.create", entidade="upload_arquivo",
+                          entidade_id=arquivo.id, descricao="Arquivo enviado",
+                          propriedade_id=propriedade.id, request=request)
         flash("Arquivo enviado com sucesso.", "success")
         return redirect(url_for("upload.index"))
 
@@ -195,6 +200,9 @@ def download(arquivo_id):
     caminho_absoluto = _caminho_absoluto_upload(arquivo.caminho)
     if not os.path.isfile(caminho_absoluto):
         abort(404)
+    registrar_sucesso("upload.download", entidade="upload_arquivo",
+                      entidade_id=arquivo.id, descricao="Download de arquivo",
+                      propriedade_id=propriedade.id, request=request)
     return send_from_directory(
         _pasta_base_upload(),
         arquivo.caminho,
@@ -215,6 +223,9 @@ def remover(arquivo_id):
         os.remove(caminho_absoluto)
     db.session.delete(arquivo)
     db.session.commit()
+    registrar_sucesso("upload.delete", entidade="upload_arquivo",
+                      entidade_id=arquivo_id, descricao="Arquivo removido",
+                      propriedade_id=propriedade.id, request=request)
     if arquivo_existia:
         flash("Arquivo removido.", "success")
     else:

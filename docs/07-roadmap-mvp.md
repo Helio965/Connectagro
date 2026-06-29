@@ -47,7 +47,7 @@
 ## Etapa 4.1 — Modelos e banco SQLite ✅
 
 - [x] **Modelos SQLAlchemy de domínio** (`src/app/models/`, 15 tabelas iniciais;
-  schema atual com 17 após as Fases 7.1 e 7.2).
+  schema atual com 18 após as Fases 7.1, 7.2 e 7.3).
 - [x] **Schema validável** por `db.create_all()` nos testes e via `flask init-db`.
 
 > Adotado **Flask-SQLAlchemy** como ORM. O banco real **não** é versionado.
@@ -56,7 +56,8 @@
 
 - [x] **Flask-Migrate/Alembic** configurado (`migrations/` versionada).
 - [x] **Migration inicial** das 15 tabelas (`flask db upgrade`) e migrations
-  posteriores de `usuario_propriedade` (Fase 7.1) e `senha_reset_token` (Fase 7.2).
+  posteriores de `usuario_propriedade` (Fase 7.1), `senha_reset_token` (Fase 7.2)
+  e `log_auditoria` (Fase 7.3).
 - [x] **Validação** do seed técnico (`flask validate-catalog-seed`).
 - [x] **Importação idempotente** do catálogo (`flask import-catalog-seed`):
   popula `produto_base` + `produto_tecnico`.
@@ -311,10 +312,17 @@ produto, foi aberto o **MVP ampliado** (Fase 7) antes do encerramento definitivo
 - [x] Migration `senha_reset_token` (sem alterar `usuario`); CSRF nos POSTs.
 - [x] Testes em `tests/test_password_reset.py`.
 
-### Fase 7.3 — Auditoria/logs ⏳ (planejado)
+### Fase 7.3 — Auditoria/logs ✅ (concluída)
 
-- [ ] Registro de login/logout, criação/edição/remoção, upload/download, acesso
-  negado e exportações.
+- [x] Tabela/model `log_auditoria` (migration própria, índices em
+  `usuario_id`/`propriedade_id`/`acao`/`criado_em`).
+- [x] Serviço central `auditoria_service.py` que nunca quebra o fluxo principal.
+- [x] Eventos: login/logout, recuperação de senha, painel de usuários, CRUDs
+  principais, upload/download/remoção, permissão negada e acesso a relatórios.
+- [x] Tela `/auditoria/` **somente admin** (`auditoria.view`), escopo por
+  propriedade e filtros simples.
+- [x] Logs sem senha, token, hash, CSRF ou conteúdo de formulário/arquivo.
+- [x] Testes em `tests/test_auditoria.py`.
 
 ### Fase 7.4 — PDF/exportações ⏳ (planejado)
 
@@ -367,12 +375,12 @@ Ordem concluída:
 
 ## Próximo passo recomendado
 
-**Fase 7.3 — Auditoria/logs.**
+**Fase 7.4 — PDF/exportações.**
 
 O MVP foi ampliado: painel de usuários, recuperação de senha, auditoria/logs,
 PDF/exportações e mapa avançado **fazem parte do MVP ampliado** (Fase 7) e **não**
-são mais pós-MVP. As Fases 7.1 (painel de usuários) e 7.2 (recuperação de senha)
-já foram entregues; a próxima frente é auditoria/logs.
+são mais pós-MVP. As Fases 7.1 (painel de usuários), 7.2 (recuperação de senha) e
+7.3 (auditoria/logs) já foram entregues; a próxima frente é PDF/exportações.
 
 Permanecem como **pós-MVP** (avaliados depois):
 

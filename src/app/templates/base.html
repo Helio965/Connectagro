@@ -32,6 +32,7 @@
     {% if can("financeiro.view") %}<a href="{{ url_for('financeiro.index') }}">Financeiro</a>{% endif %}
     {% if can("upload.view") %}<a href="{{ url_for('upload.index') }}">Upload</a>{% endif %}
     {% if can("usuarios.view") %}<a href="{{ url_for('usuarios.index') }}">Usuários</a>{% endif %}
+    {% if can("auditoria.view") %}<a href="{{ url_for('auditoria.index') }}">Auditoria</a>{% endif %}
     {% if can("equipe.view") %}<a href="{{ url_for('equipe.index') }}">Equipe</a>{% endif %}
     {% if can("colheita.view") %}<a href="{{ url_for('colheita.index') }}">Colheita</a>{% endif %}
     {% if can("mapa.view") %}<a href="{{ url_for('mapa.index') }}">Mapa</a>{% endif %}

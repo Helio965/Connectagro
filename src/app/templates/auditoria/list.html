@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Auditoria — ConnectAgro{% endblock %}
+
+{% block content %}
+<section class="card">
+  <h1>Auditoria / Logs</h1>
+  <p>
+    Registro de ações sensíveis da propriedade <strong>{{ propriedade.nome }}</strong>.
+    Exibindo os últimos {{ limite }} eventos. Os logs <strong>não</strong> guardam
+    senha, token, hash nem conteúdo de formulários/arquivos.
+  </p>
+
+  <form method="get" action="{{ url_for('auditoria.index') }}" class="filtros">
+    <label for="acao">Ação</label>
+    <input type="text" id="acao" name="acao" value="{{ filtros.acao }}"
+           placeholder="ex.: glebas.create">
+
+    <label for="resultado">Resultado</label>
+    <select id="resultado" name="resultado">
+      <option value="">Todos</option>
+      <option value="sucesso" {% if filtros.resultado == 'sucesso' %}selected{% endif %}>sucesso</option>
+      <option value="falha" {% if filtros.resultado == 'falha' %}selected{% endif %}>falha</option>
+      <option value="negado" {% if filtros.resultado == 'negado' %}selected{% endif %}>negado</option>
+    </select>
+
+    <label for="entidade">Entidade</label>
+    <input type="text" id="entidade" name="entidade" value="{{ filtros.entidade }}"
+           placeholder="ex.: gleba">
+
+    <label for="usuario_id">Usuário (id)</label>
+    <input type="text" id="usuario_id" name="usuario_id" value="{{ filtros.usuario_id }}"
+           placeholder="id">
+
+    <button type="submit">Filtrar</button>
+  </form>
+
+  {% if logs %}
+  <table class="tabela">
+    <thead>
+      <tr>
+        <th>Data/hora</th>
+        <th>Usuário</th>
+        <th>Ação</th>
+        <th>Entidade</th>
+        <th>ID</th>
+        <th>Resultado</th>
+        <th>Descrição</th>
+        <th>IP</th>
+        <th>User-agent</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for log in logs %}
+      <tr>
+        <td>{{ log.criado_em }}</td>
+        <td>{{ log.usuario_id if log.usuario_id is not none else "—" }}</td>
+        <td>{{ log.acao }}</td>
+        <td>{{ log.entidade or "—" }}</td>
+        <td>{{ log.entidade_id or "—" }}</td>
+        <td>{{ log.resultado }}</td>
+        <td>{{ log.descricao or "—" }}</td>
+        <td>{{ log.ip or "—" }}</td>
+        <td>{{ (log.user_agent or "")[:40] }}{% if log.user_agent and log.user_agent|length > 40 %}…{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">Nenhum log de auditoria encontrado para os filtros atuais.</p>
+  {% endif %}
+</section>
+{% endblock %}

@@ -6,12 +6,13 @@ equipe, colheita, upload de documentos e mapa, oferecendo ainda apoio por uma
 camada de IA simulada, relatórios operacionais e um catálogo técnico de produtos
 agrícolas para consulta rápida.
 
-> **Status do projeto:** fundação Flask, **modelos SQLAlchemy** (17 tabelas),
+> **Status do projeto:** fundação Flask, **modelos SQLAlchemy** (18 tabelas),
 > **migrations** (Flask-Migrate), **importação do catálogo técnico** (via CLI),
 > **autenticação real** (login/logout), **recuperação de senha** (token seguro,
 > sem e-mail real), **permissões finas por perfil**,
 > **CSRF/Flask-WTF** nos formulários POST,
 > **Painel de Usuários** interno por propriedade,
+> **Auditoria/logs** administrativos (somente admin),
 > **Dashboard Operacional** somente leitura, **Mapa real simplificado** somente
 > leitura, **IA Simulada Operacional** baseada em regras locais, **CRUDs** de
 > **Glebas**, **Culturas** (com associação cultura↔gleba), **Equipe**,
@@ -32,9 +33,10 @@ agrícolas para consulta rápida.
 >
 > **MVP ampliado (em andamento):** após decisão de produto, foi aberto o **MVP
 > ampliado** (Fase 7). A Fase 7.0 registrou a decisão de escopo, a **Fase 7.1
-> implementa o painel de usuários** interno da propriedade e a **Fase 7.2
+> implementa o painel de usuários** interno da propriedade, a **Fase 7.2
 > implementa a recuperação de senha** (token seguro/expirável, sem envio real de
-> e-mail). Seguem no escopo do MVP ampliado: **auditoria/logs administrativos**,
+> e-mail) e a **Fase 7.3 implementa a auditoria/logs administrativos** (somente
+> admin, sem dados sensíveis). Seguem no escopo do MVP ampliado:
 > **PDF/exportações** e **mapa avançado**. Continuam **fora do MVP ampliado** IA real/LLM, validação regulatória real
 > do catálogo, preço/imagem com fontes reais, OCR/leitura automática de uploads e
 > deploy/produção completo. **Venda, carrinho, checkout e cotação nunca entram no
@@ -94,6 +96,7 @@ em etapas posteriores, evoluirá para a versão completa.
 | Permissões     | Matriz por perfil (`admin`, `tecnico`, `trabalhador`)           |
 | CSRF           | Token CSRF em formulários POST com Flask-WTF                    |
 | Usuários       | Painel interno de usuários da propriedade, sem cadastro público |
+| Auditoria      | Logs de ações sensíveis, somente admin, escopo por propriedade  |
 | Dashboard      | Resumo operacional somente leitura da propriedade atual         |
 | Culturas       | Cadastro e acompanhamento das culturas                          |
 | Glebas         | Cadastro e gestão das áreas/talhões                             |
@@ -340,6 +343,25 @@ A redefinição (`/auth/redefinir-senha/<token>`) valida o token, exige nova sen
 **não reativa** usuário inativo e **não** faz login automático — redireciona ao
 login. Não há SMTP/Flask-Mail, fila, agendador ou deploy nesta fase.
 
+### Auditoria/logs
+
+A Fase 7.3 adiciona uma auditoria interna de ações sensíveis em `/auditoria/`,
+disponível **somente para o `admin`** (`auditoria.view`). São registrados:
+login (sucesso/falha) e logout, recuperação de senha (solicitação/redefinição/
+token inválido), criação/edição/remoção nos CRUDs (glebas, culturas, equipe,
+financeiro, colheita, aplicações), painel de usuários
+(`usuarios.create/edit/deactivate`), upload (`create/download/delete`), acesso
+à central de relatórios e tentativas de **permissão negada**.
+
+Os logs ficam na tabela `log_auditoria` e guardam **apenas dados mínimos**
+(ação, entidade, id, resultado, descrição curta, IP, user-agent, data/hora).
+Eles **nunca** armazenam senha, nova senha, hash, token puro, `token_hash`,
+`csrf_token` nem conteúdo de formulários/arquivos; e-mails em descrições são
+mascarados. Os logs são **escopados pela propriedade atual** (um admin não vê
+logs de outra propriedade) e a auditoria **nunca quebra o fluxo principal** —
+uma falha ao gravar log não impede a ação. Sem dashboard gráfico, exportação de
+logs, retenção automática, SIEM ou integração externa nesta fase.
+
 ### Usuários de teste (`seed-users`)
 
 | Perfil      | E-mail                       | Senha           |
@@ -374,19 +396,19 @@ login. Não há SMTP/Flask-Mail, fila, agendador ou deploy nesta fase.
 ## Próximos passos
 
 Concluídos: documentação de produto, modelagem (DER + dicionário), catálogo
-técnico/seed, a **fundação Flask**, os **modelos SQLAlchemy de domínio** (17
-tabelas), migrations, autenticação real, recuperação de senha, permissões finas
-por perfil, CSRF/Flask-WTF nos formulários POST, Dashboard
+técnico/seed, a **fundação Flask**, os **modelos SQLAlchemy de domínio** (18
+tabelas), migrations, autenticação real, recuperação de senha, auditoria/logs,
+permissões finas por perfil, CSRF/Flask-WTF nos formulários POST, Dashboard
 Operacional, Mapa real simplificado, IA Simulada Operacional, Relatórios
 Operacionais HTML, CRUDs de glebas/culturas/equipe/financeiro/colheita/aplicações
 de insumo/upload, Painel de Usuários interno e consulta somente leitura de
 Defensivos/Fertilizantes.
 
 O **MVP base está consolidado** e o projeto segue na fase de **MVP ampliado**
-(Fase 7). As Fases **7.1 — Painel de usuários** e **7.2 — Recuperação de senha**
-estão implementadas. O MVP ampliado ainda incorporará, em fases 7.x:
+(Fase 7). As Fases **7.1 — Painel de usuários**, **7.2 — Recuperação de senha** e
+**7.3 — Auditoria/logs** estão implementadas. O MVP ampliado ainda incorporará,
+em fases 7.x:
 
-- auditoria/logs administrativos;
 - PDF/exportações dos relatórios operacionais;
 - mapa avançado (edição/salvamento de polígono da gleba).
 
@@ -400,7 +422,7 @@ explicitamente aprovada): **venda, carrinho, checkout e cotação**. O ConnectAg
 permanece uma plataforma de gestão agrícola e consulta técnica, **sem
 marketplace e sem comércio**.
 
-O **próximo passo técnico** é a **Fase 7.3 — Auditoria/logs**. Consulte o
+O **próximo passo técnico** é a **Fase 7.4 — PDF/exportações**. Consulte o
 [Roadmap do MVP](./docs/07-roadmap-mvp.md) e o
 [Roadmap do MVP Ampliado](./docs/09-roadmap-mvp-ampliado.md) para o detalhamento.
 
