@@ -6,10 +6,11 @@ equipe, colheita, upload de documentos e mapa, oferecendo ainda apoio por uma
 camada de IA simulada, relatórios operacionais e um catálogo técnico de produtos
 agrícolas para consulta rápida.
 
-> **Status do projeto:** fundação Flask, **modelos SQLAlchemy** (15 tabelas),
+> **Status do projeto:** fundação Flask, **modelos SQLAlchemy** (16 tabelas),
 > **migrations** (Flask-Migrate), **importação do catálogo técnico** (via CLI),
 > **autenticação real** (login/logout), **permissões finas por perfil**,
 > **CSRF/Flask-WTF** nos formulários POST,
+> **Painel de Usuários** interno por propriedade,
 > **Dashboard Operacional** somente leitura, **Mapa real simplificado** somente
 > leitura, **IA Simulada Operacional** baseada em regras locais, **CRUDs** de
 > **Glebas**, **Culturas** (com associação cultura↔gleba), **Equipe**,
@@ -29,11 +30,10 @@ agrícolas para consulta rápida.
 > de entrega.
 >
 > **MVP ampliado (em andamento):** após decisão de produto, foi aberto o **MVP
-> ampliado** (Fase 7). Ele incorpora ao escopo do MVP, em fases 7.x, **painel de
-> usuários**, **recuperação de senha**, **auditoria/logs administrativos**,
-> **PDF/exportações** e **mapa avançado**. A Fase 7.0 é **somente documental**:
-> registra a decisão de escopo e o roadmap, **sem** implementar funcionalidade
-> nova. Continuam **fora do MVP ampliado** IA real/LLM, validação regulatória real
+> ampliado** (Fase 7). A Fase 7.0 registrou a decisão de escopo e a **Fase 7.1
+> implementa o painel de usuários** interno da propriedade. Seguem no escopo do
+> MVP ampliado: **recuperação de senha**, **auditoria/logs administrativos**,
+> **PDF/exportações** e **mapa avançado**. Continuam **fora do MVP ampliado** IA real/LLM, validação regulatória real
 > do catálogo, preço/imagem com fontes reais, OCR/leitura automática de uploads e
 > deploy/produção completo. **Venda, carrinho, checkout e cotação nunca entram no
 > produto.**
@@ -61,6 +61,7 @@ em etapas posteriores, evoluirá para a versão completa.
 - Uma IA simulada por regras para apoiar a leitura operacional dos dados locais da propriedade.
 - Um conjunto de relatórios HTML somente leitura, escopados pela propriedade atual.
 - Um controle básico de acesso por perfil (`admin`, `tecnico`, `trabalhador`).
+- Um painel interno para o `admin` gerenciar usuários vinculados à propriedade.
 
 ### O que o ConnectAgro **não é**
 
@@ -89,6 +90,7 @@ em etapas posteriores, evoluirá para a versão completa.
 | Login          | Autenticação e controle de acesso                               |
 | Permissões     | Matriz por perfil (`admin`, `tecnico`, `trabalhador`)           |
 | CSRF           | Token CSRF em formulários POST com Flask-WTF                    |
+| Usuários       | Painel interno de usuários da propriedade, sem cadastro público |
 | Dashboard      | Resumo operacional somente leitura da propriedade atual         |
 | Culturas       | Cadastro e acompanhamento das culturas                          |
 | Glebas         | Cadastro e gestão das áreas/talhões                             |
@@ -123,7 +125,7 @@ em etapas posteriores, evoluirá para a versão completa.
 │   └── catalogo-produtos/ # Documentação e especificação do catálogo de produtos
 ├── data/                  # Dados de apoio do projeto
 │   └── seeds/             # Seed técnico do catálogo (JSON/CSV) — importável via CLI
-├── migrations/            # Flask-Migrate/Alembic (migration inicial das 15 tabelas)
+├── migrations/            # Flask-Migrate/Alembic (schema inicial + evoluções)
 ├── instance/              # Banco SQLite e uploads locais em execução — não versionado
 ├── src/                   # Código-fonte da aplicação Flask
 │   ├── run.py             # ponto de entrada
@@ -132,7 +134,7 @@ em etapas posteriores, evoluirá para a versão completa.
 │       ├── config.py      # configuração por ambiente
 │       ├── extensions.py  # extensões (Flask-SQLAlchemy, Flask-Migrate)
 │       ├── blueprints/    # auth + CRUDs + catálogo + módulos protegidos
-│       ├── models/        # modelos SQLAlchemy de domínio (15 tabelas)
+│       ├── models/        # modelos SQLAlchemy de domínio (16 tabelas)
 │       ├── commands.py    # CLI: init-db, validate/import-catalog-seed, seed-users
 │       ├── services/      # regras de negócio e agregações (dashboard, IA, relatórios)
 │       ├── utils/         # auth.py, contexto.py, formatters.py, permissions.py
@@ -263,8 +265,9 @@ uploads.
 ### Permissões por perfil
 
 A Fase 6.3 adicionou permissões finas usando `src/app/utils/permissions.py`.
-A autorização usa o campo existente `usuario.perfil`, sem migration, sem tabela
-nova de roles/permissões e sem dependência externa de RBAC.
+A autorização usa o campo `usuario.perfil`, sem tabela de roles/permissões e sem
+dependência externa de RBAC. A Fase 7.1 acrescentou permissões `usuarios.*`,
+liberadas apenas para `admin`.
 
 Elementos principais:
 
@@ -300,6 +303,20 @@ proteção explicitamente em `tests/test_csrf.py`.
 CSRF não substitui autenticação, permissões por perfil nem escopo por
 propriedade.
 
+### Painel de usuários
+
+A Fase 7.1 adiciona o módulo `/usuarios/`, disponível somente para `admin`.
+Ele permite listar usuários vinculados à propriedade atual, criar usuário com
+senha temporária, editar nome/perfil/status e inativar acesso. Não há cadastro
+público, remoção física de usuário, recuperação de senha, auditoria ou painel de
+roles nesta fase.
+
+O vínculo entre conta e propriedade passa pela tabela `usuario_propriedade`.
+`propriedade.usuario_id` continua preservado para compatibilidade; quando uma
+base antiga ainda não tem vínculo, `propriedade_atual()` cria a associação ativa
+automaticamente. O comando `seed-users` também cria uma propriedade demo e
+vincula os três usuários de teste de forma idempotente.
+
 ### Usuários de teste (`seed-users`)
 
 | Perfil      | E-mail                       | Senha           |
@@ -308,6 +325,9 @@ propriedade.
 | tecnico     | tecnico@connectagro.com      | tecnico123      |
 | trabalhador | trabalhador@connectagro.com  | trabalhador123  |
 
+> `seed-users` cria/garante também uma propriedade demo e vínculos ativos em
+> `usuario_propriedade` para os três usuários, sem sobrescrever senhas existentes.
+>
 > A importação do catálogo popula apenas `produto_base` + `produto_tecnico`;
 > `produto_preco`/`produto_imagem` permanecem vazios no MVP e itens bloqueados
 > (Paraquate/Oxamil) não são importados. Alternativa pontual ao passo 3 (sem
@@ -331,17 +351,18 @@ propriedade.
 ## Próximos passos
 
 Concluídos: documentação de produto, modelagem (DER + dicionário), catálogo
-técnico/seed, a **fundação Flask**, os **modelos SQLAlchemy de domínio** (15
+técnico/seed, a **fundação Flask**, os **modelos SQLAlchemy de domínio** (16
 tabelas), migrations, autenticação real, permissões finas por perfil,
 CSRF/Flask-WTF nos formulários POST, Dashboard
 Operacional, Mapa real simplificado, IA Simulada Operacional, Relatórios
 Operacionais HTML, CRUDs de glebas/culturas/equipe/financeiro/colheita/aplicações
-de insumo/upload e consulta somente leitura de Defensivos/Fertilizantes.
+de insumo/upload, Painel de Usuários interno e consulta somente leitura de
+Defensivos/Fertilizantes.
 
 O **MVP base está consolidado** e o projeto entra agora na fase de **MVP
-ampliado** (Fase 7). O **MVP ampliado** incorporará, em fases 7.x:
+ampliado** (Fase 7). A **Fase 7.1 — Painel de usuários** está implementada. O
+MVP ampliado ainda incorporará, em fases 7.x:
 
-- painel de usuários (gestão interna pelo admin, sem cadastro público);
 - recuperação de senha;
 - auditoria/logs administrativos;
 - PDF/exportações dos relatórios operacionais;
@@ -357,7 +378,7 @@ explicitamente aprovada): **venda, carrinho, checkout e cotação**. O ConnectAg
 permanece uma plataforma de gestão agrícola e consulta técnica, **sem
 marketplace e sem comércio**.
 
-O **próximo passo técnico** é a **Fase 7.1 — Painel de usuários**. Consulte o
+O **próximo passo técnico** é a **Fase 7.2 — Recuperação de senha**. Consulte o
 [Roadmap do MVP](./docs/07-roadmap-mvp.md) e o
 [Roadmap do MVP Ampliado](./docs/09-roadmap-mvp-ampliado.md) para o detalhamento.
 

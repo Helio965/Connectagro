@@ -13,6 +13,7 @@ from .colheita import colheita_bp
 from .mapa import mapa_bp
 from .ia import ia_bp
 from .relatorios import relatorios_bp
+from .usuarios import usuarios_bp
 
 ALL_BLUEPRINTS = [
     dashboard_bp,
@@ -29,6 +30,7 @@ ALL_BLUEPRINTS = [
     mapa_bp,
     ia_bp,
     relatorios_bp,
+    usuarios_bp,
 ]
 
 

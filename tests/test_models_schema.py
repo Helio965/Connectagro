@@ -13,6 +13,7 @@ from app.extensions import db
 TABELAS_ESPERADAS = {
     "usuario",
     "propriedade",
+    "usuario_propriedade",
     "equipe_membro",
     "cultura",
     "gleba",
@@ -30,7 +31,7 @@ TABELAS_ESPERADAS = {
 
 
 def test_todas_as_tabelas_registradas(app):
-    """Todas as 15 tabelas esperadas estão registradas no metadata."""
+    """Todas as 16 tabelas esperadas estão registradas no metadata."""
     tabelas = set(db.metadata.tables.keys())
     faltando = TABELAS_ESPERADAS - tabelas
     assert not faltando, f"tabelas ausentes: {faltando}"
@@ -40,6 +41,9 @@ def test_todas_as_tabelas_registradas(app):
     "tabela,coluna",
     [
         ("usuario", "email"),
+        ("usuario_propriedade", "usuario_id"),
+        ("usuario_propriedade", "propriedade_id"),
+        ("usuario_propriedade", "ativo"),
         ("produto_base", "slug"),
         ("produto_base", "status_regulatorio"),
         ("produto_preco", "status_validacao"),
@@ -61,18 +65,24 @@ def test_create_all_em_memoria(app):
 
 def test_insercao_minima(app):
     """Insere registros mínimos sem depender de seed nem de arquivo .db."""
-    from app.models import Usuario, Propriedade, ProdutoBase, ProdutoTecnico
+    from app.models import (ProdutoBase, ProdutoTecnico, Propriedade, Usuario,
+                            UsuarioPropriedade)
 
     with app.app_context():
         db.create_all()
 
         u = Usuario(nome="Teste", email="teste@example.com",
-                    senha_hash="x", perfil="produtor")
+                    senha_hash="x", perfil="trabalhador")
         db.session.add(u)
         db.session.commit()
 
         p = Propriedade(usuario_id=u.id, nome="Fazenda Teste")
         db.session.add(p)
+        db.session.commit()
+
+        vinculo = UsuarioPropriedade(usuario_id=u.id, propriedade_id=p.id,
+                                     ativo=True, criado_por_id=u.id)
+        db.session.add(vinculo)
         db.session.commit()
 
         prod = ProdutoBase(
@@ -89,6 +99,8 @@ def test_insercao_minima(app):
 
         assert u.id is not None
         assert p.usuario_id == u.id
+        assert vinculo.usuario.id == u.id
+        assert vinculo.propriedade.id == p.id
         assert prod.slug == "glifosato"
         assert tec.produto.id == prod.id
         assert prod.tecnicos[0].id == tec.id

@@ -60,8 +60,8 @@
   guarda apenas dados mínimos do usuário, **nunca** a senha.
 - RN-11 — **Perfis oficiais do MVP:** `admin`, `tecnico`, `trabalhador`
   (`usuario.perfil`). A matriz de permissões fica em código no MVP, em
-  `src/app/utils/permissions.py`, sem tabela de roles/permissões, sem painel de
-  administração de usuários e sem dependência externa de RBAC.
+  `src/app/utils/permissions.py`, sem tabela de roles/permissões e sem
+  dependência externa de RBAC.
 - RN-11a — `admin` pode acessar todos os módulos e criar, editar e remover nos
   CRUDs da **sua propriedade atual**. Admin não acessa dados globais de outras
   propriedades.
@@ -92,6 +92,18 @@
 - RN-11k — CSRF não substitui autenticação, permissões por perfil nem escopo por
   propriedade. Com token válido, ações sem permissão continuam retornando **403**.
 - RN-11l — Formulários multipart do Upload também exigem token CSRF.
+- RN-11m — O painel `/usuarios/` é interno e exige permissões `usuarios.view`,
+  `usuarios.create`, `usuarios.edit` e `usuarios.deactivate`, concedidas apenas
+  ao perfil `admin`.
+- RN-11n — O painel de usuários trabalha somente com usuários vinculados à
+  propriedade atual por `usuario_propriedade`; usuários de outra propriedade não
+  podem ser editados/inativados e retornam **404** quando o perfil tem permissão.
+- RN-11o — Criar usuário pelo painel exige e-mail único, perfil oficial e senha
+  temporária com hash. Não há cadastro público nem redefinição de senha nesta
+  fase.
+- RN-11p — Inativar usuário desativa o login e o vínculo com a propriedade, sem
+  remoção física do registro. A propriedade deve manter pelo menos um `admin`
+  ativo.
 
 ## Regras operacionais
 
@@ -178,6 +190,10 @@
   exportações são relatórios operacionais, **não** documentos comerciais.
 - RN-42 — **Painel de usuários não é cadastro público**: a criação de usuários é
   uma ação administrativa interna, escopada à propriedade.
+- RN-42a — O vínculo `usuario_propriedade` é a fonte do painel de usuários no
+  MVP ampliado. `propriedade.usuario_id` permanece para compatibilidade e pode
+  gerar associação ativa automaticamente quando uma base antiga não possui
+  vínculo explícito.
 - RN-43 — A **recuperação de senha** deve respeitar a segurança e **não** expor
   senha nem token; o token deve ser seguro e expirável.
 - RN-44 — A **auditoria** deve registrar ações sensíveis **sem** armazenar senha

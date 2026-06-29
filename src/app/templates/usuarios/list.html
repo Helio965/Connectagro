@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Usuários — ConnectAgro{% endblock %}
+
+{% block content %}
+<section class="card">
+  <div class="card-head">
+    <div>
+      <h1>Usuários</h1>
+      <p>Painel de usuários interno da propriedade.</p>
+    </div>
+    {% if can("usuarios.create") %}
+    <a class="btn-acao" href="{{ url_for('usuarios.novo') }}">+ Novo usuário</a>
+    {% endif %}
+  </div>
+
+  <p class="placeholder-tag">
+    Este painel não é cadastro público. Usuários criados aqui acessam a
+    propriedade atual conforme seu perfil.
+  </p>
+
+  {% if vinculos %}
+  <table class="tabela">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>E-mail</th>
+        <th>Perfil</th>
+        <th>Status</th>
+        <th>Criado em</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for vinculo in vinculos %}
+      {% set u = vinculo.usuario %}
+      <tr>
+        <td>{{ u.nome }}</td>
+        <td>{{ u.email }}</td>
+        <td>{{ u.perfil }}</td>
+        <td>{{ "Ativo" if u.ativo and vinculo.ativo else "Inativo" }}</td>
+        <td>{{ u.criado_em }}</td>
+        <td class="acoes">
+          {% if can("usuarios.edit") %}
+          <a href="{{ url_for('usuarios.editar', usuario_id=u.id) }}">Editar</a>
+          {% endif %}
+          {% if can("usuarios.deactivate") and u.ativo and vinculo.ativo %}
+          <form method="post" action="{{ url_for('usuarios.inativar', usuario_id=u.id) }}"
+                onsubmit="return confirm('Inativar este usuário?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn-link-danger">Inativar</button>
+          </form>
+          {% endif %}
+          {% if not can("usuarios.edit") and not can("usuarios.deactivate") %}—{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>Nenhum usuário vinculado à propriedade atual.</p>
+  {% endif %}
+</section>
+{% endblock %}

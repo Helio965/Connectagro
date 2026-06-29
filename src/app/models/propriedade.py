@@ -17,6 +17,7 @@ class Propriedade(db.Model):
 
     # Relacionamentos
     usuario = db.relationship("Usuario", back_populates="propriedades")
+    vinculos_usuario = db.relationship("UsuarioPropriedade", back_populates="propriedade")
     membros = db.relationship("EquipeMembro", back_populates="propriedade")
     culturas = db.relationship("Cultura", back_populates="propriedade")
     glebas = db.relationship("Gleba", back_populates="propriedade")

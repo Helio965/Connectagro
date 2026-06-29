@@ -32,9 +32,10 @@ Produtores rurais de pequeno, médio e grande porte e suas equipes de gestão.
   equipe, financeiro, colheita, catálogo em consulta, aplicações de insumo,
   upload seguro, mapa real simplificado, IA simulada e relatórios HTML.
 - **MVP ampliado em andamento.** Por decisão de produto, o MVP foi ampliado
-  antes de ser encerrado em definitivo. O **MVP ampliado** passa a incluir, em
-  fases 7.x, **painel de usuários**, **recuperação de senha**, **auditoria/logs
-  administrativos**, **PDF/exportações** e **mapa avançado**.
+  antes de ser encerrado em definitivo. A **Fase 7.1 — painel de usuários** já
+  foi implementada. O **MVP ampliado** ainda inclui, em fases 7.x, **recuperação
+  de senha**, **auditoria/logs administrativos**, **PDF/exportações** e **mapa
+  avançado**.
 - **Fora do MVP ampliado** (avaliados depois): IA real/LLM, validação
   regulatória real do catálogo, preço/imagem com fontes reais, OCR/leitura
   automática de uploads e deploy/produção completo. A IA do produto continua

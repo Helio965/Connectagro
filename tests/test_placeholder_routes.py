@@ -18,6 +18,7 @@ ROTAS_PROTEGIDAS = [
     "/aplicacoes/",
     "/financeiro/",
     "/upload/",
+    "/usuarios/",
     "/equipe/",
     "/colheita/",
     "/mapa/",

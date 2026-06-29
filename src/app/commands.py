@@ -76,26 +76,71 @@ USUARIOS_TESTE = [
 @click.command("seed-users")
 @with_appcontext
 def seed_users():
-    """Cria os usuários de teste do MVP (idempotente; não sobrescreve senha)."""
-    from .models import Usuario
+    """Cria usuários de teste e vínculos com a propriedade demo."""
+    from .models import Propriedade, Usuario, UsuarioPropriedade
     from .utils.auth import gerar_hash_senha
 
     criados, existentes = 0, 0
+    usuarios = {}
     for nome, email, senha, perfil in USUARIOS_TESTE:
-        if Usuario.query.filter_by(email=email).first() is not None:
+        usuario = Usuario.query.filter_by(email=email).first()
+        if usuario is not None:
             existentes += 1
+            usuarios[email] = usuario
             click.echo(f"  já existe: {email} ({perfil})")
             continue
-        db.session.add(Usuario(
+        usuario = Usuario(
             nome=nome, email=email, perfil=perfil, ativo=True,
             senha_hash=gerar_hash_senha(senha),
-        ))
+        )
+        db.session.add(usuario)
+        usuarios[email] = usuario
         criados += 1
         click.echo(f"  criado:    {email} ({perfil})")
+    db.session.commit()
+
+    admin = usuarios["admin@connectagro.com"]
+    propriedade = (Propriedade.query
+                   .filter_by(usuario_id=admin.id)
+                   .filter_by(nome="Propriedade Demo ConnectAgro")
+                   .order_by(Propriedade.id)
+                   .first())
+    propriedade_criada = False
+    if propriedade is None:
+        propriedade = Propriedade(
+            usuario_id=admin.id,
+            nome="Propriedade Demo ConnectAgro",
+        )
+        db.session.add(propriedade)
+        db.session.commit()
+        propriedade_criada = True
+
+    vinculos_criados, vinculos_existentes = 0, 0
+    for usuario in usuarios.values():
+        vinculo = UsuarioPropriedade.query.filter_by(
+            usuario_id=usuario.id,
+            propriedade_id=propriedade.id,
+        ).first()
+        if vinculo is None:
+            db.session.add(UsuarioPropriedade(
+                usuario_id=usuario.id,
+                propriedade_id=propriedade.id,
+                ativo=True,
+                criado_por_id=admin.id,
+            ))
+            vinculos_criados += 1
+        else:
+            vinculos_existentes += 1
     db.session.commit()
     click.echo(
         f"Usuários de teste — criados: {criados}, já existentes: {existentes}. "
         "Senhas armazenadas como hash."
+    )
+    click.echo(
+        "Propriedade demo — "
+        f"{'criada' if propriedade_criada else 'já existente'}; "
+        f"vínculos criados: {vinculos_criados}, "
+        f"já existentes: {vinculos_existentes}."
     )
 
 

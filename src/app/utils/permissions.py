@@ -45,6 +45,10 @@ _ADMIN_PERMISSIONS = {
     "upload.create",
     "upload.download",
     "upload.delete",
+    "usuarios.view",
+    "usuarios.create",
+    "usuarios.edit",
+    "usuarios.deactivate",
 }
 
 _TECNICO_PERMISSIONS = {

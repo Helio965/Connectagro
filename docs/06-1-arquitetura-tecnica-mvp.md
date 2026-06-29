@@ -2,7 +2,7 @@
 
 ## Status do documento
 
-**Arquitetura técnica — v0.20 (MVP base consolidado + abertura do MVP ampliado: CRUDs + catálogo + upload + dashboard + mapa + IA simulada + relatórios operacionais + permissões finas + CSRF + revisão final).**
+**Arquitetura técnica — v0.21 (MVP base consolidado + MVP ampliado em andamento: painel de usuários + CRUDs + catálogo + upload + dashboard + mapa + IA simulada + relatórios operacionais + permissões finas + CSRF + revisão final).**
 
 > **Redefinição do MVP ampliado (Fase 7.0):** por decisão de produto, o MVP foi
 > ampliado. As fases 7.x passam a incluir painel de usuários, recuperação de
@@ -10,6 +10,12 @@
 > [14 — Arquitetura planejada para o MVP ampliado](#14-arquitetura-planejada-para-o-mvp-ampliado)
 > e o [09 — Roadmap do MVP Ampliado](./09-roadmap-mvp-ampliado.md)). A Fase 7.0 é
 > **somente documental** — não há implementação de funcionalidade nova.
+
+> **Painel de Usuários (Fase 7.1):** o MVP ampliado adiciona `usuarios_bp`
+> (`/usuarios`), `services/usuarios_service.py`, o modelo
+> `UsuarioPropriedade`, a migration `usuario_propriedade` e permissões
+> `usuarios.*` apenas para `admin`. O painel é interno, sem cadastro público,
+> sem remoção física e sem recuperação de senha nesta fase.
 
 > **Revisão Final do MVP (Fase 6.5):** o MVP foi revisado como conjunto
 > funcional, com validação da suíte automatizada, conferência de formulários POST
@@ -43,13 +49,14 @@ Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetur
 - O documento **06.1** (este) é o **guia técnico detalhado** da implementação do
   MVP em Flask.
 
-> **Estado atual:** estão prontos a fundação Flask, modelos SQLAlchemy (15
+> **Estado atual:** estão prontos a fundação Flask, modelos SQLAlchemy (16
 > tabelas), migrations, importação do catálogo técnico via CLI, autenticação real,
 > permissões finas por perfil, proteção **CSRF/Flask-WTF**, **Dashboard
 > Operacional** somente leitura, **Mapa real simplificado** somente leitura,
 > **IA Simulada Operacional** baseada em
 > regras locais, **Relatórios Operacionais HTML**, CRUDs de Glebas, Culturas,
-> Equipe, Financeiro, Colheita, Aplicações de Insumo e **Upload de Arquivos**,
+> Equipe, Financeiro, Colheita, Aplicações de Insumo, **Upload de Arquivos** e
+> **Painel de Usuários**,
 > além da consulta somente leitura de Defensivos e Fertilizantes.
 > `ProdutoPreco`/`ProdutoImagem` seguem vazios no MVP.
 >
@@ -74,10 +81,10 @@ Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetur
 > por usuários ficam fora do Git e não devem ser servidos diretamente por
 > `/static/uploads`.
 >
-> **Estado atual:** MVP consolidado para apresentação e continuidade. Recursos
-> como PDF/exportações, painel de usuários, recuperação de senha, auditoria
-> avançada, deploy, mapa avançado, validação regulatória real e IA externa ficam
-> como evolução pós-MVP.
+> **Estado atual:** MVP base consolidado e MVP ampliado em andamento. Recursos
+> como recuperação de senha, auditoria/logs, PDF/exportações e mapa avançado
+> seguem nas próximas fases 7.x; validação regulatória real, preço/imagem real,
+> OCR, deploy completo e IA externa ficam fora do MVP ampliado.
 
 ## Objetivo
 
@@ -142,7 +149,7 @@ Flask (rotas/blueprints)  ──►  Serviços/helpers  ──►  Modelos/Acess
 | IA simulada      | Regras locais em Python                      | Sem LLM/API externa/internet                   |
 | Relatórios       | Serviços Python + Jinja2                     | HTML somente leitura; sem PDF/exportação       |
 | Autenticação     | Sessão Flask + hash de senha (Werkzeug)      | Helpers em `utils/auth.py`                     |
-| Autorização      | Matriz em código                             | `utils/permissions.py`; sem tabela nova        |
+| Autorização      | Matriz em código                             | `utils/permissions.py`; sem tabela de roles    |
 | Formulários/CSRF | Flask-WTF / CSRFProtect                     | Token em formulários POST; testes específicos  |
 | Frontend         | HTML, CSS, JavaScript                        | Sem framework JS obrigatório no MVP            |
 | Testes           | pytest                                       | SQLite em memória e pasta temporária para upload |
@@ -164,9 +171,10 @@ src/
     │   ├── auth/  dashboard/  culturas/  glebas/
     │   ├── defensivos/  fertilizantes/  aplicacoes/
     │   ├── financeiro/  upload/  equipe/  colheita/
-    │   └── mapa/  ia/  relatorios/
-    ├── models/                  # modelos SQLAlchemy de domínio (15 tabelas)
-    ├── services/                # catalogo_seed.py, dashboard_service.py, ia_simulada_service.py, relatorios_service.py
+    │   ├── mapa/  ia/  relatorios/
+    │   └── usuarios/
+    ├── models/                  # modelos SQLAlchemy de domínio (16 tabelas)
+    ├── services/                # catalogo_seed.py, dashboard_service.py, ia_simulada_service.py, relatorios_service.py, usuarios_service.py
     ├── utils/                   # auth.py, contexto.py, catalogo.py, formatters.py, permissions.py
     ├── templates/               # base.html, módulos, erros
     └── static/                  # css/, js/ (arquivos públicos)
@@ -211,6 +219,7 @@ instance/
 | Aplicações         | `aplicacoes`     | `/aplicacoes`  | `aplicacao_insumo`, `cultura_gleba`, `produto_base` |
 | Financeiro         | `financeiro`     | `/financeiro`  | `financeiro_lancamento`                           |
 | Upload             | `upload`         | `/upload`      | `upload_arquivo`                                  |
+| Usuários           | `usuarios`       | `/usuarios`    | `usuario`, `usuario_propriedade`, `propriedade`   |
 | Equipe             | `equipe`         | `/equipe`      | `equipe_membro`                                   |
 | Colheita           | `colheita`       | `/colheita`    | `colheita_registro`, `cultura_gleba`              |
 | Mapa real          | `mapa`           | `/mapa`        | `gleba`                                           |
@@ -223,7 +232,8 @@ instance/
 
 - **Banco:** arquivo SQLite em `instance/` ou caminho configurado por ambiente.
 - **ORM:** `Flask-SQLAlchemy`, com instância `db` em `src/app/extensions.py`.
-- **Migrations:** `Flask-Migrate/Alembic`, com migration inicial das 15 tabelas.
+- **Migrations:** `Flask-Migrate/Alembic`, com migration inicial e evoluções
+  versionadas.
 - **Seeds:** `flask --app src/run.py import-catalog-seed` popula apenas
   `produto_base` + `produto_tecnico`. `produto_preco`/`produto_imagem` continuam
   vazios no MVP.
@@ -243,6 +253,8 @@ instance/
   matriz em código.
 - **CSRF/Flask-WTF:** não exige migration nova porque protege formulários e não
   altera schema.
+- **Painel de Usuários:** exige migration própria para `usuario_propriedade`, com
+  backfill a partir de `propriedade.usuario_id`.
 
 ### Dashboard operacional
 
@@ -361,9 +373,30 @@ Matriz resumida:
 
 | Perfil | Resumo |
 |--------|--------|
-| `admin` | Acessa todos os módulos; cria, edita e remove registros nos CRUDs da sua propriedade; envia, baixa e remove uploads. |
+| `admin` | Acessa todos os módulos; cria, edita e remove registros nos CRUDs da sua propriedade; envia, baixa e remove uploads; gerencia usuários internos da propriedade. |
 | `tecnico` | Acessa dashboard, mapa, catálogo, relatórios, IA, equipe e financeiro em leitura; cria/edita glebas, culturas, colheitas e aplicações; envia e baixa uploads; não remove registros críticos nem gerencia equipe/financeiro. |
 | `trabalhador` | Acessa dashboard, mapa, catálogo, relatórios e IA; visualiza glebas, culturas, colheitas e aplicações; cria colheitas, aplicações e uploads; baixa uploads; não acessa equipe/financeiro e não edita/remove registros críticos. |
+
+### Painel de usuários
+
+- `src/app/blueprints/usuarios/routes.py` expõe `/usuarios/`,
+  `/usuarios/novo`, `/usuarios/<id>/editar` e `/usuarios/<id>/inativar`.
+- Todas as rotas exigem login, CSRF em POST e permissões `usuarios.*`; no MVP
+  ampliado, essas permissões pertencem apenas ao perfil `admin`.
+- `src/app/services/usuarios_service.py` concentra criação, edição, inativação,
+  listagem e validações do painel.
+- `src/app/models/usuario_propriedade.py` representa a associação explícita entre
+  conta e propriedade, com par (`usuario_id`, `propriedade_id`) único.
+- `utils/contexto.py` resolve a propriedade atual primeiro por vínculo ativo em
+  `usuario_propriedade`. Se a base ainda usa apenas `propriedade.usuario_id`, a
+  associação ativa é criada automaticamente para manter compatibilidade.
+- `seed-users` cria/garante os três usuários de teste, uma propriedade demo e os
+  vínculos ativos, sem sobrescrever senhas existentes e sem duplicar associações.
+- O painel não implementa cadastro público, recuperação de senha, auditoria,
+  remoção física de usuário, tabela de roles/permissões ou múltiplas propriedades
+  selecionáveis.
+- A inativação marca `usuario.ativo = 0` e `usuario_propriedade.ativo = 0`; o
+  serviço impede deixar a propriedade sem nenhum `admin` ativo.
 
 ### CSRF/Flask-WTF
 
@@ -596,6 +629,10 @@ Matriz resumida:
   do `CSRFProtect`, token nos formulários, POST sem token retornando 400, POST
   com token válido funcionando, Upload multipart com/sem token, rotas GET sem
   token, erro amigável e convivência com permissões 403.
+- `tests/test_usuarios_painel.py` cobre acesso somente por `admin`,
+  criação/edição/inativação de usuários, vínculo por propriedade, bloqueio do
+  último admin ativo, compatibilidade com base legada, `seed-users` idempotente e
+  convivência com CSRF/permissões.
 
 ---
 
@@ -648,7 +685,8 @@ Matriz resumida:
 - [x] Decisão final sobre ORM: Flask-SQLAlchemy
 - [x] Fundação Flask criada (`src/run.py` + `src/app/`)
 - [x] Blueprints placeholders criados
-- [x] Modelos SQLAlchemy de domínio criados (15 tabelas em `src/app/models/`)
+- [x] Modelos SQLAlchemy de domínio criados (15 tabelas iniciais; 16 no schema
+  atual após `usuario_propriedade`)
 - [x] Schema validável por `db.create_all()` e comando `flask init-db`
 - [x] Flask-Migrate/Alembic configurado e migration inicial versionada
 - [x] Validação do seed técnico (`flask validate-catalog-seed`)
@@ -670,9 +708,9 @@ Matriz resumida:
 - [x] Revisão e ajustes finais do MVP
 - [x] Checklist final de entrega do MVP (`docs/08-checklist-final-mvp.md`)
 
-**MVP ampliado (Fase 7 — planejado):**
+**MVP ampliado (Fase 7):**
 
-- [ ] Painel de usuários (Fase 7.1)
+- [x] Painel de usuários (Fase 7.1)
 - [ ] Recuperação de senha (Fase 7.2)
 - [ ] Auditoria/logs administrativos (Fase 7.3)
 - [ ] PDF/exportações (Fase 7.4)
@@ -690,22 +728,24 @@ Matriz resumida:
 
 ---
 
-## 14. Arquitetura planejada para o MVP ampliado
+## 14. Arquitetura do MVP ampliado
 
 > Esta seção descreve, em **alto nível**, a arquitetura pretendida para as fases
-> 7.x. **Nenhum** destes itens está implementado ainda — a Fase 7.0 é apenas
-> documental. As decisões definitivas serão tomadas em cada fase específica.
+> 7.x. A Fase 7.1 já está implementada; as demais decisões definitivas serão
+> tomadas em cada fase específica.
 
-### Painel de usuários (Fase 7.1)
+### Painel de usuários (Fase 7.1 — implementado)
 
 - Gestão interna dos usuários da propriedade pelo `admin` (listar, criar, editar
   perfil/status, inativar); **sem** cadastro público.
-- Provável necessidade de **repensar o vínculo usuário↔propriedade** (hoje cada
-  usuário resolve uma propriedade padrão em `utils/contexto.py`).
-- Possível **tabela de associação** futura (ex.: usuário↔propriedade) — a ser
-  decidida na fase, com migration própria.
+- Tabela de associação `usuario_propriedade` com migration própria e backfill a
+  partir de `propriedade.usuario_id`.
+- `utils/contexto.py` usa vínculo ativo como fonte da propriedade atual, mantendo
+  compatibilidade com bases antigas.
 - Mantém as **permissões por perfil** (`utils/permissions.py`); a gestão de
-  usuários exige permissão de `admin`.
+  usuários exige permissões `usuarios.*`, concedidas apenas ao `admin`.
+- Não inclui recuperação de senha, auditoria/logs, remoção física de usuário nem
+  tabela de roles/permissões.
 
 ### Recuperação de senha (Fase 7.2)
 

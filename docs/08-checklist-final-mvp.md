@@ -46,7 +46,8 @@ ampliado** (Fase 7).
 
 ## 4. Dados e banco
 
-- [x] SQLAlchemy com 15 tabelas de domínio.
+- [x] SQLAlchemy com 15 tabelas no MVP base; schema atual com 16 tabelas após
+  `usuario_propriedade` na Fase 7.1.
 - [x] Flask-Migrate/Alembic configurado.
 - [x] Migration inicial versionada.
 - [x] SQLite como banco padrão do MVP.
@@ -138,7 +139,8 @@ flask --app src/run.py seed-users
 Recursos **ainda não implementados** no MVP base. Os itens marcados com
 **(MVP ampliado)** foram movidos para a Fase 7 e serão entregues em fases 7.x:
 
-- Sem painel de usuários. **(MVP ampliado — Fase 7.1)**
+- Painel de usuários fora do MVP base, entregue depois no MVP ampliado
+  **(Fase 7.1 concluída)**.
 - Sem recuperação de senha. **(MVP ampliado — Fase 7.2)**
 - Sem auditoria/logs administrativos. **(MVP ampliado — Fase 7.3)**
 - Sem PDF/exportação. **(MVP ampliado — Fase 7.4)**
@@ -156,7 +158,7 @@ Recursos **ainda não implementados** no MVP base. Os itens marcados com
 
 Itens que **passaram a integrar o MVP** (Fase 7), antes tratados como pós-MVP:
 
-- Painel de usuários (Fase 7.1).
+- Painel de usuários (Fase 7.1 concluída).
 - Recuperação de senha (Fase 7.2).
 - Auditoria/logs administrativos (Fase 7.3).
 - PDF/exportações (Fase 7.4).

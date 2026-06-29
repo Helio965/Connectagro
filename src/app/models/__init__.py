@@ -5,6 +5,7 @@ Importa todos os modelos para que o SQLAlchemy registre as tabelas quando
 """
 from .usuario import Usuario
 from .propriedade import Propriedade
+from .usuario_propriedade import UsuarioPropriedade
 from .equipe import EquipeMembro
 from .cultura import Cultura, CulturaGleba
 from .gleba import Gleba
@@ -18,6 +19,7 @@ from .ia import IaInteracao
 __all__ = [
     "Usuario",
     "Propriedade",
+    "UsuarioPropriedade",
     "EquipeMembro",
     "Cultura",
     "CulturaGleba",
