@@ -58,9 +58,9 @@
 ## Requisitos Funcionais — MVP ampliado
 
 > Os requisitos abaixo descrevem o **escopo do MVP ampliado** (Fase 7). As Fases
-> 7.1 (painel de usuários), 7.2 (recuperação de senha), 7.3 (auditoria/logs) e
-> 7.4 (PDF/exportações) já estão implementadas; o item restante (mapa avançado)
-> segue planejado. Nenhum deles inclui venda, carrinho, checkout ou cotação.
+> 7.1 (painel de usuários), 7.2 (recuperação de senha), 7.3 (auditoria/logs),
+> 7.4 (PDF/exportações) e 7.5 (mapa avançado) já estão implementadas. Falta apenas
+> a revisão final (Fase 7.6). Nenhum item inclui venda, carrinho, checkout ou cotação.
 
 ### Painel de usuários (Fase 7.1)
 - RF-17 — Permitir que o **admin** liste os usuários da sua propriedade.
@@ -113,11 +113,16 @@
 - RF-33 — Exportações **nunca** geram cotação/venda; são relatórios operacionais
   com aviso explícito e registram auditoria `exportacao.gerada`.
 
-### Mapa avançado (Fase 7.5)
-- RF-34 — Editar e **salvar o polígono** da gleba (`poligono_geojson`).
-- RF-35 — Melhorar a visualização dos polígonos no mapa.
-- RF-36 — Calcular **área aproximada**, se implementado.
-- RF-37 — Sem **PostGIS** obrigatório e sem **GPS em tempo real** obrigatório.
+### Mapa avançado (Fase 7.5) ✅
+- RF-34 — **Editar, salvar e limpar** o polígono da gleba (`poligono_geojson`)
+  pelo mapa, com Leaflet + Leaflet.draw (CDN). Edição exige a permissão
+  `mapa.edit` (admin e técnico); **trabalhador apenas visualiza**.
+- RF-35 — Exibir e editar os polígonos no mapa (um polígono por gleba), com
+  validação de GeoJSON no backend e auditoria das alterações.
+- RF-36 — Cálculo de **área aproximada** **não** foi implementado nesta fase
+  (evitar dependência/risco); o foco é desenhar/salvar/limpar o polígono.
+- RF-37 — Sem **PostGIS**, sem **GPS em tempo real**, sem shapefile/KML e sem
+  medição/georreferenciamento oficial.
 
 ---
 

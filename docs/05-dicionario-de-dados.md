@@ -36,6 +36,10 @@ A Fase 7.4 (PDF/exportações) **não** altera o schema: as exportações CSV/PD
 usam apenas dados já existentes, gerados em memória a partir do
 `relatorios_service`. O total permanece em **18 tabelas**.
 
+A Fase 7.5 (mapa avançado) também **não** altera o schema: a edição de polígonos
+usa o campo já existente `gleba.poligono_geojson` (TEXT, GeoJSON). O total
+permanece em **18 tabelas**.
+
 ## Objetivo
 
 Documentar, de forma padronizada, cada tabela do MVP e seus campos: nome, tipo,
@@ -188,7 +192,7 @@ Culturas cadastradas na propriedade.
 | area_ha          | REAL    | Não         |       | Área em hectares           |                                      |
 | latitude         | REAL    | Não         |       | Latitude do ponto central  | Usada pelo mapa real simplificado    |
 | longitude        | REAL    | Não         |       | Longitude do ponto central | Usada pelo mapa real simplificado    |
-| poligono_geojson | TEXT    | Não         |       | Polígono da área (GeoJSON) | JSON em `TEXT`; somente leitura no mapa |
+| poligono_geojson | TEXT    | Não         |       | Polígono da área (GeoJSON) | JSON em `TEXT`; editável no mapa (Fase 7.5) com permissão `mapa.edit` |
 | tipo_solo        | TEXT    | Não         |       | Tipo de solo               |                                      |
 | observacoes      | TEXT    | Não         |       | Texto livre                |                                      |
 | criado_em        | TEXT    | Sim         |       | Data/hora de criação       | ISO 8601                             |

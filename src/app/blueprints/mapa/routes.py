@@ -1,10 +1,17 @@
-"""Rotas do módulo Mapa real simplificado do MVP."""
+"""Rotas do módulo Mapa (real simplificado + edição de polígonos — Fase 7.5)."""
 import json
 
-from flask import jsonify, render_template
+from flask import abort, jsonify, render_template, request
 
 from . import mapa_bp
+from ...extensions import db
 from ...models import Gleba
+from ...services.auditoria_service import registrar_falha, registrar_sucesso
+from ...services.mapa_service import (
+    atualizar_poligono_gleba,
+    limpar_poligono_gleba,
+    validar_poligono_geojson,
+)
 from ...utils.auth import login_required
 from ...utils.contexto import propriedade_atual
 from ...utils.formatters import formatar_area
@@ -55,7 +62,8 @@ def _poligono_geojson_valido(valor):
 
 
 def _gleba_payload(gleba):
-    latitude, longitude = _coordenadas_validas(gleba)
+    coords = _coordenadas_validas(gleba)
+    latitude, longitude = coords if coords else (None, None)
     return {
         "id": gleba.id,
         "nome": gleba.nome,
@@ -115,4 +123,62 @@ def dados():
         "propriedade": {"id": propriedade.id, "nome": propriedade.nome},
         "glebas": glebas_com_coordenadas,
         "sem_coordenadas": glebas_sem_coordenadas,
+    })
+
+
+def _gleba_da_propriedade_ou_404(gleba_id, propriedade):
+    gleba = Gleba.query.filter_by(id=gleba_id, propriedade_id=propriedade.id).first()
+    if gleba is None:
+        abort(404)
+    return gleba
+
+
+@mapa_bp.route("/glebas/<int:gleba_id>/poligono", methods=["POST"])
+@login_required
+@require_permission("mapa.edit")
+def salvar_poligono(gleba_id):
+    """Salva o polígono GeoJSON de uma gleba da propriedade atual."""
+    propriedade = propriedade_atual()
+    gleba = _gleba_da_propriedade_ou_404(gleba_id, propriedade)
+
+    payload = request.get_json(silent=True)
+    geojson, erro = validar_poligono_geojson(payload)
+    if erro:
+        registrar_falha(
+            "mapa.poligono.falha", entidade="gleba", entidade_id=gleba.id,
+            descricao="GeoJSON inválido ao salvar polígono",
+            propriedade_id=propriedade.id, request=request)
+        return jsonify({"ok": False, "error": erro}), 400
+
+    atualizar_poligono_gleba(gleba, geojson)
+    db.session.commit()
+    registrar_sucesso(
+        "mapa.poligono.update", entidade="gleba", entidade_id=gleba.id,
+        descricao="Polígono da gleba atualizado",
+        propriedade_id=propriedade.id, request=request)
+    return jsonify({
+        "ok": True,
+        "message": "Polígono salvo com sucesso.",
+        "gleba": _gleba_payload(gleba),
+    })
+
+
+@mapa_bp.route("/glebas/<int:gleba_id>/poligono/limpar", methods=["POST"])
+@login_required
+@require_permission("mapa.edit")
+def limpar_poligono(gleba_id):
+    """Remove o polígono GeoJSON de uma gleba da propriedade atual."""
+    propriedade = propriedade_atual()
+    gleba = _gleba_da_propriedade_ou_404(gleba_id, propriedade)
+
+    limpar_poligono_gleba(gleba)
+    db.session.commit()
+    registrar_sucesso(
+        "mapa.poligono.delete", entidade="gleba", entidade_id=gleba.id,
+        descricao="Polígono da gleba removido",
+        propriedade_id=propriedade.id, request=request)
+    return jsonify({
+        "ok": True,
+        "message": "Polígono removido com sucesso.",
+        "gleba": _gleba_payload(gleba),
     })

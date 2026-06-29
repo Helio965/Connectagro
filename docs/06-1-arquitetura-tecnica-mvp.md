@@ -2,7 +2,16 @@
 
 ## Status do documento
 
-**Arquitetura técnica — v0.24 (MVP base consolidado + MVP ampliado em andamento: painel de usuários + recuperação de senha + auditoria/logs + PDF/exportações + CRUDs + catálogo + upload + dashboard + mapa + IA simulada + relatórios operacionais + permissões finas + CSRF + revisão final).**
+**Arquitetura técnica — v0.25 (MVP base consolidado + MVP ampliado em andamento: painel de usuários + recuperação de senha + auditoria/logs + PDF/exportações + mapa avançado + CRUDs + catálogo + upload + dashboard + IA simulada + relatórios operacionais + permissões finas + CSRF + revisão final).**
+
+> **Mapa avançado (Fase 7.5):** o módulo Mapa passa a permitir **editar, salvar e
+> limpar** o polígono (`gleba.poligono_geojson`) de cada gleba, com Leaflet +
+> **Leaflet.draw** (via CDN). Adiciona `services/mapa_service.py` (validação/
+> normalização de GeoJSON) e as rotas POST `/mapa/glebas/<id>/poligono` e
+> `.../poligono/limpar`, com `mapa.edit` (admin/técnico; trabalhador só
+> visualiza), CSRF (token via header `X-CSRFToken`), escopo por propriedade e
+> auditoria (`mapa.poligono.update`/`delete`/`falha`). **Sem** migration/model/
+> tabela/dependência Python nova — usa o campo já existente.
 
 > **PDF/exportações (Fase 7.4):** o MVP ampliado adiciona
 > `services/exportacoes_service.py` e rotas `/relatorios/<slug>/exportar.csv` e
@@ -173,7 +182,7 @@ Flask (rotas/blueprints)  ──►  Serviços/helpers  ──►  Modelos/Acess
 | Acesso a dados   | Flask-SQLAlchemy                             | ORM adotado                                    |
 | Migrations       | Flask-Migrate (Alembic)                      | Pasta `migrations/` versionada                 |
 | Upload local     | Werkzeug `secure_filename` + Flask `send_from_directory` | Arquivos fora de `static` e do Git |
-| Mapa frontend    | Leaflet.js via CDN                           | Sem dependência Python/NPM nova                |
+| Mapa frontend    | Leaflet.js + Leaflet.draw via CDN            | Edição de polígono; sem dependência Python/NPM |
 | IA simulada      | Regras locais em Python                      | Sem LLM/API externa/internet                   |
 | Relatórios       | Serviços Python + Jinja2                     | HTML somente leitura                           |
 | Exportações      | `csv` (lib padrão) + ReportLab (PDF)         | CSV/PDF em memória; `exportacoes_service.py`   |
@@ -203,7 +212,7 @@ src/
     │   ├── mapa/  ia/  relatorios/
     │   └── usuarios/  auditoria/
     ├── models/                  # modelos SQLAlchemy de domínio (18 tabelas)
-    ├── services/                # catalogo_seed.py, dashboard_service.py, ia_simulada_service.py, relatorios_service.py, usuarios_service.py, password_reset_service.py, auditoria_service.py, exportacoes_service.py
+    ├── services/                # catalogo_seed.py, dashboard_service.py, ia_simulada_service.py, relatorios_service.py, usuarios_service.py, password_reset_service.py, auditoria_service.py, exportacoes_service.py, mapa_service.py
     ├── utils/                   # auth.py, contexto.py, catalogo.py, formatters.py, permissions.py
     ├── templates/               # base.html, módulos, erros
     └── static/                  # css/, js/ (arquivos públicos)
@@ -251,7 +260,7 @@ instance/
 | Usuários           | `usuarios`       | `/usuarios`    | `usuario`, `usuario_propriedade`, `propriedade`   |
 | Equipe             | `equipe`         | `/equipe`      | `equipe_membro`                                   |
 | Colheita           | `colheita`       | `/colheita`    | `colheita_registro`, `cultura_gleba`              |
-| Mapa real          | `mapa`           | `/mapa`        | `gleba`                                           |
+| Mapa (avançado)    | `mapa`           | `/mapa`        | `gleba` (edição de `poligono_geojson`)            |
 | IA simulada        | `ia`             | `/ia`          | `ia_interacao`                                    |
 | Relatórios         | `relatorios`     | `/relatorios`  | leitura de múltiplas entidades                    |
 | Auditoria          | `auditoria`      | `/auditoria`   | `log_auditoria` (somente `admin`)                 |
@@ -291,6 +300,8 @@ instance/
 - **Auditoria/logs:** exige migration própria para `log_auditoria` (índices em
   `usuario_id`, `propriedade_id`, `acao` e `criado_em`); **não** altera as
   tabelas existentes.
+- **Mapa avançado:** **não** exige migration nova porque a edição de polígonos
+  usa o campo já existente `gleba.poligono_geojson`.
 
 ### Dashboard operacional
 
@@ -321,9 +332,27 @@ instance/
   `[-15.7801, -47.9292]`, marcadores, popup e ajuste de bounds.
 - A página renderiza sem internet nos testes; sem a biblioteca Leaflet carregada,
   o script mostra mensagem de indisponibilidade do mapa visual.
-- O módulo não cria, edita ou remove glebas, não mede área, não desenha polígonos,
-  não importa/exporta GeoJSON, não usa GPS em tempo real, não usa PostGIS e não
-  adiciona dependência Python/NPM.
+
+#### Edição de polígonos (Fase 7.5)
+
+- `templates/mapa/index.html` expõe `data-csrf-token` e `data-can-edit` no
+  container do mapa; os controles de edição (select de gleba, "Salvar"/"Limpar")
+  só aparecem para quem tem `mapa.edit`.
+- `mapa.js` usa **Leaflet.draw** (CDN) para desenhar/editar **um polígono por
+  gleba**; o salvamento é um `fetch` POST com header `X-CSRFToken`. Se
+  Leaflet.draw não carregar, o mapa segue como somente leitura.
+- `POST /mapa/glebas/<id>/poligono` valida o GeoJSON via
+  `services/mapa_service.validar_poligono_geojson` (Polygon/MultiPolygon/Feature;
+  fecha anéis; coordenadas em faixa; **≤ 100 KB**; recusa FeatureCollection/
+  GeometryCollection), grava em `gleba.poligono_geojson`, atualiza `atualizado_em`
+  e responde JSON. GeoJSON inválido → **400** (`{"ok": false, "error": ...}`).
+- `POST /mapa/glebas/<id>/poligono/limpar` zera o polígono.
+- Ambas exigem login + `mapa.edit`; gleba de outra propriedade → **404**.
+  Auditoria: `mapa.poligono.update`/`mapa.poligono.delete`/`mapa.poligono.falha`,
+  **sem** gravar GeoJSON/coordenadas no log.
+- O mapa **não** mede área, não importa/exporta arquivos geográficos
+  (shapefile/KML), não usa GPS em tempo real nem PostGIS, e não adiciona
+  dependência Python/NPM (Leaflet.draw é via CDN).
 
 ### IA simulada operacional
 
@@ -431,9 +460,9 @@ Matriz resumida:
 
 | Perfil | Resumo |
 |--------|--------|
-| `admin` | Acessa todos os módulos; cria, edita e remove registros nos CRUDs da sua propriedade; envia, baixa e remove uploads; gerencia usuários internos da propriedade; consulta a auditoria/logs (`auditoria.view`). |
-| `tecnico` | Acessa dashboard, mapa, catálogo, relatórios, IA, equipe e financeiro em leitura; cria/edita glebas, culturas, colheitas e aplicações; envia e baixa uploads; não remove registros críticos nem gerencia equipe/financeiro. |
-| `trabalhador` | Acessa dashboard, mapa, catálogo, relatórios e IA; visualiza glebas, culturas, colheitas e aplicações; cria colheitas, aplicações e uploads; baixa uploads; não acessa equipe/financeiro e não edita/remove registros críticos. |
+| `admin` | Acessa todos os módulos; cria, edita e remove registros nos CRUDs da sua propriedade; envia, baixa e remove uploads; gerencia usuários internos da propriedade; consulta a auditoria/logs (`auditoria.view`); edita polígonos no mapa (`mapa.edit`). |
+| `tecnico` | Acessa dashboard, mapa, catálogo, relatórios, IA, equipe e financeiro em leitura; cria/edita glebas, culturas, colheitas e aplicações; **edita polígonos no mapa** (`mapa.edit`); envia e baixa uploads; não remove registros críticos nem gerencia equipe/financeiro. |
+| `trabalhador` | Acessa dashboard, mapa, catálogo, relatórios e IA; **visualiza** o mapa mas **não** edita polígonos; visualiza glebas, culturas, colheitas e aplicações; cria colheitas, aplicações e uploads; baixa uploads; não acessa equipe/financeiro e não edita/remove registros críticos. |
 
 ### Painel de usuários
 
@@ -767,6 +796,15 @@ Matriz resumida:
   arquivo), preservação de filtros nos links, auditoria `exportacao.gerada`/
   `exportacao.falha`, ausência de dados sensíveis no log e garantia de que
   exportar não cria dados nem `ProdutoPreco`/`ProdutoImagem`.
+- `tests/test_mapa_avancado.py` cobre a edição de polígonos: matriz de `mapa.edit`
+  (admin/técnico sim, trabalhador não); GET do mapa para todos os perfis; salvar
+  polígono (admin/técnico 200, trabalhador 403, sem login redireciona, gleba de
+  outra propriedade 404); validação de GeoJSON (inválido, fora de faixa, anel
+  curto, payload grande → 400; Polygon/MultiPolygon/Feature aceitos;
+  FeatureCollection recusado); persistência/substituição e `atualizado_em`;
+  limpar polígono; auditoria `mapa.poligono.update/delete/falha` sem GeoJSON nos
+  logs e escopada por propriedade; `data-csrf-token`/`data-can-edit` e controles
+  por perfil no template; e CSRF nos POSTs via `X-CSRFToken`.
 
 ---
 
@@ -848,7 +886,7 @@ Matriz resumida:
 - [x] Recuperação de senha (Fase 7.2)
 - [x] Auditoria/logs administrativos (Fase 7.3)
 - [x] PDF/exportações (Fase 7.4)
-- [ ] Mapa avançado (Fase 7.5)
+- [x] Mapa avançado (Fase 7.5)
 
 **Fora do MVP ampliado (avaliados depois):**
 
@@ -865,7 +903,7 @@ Matriz resumida:
 ## 14. Arquitetura do MVP ampliado
 
 > Esta seção descreve, em **alto nível**, a arquitetura pretendida para as fases
-> 7.x. As Fases 7.1, 7.2, 7.3 e 7.4 já estão implementadas; as demais decisões definitivas
+> 7.x. As Fases 7.1 a 7.5 já estão implementadas; as demais decisões definitivas
 > serão tomadas em cada fase específica.
 
 ### Painel de usuários (Fase 7.1 — implementado)
@@ -910,12 +948,15 @@ Matriz resumida:
 - Exportação é relatório operacional, **nunca** cotação/venda, e gera auditoria
   `exportacao.gerada`. Detalhes na seção "Exportações (CSV/PDF)" acima.
 
-### Mapa avançado (Fase 7.5)
+### Mapa avançado (Fase 7.5 — implementado)
 
-- Evoluir o campo já existente `gleba.poligono_geojson`.
-- **Edição visual** do polígono com Leaflet e **validação de GeoJSON**.
-- **Sem PostGIS obrigatório** e sem GPS em tempo real obrigatório no MVP
-  ampliado; cálculo de área aproximada é opcional.
+- Edição visual do polígono (`gleba.poligono_geojson`) com Leaflet + Leaflet.draw
+  (CDN); validação de GeoJSON no backend (`services/mapa_service.py`).
+- Rotas POST com `mapa.edit` (admin/técnico), CSRF, escopo por propriedade e
+  auditoria. **Sem** migration/model/dependência Python nova.
+- **Sem PostGIS**, GPS em tempo real, shapefile/KML ou medição oficial; o cálculo
+  de área aproximada **não** foi implementado nesta fase. Detalhes na seção
+  "Edição de polígonos (Fase 7.5)" acima.
 
 ### Fora do MVP ampliado
 

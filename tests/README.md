@@ -16,8 +16,9 @@ simples de `LegacyAPIWarning` em `test_ia_simulada_service.py` foram removidos
 usando `db.session.get(...)`, sem alterar models ou comportamento funcional. A
 Fase 6.5 encerrou o **MVP base**, não o produto: por decisão de produto, foi
 aberto o **MVP ampliado** (Fase 7). As Fases 7.1 (painel de usuários), 7.2
-(recuperação de senha), 7.3 (auditoria/logs) e 7.4 (PDF/exportações) adicionaram
-testes próprios; cada nova fase 7.x deverá manter essa regra (mapa avançado).
+(recuperação de senha), 7.3 (auditoria/logs), 7.4 (PDF/exportações) e 7.5 (mapa
+avançado) adicionaram testes próprios; a Fase 7.6 (revisão final) deverá manter
+toda a suíte passando.
 
 Arquivos existentes:
 
@@ -69,6 +70,14 @@ Arquivos existentes:
   filtros nos links; auditoria `exportacao.gerada`/`exportacao.falha` sem dados
   sensíveis; e garantia de que exportar não cria dados nem `ProdutoPreco`/
   `ProdutoImagem`.
+- **`test_mapa_avancado.py`** — Fase 7.5: edição de polígonos; matriz `mapa.edit`
+  (admin/técnico sim, trabalhador não); salvar/limpar polígono (200 admin/técnico,
+  403 trabalhador, 404 fora da propriedade, 302 sem login); validação de GeoJSON
+  (Polygon/MultiPolygon/Feature aceitos; inválido/fora de faixa/anel curto/payload
+  grande/FeatureCollection → 400); persistência/substituição e `atualizado_em`;
+  auditoria `mapa.poligono.update/delete/falha` sem GeoJSON nos logs e escopada
+  por propriedade; `data-csrf-token`/`data-can-edit` e controles por perfil no
+  template; e CSRF nos POSTs via `X-CSRFToken`.
 - **`test_dashboard_operacional.py`** — Dashboard Operacional: exige login;
   responde 200 com login; mostra propriedade atual; calcula totais de glebas,
   culturas, financeiro, equipe, colheita, aplicações e uploads; não vaza dados de
@@ -145,7 +154,8 @@ suíte atual passando:
   por propriedade, sem senha/token/CSRF, auditoria não quebra o fluxo.
 - PDF/exportações (Fase 7.4) — concluído; CSV/PDF em memória, escopo por
   propriedade/permissão, filtros preservados, auditoria, nunca cotação/venda.
-- Mapa avançado (Fase 7.5) — edição/validação de `poligono_geojson`.
+- Mapa avançado (Fase 7.5) — concluído; edição/validação de `poligono_geojson`,
+  `mapa.edit` (admin/técnico), CSRF, auditoria sem GeoJSON, escopo por propriedade.
 
 ## Evolução pós-MVP
 
