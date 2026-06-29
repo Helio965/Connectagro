@@ -8,6 +8,8 @@
 
   <form method="post" class="form-vertical"
         action="{{ url_for('culturas.editar', cultura_id=cultura.id) if cultura else url_for('culturas.nova') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
     <label for="nome">Nome *</label>
     <input type="text" id="nome" name="nome" required value="{{ form.nome or '' }}">
 

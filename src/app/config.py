@@ -6,6 +6,11 @@ Nenhum segredo real deve ser fixado no código.
 import os
 
 
+def _env_bool(name, default="true"):
+    """Lê booleano simples de variável de ambiente."""
+    return os.environ.get(name, default).lower() in ("1", "true", "yes", "on")
+
+
 class BaseConfig:
     """Configuração base comum a todos os ambientes."""
 
@@ -15,6 +20,7 @@ class BaseConfig:
     UPLOAD_FOLDER = os.environ.get("UPLOAD_FOLDER", "instance/uploads")
     MAX_CONTENT_LENGTH = int(os.environ.get("MAX_CONTENT_LENGTH", 16 * 1024 * 1024))
     APP_NAME = "ConnectAgro"
+    WTF_CSRF_ENABLED = _env_bool("WTF_CSRF_ENABLED", "true")
 
 
 class DevelopmentConfig(BaseConfig):

@@ -2,8 +2,15 @@
 
 ## Status do documento
 
-**Arquitetura técnica — v0.17 (CRUDs + catálogo + upload + dashboard + mapa + IA simulada + relatórios operacionais + permissões finas).**
+**Arquitetura técnica — v0.18 (CRUDs + catálogo + upload + dashboard + mapa + IA simulada + relatórios operacionais + permissões finas + CSRF).**
 
+> **CSRF/Flask-WTF (Fase 6.4):** `Flask-WTF` foi adicionado às dependências e
+> `CSRFProtect` é inicializado pela Application Factory. Todos os formulários
+> POST renderizam `csrf_token()`, incluindo Upload multipart e IA simulada. CSRF
+> fica ativo por padrão em desenvolvimento/produção e desativado no
+> `TestingConfig`; `tests/test_csrf.py` ativa a proteção explicitamente para
+> validar 400 sem token e fluxos com token válido.
+>
 > **Permissões finas por perfil (Fase 6.3):** `src/app/utils/permissions.py`
 > concentra `PERMISSOES_POR_PERFIL`, `require_permission(...)`, `can(...)` e a
 > matriz dos perfis `admin`, `tecnico` e `trabalhador`. A autorização é aplicada
@@ -26,8 +33,9 @@ Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetur
 
 > **Estado atual:** estão prontos a fundação Flask, modelos SQLAlchemy (15
 > tabelas), migrations, importação do catálogo técnico via CLI, autenticação real,
-> permissões finas por perfil, **Dashboard Operacional** somente leitura, **Mapa
-> real simplificado** somente leitura, **IA Simulada Operacional** baseada em
+> permissões finas por perfil, proteção **CSRF/Flask-WTF**, **Dashboard
+> Operacional** somente leitura, **Mapa real simplificado** somente leitura,
+> **IA Simulada Operacional** baseada em
 > regras locais, **Relatórios Operacionais HTML**, CRUDs de Glebas, Culturas,
 > Equipe, Financeiro, Colheita, Aplicações de Insumo e **Upload de Arquivos**,
 > além da consulta somente leitura de Defensivos e Fertilizantes.
@@ -54,7 +62,7 @@ Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetur
 > por usuários ficam fora do Git e não devem ser servidos diretamente por
 > `/static/uploads`.
 >
-> **Pendente:** CSRF/Flask-WTF e revisão final do MVP.
+> **Pendente:** revisão final do MVP.
 
 ## Objetivo
 
@@ -95,6 +103,8 @@ Flask (rotas/blueprints)  ──►  Serviços/helpers  ──►  Modelos/Acess
 - **Relatórios como consultas HTML somente leitura:** sem exportação/PDF nesta fase.
 - **Autorização por perfil em código:** protege rotas no backend e ajuda a
   renderizar menus/botões conforme perfil.
+- **CSRF em formulários POST:** proteção global com Flask-WTF/CSRFProtect e
+  tokens renderizados nos templates.
 - **Configuração por ambiente** via variáveis de ambiente (`.env`), sem segredos
   versionados.
 - Alinhamento total com os nomes de tabelas/campos do
@@ -118,7 +128,7 @@ Flask (rotas/blueprints)  ──►  Serviços/helpers  ──►  Modelos/Acess
 | Relatórios       | Serviços Python + Jinja2                     | HTML somente leitura; sem PDF/exportação       |
 | Autenticação     | Sessão Flask + hash de senha (Werkzeug)      | Helpers em `utils/auth.py`                     |
 | Autorização      | Matriz em código                             | `utils/permissions.py`; sem tabela nova        |
-| Formulários/CSRF | Sem Flask-WTF nesta etapa                    | CSRF dedicado permanece pendente               |
+| Formulários/CSRF | Flask-WTF / CSRFProtect                     | Token em formulários POST; testes específicos  |
 | Frontend         | HTML, CSS, JavaScript                        | Sem framework JS obrigatório no MVP            |
 | Testes           | pytest                                       | SQLite em memória e pasta temporária para upload |
 
@@ -132,7 +142,7 @@ src/
 └── app/
     ├── __init__.py              # create_app / Application Factory
     ├── config.py                # inclui UPLOAD_FOLDER e MAX_CONTENT_LENGTH
-    ├── extensions.py            # db, migrate
+    ├── extensions.py            # db, migrate, csrf
     ├── commands.py              # init-db, validate/import-catalog-seed, seed-users
     ├── blueprints/
     │   ├── __init__.py          # registro central dos blueprints
@@ -160,7 +170,7 @@ instance/
 ## 4. Application Factory + Blueprints
 
 - `create_app(config_name)` em `app/__init__.py` instancia o Flask, carrega a
-  configuração, inicializa `db`/`migrate`, registra modelos, blueprints,
+  configuração, inicializa `db`/`migrate`/`csrf`, registra modelos, blueprints,
   comandos CLI, context processors e handlers de erro.
 - O context processor injeta `current_user`, `is_authenticated` e `can` nos
   templates Jinja.
@@ -168,6 +178,8 @@ instance/
 - Cada módulo do MVP tem `__init__.py` com `Blueprint` e `routes.py` com as rotas.
 - O handler 403 renderiza `templates/errors/403.html` com mensagem amigável, sem
   expor nomes internos de permissões.
+- O handler de `CSRFError` renderiza `templates/errors/400.html` com mensagem
+  amigável e status **400**, sem expor detalhes técnicos do token.
 
 ---
 
@@ -214,6 +226,8 @@ instance/
   existentes.
 - **Permissões finas:** não exigem migration nova porque usam `usuario.perfil` e
   matriz em código.
+- **CSRF/Flask-WTF:** não exige migration nova porque protege formulários e não
+  altera schema.
 
 ### Dashboard operacional
 
@@ -336,6 +350,28 @@ Matriz resumida:
 | `tecnico` | Acessa dashboard, mapa, catálogo, relatórios, IA, equipe e financeiro em leitura; cria/edita glebas, culturas, colheitas e aplicações; envia e baixa uploads; não remove registros críticos nem gerencia equipe/financeiro. |
 | `trabalhador` | Acessa dashboard, mapa, catálogo, relatórios e IA; visualiza glebas, culturas, colheitas e aplicações; cria colheitas, aplicações e uploads; baixa uploads; não acessa equipe/financeiro e não edita/remove registros críticos. |
 
+### CSRF/Flask-WTF
+
+- `Flask-WTF>=1.2` é a única dependência nova da Fase 6.4.
+- `src/app/extensions.py` cria a instância central `csrf = CSRFProtect()`.
+- `create_app` chama `csrf.init_app(app)` junto das demais extensões.
+- `BaseConfig.WTF_CSRF_ENABLED` fica ativo por padrão, com possibilidade de
+  ajuste por variável de ambiente `WTF_CSRF_ENABLED`.
+- `TestingConfig.WTF_CSRF_ENABLED = False` preserva a suíte existente, que já
+  fazia POSTs sem token.
+- Todos os formulários `method="post"` renderizam:
+
+```html
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+```
+
+- Formulários multipart (`enctype="multipart/form-data"`) também enviam o token.
+- Rotas GET, como `/health`, catálogo, dashboard, relatórios e `/mapa/dados`, não
+  exigem token CSRF.
+- `CSRFError` retorna **400** com mensagem amigável em `templates/errors/400.html`.
+- CSRF é uma camada adicional: autenticação, permissões e escopo por propriedade
+  continuam sendo validados separadamente.
+
 ---
 
 ## 7. Fluxo principal do MVP
@@ -386,6 +422,15 @@ Matriz resumida:
 - Handler/template 403.
 - Sem migration, sem model novo, sem dependência nova e sem tabela de permissões.
 - Escopo por propriedade preservado.
+
+### CSRF/Flask-WTF ✅
+- Proteção global com `CSRFProtect`.
+- CSRF ativo por padrão em desenvolvimento/produção.
+- CSRF desativado no `TestingConfig` para preservar os testes legados.
+- `csrf_token()` em todos os formulários POST.
+- Upload multipart protegido com token.
+- Handler 400 amigável para erro CSRF.
+- Testes específicos em `tests/test_csrf.py`.
 
 ### Dashboard ✅
 - Painel operacional somente leitura em `/`.
@@ -484,7 +529,9 @@ Matriz resumida:
 - Autorização em `utils/permissions.py` com `PERMISSOES_POR_PERFIL`,
   `require_permission(...)` e `can(...)`.
 - Handler/template 403 para ações sem permissão.
-- Sem Flask-WTF/CSRF dedicado nesta etapa.
+- Handler/template 400 para falha de CSRF.
+- CSRF/Flask-WTF ativo nos formulários POST; `TestingConfig` mantém CSRF
+  desativado por padrão e `tests/test_csrf.py` ativa a proteção explicitamente.
 - Templates Jinja com escaping padrão.
 - Dashboard filtra dados operacionais pela propriedade atual; Colheita e
   Aplicações usam join com `CulturaGleba`, `Cultura` e `Gleba`.
@@ -530,6 +577,10 @@ Matriz resumida:
   malicioso, listagem, download, remoção, escopo por propriedade, garantia de
   pasta padrão fora de `static` e garantia de que `ProdutoPreco`/`ProdutoImagem`
   não são criados.
+- `tests/test_csrf.py` cobre CSRF desativado por padrão em testes, inicialização
+  do `CSRFProtect`, token nos formulários, POST sem token retornando 400, POST
+  com token válido funcionando, Upload multipart com/sem token, rotas GET sem
+  token, erro amigável e convivência com permissões 403.
 
 ---
 
@@ -555,6 +606,9 @@ Matriz resumida:
 - Permissões devem bloquear no backend com 403; `can()` em template é apenas
   apoio visual.
 - Permissões por perfil não substituem escopo por propriedade.
+- Todo formulário POST deve renderizar `csrf_token()`.
+- Upload multipart também deve enviar token CSRF.
+- CSRF não substitui autenticação, permissões nem escopo por propriedade.
 - No MVP, **preço e imagem** devem aparecer como pendentes / não consolidados.
 - A **validação diária do menor preço** pertence ao sistema final.
 - Usar nomes de tabelas e campos compatíveis com o DER e o dicionário de dados.
@@ -596,11 +650,11 @@ Matriz resumida:
 - [x] IA Simulada Operacional (regras locais, histórico escopado)
 - [x] Relatórios Operacionais HTML (somente leitura)
 - [x] Permissões finas por perfil (matriz em código, backend 403, `can()` em templates)
-- [x] Testes de fundação, schema, seed, autenticação, CRUDs, Dashboard, Mapa, IA, Relatórios, Permissões e consulta do catálogo
+- [x] CSRF/Flask-WTF nos formulários POST
+- [x] Testes de fundação, schema, seed, autenticação, CRUDs, Dashboard, Mapa, IA, Relatórios, Permissões, CSRF e consulta do catálogo
 
 **Pendente:**
 
-- [ ] CSRF/Flask-WTF
 - [ ] Revisão e ajustes finais do MVP
 
 ---

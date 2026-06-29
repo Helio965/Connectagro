@@ -9,6 +9,7 @@ agrícolas para consulta rápida.
 > **Status do projeto:** fundação Flask, **modelos SQLAlchemy** (15 tabelas),
 > **migrations** (Flask-Migrate), **importação do catálogo técnico** (via CLI),
 > **autenticação real** (login/logout), **permissões finas por perfil**,
+> **CSRF/Flask-WTF** nos formulários POST,
 > **Dashboard Operacional** somente leitura, **Mapa real simplificado** somente
 > leitura, **IA Simulada Operacional** baseada em regras locais, **CRUDs** de
 > **Glebas**, **Culturas** (com associação cultura↔gleba), **Equipe**,
@@ -73,6 +74,7 @@ em etapas posteriores, evoluirá para a versão completa.
 | -------------- | --------------------------------------------------------------- |
 | Login          | Autenticação e controle de acesso                               |
 | Permissões     | Matriz por perfil (`admin`, `tecnico`, `trabalhador`)           |
+| CSRF           | Token CSRF em formulários POST com Flask-WTF                    |
 | Dashboard      | Resumo operacional somente leitura da propriedade atual         |
 | Culturas       | Cadastro e acompanhamento das culturas                          |
 | Glebas         | Cadastro e gestão das áreas/talhões                             |
@@ -93,6 +95,7 @@ em etapas posteriores, evoluirá para a versão completa.
 
 - **Backend:** Python + Flask
 - **Banco de dados:** SQLite + Flask-SQLAlchemy + Flask-Migrate
+- **Segurança de formulários:** Flask-WTF / CSRFProtect
 - **Frontend:** HTML, CSS, JavaScript, Jinja2
 - **Testes:** pytest
 
@@ -269,6 +272,20 @@ Resumo dos perfis:
 | tecnico | Acessa dashboard, mapa, catálogo, relatórios, IA, equipe e financeiro em leitura; cria/edita glebas, culturas, colheitas e aplicações; envia e baixa uploads; não remove registros críticos nem gerencia equipe/financeiro. |
 | trabalhador | Acessa dashboard, mapa, catálogo, relatórios e IA; visualiza glebas, culturas, colheitas e aplicações; cria colheitas, aplicações e uploads; baixa upload; não acessa equipe/financeiro e não edita/remove registros críticos. |
 
+### Proteção CSRF
+
+A Fase 6.4 adicionou proteção CSRF real com Flask-WTF/CSRFProtect.
+Todos os formulários POST do MVP renderizam `csrf_token()`, incluindo login,
+CRUDs, formulários de remoção, Upload multipart e IA simulada. Requisições POST
+sem token válido retornam **400** com mensagem amigável.
+
+O ambiente de testes (`TestingConfig`) mantém `WTF_CSRF_ENABLED = False` por
+padrão para preservar a suíte existente. Os testes específicos de CSRF ativam a
+proteção explicitamente em `tests/test_csrf.py`.
+
+CSRF não substitui autenticação, permissões por perfil nem escopo por
+propriedade.
+
 ### Usuários de teste (`seed-users`)
 
 | Perfil      | E-mail                       | Senha           |
@@ -299,13 +316,14 @@ Resumo dos perfis:
 
 Concluídos: documentação de produto, modelagem (DER + dicionário), catálogo
 técnico/seed, a **fundação Flask**, os **modelos SQLAlchemy de domínio** (15
-tabelas), migrations, autenticação real, permissões finas por perfil, Dashboard
+tabelas), migrations, autenticação real, permissões finas por perfil,
+CSRF/Flask-WTF nos formulários POST, Dashboard
 Operacional, Mapa real simplificado, IA Simulada Operacional, Relatórios
 Operacionais HTML, CRUDs de glebas/culturas/equipe/financeiro/colheita/aplicações
 de insumo/upload e consulta somente leitura de Defensivos/Fertilizantes.
 
-O **próximo passo recomendado** é implementar **CSRF/Flask-WTF**, mantendo
-pendente apenas a revisão final do MVP após essa proteção.
+O **próximo passo recomendado** é a **revisão final do MVP**, incluindo ajustes
+visuais finais e limpeza opcional dos avisos legados do SQLAlchemy.
 
 Consulte o [Roadmap do MVP](./docs/07-roadmap-mvp.md) para o detalhamento.
 

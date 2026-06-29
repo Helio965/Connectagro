@@ -48,6 +48,7 @@
           {% if can("financeiro.delete") %}
           <form method="post" action="{{ url_for('financeiro.remover', lancamento_id=l.id) }}"
                 onsubmit="return confirm('Remover este lançamento?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn-link-danger">Remover</button>
           </form>
           {% endif %}

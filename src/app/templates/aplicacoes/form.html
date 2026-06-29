@@ -36,6 +36,8 @@
   {% if opcoes_cultura_gleba and opcoes_produtos %}
   <form method="post" class="form-vertical"
         action="{{ url_for('aplicacoes.editar', aplicacao_id=aplicacao.id) if aplicacao else url_for('aplicacoes.nova') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
     <label for="cultura_gleba_id">Cultura ↔ Gleba *</label>
     <select id="cultura_gleba_id" name="cultura_gleba_id" required>
       <option value="">Selecione…</option>

@@ -8,6 +8,8 @@
 
   <form method="post" class="form-vertical"
         action="{{ url_for('financeiro.editar', lancamento_id=lancamento.id) if lancamento else url_for('financeiro.novo') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
     <label for="tipo">Tipo *</label>
     <select id="tipo" name="tipo" required>
       {% for t in tipos %}

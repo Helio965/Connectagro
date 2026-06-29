@@ -26,6 +26,8 @@
     <section class="ia-card-bloco">
       <h2>Perguntar</h2>
       <form method="post" class="form-vertical">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
         <label for="pergunta">Pergunta</label>
         <textarea id="pergunta" name="pergunta" rows="5" maxlength="1000">{{ pergunta_atual }}</textarea>
         <div class="form-acoes">
@@ -45,6 +47,7 @@
           ("Catálogo", "O que existe no catálogo?")
         ] %}
           <form method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" name="pergunta" value="{{ pergunta }}">
             <button type="submit">{{ rotulo }}</button>
           </form>

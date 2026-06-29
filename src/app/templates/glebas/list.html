@@ -31,6 +31,7 @@
           {% if can("glebas.delete") %}
           <form method="post" action="{{ url_for('glebas.remover', gleba_id=g.id) }}"
                 onsubmit="return confirm('Remover esta gleba?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn-link-danger">Remover</button>
           </form>
           {% endif %}

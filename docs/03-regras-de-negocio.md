@@ -85,6 +85,13 @@
   botões não permitidos, mas não é a fonte de segurança da autorização.
 - RN-11h — As funções de `equipe_membro` poderão refinar permissões futuramente,
   mas não controlam autorização nesta fase.
+- RN-11i — Todo formulário **POST** do MVP deve enviar token CSRF gerado por
+  Flask-WTF/CSRFProtect.
+- RN-11j — Requisições POST com CSRF ausente ou inválido devem retornar **400**
+  com mensagem amigável, sem expor detalhes técnicos do token.
+- RN-11k — CSRF não substitui autenticação, permissões por perfil nem escopo por
+  propriedade. Com token válido, ações sem permissão continuam retornando **403**.
+- RN-11l — Formulários multipart do Upload também exigem token CSRF.
 
 ## Regras operacionais
 

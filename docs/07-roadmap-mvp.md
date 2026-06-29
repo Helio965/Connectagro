@@ -236,7 +236,24 @@
 - [x] Testes em `tests/test_permissions.py`.
 
 > Permissões finas não substituem o isolamento por propriedade e não criam tabela
-> de roles/permissões. Pendentes: CSRF/Flask-WTF e revisão final do MVP.
+> de roles/permissões. A proteção CSRF foi tratada na Fase 6.4.
+
+## Fase 6.4 — CSRF/Flask-WTF ✅
+
+- [x] Dependência `Flask-WTF>=1.2` adicionada.
+- [x] `CSRFProtect` centralizado em `src/app/extensions.py`.
+- [x] `csrf.init_app(app)` inicializado na Application Factory.
+- [x] CSRF ativo por padrão em desenvolvimento/produção.
+- [x] `TestingConfig.WTF_CSRF_ENABLED = False` preservado para a suíte existente.
+- [x] `csrf_token()` renderizado em todos os formulários POST do MVP.
+- [x] Upload multipart envia token CSRF.
+- [x] Handler/template 400 amigável para erro CSRF.
+- [x] Testes específicos em `tests/test_csrf.py`.
+- [x] Permissões continuam retornando 403 quando a requisição tem token válido.
+
+> Sem WTForms completo, sem refatoração geral de formulários, sem migration, sem
+> model novo, sem alteração de permissões, sem CRUD novo e sem mudança em seed,
+> catálogo, preço ou imagem.
 
 ## Etapa 5 — Implementação dos módulos
 
@@ -268,16 +285,16 @@ Ordem concluída:
 - [x] IA simulada.
 - [x] Relatórios operacionais HTML.
 - [x] Permissões finas por perfil/módulo.
-- [ ] CSRF/Flask-WTF.
+- [x] CSRF/Flask-WTF.
 - [ ] Revisão e ajustes finais do MVP.
 
 ---
 
 ## Próximo passo recomendado
 
-**CSRF/Flask-WTF**, mantendo o escopo restrito: proteger formulários POST sem
-criar painel de usuários, APIs externas, PDF/exportação, migrations ou permissões
-customizáveis por banco.
+**Revisão final do MVP**, incluindo ajustes visuais finais, validação geral dos
+fluxos principais e limpeza opcional dos `LegacyAPIWarning` do SQLAlchemy. PDF,
+exportações avançadas e integrações externas seguem como evolução futura/pós-MVP.
 
 ---
 

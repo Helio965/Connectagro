@@ -37,6 +37,7 @@
           {% if can("upload.delete") %}
           <form method="post" action="{{ url_for('upload.remover', arquivo_id=arquivo.id) }}"
                 onsubmit="return confirm('Remover este arquivo?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn-link-danger">Remover</button>
           </form>
           {% endif %}
