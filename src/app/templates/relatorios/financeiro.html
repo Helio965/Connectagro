@@ -7,9 +7,14 @@
   <h1>Relatório Financeiro</h1>
   <p class="hint">Propriedade: <strong>{{ propriedade.nome }}</strong></p>
   {% include "relatorios/_acoes.html" %}
+  <div class="relatorio-export no-print">
+    <a class="btn-acao" href="{{ url_for('relatorios.financeiro_exportar_csv', data_inicio=filtros.data_inicio, data_fim=filtros.data_fim, tipo=filtros.tipo) }}">Exportar CSV</a>
+    <a class="btn-acao" href="{{ url_for('relatorios.financeiro_exportar_pdf', data_inicio=filtros.data_inicio, data_fim=filtros.data_fim, tipo=filtros.tipo) }}">Exportar PDF</a>
+  </div>
   <p class="relatorio-aviso no-print">
     Relatório financeiro informativo — <strong>não substitui contabilidade
     formal</strong>. Somente leitura, escopado pela propriedade atual.
+    Exportações são <strong>operacionais</strong>, não cotação/venda.
   </p>
 
   <form method="get" class="relatorio-filtros no-print">

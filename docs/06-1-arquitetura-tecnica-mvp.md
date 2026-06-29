@@ -2,7 +2,16 @@
 
 ## Status do documento
 
-**Arquitetura técnica — v0.23 (MVP base consolidado + MVP ampliado em andamento: painel de usuários + recuperação de senha + auditoria/logs + CRUDs + catálogo + upload + dashboard + mapa + IA simulada + relatórios operacionais + permissões finas + CSRF + revisão final).**
+**Arquitetura técnica — v0.24 (MVP base consolidado + MVP ampliado em andamento: painel de usuários + recuperação de senha + auditoria/logs + PDF/exportações + CRUDs + catálogo + upload + dashboard + mapa + IA simulada + relatórios operacionais + permissões finas + CSRF + revisão final).**
+
+> **PDF/exportações (Fase 7.4):** o MVP ampliado adiciona
+> `services/exportacoes_service.py` e rotas `/relatorios/<slug>/exportar.csv` e
+> `.../exportar.pdf` para os cinco relatórios. CSV usa a biblioteca padrão
+> (`csv`); PDF usa **ReportLab** (única dependência nova), tudo gerado **em
+> memória** (`io.StringIO`/`io.BytesIO`), sem arquivo em disco. As exportações
+> reutilizam `relatorios_service`, respeitam `relatorios.view`, os mesmos filtros
+> (400 sem gerar arquivo em filtro inválido) e o escopo por propriedade, e
+> registram auditoria `exportacao.gerada`. Não há tabela/migration/model novos.
 
 > **Auditoria/logs (Fase 7.3):** o MVP ampliado adiciona o modelo `LogAuditoria`
 > (tabela `log_auditoria`, migration própria), `services/auditoria_service.py`,
@@ -166,7 +175,8 @@ Flask (rotas/blueprints)  ──►  Serviços/helpers  ──►  Modelos/Acess
 | Upload local     | Werkzeug `secure_filename` + Flask `send_from_directory` | Arquivos fora de `static` e do Git |
 | Mapa frontend    | Leaflet.js via CDN                           | Sem dependência Python/NPM nova                |
 | IA simulada      | Regras locais em Python                      | Sem LLM/API externa/internet                   |
-| Relatórios       | Serviços Python + Jinja2                     | HTML somente leitura; sem PDF/exportação       |
+| Relatórios       | Serviços Python + Jinja2                     | HTML somente leitura                           |
+| Exportações      | `csv` (lib padrão) + ReportLab (PDF)         | CSV/PDF em memória; `exportacoes_service.py`   |
 | Autenticação     | Sessão Flask + hash de senha (Werkzeug)      | Helpers em `utils/auth.py`                     |
 | Autorização      | Matriz em código                             | `utils/permissions.py`; sem tabela de roles    |
 | Formulários/CSRF | Flask-WTF / CSRFProtect                     | Token em formulários POST; testes específicos  |
@@ -193,7 +203,7 @@ src/
     │   ├── mapa/  ia/  relatorios/
     │   └── usuarios/  auditoria/
     ├── models/                  # modelos SQLAlchemy de domínio (18 tabelas)
-    ├── services/                # catalogo_seed.py, dashboard_service.py, ia_simulada_service.py, relatorios_service.py, usuarios_service.py, password_reset_service.py, auditoria_service.py
+    ├── services/                # catalogo_seed.py, dashboard_service.py, ia_simulada_service.py, relatorios_service.py, usuarios_service.py, password_reset_service.py, auditoria_service.py, exportacoes_service.py
     ├── utils/                   # auth.py, contexto.py, catalogo.py, formatters.py, permissions.py
     ├── templates/               # base.html, módulos, erros
     └── static/                  # css/, js/ (arquivos públicos)
@@ -377,7 +387,29 @@ instance/
 - O relatório de uploads lista metadados e download protegido; não lê conteúdo do
   arquivo e não faz OCR/IA/extração.
 - Relatórios são HTML somente leitura: não criam, alteram ou removem dados.
-- Não há PDF, CSV, Excel, API externa ou exportação automática nesta fase.
+- Exportações CSV/PDF (Fase 7.4) reutilizam estes mesmos serviços/filtros — ver
+  "Exportações (CSV/PDF)" abaixo. Não há Excel/XLSX nem exportação automática.
+
+### Exportações (CSV/PDF)
+
+- `src/app/services/exportacoes_service.py` gera **CSV** (módulo `csv` da
+  biblioteca padrão, `io.StringIO`, UTF-8 sem BOM, separador vírgula) e **PDF**
+  (ReportLab, `io.BytesIO`, A4 paisagem), **sem** escrever arquivo em disco.
+- Rotas em `relatorios/routes.py`: `/relatorios/<slug>/exportar.csv` e
+  `.../exportar.pdf` para `geral`, `financeiro`, `agricola`, `aplicacoes` e
+  `uploads`, todas com `@login_required` + `require_permission("relatorios.view")`.
+- As exportações chamam os mesmos `montar_relatorio_*` e aplicam os mesmos
+  filtros (financeiro: período/tipo; aplicações: período/classe). Filtro inválido
+  (`FiltroInvalidoError`) registra `exportacao.falha` e retorna **400**, **sem**
+  gerar arquivo nem registrar sucesso.
+- Cada exportação bem-sucedida registra auditoria `exportacao.gerada` (entidade
+  `relatorio`, `entidade_id` = slug), **sem** gravar o conteúdo do relatório.
+- Todo CSV/PDF inclui um aviso fixo: "Relatório operacional interno. Não é
+  cotação, venda, recomendação agronômica ou documento comercial."
+- Os templates dos relatórios ganham botões "Exportar CSV/PDF" que **preservam os
+  filtros atuais** (financeiro e aplicações via querystring).
+- Sem nova tabela, migration, model ou permissão; única dependência nova:
+  `ReportLab>=4.0`.
 
 ### Autorização por perfil
 
@@ -728,6 +760,13 @@ Matriz resumida:
   trabalhador 403, link no menu por perfil, filtro), eventos de autenticação,
   recuperação de senha, painel de usuários, permissão negada, upload e CRUDs,
   escopo por propriedade e ausência de senha/token/CSRF nos logs.
+- `tests/test_exportacoes.py` cobre as exportações CSV/PDF dos cinco relatórios:
+  exigência de login, acesso por `relatorios.view` (admin e técnico), headers e
+  `Content-Disposition` de CSV/PDF, assinatura `%PDF-`, conteúdo escopado pela
+  propriedade (sem dados de outra), filtros válidos e inválidos (400 sem gerar
+  arquivo), preservação de filtros nos links, auditoria `exportacao.gerada`/
+  `exportacao.falha`, ausência de dados sensíveis no log e garantia de que
+  exportar não cria dados nem `ProdutoPreco`/`ProdutoImagem`.
 
 ---
 
@@ -808,7 +847,7 @@ Matriz resumida:
 - [x] Painel de usuários (Fase 7.1)
 - [x] Recuperação de senha (Fase 7.2)
 - [x] Auditoria/logs administrativos (Fase 7.3)
-- [ ] PDF/exportações (Fase 7.4)
+- [x] PDF/exportações (Fase 7.4)
 - [ ] Mapa avançado (Fase 7.5)
 
 **Fora do MVP ampliado (avaliados depois):**
@@ -826,7 +865,7 @@ Matriz resumida:
 ## 14. Arquitetura do MVP ampliado
 
 > Esta seção descreve, em **alto nível**, a arquitetura pretendida para as fases
-> 7.x. As Fases 7.1, 7.2 e 7.3 já estão implementadas; as demais decisões definitivas
+> 7.x. As Fases 7.1, 7.2, 7.3 e 7.4 já estão implementadas; as demais decisões definitivas
 > serão tomadas em cada fase específica.
 
 ### Painel de usuários (Fase 7.1 — implementado)
@@ -861,13 +900,15 @@ Matriz resumida:
   escopado por propriedade; consulta em `/auditoria/` apenas pelo `admin`.
   Detalhes na seção "Auditoria/logs" acima.
 
-### PDF/exportações (Fase 7.4)
+### PDF/exportações (Fase 7.4 — implementado)
 
-- **Reutilizar** os serviços de relatórios (`services/relatorios_service.py`).
-- Exportações **escopadas por propriedade** e por permissão.
-- **CSV** pode usar biblioteca padrão; **PDF** pode exigir dependência futura
-  **controlada**.
-- Exportação é relatório operacional, **nunca** cotação/venda.
+- `services/exportacoes_service.py` reutiliza `relatorios_service` para gerar
+  **CSV** (biblioteca padrão) e **PDF** (ReportLab) em memória.
+- Exportações **escopadas por propriedade** e por permissão (`relatorios.view`),
+  com os mesmos filtros dos relatórios; filtro inválido → 400 sem gerar arquivo.
+- Única dependência nova: **ReportLab>=4.0**; CSV usa o módulo `csv`.
+- Exportação é relatório operacional, **nunca** cotação/venda, e gera auditoria
+  `exportacao.gerada`. Detalhes na seção "Exportações (CSV/PDF)" acima.
 
 ### Mapa avançado (Fase 7.5)
 

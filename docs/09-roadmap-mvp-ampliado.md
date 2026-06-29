@@ -4,8 +4,10 @@
 > base**. Ele define o escopo do **MVP ampliado** (Fase 7), o que fica de fora e o
 > que **nunca** entra no produto. A **Fase 7.0** foi somente documental, a
 > **Fase 7.1** implementa o painel interno de usuários, a **Fase 7.2** implementa
-> a recuperação de senha (token seguro, sem envio real de e-mail) e a **Fase 7.3**
-> implementa a auditoria/logs administrativos (somente admin, sem dados sensíveis).
+> a recuperação de senha (token seguro, sem envio real de e-mail), a **Fase 7.3**
+> implementa a auditoria/logs administrativos (somente admin, sem dados sensíveis)
+> e a **Fase 7.4** implementa as exportações CSV/PDF dos relatórios (operacionais,
+> nunca cotação/venda).
 
 ## 1. Decisão de produto
 
@@ -49,7 +51,7 @@ flask --app src/run.py seed-users
 | 7.1 | Painel de usuários | **Concluído:** admin lista, cria, edita perfil/status e inativa usuários da propriedade. **Sem cadastro público.** |
 | 7.2 | Recuperação de senha | **Concluído:** token seguro/expirável, armazenado só como hash, uso único; mensagem genérica; sem envio real de e-mail (link dev em local/teste). |
 | 7.3 | Auditoria/logs | **Concluído:** tabela `log_auditoria`, serviço central, eventos sensíveis (auth, reset, CRUDs, usuários, upload, permissão negada); tela `/auditoria/` só admin, escopo por propriedade, sem dados sensíveis. |
-| 7.4 | PDF/exportações | Exportar relatórios operacionais, escopados por propriedade e permissões; nunca cotação/venda. |
+| 7.4 | PDF/exportações | **Concluído:** CSV (lib padrão) + PDF (ReportLab) dos 5 relatórios, em memória; escopo por propriedade/permissão; filtros preservados; auditoria `exportacao.gerada`; nunca cotação/venda. |
 | 7.5 | Mapa avançado | Edição/salvamento de polígono da gleba e melhor visualização; sem PostGIS obrigatório. |
 
 ## 4. Fora do MVP ampliado
@@ -82,7 +84,7 @@ O ConnectAgro permanece uma plataforma de **gestão agrícola e consulta técnic
 - **Fase 7.1 — Painel de usuários** ✅
 - **Fase 7.2 — Recuperação de senha** ✅
 - **Fase 7.3 — Auditoria/logs** ✅
-- **Fase 7.4 — PDF/exportações** ⏳
+- **Fase 7.4 — PDF/exportações** ✅
 - **Fase 7.5 — Mapa avançado** ⏳
 - **Fase 7.6 — Revisão final do MVP ampliado** ⏳
 
@@ -130,13 +132,13 @@ Por fase:
 1. Fase 7.1 — Painel de usuários (concluída).
 2. Fase 7.2 — Recuperação de senha (concluída).
 3. Fase 7.3 — Auditoria/logs (concluída).
-4. Fase 7.4 — PDF/exportações.
+4. Fase 7.4 — PDF/exportações (concluída).
 5. Fase 7.5 — Mapa avançado.
 6. Fase 7.6 — Revisão final do MVP ampliado.
 
 ## 10. Próximo passo
 
-**Fase 7.4 — PDF/exportações.**
+**Fase 7.5 — Mapa avançado.**
 
 ---
 
