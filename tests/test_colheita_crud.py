@@ -223,7 +223,7 @@ def test_listagem_exibe_dados(app_db):
 
 
 def test_nova_sem_associacao_orienta_usuario(app_db):
-    """Sem cultura↔gleba, GET /colheita/nova responde 200 e orienta o usuário."""
+    """Sem associação, GET /colheita/nova responde 200 e orienta o usuário."""
     from app.models import Usuario, Propriedade
 
     with app_db.app_context():
@@ -236,4 +236,6 @@ def test_nova_sem_associacao_orienta_usuario(app_db):
     client = _login(app_db, "x@connectagro.com")
     resp = client.get("/colheita/nova")
     assert resp.status_code == 200
-    assert "cultura" in resp.data.decode("utf-8").lower()
+    corpo = resp.data.decode("utf-8").lower()
+    assert "cultura" in corpo
+    assert "propriedade" in corpo

@@ -53,11 +53,6 @@ def filtrar_por_periodo_query(query, campo_data, data_inicio=None, data_fim=None
     return query
 
 
-def _coordenada_valida(gleba):
-    return (gleba.latitude is not None and gleba.longitude is not None
-            and -90 <= gleba.latitude <= 90 and -180 <= gleba.longitude <= 180)
-
-
 # ---------------------------------------------------------------------------
 # Relatório Geral
 # ---------------------------------------------------------------------------
@@ -91,7 +86,6 @@ def montar_relatorio_geral(propriedade):
             "total": len(glebas),
             "area_total": sum(g.area_ha or 0 for g in glebas),
             "sem_area": sum(1 for g in glebas if not g.area_ha),
-            "sem_coordenadas": sum(1 for g in glebas if not _coordenada_valida(g)),
         },
         "culturas": {
             "total": len(culturas),
@@ -166,7 +160,7 @@ def montar_relatorio_agricola(propriedade):
             por_unidade[col.unidade or "sem unidade"] += col.quantidade
 
     return {
-        "glebas": [{"obj": g, "coordenada_valida": _coordenada_valida(g)} for g in glebas],
+        "glebas": [{"obj": g} for g in glebas],
         "culturas": culturas,
         "associacoes": associacoes,
         "colheitas": colheitas,

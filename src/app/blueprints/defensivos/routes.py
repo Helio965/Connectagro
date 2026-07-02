@@ -8,7 +8,6 @@ from ...utils.catalogo import (
     categorias_disponiveis,
     parse_json_lista,
     primeiro_tecnico,
-    status_disponiveis,
 )
 from ...utils.permissions import require_permission
 from . import defensivos_bp
@@ -24,16 +23,13 @@ CAMPOS_LISTA = ("culturas_comuns", "alvos_controle")
 def index():
     q = request.args.get("q") or None
     categoria = request.args.get("categoria") or None
-    status_regulatorio = request.args.get("status_regulatorio") or None
-    produtos = aplicar_filtros_catalogo(
-        CLASSE, q=q, categoria=categoria, status_regulatorio=status_regulatorio).all()
+    produtos = aplicar_filtros_catalogo(CLASSE, q=q, categoria=categoria).all()
     return render_template(
         "catalogo/list.html",
         titulo="Defensivos", endpoint="defensivos.detalhe",
+        tipo="defensivos",
         produtos=produtos, q=q or "", categoria=categoria or "",
-        status_regulatorio=status_regulatorio or "",
-        categorias=categorias_disponiveis(CLASSE),
-        status_opcoes=status_disponiveis(CLASSE))
+        categorias=categorias_disponiveis(CLASSE))
 
 
 @defensivos_bp.route("/<slug>")

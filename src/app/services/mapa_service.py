@@ -1,134 +1,94 @@
-"""Validação/normalização de polígonos GeoJSON do mapa avançado (Fase 7.5).
+"""Serviço de mapa do ConnectAgro (Fase 7.5).
 
-Operacional, **sem PostGIS**, sem dependência geoespacial e sem georreferencia-
-mento oficial. Aceita apenas ``Polygon``, ``MultiPolygon`` ou ``Feature`` com
-geometria Polygon/MultiPolygon — **rejeita** FeatureCollection e
-GeometryCollection (um polígono por gleba nesta fase).
+Valida, atualiza e limpa polígonos GeoJSON das glebas. O GeoJSON é validado
+no backend (Polygon/MultiPolygon/Feature, coordenadas em faixa, tamanho
+limitado); inválido retorna erro e não é salvo.
 """
 import json
 
 from ..models._helpers import iso_now
 
-# Limite de tamanho do GeoJSON aceito (evita abuso). 100 KB.
-MAX_GEOJSON_BYTES = 100 * 1024
+# Tipos GeoJSON aceitos.
+_TIPOS_ACEITOS = {"Polygon", "MultiPolygon", "Feature"}
 
-
-def _eh_numero(valor):
-    return isinstance(valor, (int, float)) and not isinstance(valor, bool)
-
-
-def _validar_anel(anel):
-    if not isinstance(anel, list) or len(anel) < 4:
-        return "Cada anel do polígono precisa de ao menos 4 pontos."
-    for ponto in anel:
-        if not isinstance(ponto, (list, tuple)) or len(ponto) < 2:
-            return "Coordenada inválida: use pares [longitude, latitude]."
-        lon, lat = ponto[0], ponto[1]
-        if not _eh_numero(lon) or not _eh_numero(lat):
-            return "Coordenada não numérica."
-        if not (-180 <= lon <= 180) or not (-90 <= lat <= 90):
-            return "Coordenada fora da faixa permitida."
-    return None
-
-
-def _validar_poligono_coords(coords):
-    if not isinstance(coords, list) or not coords:
-        return "Polígono sem anéis."
-    for anel in coords:
-        erro = _validar_anel(anel)
-        if erro:
-            return erro
-    return None
-
-
-def _validar_geometry(geom):
-    if not isinstance(geom, dict):
-        return "Geometria inválida."
-    tipo = geom.get("type")
-    coords = geom.get("coordinates")
-    if tipo == "Polygon":
-        return _validar_poligono_coords(coords)
-    if tipo == "MultiPolygon":
-        if not isinstance(coords, list) or not coords:
-            return "MultiPolygon sem polígonos."
-        for poligono in coords:
-            erro = _validar_poligono_coords(poligono)
-            if erro:
-                return erro
-        return None
-    return "Tipo de geometria não suportado (use Polygon ou MultiPolygon)."
-
-
-def _fechar_anel(anel):
-    if anel and anel[0] != anel[-1]:
-        return list(anel) + [list(anel[0])]
-    return [list(p) for p in anel]
-
-
-def _normalizar_coords(tipo, coords):
-    if tipo == "Polygon":
-        return [_fechar_anel(anel) for anel in coords]
-    # MultiPolygon
-    return [[_fechar_anel(anel) for anel in poligono] for poligono in coords]
-
-
-def _normalizar_geometry(geom):
-    tipo = geom["type"]
-    return {"type": tipo, "coordinates": _normalizar_coords(tipo, geom["coordinates"])}
+# Tamanho máximo do GeoJSON serializado (bytes).
+_MAX_GEOJSON_BYTES = 500_000
 
 
 def validar_poligono_geojson(payload):
-    """Valida e normaliza o GeoJSON recebido.
+    """Valida um payload GeoJSON para salvamento.
 
-    Retorna ``(geojson_normalizado, None)`` em sucesso ou ``(None, mensagem)`` em
-    erro. Aceita Polygon/MultiPolygon/Feature; fecha anéis automaticamente.
+    Retorna ``(geojson_string, None)`` em caso de sucesso ou
+    ``(None, mensagem_de_erro)`` se inválido.
     """
-    if not isinstance(payload, dict):
-        return None, "GeoJSON inválido."
+    if payload is None:
+        return None, "Payload vazio."
 
-    try:
-        if len(json.dumps(payload)) > MAX_GEOJSON_BYTES:
-            return None, "GeoJSON excede o tamanho máximo permitido."
-    except (TypeError, ValueError):
-        return None, "GeoJSON inválido."
+    if isinstance(payload, str):
+        try:
+            payload = json.loads(payload)
+        except (TypeError, ValueError):
+            return None, "JSON inválido."
+
+    if not isinstance(payload, dict):
+        return None, "O payload deve ser um objeto JSON."
 
     tipo = payload.get("type")
+    if tipo not in _TIPOS_ACEITOS:
+        return None, f"Tipo GeoJSON não suportado: {tipo}. Use Polygon, MultiPolygon ou Feature."
+
+    if tipo in {"Polygon", "MultiPolygon"}:
+        coords = payload.get("coordinates")
+        if not isinstance(coords, list):
+            return None, "Coordenadas ausentes ou inválidas."
+        if not _validar_coordenadas_recursive(coords):
+            return None, "Coordenadas fora da faixa válida (-90/90 lat, -180/180 lng)."
+
     if tipo == "Feature":
         geometry = payload.get("geometry")
-        erro = _validar_geometry(geometry)
-        if erro:
-            return None, erro
-        return {
-            "type": "Feature",
-            "properties": payload.get("properties") if isinstance(payload.get("properties"), dict) else {},
-            "geometry": _normalizar_geometry(geometry),
-        }, None
+        if not isinstance(geometry, dict):
+            return None, "Feature sem geometria válida."
+        geo_tipo = geometry.get("type")
+        if geo_tipo not in {"Polygon", "MultiPolygon"}:
+            return None, f"Geometria não suportada dentro de Feature: {geo_tipo}."
+        coords = geometry.get("coordinates")
+        if not isinstance(coords, list):
+            return None, "Coordenadas ausentes na geometria."
+        if not _validar_coordenadas_recursive(coords):
+            return None, "Coordenadas fora da faixa válida."
 
-    if tipo in ("Polygon", "MultiPolygon"):
-        erro = _validar_geometry(payload)
-        if erro:
-            return None, erro
-        return _normalizar_geometry(payload), None
+    geojson_str = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+    if len(geojson_str.encode("utf-8")) > _MAX_GEOJSON_BYTES:
+        return None, f"GeoJSON excede o tamanho máximo ({_MAX_GEOJSON_BYTES} bytes)."
 
-    if tipo in ("FeatureCollection", "GeometryCollection"):
-        return None, "Use um único polígono (Polygon/MultiPolygon/Feature) por gleba."
-
-    return None, "Tipo de GeoJSON não suportado (use Polygon, MultiPolygon ou Feature)."
+    return geojson_str, None
 
 
-def normalizar_poligono_geojson(payload):
-    """Atalho que retorna apenas o GeoJSON normalizado (ou ``None``)."""
-    geojson, _ = validar_poligono_geojson(payload)
-    return geojson
+def _validar_coordenadas_recursive(coords, depth=0):
+    """Valida coordenadas recursivamente (listas de listas de [lng, lat])."""
+    if depth > 4:
+        return False
+    if not isinstance(coords, list):
+        return False
+    if len(coords) == 0:
+        return True
+    # Se é uma coordenada [lng, lat] ou [lng, lat, alt]
+    if isinstance(coords[0], (int, float)):
+        if len(coords) < 2:
+            return False
+        lng, lat = coords[0], coords[1]
+        return -180 <= lng <= 180 and -90 <= lat <= 90
+    # Caso contrário é uma lista de coordenadas
+    return all(_validar_coordenadas_recursive(c, depth + 1) for c in coords)
 
 
-def atualizar_poligono_gleba(gleba, geojson_normalizado):
-    """Grava o polígono na gleba (como TEXT) e marca atualização."""
-    gleba.poligono_geojson = json.dumps(geojson_normalizado, ensure_ascii=False)
+def atualizar_poligono_gleba(gleba, geojson_str):
+    """Atualiza o polígono GeoJSON de uma gleba."""
+    gleba.poligono_geojson = geojson_str
     gleba.atualizado_em = iso_now()
 
 
 def limpar_poligono_gleba(gleba):
-    """Remove o polígono da gleba e marca atualização."""
+    """Remove o polígono GeoJSON de uma gleba."""
     gleba.poligono_geojson = None
     gleba.atualizado_em = iso_now()

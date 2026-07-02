@@ -18,8 +18,9 @@ def _criar_base(app):
         db.session.add(propriedade)
         db.session.commit()
         gleba = Gleba(propriedade_id=propriedade.id, nome="Talhão Serviço", area_ha=12)
+        gleba_sem_area = Gleba(propriedade_id=propriedade.id, nome="Talhão Sem Área")
         cultura = Cultura(propriedade_id=propriedade.id, nome="Soja", status="planejada")
-        db.session.add_all([gleba, cultura])
+        db.session.add_all([gleba, gleba_sem_area, cultura])
         db.session.commit()
         db.session.add(CulturaGleba(cultura_id=cultura.id, gleba_id=gleba.id))
         db.session.add(FinanceiroLancamento(propriedade_id=propriedade.id, tipo="receita",
@@ -38,7 +39,7 @@ def test_classificar_intencao_simples(app_db):
     from app.services.ia_simulada_service import classificar_intencao_simples
 
     assert classificar_intencao_simples("Como está o financeiro?") == "financeiro"
-    assert classificar_intencao_simples("Tenho glebas sem coordenadas?") == "glebas"
+    assert classificar_intencao_simples("Tenho propriedades sem área?") == "glebas"
     assert classificar_intencao_simples("Resumo das aplicações") == "aplicacoes"
     assert classificar_intencao_simples("O que existe no catálogo?") == "catalogo"
     assert classificar_intencao_simples("pergunta sem tema") == "ajuda"
@@ -52,7 +53,7 @@ def test_montar_contexto_operacional(app_db):
     with app.app_context():
         propriedade = db.session.get(Propriedade, propriedade_id)
         contexto = montar_contexto_operacional(propriedade)
-        assert contexto["glebas"]["total"] == 1
+        assert contexto["glebas"]["total"] == 2
         assert contexto["glebas"]["area_total"] == pytest.approx(12)
         assert contexto["culturas"]["total"] == 1
         assert contexto["culturas"]["total_associacoes"] == 1
@@ -68,7 +69,7 @@ def test_gerar_alertas_operacionais(app_db):
     with app.app_context():
         propriedade = db.session.get(Propriedade, propriedade_id)
         alertas = gerar_alertas_operacionais(propriedade)
-        assert "Existem 1 glebas sem coordenadas válidas." in alertas
+        assert "Existem 1 propriedades sem área informada." in alertas
         assert "Nenhum registro de colheita cadastrado." in alertas
         assert "Nenhum upload cadastrado. A IA não lê conteúdo de arquivos no MVP." in alertas
 
@@ -82,7 +83,7 @@ def test_responder_pergunta_simulada(app_db):
         propriedade = db.session.get(Propriedade, propriedade_id)
         resposta = responder_pergunta_simulada(propriedade, "Faça um resumo da propriedade")
         assert "Resumo operacional da propriedade" in resposta
-        assert "Glebas cadastradas: 1" in resposta
+        assert "Propriedades cadastradas: 2" in resposta
         assert "Saldo financeiro: R$ 500,00" in resposta
         assert "Importante: esta IA é simulada" in resposta
 

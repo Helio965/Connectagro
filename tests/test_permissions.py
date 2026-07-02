@@ -226,10 +226,16 @@ def test_admin_cria_edita_remove_gleba(app_db):
     from app.models import Gleba
 
     client = _login(app_db, "admin")
-    assert client.post("/glebas/nova", data={"nome": "Gleba Admin Nova"}).status_code == 302
+    assert client.post("/glebas/nova", data={
+        "nome": "Gleba Admin Nova",
+        "area_ha": "5",
+    }).status_code == 302
     with app_db.app_context():
         gleba_id = Gleba.query.filter_by(nome="Gleba Admin Nova").one().id
-    assert client.post(f"/glebas/{gleba_id}/editar", data={"nome": "Gleba Admin Editada"}).status_code == 302
+    assert client.post(f"/glebas/{gleba_id}/editar", data={
+        "nome": "Gleba Admin Editada",
+        "area_ha": "6",
+    }).status_code == 302
     assert client.post(f"/glebas/{gleba_id}/remover").status_code == 302
     with app_db.app_context():
         assert db.session.get(Gleba, gleba_id) is None
@@ -242,12 +248,18 @@ def test_tecnico_cria_edita_gleba_e_cultura_mas_nao_remove(app_db):
     from app.models import Cultura, Gleba
 
     client = _login(app_db, "tecnico")
-    assert client.post("/glebas/nova", data={"nome": "Gleba Tecnico"}).status_code == 302
+    assert client.post("/glebas/nova", data={
+        "nome": "Gleba Tecnico",
+        "area_ha": "7",
+    }).status_code == 302
     assert client.post("/culturas/nova", data={"nome": "Cultura Tecnico"}).status_code == 302
     with app_db.app_context():
         gleba_id = Gleba.query.filter_by(nome="Gleba Tecnico").one().id
         cultura_id = Cultura.query.filter_by(nome="Cultura Tecnico").one().id
-    assert client.post(f"/glebas/{gleba_id}/editar", data={"nome": "Gleba Tecnico Editada"}).status_code == 302
+    assert client.post(f"/glebas/{gleba_id}/editar", data={
+        "nome": "Gleba Tecnico Editada",
+        "area_ha": "8",
+    }).status_code == 302
     assert client.post(f"/culturas/{cultura_id}/editar",
                        data={"nome": "Cultura Tecnico Editada", "status": "em_andamento"}).status_code == 302
     assert client.post(f"/glebas/{gleba_id}/remover").status_code == 403
@@ -375,7 +387,7 @@ def test_templates_escondem_menu_e_acoes_sem_permissao(app_db):
 
     admin = _login(app_db, "admin")
     assert "Usuários" in admin.get("/").data.decode("utf-8")
-    assert "+ Nova gleba" in admin.get("/glebas/").data.decode("utf-8")
+    assert "+ Nova propriedade" in admin.get("/glebas/").data.decode("utf-8")
     assert "+ Novo lançamento" in admin.get("/financeiro/").data.decode("utf-8")
     assert "Remover" in admin.get("/upload/").data.decode("utf-8")
 

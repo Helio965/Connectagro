@@ -7,62 +7,71 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
   {% block extra_head %}{% endblock %}
 </head>
-<body>
+<body class="{% if is_authenticated %}has-sidebar{% endif %}">
+  {% if is_authenticated %}
+  <button type="button" class="sidebar-toggle" id="sidebar-toggle"
+          aria-controls="sidebar" aria-expanded="false">
+    <span class="sidebar-toggle-icon" aria-hidden="true">☰</span> Menu
+  </button>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <a class="brand" href="{{ url_for('dashboard.index') }}">ConnectAgro</a>
+    </div>
+
+    <nav class="sidebar-nav">
+      {% if can("dashboard.view") %}<a class="{{ 'active' if request.blueprint == 'dashboard' }}" href="{{ url_for('dashboard.index') }}">Dashboard</a>{% endif %}
+      {% if can("culturas.view") %}<a class="{{ 'active' if request.blueprint == 'culturas' }}" href="{{ url_for('culturas.index') }}">Culturas</a>{% endif %}
+      {% if can("glebas.view") %}<a class="{{ 'active' if request.blueprint == 'glebas' }}" href="{{ url_for('glebas.index') }}">Propriedades</a>{% endif %}
+      {% if can("catalogo.view") %}<a class="{{ 'active' if request.blueprint == 'defensivos' }}" href="{{ url_for('defensivos.index') }}">Defensivos</a>{% endif %}
+      {% if can("catalogo.view") %}<a class="{{ 'active' if request.blueprint == 'fertilizantes' }}" href="{{ url_for('fertilizantes.index') }}">Fertilizantes</a>{% endif %}
+      {% if can("aplicacoes.view") %}<a class="{{ 'active' if request.blueprint == 'aplicacoes' }}" href="{{ url_for('aplicacoes.index') }}">Aplicações</a>{% endif %}
+      {% if can("financeiro.view") %}<a class="{{ 'active' if request.blueprint == 'financeiro' }}" href="{{ url_for('financeiro.index') }}">Financeiro</a>{% endif %}
+      {% if can("upload.view") %}<a class="{{ 'active' if request.blueprint == 'upload' }}" href="{{ url_for('upload.index') }}">Upload</a>{% endif %}
+      {% if can("usuarios.view") %}<a class="{{ 'active' if request.blueprint == 'usuarios' }}" href="{{ url_for('usuarios.index') }}">Usuários</a>{% endif %}
+      {% if can("auditoria.view") %}<a class="{{ 'active' if request.blueprint == 'auditoria' }}" href="{{ url_for('auditoria.index') }}">Auditoria</a>{% endif %}
+      {% if can("equipe.view") %}<a class="{{ 'active' if request.blueprint == 'equipe' }}" href="{{ url_for('equipe.index') }}">Equipe</a>{% endif %}
+      {% if can("colheita.view") %}<a class="{{ 'active' if request.blueprint == 'colheita' }}" href="{{ url_for('colheita.index') }}">Colheita</a>{% endif %}
+      {% if can("mapa.view") %}<a class="{{ 'active' if request.blueprint == 'mapa' }}" href="{{ url_for('mapa.index') }}">Mapa</a>{% endif %}
+      {% if can("ia.view") %}<a class="{{ 'active' if request.blueprint == 'ia' }}" href="{{ url_for('ia.index') }}">IA</a>{% endif %}
+      {% if can("relatorios.view") %}<a class="{{ 'active' if request.blueprint == 'relatorios' }}" href="{{ url_for('relatorios.index') }}">Relatórios</a>{% endif %}
+    </nav>
+
+    <div class="sidebar-foot">
+      <span class="sidebar-user">{{ current_user.nome }} <small>({{ current_user.perfil }})</small></span>
+      <a class="sidebar-logout" href="{{ url_for('auth.logout') }}">Sair</a>
+    </div>
+  </aside>
+
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+  {% else %}
   <header class="topbar">
     <a class="brand" href="{{ url_for('dashboard.index') }}">ConnectAgro</a>
-    <span class="mvp-badge">MVP ampliado</span>
     <span class="topbar-user">
-      {% if is_authenticated %}
-        {{ current_user.nome }} <small>({{ current_user.perfil }})</small> ·
-        <a href="{{ url_for('auth.logout') }}">Sair</a>
-      {% else %}
-        <a href="{{ url_for('auth.login') }}">Login</a>
-      {% endif %}
+      <a href="{{ url_for('auth.login') }}">Login</a>
     </span>
   </header>
-
-  {% if is_authenticated %}
-  <nav class="menu">
-    {% if can("dashboard.view") %}<a href="{{ url_for('dashboard.index') }}">Dashboard</a>{% endif %}
-    {% if can("culturas.view") %}<a href="{{ url_for('culturas.index') }}">Culturas</a>{% endif %}
-    {% if can("glebas.view") %}<a href="{{ url_for('glebas.index') }}">Glebas</a>{% endif %}
-    {% if can("catalogo.view") %}<a href="{{ url_for('defensivos.index') }}">Defensivos</a>{% endif %}
-    {% if can("catalogo.view") %}<a href="{{ url_for('fertilizantes.index') }}">Fertilizantes</a>{% endif %}
-    {% if can("aplicacoes.view") %}<a href="{{ url_for('aplicacoes.index') }}">Aplicações</a>{% endif %}
-    {% if can("financeiro.view") %}<a href="{{ url_for('financeiro.index') }}">Financeiro</a>{% endif %}
-    {% if can("upload.view") %}<a href="{{ url_for('upload.index') }}">Upload</a>{% endif %}
-    {% if can("usuarios.view") %}<a href="{{ url_for('usuarios.index') }}">Usuários</a>{% endif %}
-    {% if can("auditoria.view") %}<a href="{{ url_for('auditoria.index') }}">Auditoria</a>{% endif %}
-    {% if can("equipe.view") %}<a href="{{ url_for('equipe.index') }}">Equipe</a>{% endif %}
-    {% if can("colheita.view") %}<a href="{{ url_for('colheita.index') }}">Colheita</a>{% endif %}
-    {% if can("mapa.view") %}<a href="{{ url_for('mapa.index') }}">Mapa</a>{% endif %}
-    {% if can("ia.view") %}<a href="{{ url_for('ia.index') }}">IA</a>{% endif %}
-    {% if can("relatorios.view") %}<a href="{{ url_for('relatorios.index') }}">Relatórios</a>{% endif %}
-  </nav>
   {% endif %}
 
-  <main class="content">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <ul class="flashes">
-          {% for category, message in messages %}
-            <li class="flash flash-{{ category }}">{{ message }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
+  <div class="layout-main">
+    <main class="content">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <ul class="flashes">
+            {% for category, message in messages %}
+              <li class="flash flash-{{ category }}">{{ message }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      {% endwith %}
 
-    <p class="mvp-notice">
-      Sistema em <strong>MVP ampliado</strong>. Gestão operacional, segurança,
-      usuários internos, relatórios, mapa e IA simulada estão disponíveis;
-      recursos avançados seguem como evolução pós-MVP.
-    </p>
-    {% block content %}{% endblock %}
-  </main>
+      {% block content %}{% endblock %}
+    </main>
 
-  <footer class="footer">
-    <small>ConnectAgro — plataforma de gestão agrícola (MVP). Não vende produtos.</small>
-  </footer>
+    <footer class="footer">
+      <small>ConnectAgro — plataforma de gestão agrícola. Não vende produtos.</small>
+    </footer>
+  </div>
 
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>
   {% block extra_scripts %}{% endblock %}

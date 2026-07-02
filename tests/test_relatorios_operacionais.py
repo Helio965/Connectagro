@@ -41,7 +41,7 @@ def _setup(email, gleba_nome, cultura_nome, receita=100.0, despesa=30.0):
     db.session.add(p)
     db.session.commit()
     g = Gleba(propriedade_id=p.id, nome=gleba_nome, area_ha=10.0,
-              latitude=-15.0, longitude=-47.0, tipo_solo="argiloso")
+              tipo_solo="argiloso")
     c = Cultura(propriedade_id=p.id, nome=cultura_nome, status="em_andamento",
                 safra="2025/2026")
     db.session.add_all([g, c])
@@ -111,7 +111,7 @@ def test_index_lista_relatorios(app_rel):
 def test_geral_mostra_propriedade_e_totais(app_rel):
     corpo = _login(app_rel, "a@connectagro.com").get("/relatorios/geral").data.decode("utf-8")
     assert "Fazenda a@connectagro.com" in corpo
-    assert "Total de glebas" in corpo
+    assert "Total de propriedades" in corpo
     assert "Total de culturas" in corpo
     assert "Total de aplicações" in corpo
 
@@ -216,6 +216,20 @@ def test_aplicacoes_avisos(app_rel):
 def test_aplicacoes_escopo(app_rel):
     corpo = _login(app_rel, "a@connectagro.com").get("/relatorios/aplicacoes").data.decode("utf-8")
     assert "Secreta B" not in corpo
+
+
+def test_exportacao_aplicacoes_com_dados(app_rel):
+    client = _login(app_rel, "a@connectagro.com")
+
+    csv_resp = client.get("/relatorios/aplicacoes/exportar.csv")
+    assert csv_resp.status_code == 200
+    csv_corpo = csv_resp.data.decode("utf-8")
+    assert "Defensivo Teste" in csv_corpo
+    assert "Operador A" in csv_corpo
+
+    pdf_resp = client.get("/relatorios/aplicacoes/exportar.pdf")
+    assert pdf_resp.status_code == 200
+    assert pdf_resp.data.startswith(b"%PDF")
 
 
 # --- Uploads --------------------------------------------------------------

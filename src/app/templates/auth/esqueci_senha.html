@@ -5,15 +5,7 @@
 {% block content %}
 <section class="card login-card">
   <h1>Recuperar senha</h1>
-  <p>
-    Informe o e-mail da sua conta. Por segurança, a mesma mensagem é exibida
-    independentemente de o e-mail estar cadastrado.
-  </p>
-  <p class="muted">
-    Esta fase do MVP ampliado <strong>não envia e-mail real</strong>. Em
-    ambiente local/de desenvolvimento, o link de redefinição é exibido aqui
-    mesmo para teste manual.
-  </p>
+  <p>Informe seu e-mail cadastrado. Se o e-mail estiver ativo, um link de redefinição será gerado.</p>
 
   <form method="post" action="{{ url_for('auth.esqueci_senha') }}" class="login-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -22,14 +14,13 @@
     <input type="email" id="email" name="email" required autofocus
            autocomplete="username" placeholder="voce@exemplo.com">
 
-    <button type="submit" class="btn-entrar">Enviar</button>
+    <button type="submit" class="btn-entrar">Solicitar redefinição</button>
   </form>
 
   {% if dev_link %}
-  <div class="dev-reset-link">
-    <h2>Link de redefinição para ambiente local</h2>
-    <p>Disponível apenas em desenvolvimento/teste. Não aparece em produção.</p>
-    <p><a href="{{ dev_link }}">{{ dev_link }}</a></p>
+  <div class="dev-link-box">
+    <p><strong>Ambiente de desenvolvimento:</strong> use o link abaixo para redefinir a senha.</p>
+    <a href="{{ dev_link }}">{{ dev_link }}</a>
   </div>
   {% endif %}
 

@@ -1,410 +1,298 @@
-"""Exportações operacionais dos relatórios (Fase 7.4 — MVP ampliado).
+"""Exportações CSV/PDF dos relatórios operacionais (Fase 7.4).
 
-Gera **CSV** (biblioteca padrão) e **PDF** (ReportLab) **em memória**, a partir
-dos dados já montados por ``relatorios_service`` (somente leitura, escopados pela
-propriedade atual). As exportações são **relatórios operacionais** — nunca
-cotação, venda, checkout ou documento comercial.
+Gera CSV (biblioteca padrão) e PDF (ReportLab) **em memória**, sem gravar
+arquivo no disco. Reutiliza os mesmos dados do ``relatorios_service``.
 
-Decisões documentadas:
-- CSV em **UTF-8 sem BOM**, separador **vírgula**, com linhas iniciais de
-  metadados (relatório, propriedade, geração, filtros e aviso).
-- PDF simples (sem logo/imagem, sem HTML-to-PDF), em página A4 paisagem.
+Cada exportação traz o aviso de que é um relatório operacional — não cotação,
+venda, checkout ou documento comercial.
 """
 import csv
 import io
 from datetime import datetime, timezone
-from xml.sax.saxutils import escape
 
-from flask import Response
+from flask import make_response
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import cm
+from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
-from reportlab.lib.pagesizes import A4, landscape
-from reportlab.lib.styles import ParagraphStyle
-from reportlab.lib.units import mm
-from reportlab.platypus import (
-    Paragraph,
-    SimpleDocTemplate,
-    Spacer,
-    Table,
-    TableStyle,
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+_AVISO_OPERACIONAL = (
+    "Relatório operacional do ConnectAgro. Não constitui cotação, venda, "
+    "checkout ou documento comercial."
 )
 
-AVISO = ("Relatório operacional interno. Não é cotação, venda, recomendação "
-         "agronômica ou documento comercial.")
 
-_PAGINA = landscape(A4)
-_MARGEM = 15 * mm
-_LARGURA_UTIL = _PAGINA[0] - 2 * _MARGEM
-
-_ESTILO_TITULO = ParagraphStyle("titulo", fontSize=14, leading=17,
-                                spaceAfter=4, fontName="Helvetica-Bold")
-_ESTILO_SUBTITULO = ParagraphStyle("subtitulo", fontSize=10, leading=13,
-                                   spaceBefore=6, spaceAfter=3,
-                                   fontName="Helvetica-Bold")
-_ESTILO_NORMAL = ParagraphStyle("normal", fontSize=8, leading=10)
-_ESTILO_AVISO = ParagraphStyle("aviso", fontSize=7, leading=9,
-                               textColor=colors.HexColor("#9a3412"),
-                               spaceBefore=3)
-_ESTILO_CELULA = ParagraphStyle("celula", fontSize=7, leading=8)
-_ESTILO_CELULA_HEADER = ParagraphStyle("celula_h", fontSize=7, leading=8,
-                                       textColor=colors.white,
-                                       fontName="Helvetica-Bold")
-
-
-# ---------------------------------------------------------------------------
-# Helpers comuns
-# ---------------------------------------------------------------------------
-
-def _agora_legivel():
-    return datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-
-
-def _txt(valor):
-    """Converte valor em texto seguro para célula/CSV ('' para None)."""
-    if valor is None:
-        return ""
-    return str(valor)
-
-
-def _num(valor, casas=2):
-    """Número com ponto decimal (formato neutro/máquina)."""
-    if valor is None:
-        return ""
-    return f"{float(valor):.{casas}f}"
-
-
-def _filtros_legivel(filtros):
-    if not filtros:
-        return ""
-    return "; ".join(f"{k}={v}" for k, v in filtros.items() if v not in (None, ""))
-
-
-def nome_arquivo(slug, ext):
-    """Nome do arquivo de exportação, com carimbo de data."""
+def nome_arquivo(slug, extensao):
+    """Gera o nome do arquivo de exportação com data."""
     data = datetime.now(timezone.utc).strftime("%Y%m%d")
-    return f"relatorio_{slug}_{data}.{ext}"
+    return f"connectagro_{slug}_{data}.{extensao}"
 
 
-# ---------------------------------------------------------------------------
-# Respostas HTTP
-# ---------------------------------------------------------------------------
-
-def resposta_csv(conteudo, nome):
-    return Response(
-        conteudo,
-        content_type="text/csv; charset=utf-8",
-        headers={"Content-Disposition": f'attachment; filename="{nome}"'},
-    )
+def resposta_csv(conteudo, filename):
+    """Cria uma resposta HTTP com conteúdo CSV."""
+    resp = make_response(conteudo)
+    resp.headers["Content-Type"] = "text/csv; charset=utf-8"
+    resp.headers["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return resp
 
 
-def resposta_pdf(bytes_pdf, nome):
-    return Response(
-        bytes_pdf,
-        content_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="{nome}"'},
-    )
+def resposta_pdf(pdf_bytes, filename):
+    """Cria uma resposta HTTP com conteúdo PDF."""
+    resp = make_response(pdf_bytes)
+    resp.headers["Content-Type"] = "application/pdf"
+    resp.headers["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return resp
 
 
-# ---------------------------------------------------------------------------
-# CSV — helpers
-# ---------------------------------------------------------------------------
-
-def _novo_csv():
-    buffer = io.StringIO()
-    return buffer, csv.writer(buffer)
+def _csv_writer(buf):
+    return csv.writer(buf, delimiter=";", quoting=csv.QUOTE_MINIMAL)
 
 
-def _csv_cabecalho(writer, titulo, propriedade, filtros=None):
-    writer.writerow(["Relatório", titulo])
-    writer.writerow(["Propriedade", propriedade.nome])
-    writer.writerow(["Gerado em", _agora_legivel()])
-    if filtros:
-        writer.writerow(["Filtros", _filtros_legivel(filtros)])
-    writer.writerow(["Aviso", AVISO])
-    writer.writerow([])
-
-
-# ---------------------------------------------------------------------------
-# PDF — helpers
-# ---------------------------------------------------------------------------
-
-def _tabela(headers, rows):
-    largura_col = _LARGURA_UTIL / max(len(headers), 1)
-    dados = [[Paragraph(escape(str(h)), _ESTILO_CELULA_HEADER) for h in headers]]
-    for row in rows:
-        dados.append([Paragraph(escape(_txt(c)), _ESTILO_CELULA) for c in row])
-    tabela = Table(dados, colWidths=[largura_col] * len(headers), repeatRows=1)
-    tabela.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#2d6a4f")),
-        ("GRID", (0, 0), (-1, -1), 0.25, colors.grey),
-        ("VALIGN", (0, 0), (-1, -1), "TOP"),
-        ("ROWBACKGROUNDS", (0, 1), (-1, -1),
-         [colors.white, colors.HexColor("#f2f2f2")]),
-        ("LEFTPADDING", (0, 0), (-1, -1), 3),
-        ("RIGHTPADDING", (0, 0), (-1, -1), 3),
-        ("TOPPADDING", (0, 0), (-1, -1), 2),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
-    ]))
-    return tabela
-
-
-def _cabecalho_pdf(titulo, propriedade, filtros=None):
-    flow = [
-        Paragraph(escape(titulo), _ESTILO_TITULO),
-        Paragraph(f"Propriedade: {escape(propriedade.nome)}", _ESTILO_NORMAL),
-        Paragraph(f"Gerado em: {_agora_legivel()}", _ESTILO_NORMAL),
-    ]
-    if filtros and _filtros_legivel(filtros):
-        flow.append(Paragraph("Filtros: " + escape(_filtros_legivel(filtros)),
-                              _ESTILO_NORMAL))
-    flow.append(Paragraph(AVISO, _ESTILO_AVISO))
-    flow.append(Spacer(1, 5 * mm))
-    return flow
-
-
-def _render_pdf(story):
-    buffer = io.BytesIO()
+def _pdf_doc(buf, titulo):
+    """Cria um SimpleDocTemplate padrão para os PDFs."""
     doc = SimpleDocTemplate(
-        buffer, pagesize=_PAGINA, leftMargin=_MARGEM, rightMargin=_MARGEM,
-        topMargin=_MARGEM, bottomMargin=_MARGEM, title="ConnectAgro",
+        buf, pagesize=A4,
+        leftMargin=2 * cm, rightMargin=2 * cm,
+        topMargin=2 * cm, bottomMargin=2 * cm,
+        title=titulo,
     )
-    doc.build(story)
-    return buffer.getvalue()
+    return doc
 
 
-def _subtitulo(texto):
-    return Paragraph(escape(texto), _ESTILO_SUBTITULO)
-
-
-# ===========================================================================
-# Relatório Geral
-# ===========================================================================
-
-def _linhas_geral(dados):
-    g, c = dados["glebas"], dados["culturas"]
-    eq, fin = dados["equipe"], dados["financeiro"]
-    linhas = [
-        ("Glebas", "Total de glebas", g["total"]),
-        ("Glebas", "Área total (ha)", _num(g["area_total"])),
-        ("Glebas", "Glebas sem área", g["sem_area"]),
-        ("Glebas", "Glebas sem coordenadas válidas", g["sem_coordenadas"]),
-        ("Culturas", "Total de culturas", c["total"]),
-        ("Culturas", "Associações cultura↔gleba", c["total_associacoes"]),
+def _pdf_header(titulo, propriedade, styles):
+    """Retorna os elementos de cabeçalho padrão para os PDFs."""
+    elements = [
+        Paragraph(titulo, styles["Title"]),
+        Paragraph(f"Propriedade: {propriedade.nome}", styles["Normal"]),
+        Paragraph(_AVISO_OPERACIONAL, styles["Italic"]),
+        Spacer(1, 0.5 * cm),
     ]
-    for status, qtd in c["por_status"].items():
-        linhas.append(("Culturas", f"Culturas: {status}", qtd))
-    linhas += [
-        ("Equipe", "Total de membros", eq["total"]),
-        ("Equipe", "Ativos", eq["ativos"]),
-        ("Equipe", "Inativos", eq["inativos"]),
-        ("Financeiro", "Receitas", _num(fin["receitas"])),
-        ("Financeiro", "Despesas", _num(fin["despesas"])),
-        ("Financeiro", "Saldo", _num(fin["saldo"])),
-        ("Financeiro", "Lançamentos", fin["total_lancamentos"]),
-        ("Colheita", "Total de colheitas", dados["colheita"]["total"]),
-        ("Aplicações", "Total de aplicações", dados["aplicacoes"]["total"]),
-        ("Uploads", "Total de uploads", dados["uploads"]["total"]),
-        ("Uploads", "Tamanho total (bytes)", dados["uploads"]["tamanho_total"]),
-        ("Catálogo", "Defensivos", dados["catalogo"]["defensivos"]),
-        ("Catálogo", "Fertilizantes", dados["catalogo"]["fertilizantes"]),
-    ]
-    return linhas
+    return elements
 
+
+def _tabela_pdf(dados, col_widths=None):
+    """Cria uma tabela padrão estilizada para PDF."""
+    t = Table(dados, colWidths=col_widths, repeatRows=1)
+    t.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.Color(0.2, 0.4, 0.2)),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("FONTSIZE", (0, 0), (-1, 0), 9),
+        ("FONTSIZE", (0, 1), (-1, -1), 8),
+        ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.Color(0.95, 0.95, 0.95)]),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+    ]))
+    return t
+
+
+def _fmt_valor(v, casas=2):
+    """Formata número para exibição."""
+    if v is None:
+        return "0"
+    return f"{float(v):,.{casas}f}".replace(",", "_").replace(".", ",").replace("_", ".")
+
+
+# ---------------------------------------------------------------------------
+# CSV generators
+# ---------------------------------------------------------------------------
 
 def gerar_csv_relatorio_geral(propriedade, dados):
-    buffer, writer = _novo_csv()
-    _csv_cabecalho(writer, "Geral", propriedade)
-    writer.writerow(["Seção", "Indicador", "Valor"])
-    for secao, indicador, valor in _linhas_geral(dados):
-        writer.writerow([secao, indicador, _txt(valor)])
-    return buffer.getvalue()
-
-
-def gerar_pdf_relatorio_geral(propriedade, dados):
-    story = _cabecalho_pdf("Relatório Geral", propriedade)
-    rows = [[s, i, _txt(v)] for s, i, v in _linhas_geral(dados)]
-    story.append(_tabela(["Seção", "Indicador", "Valor"], rows))
-    return _render_pdf(story)
-
-
-# ===========================================================================
-# Relatório Financeiro
-# ===========================================================================
-
-_HEADERS_FIN = ["Data", "Tipo", "Categoria", "Descrição", "Valor"]
-
-
-def _linhas_financeiro(dados):
-    return [[_txt(l.data), _txt(l.tipo), _txt(l.categoria), _txt(l.descricao),
-             _num(l.valor)] for l in dados["lancamentos"]]
+    buf = io.StringIO()
+    w = _csv_writer(buf)
+    w.writerow([_AVISO_OPERACIONAL])
+    w.writerow(["Relatório Geral", propriedade.nome])
+    w.writerow([])
+    w.writerow(["Indicador", "Valor"])
+    g = dados["glebas"]
+    w.writerow(["Total de propriedades", g["total"]])
+    w.writerow(["Área total (ha)", _fmt_valor(g["area_total"])])
+    w.writerow(["Propriedades sem área", g["sem_area"]])
+    c = dados["culturas"]
+    w.writerow(["Total de culturas", c["total"]])
+    w.writerow(["Associações cultura↔propriedade", c["total_associacoes"]])
+    f = dados["financeiro"]
+    w.writerow(["Receitas", _fmt_valor(f["receitas"])])
+    w.writerow(["Despesas", _fmt_valor(f["despesas"])])
+    w.writerow(["Saldo", _fmt_valor(f["saldo"])])
+    e = dados["equipe"]
+    w.writerow(["Membros de equipe", e["total"]])
+    w.writerow(["Ativos", e["ativos"]])
+    w.writerow(["Colheitas", dados["colheita"]["total"]])
+    w.writerow(["Aplicações", dados["aplicacoes"]["total"]])
+    w.writerow(["Uploads", dados["uploads"]["total"]])
+    return buf.getvalue()
 
 
 def gerar_csv_relatorio_financeiro(propriedade, dados):
-    buffer, writer = _novo_csv()
-    _csv_cabecalho(writer, "Financeiro", propriedade, dados.get("filtros"))
-    writer.writerow(["Receitas", _num(dados["receitas"])])
-    writer.writerow(["Despesas", _num(dados["despesas"])])
-    writer.writerow(["Saldo", _num(dados["saldo"])])
-    writer.writerow(["Quantidade", dados["quantidade"]])
-    writer.writerow([])
-    writer.writerow(_HEADERS_FIN)
-    for linha in _linhas_financeiro(dados):
-        writer.writerow(linha)
-    return buffer.getvalue()
+    buf = io.StringIO()
+    w = _csv_writer(buf)
+    w.writerow([_AVISO_OPERACIONAL])
+    w.writerow(["Relatório Financeiro", propriedade.nome])
+    w.writerow(["Receitas", _fmt_valor(dados["receitas"])])
+    w.writerow(["Despesas", _fmt_valor(dados["despesas"])])
+    w.writerow(["Saldo", _fmt_valor(dados["saldo"])])
+    w.writerow([])
+    w.writerow(["Data", "Tipo", "Categoria", "Descrição", "Valor"])
+    for l in dados["lancamentos"]:
+        w.writerow([l.data, l.tipo, l.categoria or "", l.descricao or "", _fmt_valor(l.valor)])
+    return buf.getvalue()
 
-
-def gerar_pdf_relatorio_financeiro(propriedade, dados):
-    story = _cabecalho_pdf("Relatório Financeiro", propriedade, dados.get("filtros"))
-    resumo = [["Receitas", _num(dados["receitas"])],
-              ["Despesas", _num(dados["despesas"])],
-              ["Saldo", _num(dados["saldo"])],
-              ["Quantidade", _txt(dados["quantidade"])]]
-    story.append(_subtitulo("Resumo"))
-    story.append(_tabela(["Indicador", "Valor"], resumo))
-    story.append(Spacer(1, 4 * mm))
-    story.append(_subtitulo("Lançamentos"))
-    story.append(_tabela(_HEADERS_FIN, _linhas_financeiro(dados)))
-    return _render_pdf(story)
-
-
-# ===========================================================================
-# Relatório Agrícola
-# ===========================================================================
 
 def gerar_csv_relatorio_agricola(propriedade, dados):
-    buffer, writer = _novo_csv()
-    _csv_cabecalho(writer, "Agrícola", propriedade)
-
-    writer.writerow(["Glebas"])
-    writer.writerow(["Nome", "Área (ha)", "Tipo de solo", "Latitude",
-                     "Longitude", "Coordenadas válidas"])
+    buf = io.StringIO()
+    w = _csv_writer(buf)
+    w.writerow([_AVISO_OPERACIONAL])
+    w.writerow(["Relatório Agrícola", propriedade.nome])
+    w.writerow([])
+    w.writerow(["Propriedades"])
+    w.writerow(["Nome", "Área (ha)", "Tipo de Solo"])
     for item in dados["glebas"]:
         g = item["obj"]
-        writer.writerow([_txt(g.nome), _num(g.area_ha), _txt(g.tipo_solo),
-                         _txt(g.latitude), _txt(g.longitude),
-                         "Sim" if item["coordenada_valida"] else "Não"])
-    writer.writerow([])
-
-    writer.writerow(["Culturas"])
-    writer.writerow(["Nome", "Variedade", "Safra", "Status", "Início", "Fim"])
+        w.writerow([g.nome, _fmt_valor(g.area_ha), g.tipo_solo or ""])
+    w.writerow([])
+    w.writerow(["Culturas"])
+    w.writerow(["Nome", "Variedade", "Safra", "Status"])
     for c in dados["culturas"]:
-        writer.writerow([_txt(c.nome), _txt(c.variedade), _txt(c.safra),
-                         _txt(c.status), _txt(c.data_inicio), _txt(c.data_fim)])
-    writer.writerow([])
-
-    writer.writerow(["Associações cultura-gleba"])
-    writer.writerow(["Cultura", "Gleba", "Status da cultura"])
-    for cg in dados["associacoes"]:
-        writer.writerow([_txt(cg.cultura.nome), _txt(cg.gleba.nome),
-                         _txt(cg.cultura.status)])
-    writer.writerow([])
-
-    writer.writerow(["Colheitas"])
-    writer.writerow(["Data", "Cultura", "Gleba", "Quantidade", "Unidade",
-                     "Qualidade"])
-    for col in dados["colheitas"]:
-        writer.writerow([_txt(col.data_colheita), _txt(col.cultura_gleba.cultura.nome),
-                         _txt(col.cultura_gleba.gleba.nome), _num(col.quantidade),
-                         _txt(col.unidade), _txt(col.qualidade)])
-    return buffer.getvalue()
-
-
-def gerar_pdf_relatorio_agricola(propriedade, dados):
-    story = _cabecalho_pdf("Relatório Agrícola", propriedade)
-
-    story.append(_subtitulo("Glebas"))
-    rows = [[_txt(i["obj"].nome), _num(i["obj"].area_ha), _txt(i["obj"].tipo_solo),
-             _txt(i["obj"].latitude), _txt(i["obj"].longitude),
-             "Sim" if i["coordenada_valida"] else "Não"] for i in dados["glebas"]]
-    story.append(_tabela(["Nome", "Área (ha)", "Tipo de solo", "Latitude",
-                          "Longitude", "Coord. válidas"], rows))
-    story.append(Spacer(1, 4 * mm))
-
-    story.append(_subtitulo("Culturas"))
-    rows = [[_txt(c.nome), _txt(c.variedade), _txt(c.safra), _txt(c.status),
-             _txt(c.data_inicio), _txt(c.data_fim)] for c in dados["culturas"]]
-    story.append(_tabela(["Nome", "Variedade", "Safra", "Status", "Início", "Fim"], rows))
-    story.append(Spacer(1, 4 * mm))
-
-    story.append(_subtitulo("Associações cultura↔gleba"))
-    rows = [[_txt(cg.cultura.nome), _txt(cg.gleba.nome), _txt(cg.cultura.status)]
-            for cg in dados["associacoes"]]
-    story.append(_tabela(["Cultura", "Gleba", "Status da cultura"], rows))
-    story.append(Spacer(1, 4 * mm))
-
-    story.append(_subtitulo(f"Colheitas (total: {dados['total_colheitas']})"))
-    rows = [[_txt(col.data_colheita), _txt(col.cultura_gleba.cultura.nome),
-             _txt(col.cultura_gleba.gleba.nome), _num(col.quantidade),
-             _txt(col.unidade), _txt(col.qualidade)] for col in dados["colheitas"]]
-    story.append(_tabela(["Data", "Cultura", "Gleba", "Quantidade", "Unidade",
-                          "Qualidade"], rows))
-    return _render_pdf(story)
-
-
-# ===========================================================================
-# Relatório de Aplicações
-# ===========================================================================
-
-_HEADERS_APL = ["Data", "Cultura", "Gleba", "Produto", "Classe", "Dose",
-                "Unidade", "Responsável", "Observação"]
-
-
-def _linhas_aplicacoes(dados):
-    linhas = []
-    for a in dados["aplicacoes"]:
-        linhas.append([
-            _txt(a.data_aplicacao), _txt(a.cultura_gleba.cultura.nome),
-            _txt(a.cultura_gleba.gleba.nome), _txt(a.produto.nome),
-            _txt(a.produto.classe), _num(a.dose), _txt(a.unidade),
-            _txt(a.responsavel), _txt(a.observacao),
-        ])
-    return linhas
+        w.writerow([c.nome, c.variedade or "", c.safra or "", c.status])
+    return buf.getvalue()
 
 
 def gerar_csv_relatorio_aplicacoes(propriedade, dados):
-    buffer, writer = _novo_csv()
-    _csv_cabecalho(writer, "Aplicações", propriedade, dados.get("filtros"))
-    writer.writerow(["Total", dados["total"]])
-    writer.writerow([])
-    writer.writerow(_HEADERS_APL)
-    for linha in _linhas_aplicacoes(dados):
-        writer.writerow(linha)
-    return buffer.getvalue()
-
-
-def gerar_pdf_relatorio_aplicacoes(propriedade, dados):
-    story = _cabecalho_pdf("Relatório de Aplicações", propriedade, dados.get("filtros"))
-    story.append(_subtitulo(f"Total de aplicações: {dados['total']}"))
-    story.append(_tabela(_HEADERS_APL, _linhas_aplicacoes(dados)))
-    return _render_pdf(story)
-
-
-# ===========================================================================
-# Relatório de Uploads
-# ===========================================================================
-
-_HEADERS_UP = ["Data", "Nome original", "Tipo MIME", "Tamanho (bytes)", "Descrição"]
-
-
-def _linhas_uploads(dados):
-    return [[_txt(a.enviado_em), _txt(a.nome_original), _txt(a.tipo_mime),
-             _txt(a.tamanho), _txt(a.descricao)] for a in dados["arquivos"]]
+    buf = io.StringIO()
+    w = _csv_writer(buf)
+    w.writerow([_AVISO_OPERACIONAL])
+    w.writerow(["Relatório de Aplicações", propriedade.nome, f"Total: {dados['total']}"])
+    w.writerow([])
+    w.writerow(["Data", "Produto", "Dose", "Unidade", "Responsável", "Observação"])
+    for a in dados["aplicacoes"]:
+        produto = a.produto.nome if a.produto else ""
+        w.writerow([a.data_aplicacao, produto, _fmt_valor(a.dose), a.unidade or "",
+                    a.responsavel or "", a.observacao or ""])
+    return buf.getvalue()
 
 
 def gerar_csv_relatorio_uploads(propriedade, dados):
-    buffer, writer = _novo_csv()
-    _csv_cabecalho(writer, "Uploads", propriedade)
-    writer.writerow(["Total", dados["total"]])
-    writer.writerow(["Tamanho total (bytes)", dados["tamanho_total"]])
-    writer.writerow([])
-    writer.writerow(_HEADERS_UP)
-    for linha in _linhas_uploads(dados):
-        writer.writerow(linha)
-    return buffer.getvalue()
+    buf = io.StringIO()
+    w = _csv_writer(buf)
+    w.writerow([_AVISO_OPERACIONAL])
+    w.writerow(["Relatório de Uploads", propriedade.nome, f"Total: {dados['total']}"])
+    w.writerow([])
+    w.writerow(["Nome", "Tipo MIME", "Tamanho", "Descrição", "Enviado em"])
+    for a in dados["arquivos"]:
+        w.writerow([a.nome_original, a.tipo_mime or "", a.tamanho or 0,
+                    a.descricao or "", a.enviado_em])
+    return buf.getvalue()
+
+
+# ---------------------------------------------------------------------------
+# PDF generators
+# ---------------------------------------------------------------------------
+
+def gerar_pdf_relatorio_geral(propriedade, dados):
+    buf = io.BytesIO()
+    doc = _pdf_doc(buf, "Relatório Geral")
+    styles = getSampleStyleSheet()
+    elems = _pdf_header("Relatório Geral", propriedade, styles)
+
+    table_data = [["Indicador", "Valor"]]
+    g = dados["glebas"]
+    table_data.append(["Total de propriedades", str(g["total"])])
+    table_data.append(["Área total", f'{_fmt_valor(g["area_total"])} ha'])
+    c = dados["culturas"]
+    table_data.append(["Total de culturas", str(c["total"])])
+    f = dados["financeiro"]
+    table_data.append(["Receitas", f'R$ {_fmt_valor(f["receitas"])}'])
+    table_data.append(["Despesas", f'R$ {_fmt_valor(f["despesas"])}'])
+    table_data.append(["Saldo", f'R$ {_fmt_valor(f["saldo"])}'])
+    e = dados["equipe"]
+    table_data.append(["Equipe (ativos)", str(e["ativos"])])
+    table_data.append(["Colheitas", str(dados["colheita"]["total"])])
+    table_data.append(["Aplicações", str(dados["aplicacoes"]["total"])])
+    table_data.append(["Uploads", str(dados["uploads"]["total"])])
+
+    elems.append(_tabela_pdf(table_data))
+    doc.build(elems)
+    return buf.getvalue()
+
+
+def gerar_pdf_relatorio_financeiro(propriedade, dados):
+    buf = io.BytesIO()
+    doc = _pdf_doc(buf, "Relatório Financeiro")
+    styles = getSampleStyleSheet()
+    elems = _pdf_header("Relatório Financeiro", propriedade, styles)
+
+    elems.append(Paragraph(
+        f'Receitas: R$ {_fmt_valor(dados["receitas"])} | '
+        f'Despesas: R$ {_fmt_valor(dados["despesas"])} | '
+        f'Saldo: R$ {_fmt_valor(dados["saldo"])}',
+        styles["Normal"]))
+    elems.append(Spacer(1, 0.3 * cm))
+
+    table_data = [["Data", "Tipo", "Categoria", "Valor"]]
+    for l in dados["lancamentos"]:
+        table_data.append([l.data, l.tipo, l.categoria or "—", f"R$ {_fmt_valor(l.valor)}"])
+    elems.append(_tabela_pdf(table_data))
+    doc.build(elems)
+    return buf.getvalue()
+
+
+def gerar_pdf_relatorio_agricola(propriedade, dados):
+    buf = io.BytesIO()
+    doc = _pdf_doc(buf, "Relatório Agrícola")
+    styles = getSampleStyleSheet()
+    elems = _pdf_header("Relatório Agrícola", propriedade, styles)
+
+    elems.append(Paragraph("Propriedades", styles["Heading2"]))
+    table_data = [["Nome", "Área (ha)", "Tipo de Solo"]]
+    for item in dados["glebas"]:
+        g = item["obj"]
+        table_data.append([g.nome, _fmt_valor(g.area_ha), g.tipo_solo or "—"])
+    elems.append(_tabela_pdf(table_data))
+    elems.append(Spacer(1, 0.5 * cm))
+
+    elems.append(Paragraph("Culturas", styles["Heading2"]))
+    table_data = [["Nome", "Variedade", "Safra", "Status"]]
+    for c in dados["culturas"]:
+        table_data.append([c.nome, c.variedade or "—", c.safra or "—", c.status])
+    elems.append(_tabela_pdf(table_data))
+    doc.build(elems)
+    return buf.getvalue()
+
+
+def gerar_pdf_relatorio_aplicacoes(propriedade, dados):
+    buf = io.BytesIO()
+    doc = _pdf_doc(buf, "Relatório de Aplicações")
+    styles = getSampleStyleSheet()
+    elems = _pdf_header("Relatório de Aplicações", propriedade, styles)
+
+    table_data = [["Data", "Produto", "Dose", "Unidade", "Responsável"]]
+    for a in dados["aplicacoes"]:
+        produto = a.produto.nome if a.produto else "—"
+        table_data.append([a.data_aplicacao, produto, _fmt_valor(a.dose),
+                          a.unidade or "—", a.responsavel or "—"])
+    elems.append(_tabela_pdf(table_data))
+    doc.build(elems)
+    return buf.getvalue()
 
 
 def gerar_pdf_relatorio_uploads(propriedade, dados):
-    story = _cabecalho_pdf("Relatório de Uploads", propriedade)
-    story.append(_subtitulo(
-        f"Total: {dados['total']} · Tamanho total (bytes): {dados['tamanho_total']}"))
-    story.append(_tabela(_HEADERS_UP, _linhas_uploads(dados)))
-    return _render_pdf(story)
+    buf = io.BytesIO()
+    doc = _pdf_doc(buf, "Relatório de Uploads")
+    styles = getSampleStyleSheet()
+    elems = _pdf_header("Relatório de Uploads", propriedade, styles)
+
+    table_data = [["Nome", "Tipo MIME", "Tamanho", "Enviado em"]]
+    for a in dados["arquivos"]:
+        table_data.append([a.nome_original, a.tipo_mime or "—",
+                          str(a.tamanho or 0), a.enviado_em or "—"])
+    elems.append(_tabela_pdf(table_data))
+    doc.build(elems)
+    return buf.getvalue()

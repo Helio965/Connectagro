@@ -18,21 +18,21 @@
 </section>
 
 <div class="dashboard-alerts">
-  <p>O Dashboard é um resumo operacional do MVP.</p>
+  <p>O Dashboard reúne um resumo operacional da propriedade.</p>
   <p>O catálogo é apenas consulta técnica; o ConnectAgro não vende produtos.</p>
   <p>Aplicações de insumo são registros históricos e não representam recomendação agronômica.</p>
 </div>
 
 <section class="dashboard-grid" aria-label="Indicadores principais">
   <article class="metric-card">
-    <span class="metric-label">Glebas</span>
+    <span class="metric-label">Propriedades</span>
     <strong class="metric-value">{{ dashboard.glebas.total }}</strong>
     <small>{{ formatar_area(dashboard.glebas.area_total) }} no total · {{ dashboard.glebas.sem_area }} sem área</small>
   </article>
   <article class="metric-card">
     <span class="metric-label">Culturas</span>
     <strong class="metric-value">{{ dashboard.culturas.total }}</strong>
-    <small>{{ dashboard.culturas.total_associacoes }} associações cultura↔gleba</small>
+    <small>{{ dashboard.culturas.total_associacoes }} associações cultura↔propriedade</small>
   </article>
   {% if can("financeiro.view") %}
   <article class="metric-card">
@@ -112,7 +112,7 @@
 <section class="dashboard-section">
   <h2>Atalhos rápidos</h2>
   <div class="quick-actions">
-    {% if can("glebas.create") %}<a href="{{ url_for('glebas.nova') }}">Nova Gleba</a>{% endif %}
+    {% if can("glebas.create") %}<a href="{{ url_for('glebas.nova') }}">Nova Propriedade</a>{% endif %}
     {% if can("culturas.create") %}<a href="{{ url_for('culturas.nova') }}">Nova Cultura</a>{% endif %}
     {% if can("financeiro.create") %}<a href="{{ url_for('financeiro.novo') }}">Novo Lançamento Financeiro</a>{% endif %}
     {% if can("colheita.create") %}<a href="{{ url_for('colheita.nova') }}">Nova Colheita</a>{% endif %}
@@ -151,7 +151,7 @@
     <h2>Últimas colheitas</h2>
     {% if dashboard.colheita.ultimas %}
       <table class="tabela compact-table">
-        <thead><tr><th>Data</th><th>Cultura</th><th>Gleba</th><th>Quantidade</th></tr></thead>
+        <thead><tr><th>Data</th><th>Cultura</th><th>Propriedade</th><th>Quantidade</th></tr></thead>
         <tbody>
           {% for colheita in dashboard.colheita.ultimas %}
             <tr>
@@ -214,7 +214,7 @@
 
 {% if dashboard.glebas.total == 0 %}
   <section class="dashboard-section">
-    <p class="empty-state">Nenhuma gleba cadastrada ainda.</p>
+    <p class="empty-state">Nenhuma propriedade cadastrada ainda.</p>
   </section>
 {% endif %}
 

@@ -44,11 +44,9 @@ def _popular_cenario_ia():
     db.session.add(prop_a2)
     db.session.commit()
 
-    gleba_a1 = Gleba(propriedade_id=prop_a.id, nome="Talhão A1", area_ha=10.5,
-                     latitude=-15.1, longitude=-47.2)
+    gleba_a1 = Gleba(propriedade_id=prop_a.id, nome="Talhão A1", area_ha=10.5)
     gleba_a2 = Gleba(propriedade_id=prop_a.id, nome="Talhão A2")
-    gleba_b = Gleba(propriedade_id=prop_b.id, nome="Talhão B secreto", area_ha=999,
-                    latitude=-10.0, longitude=-45.0)
+    gleba_b = Gleba(propriedade_id=prop_b.id, nome="Talhão B secreto", area_ha=999)
     db.session.add_all([gleba_a1, gleba_a2, gleba_b])
     db.session.commit()
 
@@ -190,11 +188,11 @@ def test_post_ia_vincula_usuario_atual(app_db):
 def test_post_ia_vincula_propriedade_atual(app_db):
     from app.models import IaInteracao, Propriedade, Usuario
 
-    _post_ia(app_db, "Tenho glebas sem coordenadas?")
+    _post_ia(app_db, "Tenho propriedades sem área?")
     with app_db.app_context():
         usuario = Usuario.query.filter_by(email="a@connectagro.com").one()
         propriedade = Propriedade.query.filter_by(usuario_id=usuario.id, nome="Fazenda A").one()
-        interacao = IaInteracao.query.filter_by(pergunta="Tenho glebas sem coordenadas?").one()
+        interacao = IaInteracao.query.filter_by(pergunta="Tenho propriedades sem área?").one()
         assert interacao.propriedade_id == propriedade.id
 
 
@@ -238,13 +236,13 @@ def test_resposta_financeiro_retorna_receitas_despesas_saldo(app_db):
     assert "R$ 99.999,00" not in corpo
 
 
-def test_resposta_glebas_retorna_total_area_sem_coordenadas(app_db):
-    resp, corpo = _post_ia(app_db, "Tenho glebas sem coordenadas?")
+def test_resposta_propriedades_retorna_total_area_sem_area(app_db):
+    resp, corpo = _post_ia(app_db, "Tenho propriedades sem área?")
     assert resp.status_code == 200
-    assert "Resumo de glebas" in corpo
-    assert "Glebas cadastradas: 2" in corpo
+    assert "Resumo de propriedades" in corpo
+    assert "Propriedades cadastradas: 2" in corpo
     assert "Área total informada: 10,50 ha" in corpo
-    assert "Glebas sem coordenadas válidas: 1" in corpo
+    assert "Propriedades sem área informada: 1" in corpo
     assert "999,00 ha" not in corpo
 
 
@@ -255,7 +253,7 @@ def test_resposta_culturas_retorna_status_e_associacoes(app_db):
     assert "Culturas cadastradas: 2" in corpo
     assert "Planejadas: 1" in corpo
     assert "Em andamento: 1" in corpo
-    assert "Associações cultura↔gleba: 2" in corpo
+    assert "Associações cultura↔propriedade: 2" in corpo
     assert "Cultura secreta" not in corpo
 
 
@@ -304,7 +302,7 @@ def test_resposta_desconhecida_retorna_ajuda(app_db):
     resp, corpo = _post_ia(app_db, "Explique algo aleatório")
     assert resp.status_code == 200
     assert "Não entendi totalmente a pergunta." in corpo
-    for tema in ("resumo", "financeiro", "glebas", "culturas", "colheita", "aplicações", "documentos", "catálogo"):
+    for tema in ("resumo", "financeiro", "propriedades", "culturas", "colheita", "aplicações", "documentos", "catálogo"):
         assert tema in corpo
 
 

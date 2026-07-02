@@ -64,12 +64,26 @@ def test_filtro_categoria(app_cat):
     assert "Imidacloprido" not in corpo  # inseticida
 
 
-def test_filtro_status_regulatorio(app_cat):
+def test_listagem_nao_exibe_status_regulatorio(app_cat):
     client = _login(app_cat)
-    # defensivo com atencao_regulatoria: Clorpirifós
-    corpo = client.get("/defensivos/?status_regulatorio=atencao_regulatoria").data.decode("utf-8")
-    assert "Clorpirifós" in corpo
-    assert "Glifosato" not in corpo  # nao_validado_agrofit
+    for url in ("/defensivos/", "/fertilizantes/"):
+        corpo = client.get(url).data.decode("utf-8")
+        assert "Status regulatório" not in corpo
+        assert "Todos os status" not in corpo
+        assert "status_regulatorio" not in corpo
+        assert "nao_validado_agrofit" not in corpo
+        assert "sujeito_a_sipeagro_nao_validado" not in corpo
+        assert "tipo_tecnico_generico" not in corpo
+
+
+def test_listagem_usa_cards_com_placeholder(app_cat):
+    client = _login(app_cat)
+    for url in ("/defensivos/", "/fertilizantes/"):
+        corpo = client.get(url).data.decode("utf-8")
+        assert "catalog-grid" in corpo
+        assert "catalog-card" in corpo
+        assert "placeholder-produto.svg" in corpo
+        assert "Ver detalhes" in corpo
 
 
 def test_detalhe_defensivo(app_cat):
@@ -107,10 +121,13 @@ def test_sem_termos_de_venda(app_cat):
             assert proibido not in corpo, f"'{proibido}' não deveria aparecer em {url}"
 
 
-def test_aviso_preco_imagem_pendente(app_cat):
-    corpo = _login(app_cat).get("/defensivos/glifosato").data.decode("utf-8").lower()
-    assert "preço e imagem" in corpo
-    assert "pendente" in corpo
+def test_detalhe_usa_placeholder_e_nao_exibe_status_cru(app_cat):
+    corpo = _login(app_cat).get("/defensivos/glifosato").data.decode("utf-8")
+    assert "placeholder-produto.svg" in corpo
+    assert "Status regulatório" not in corpo
+    assert "Status do sistema" not in corpo
+    assert "nao_validado_agrofit" not in corpo
+    assert "Esta página é apenas uma consulta inicial" in corpo
 
 
 def test_campos_json_renderizados_como_lista(app_cat):

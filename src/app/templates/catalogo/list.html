@@ -2,30 +2,37 @@
 
 {% block title %}{{ titulo }} — ConnectAgro{% endblock %}
 
+{% macro imagem_catalogo(produto) -%}
+  {% set imagem = produto.imagem_url %}
+  {% if imagem %}
+    {% if imagem.startswith("http://") or imagem.startswith("https://") or imagem.startswith("/") or imagem.startswith("data:") %}
+      {{- imagem -}}
+    {% elif imagem.startswith("static/") %}
+      {{- url_for("static", filename=imagem[7:]) -}}
+    {% else %}
+      {{- url_for("static", filename=imagem) -}}
+    {% endif %}
+  {% else %}
+    {{- url_for("static", filename="img/placeholder-produto.svg") -}}
+  {% endif %}
+{%- endmacro %}
+
 {% block content %}
 <section class="card">
   <h1>{{ titulo }}</h1>
 
   <p class="hint">
-    Este catálogo é uma base técnica inicial de consulta e <strong>não substitui
-    orientação de um profissional habilitado</strong>. O ConnectAgro <strong>não
-    vende produtos</strong>, não possui carrinho e não emite cotação. Preço e
-    imagem permanecem pendentes no MVP. O status regulatório exibido <strong>não
-    representa validação oficial automática</strong>.
+    Catálogo inicial de consulta de {{ tipo }} agrícolas. As imagens são apenas
+    referências visuais. O ConnectAgro não vende produtos e não substitui
+    orientação técnica profissional.
   </p>
 
   <form method="get" class="filtros">
-    <input type="text" name="q" placeholder="Buscar por nome, categoria…" value="{{ q }}">
+    <input type="text" name="q" placeholder="Buscar por nome, categoria ou descrição…" value="{{ q }}">
     <select name="categoria">
       <option value="">Todas as categorias</option>
       {% for c in categorias %}
       <option value="{{ c }}" {{ "selected" if categoria == c else "" }}>{{ c }}</option>
-      {% endfor %}
-    </select>
-    <select name="status_regulatorio">
-      <option value="">Todos os status</option>
-      {% for s in status_opcoes %}
-      <option value="{{ s }}" {{ "selected" if status_regulatorio == s else "" }}>{{ s }}</option>
       {% endfor %}
     </select>
     <button type="submit" class="btn-acao">Filtrar</button>
@@ -33,22 +40,27 @@
   </form>
 
   {% if produtos %}
-  <table class="tabela">
-    <thead>
-      <tr><th>Nome</th><th>Categoria</th><th>Descrição</th><th>Status regulatório</th><th></th></tr>
-    </thead>
-    <tbody>
-      {% for p in produtos %}
-      <tr>
-        <td>{{ p.nome }}</td>
-        <td>{{ p.categoria or "—" }}</td>
-        <td>{{ p.descricao_curta or "—" }}</td>
-        <td><code>{{ p.status_regulatorio }}</code></td>
-        <td><a href="{{ url_for(endpoint, slug=p.slug) }}">Ver detalhes</a></td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <div class="catalog-grid">
+    {% for p in produtos %}
+    <article class="catalog-card">
+      <div class="catalog-image-wrapper">
+        <img
+          src="{{ imagem_catalogo(p) }}"
+          alt="Foto de referência de {{ p.nome }}"
+          class="catalog-image"
+          loading="lazy"
+        >
+      </div>
+
+      <div class="catalog-card-body">
+        <h2 class="catalog-title">{{ p.nome }}</h2>
+        <span class="catalog-category">{{ p.categoria or "Sem categoria" }}</span>
+        <p class="catalog-description">{{ p.descricao_curta or "Descrição não informada." }}</p>
+        <a href="{{ url_for(endpoint, slug=p.slug) }}" class="catalog-details-link">Ver detalhes</a>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
   {% else %}
   <p>Nenhum produto encontrado com os filtros atuais.</p>
   {% endif %}

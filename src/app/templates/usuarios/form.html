@@ -6,10 +6,6 @@
 <section class="card">
   <h1>{{ "Editar usuário" if usuario else "Novo usuário" }}</h1>
 
-  <p class="placeholder-tag">
-    Painel de usuários interno da propriedade. Este painel não é cadastro público.
-  </p>
-
   <form method="post" class="form-vertical"
         action="{{ url_for('usuarios.editar', usuario_id=usuario.id) if usuario else url_for('usuarios.novo') }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -17,34 +13,30 @@
     <label for="nome">Nome *</label>
     <input type="text" id="nome" name="nome" required value="{{ form.nome or '' }}">
 
+    {% if not usuario %}
     <label for="email">E-mail *</label>
-    <input type="email" id="email" name="email" required
-           value="{{ form.email or '' }}" {{ "readonly" if usuario else "" }}>
-    {% if usuario %}
-    <p class="hint">O e-mail não é editado nesta versão do painel.</p>
+    <input type="email" id="email" name="email" required value="{{ form.email or '' }}">
+
+    <label for="senha">Senha temporária *</label>
+    <input type="password" id="senha" name="senha" required minlength="6"
+           placeholder="Mínimo 6 caracteres">
+    {% else %}
+    <p><strong>E-mail:</strong> {{ usuario.email }}</p>
     {% endif %}
 
     <label for="perfil">Perfil *</label>
     <select id="perfil" name="perfil" required>
-      {% for perfil in perfis %}
-      <option value="{{ perfil }}" {{ "selected" if form.perfil == perfil else "" }}>
-        {{ perfil }}
-      </option>
+      {% for p in perfis %}
+      <option value="{{ p }}" {{ "selected" if (form.perfil or '') == p else "" }}>{{ p }}</option>
       {% endfor %}
     </select>
 
-    {% if not usuario %}
-    <label for="senha">Senha temporária *</label>
-    <input type="password" id="senha" name="senha" required minlength="6">
-
-    <label for="confirmar_senha">Confirmar senha temporária</label>
-    <input type="password" id="confirmar_senha" name="confirmar_senha" minlength="6">
-    {% endif %}
-
+    {% if usuario %}
     <label class="check-inline">
       <input type="checkbox" name="ativo" value="1" {{ "checked" if form.ativo else "" }}>
       Ativo
     </label>
+    {% endif %}
 
     <div class="form-acoes">
       <button type="submit" class="btn-acao">Salvar</button>

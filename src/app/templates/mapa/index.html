@@ -17,14 +17,14 @@
   </div>
 
   <div class="mapa-aviso">
-    <p>O mapa do MVP usa coordenadas cadastradas nas glebas e permite a
-       <strong>edição do polígono</strong> de cada gleba para apoio operacional.</p>
+    <p>O mapa permite a <strong>edição do polígono</strong> de cada propriedade para
+       apoio operacional, sem exigir dados técnicos no cadastro.</p>
     <p>É apoio operacional: <strong>não substitui medição técnica ou
        georreferenciamento oficial</strong> e não usa GPS em tempo real.</p>
   </div>
 
   {% if not glebas %}
-    <p class="mapa-empty">Nenhuma gleba cadastrada ainda.</p>
+    <p class="mapa-empty">Nenhuma propriedade cadastrada ainda.</p>
   {% endif %}
 
   <div class="mapa-layout">
@@ -33,8 +33,8 @@
            data-mapa-url="{{ url_for('mapa.dados') }}"
            data-csrf-token="{{ csrf_token() }}"
            data-can-edit="{{ '1' if can('mapa.edit') else '0' }}">
-        {% if not glebas_com_coordenadas %}
-          <p class="mapa-empty">Nenhuma gleba com coordenadas válidas para exibir no mapa.</p>
+        {% if not glebas %}
+          <p class="mapa-empty">Nenhuma propriedade cadastrada para exibir no mapa.</p>
         {% endif %}
       </div>
     </div>
@@ -43,8 +43,8 @@
       {% if can("mapa.edit") %}
       <section class="mapa-edicao" id="mapa-edicao">
         <h2>Editar polígono</h2>
-        <p class="hint">Selecione uma gleba, desenhe ou ajuste o polígono e salve.</p>
-        <label for="mapa-gleba-select">Gleba</label>
+        <p class="hint">Selecione uma propriedade, desenhe ou ajuste o polígono e salve.</p>
+        <label for="mapa-gleba-select">Propriedade</label>
         <select id="mapa-gleba-select"></select>
         <div class="mapa-edicao-acoes">
           <button type="button" id="mapa-salvar" class="btn-acao">Salvar polígono</button>
@@ -59,9 +59,9 @@
       {% endif %}
 
       <section>
-        <h2>Glebas no mapa</h2>
+        <h2>Propriedades no mapa</h2>
         <ul class="mapa-lista">
-          {% for gleba in glebas_com_coordenadas %}
+          {% for gleba in glebas_mapa %}
             <li>
               <strong>{{ gleba.nome }}</strong>
               {% if gleba.area_ha is not none %}
@@ -72,25 +72,13 @@
               {% if gleba.tipo_solo %}
                 <span>Solo: {{ gleba.tipo_solo }}</span>
               {% endif %}
-              <small>Lat: {{ gleba.latitude }} · Lon: {{ gleba.longitude }}</small>
+              <small>{{ "Polígono cadastrado" if gleba.poligono_geojson else "Sem polígono cadastrado" }}</small>
             </li>
           {% else %}
-            <li class="mapa-empty">Nenhuma gleba com coordenadas válidas para exibir no mapa.</li>
+            <li class="mapa-empty">Nenhuma propriedade cadastrada para exibir no mapa.</li>
           {% endfor %}
         </ul>
       </section>
-
-      {% if glebas_sem_coordenadas %}
-        <section>
-          <h2>Sem coordenadas válidas</h2>
-          <p class="hint">Edite a gleba e preencha latitude/longitude para aparecer no mapa.</p>
-          <ul class="mapa-lista">
-            {% for gleba in glebas_sem_coordenadas %}
-              <li><strong>{{ gleba.nome }}</strong></li>
-            {% endfor %}
-          </ul>
-        </section>
-      {% endif %}
     </aside>
   </div>
 </section>

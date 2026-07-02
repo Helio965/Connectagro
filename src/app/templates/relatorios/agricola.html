@@ -14,24 +14,22 @@
   {% include "relatorios/_avisos.html" %}
 
   <div class="relatorio-section">
-    <h2>Glebas</h2>
+    <h2>Propriedades</h2>
     {% if dados.glebas %}
     <table class="tabela">
-      <thead><tr><th>Nome</th><th>Área</th><th>Tipo de solo</th><th>Latitude</th><th>Longitude</th><th>Coordenadas válidas</th></tr></thead>
+      <thead><tr><th>Nome</th><th>Área</th><th>Status</th><th>Tipo de solo</th></tr></thead>
       <tbody>
         {% for item in dados.glebas %}
         <tr>
           <td>{{ item.obj.nome }}</td>
           <td>{% if item.obj.area_ha is not none %}{{ formatar_area(item.obj.area_ha) }}{% else %}—{% endif %}</td>
+          <td>{{ (item.obj.status or "ativa").replace("_", " ").capitalize() }}</td>
           <td>{{ item.obj.tipo_solo or "—" }}</td>
-          <td>{{ item.obj.latitude if item.obj.latitude is not none else "—" }}</td>
-          <td>{{ item.obj.longitude if item.obj.longitude is not none else "—" }}</td>
-          <td>{{ "Sim" if item.coordenada_valida else "Não" }}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
-    {% else %}<p>Nenhuma gleba cadastrada.</p>{% endif %}
+    {% else %}<p>Nenhuma propriedade cadastrada.</p>{% endif %}
   </div>
 
   <div class="relatorio-section">
@@ -53,10 +51,10 @@
   </div>
 
   <div class="relatorio-section">
-    <h2>Associações Cultura ↔ Gleba</h2>
+    <h2>Associações Cultura ↔ Propriedade</h2>
     {% if dados.associacoes %}
     <table class="tabela">
-      <thead><tr><th>Cultura</th><th>Gleba</th><th>Área da gleba</th><th>Status da cultura</th></tr></thead>
+      <thead><tr><th>Cultura</th><th>Propriedade</th><th>Área da propriedade</th><th>Status da cultura</th></tr></thead>
       <tbody>
         {% for cg in dados.associacoes %}
         <tr>
@@ -67,7 +65,7 @@
         {% endfor %}
       </tbody>
     </table>
-    {% else %}<p>Nenhuma associação cultura↔gleba.</p>{% endif %}
+    {% else %}<p>Nenhuma associação cultura↔propriedade.</p>{% endif %}
   </div>
 
   <div class="relatorio-section">
@@ -77,7 +75,7 @@
     </p>
     {% if dados.colheitas %}
     <table class="tabela">
-      <thead><tr><th>Data</th><th>Cultura</th><th>Gleba</th><th>Quantidade</th><th>Unidade</th><th>Qualidade</th><th>Observação</th></tr></thead>
+      <thead><tr><th>Data</th><th>Cultura</th><th>Propriedade</th><th>Quantidade</th><th>Unidade</th><th>Qualidade</th><th>Observação</th></tr></thead>
       <tbody>
         {% for col in dados.colheitas %}
         <tr>
