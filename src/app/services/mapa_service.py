@@ -11,8 +11,8 @@ from ..models._helpers import iso_now
 # Tipos GeoJSON aceitos.
 _TIPOS_ACEITOS = {"Polygon", "MultiPolygon", "Feature"}
 
-# Tamanho máximo do GeoJSON serializado (bytes).
-_MAX_GEOJSON_BYTES = 500_000
+# Tamanho máximo do GeoJSON serializado (bytes) — contrato da Fase 7.5.
+_MAX_GEOJSON_BYTES = 100 * 1024
 
 
 def validar_poligono_geojson(payload):
@@ -43,6 +43,8 @@ def validar_poligono_geojson(payload):
             return None, "Coordenadas ausentes ou inválidas."
         if not _validar_coordenadas_recursive(coords):
             return None, "Coordenadas fora da faixa válida (-90/90 lat, -180/180 lng)."
+        if not _validar_aneis(tipo, coords):
+            return None, "Cada anel do polígono precisa de ao menos 4 pontos."
 
     if tipo == "Feature":
         geometry = payload.get("geometry")
@@ -56,12 +58,27 @@ def validar_poligono_geojson(payload):
             return None, "Coordenadas ausentes na geometria."
         if not _validar_coordenadas_recursive(coords):
             return None, "Coordenadas fora da faixa válida."
+        if not _validar_aneis(geo_tipo, coords):
+            return None, "Cada anel do polígono precisa de ao menos 4 pontos."
 
     geojson_str = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
     if len(geojson_str.encode("utf-8")) > _MAX_GEOJSON_BYTES:
         return None, f"GeoJSON excede o tamanho máximo ({_MAX_GEOJSON_BYTES} bytes)."
 
     return geojson_str, None
+
+
+def _validar_aneis(tipo, coords):
+    """Exige ao menos 4 pontos por anel (mínimo de um anel fechado)."""
+    if tipo == "Polygon":
+        aneis = coords
+    else:  # MultiPolygon: lista de polígonos, cada um com seus anéis.
+        aneis = [anel for poligono in coords if isinstance(poligono, list)
+                 for anel in poligono]
+    for anel in aneis:
+        if not isinstance(anel, list) or len(anel) < 4:
+            return False
+    return True
 
 
 def _validar_coordenadas_recursive(coords, depth=0):

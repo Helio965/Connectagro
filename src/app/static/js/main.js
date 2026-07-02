@@ -14,6 +14,24 @@ document.addEventListener("DOMContentLoaded", function () {
   var backdrop = document.getElementById("sidebar-backdrop");
   if (!toggle || !sidebar) return;
 
+  sidebar.querySelectorAll("[data-sidebar-toggle]").forEach(function (button) {
+    var targetId = button.getAttribute("data-sidebar-toggle");
+    var submenu = document.getElementById(targetId);
+    if (!submenu) return;
+
+    function setGroupOpen(isOpen) {
+      submenu.classList.toggle("open", isOpen);
+      button.classList.toggle("is-open", isOpen);
+      button.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    }
+
+    setGroupOpen(submenu.classList.contains("open"));
+
+    button.addEventListener("click", function () {
+      setGroupOpen(!submenu.classList.contains("open"));
+    });
+  });
+
   function abrir() {
     sidebar.classList.add("open");
     if (backdrop) backdrop.classList.add("show");

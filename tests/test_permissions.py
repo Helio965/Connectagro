@@ -149,14 +149,16 @@ def test_matriz_de_permissoes_por_perfil(app_db):
                   "usuarios.view", "usuarios.create", "usuarios.edit",
                   "usuarios.deactivate"),
         "tecnico": ("dashboard.view", "glebas.create", "culturas.edit", "colheita.edit",
-                    "aplicacoes.edit", "upload.download", "financeiro.view", "equipe.view"),
+                    "aplicacoes.edit", "upload.download", "financeiro.view", "equipe.view",
+                    "usuarios.view", "usuarios.create", "usuarios.edit",
+                    "usuarios.deactivate"),
         "trabalhador": ("dashboard.view", "glebas.view", "culturas.view", "colheita.create",
                         "aplicacoes.create", "upload.create", "upload.download"),
     }
     negadas = {
         "tecnico": ("glebas.delete", "culturas.delete", "colheita.delete",
                     "aplicacoes.delete", "upload.delete", "financeiro.create",
-                    "equipe.create", "usuarios.view", "usuarios.create"),
+                    "equipe.create"),
         "trabalhador": ("glebas.create", "culturas.create", "colheita.edit",
                         "aplicacoes.edit", "financeiro.view", "equipe.view",
                         "upload.delete", "usuarios.view", "usuarios.create"),
@@ -190,6 +192,7 @@ def test_rotas_publicas_continuam_publicas(app_db, rota):
 
 @pytest.mark.parametrize("rota", [
     "/", "/mapa/", "/defensivos/", "/fertilizantes/", "/relatorios/", "/ia/",
+    "/usuarios/",
 ])
 def test_tecnico_acessa_modulos_de_consulta_e_apoio(app_db, rota):
     assert _login(app_db, "tecnico").get(rota).status_code == 200
@@ -378,7 +381,7 @@ def test_templates_escondem_menu_e_acoes_sem_permissao(app_db):
     assert "Usuários" not in trabalhador_home
 
     tecnico = _login(app_db, "tecnico")
-    assert "Usuários" not in tecnico.get("/").data.decode("utf-8")
+    assert "Usuários" in tecnico.get("/").data.decode("utf-8")
     financeiro = tecnico.get("/financeiro/").data.decode("utf-8")
     assert "Financeiro" in financeiro
     assert "+ Novo lançamento" not in financeiro

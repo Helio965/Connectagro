@@ -40,7 +40,7 @@ def create_app(config_name=None):
 
     # Dados do usuário logado e autorização disponíveis nos templates Jinja.
     from .utils.auth import is_authenticated, usuario_atual
-    from .utils.permissions import can
+    from .utils.permissions import can, role_label
 
     @app.context_processor
     def inject_usuario():
@@ -48,6 +48,7 @@ def create_app(config_name=None):
             "current_user": usuario_atual(),
             "is_authenticated": is_authenticated(),
             "can": can,
+            "role_label": role_label,
         }
 
     # Health check

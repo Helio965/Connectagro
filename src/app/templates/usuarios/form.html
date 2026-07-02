@@ -13,30 +13,41 @@
     <label for="nome">Nome *</label>
     <input type="text" id="nome" name="nome" required value="{{ form.nome or '' }}">
 
-    {% if not usuario %}
     <label for="email">E-mail *</label>
     <input type="email" id="email" name="email" required value="{{ form.email or '' }}">
 
-    <label for="senha">Senha temporária *</label>
-    <input type="password" id="senha" name="senha" required minlength="6"
-           placeholder="Mínimo 6 caracteres">
+    {% if usuario %}
+    <p class="hint">Preencha a senha apenas se quiser alterá-la.</p>
+    <label for="senha">Nova senha</label>
+    <input type="password" id="senha" name="senha" minlength="{{ min_senha }}"
+           autocomplete="new-password" placeholder="Mínimo {{ min_senha }} caracteres">
+
+    <label for="confirmar_senha">Confirmar nova senha</label>
+    <input type="password" id="confirmar_senha" name="confirmar_senha"
+           minlength="{{ min_senha }}" autocomplete="new-password"
+           placeholder="Repita a nova senha">
     {% else %}
-    <p><strong>E-mail:</strong> {{ usuario.email }}</p>
+    <label for="senha">Senha *</label>
+    <input type="password" id="senha" name="senha" required minlength="{{ min_senha }}"
+           autocomplete="new-password" placeholder="Mínimo {{ min_senha }} caracteres">
+
+    <label for="confirmar_senha">Confirmar senha *</label>
+    <input type="password" id="confirmar_senha" name="confirmar_senha" required
+           minlength="{{ min_senha }}" autocomplete="new-password"
+           placeholder="Repita a senha">
     {% endif %}
 
     <label for="perfil">Perfil *</label>
     <select id="perfil" name="perfil" required>
       {% for p in perfis %}
-      <option value="{{ p }}" {{ "selected" if (form.perfil or '') == p else "" }}>{{ p }}</option>
+      <option value="{{ p }}" {{ "selected" if (form.perfil or '') == p else "" }}>{{ role_label(p) }}</option>
       {% endfor %}
     </select>
 
-    {% if usuario %}
     <label class="check-inline">
       <input type="checkbox" name="ativo" value="1" {{ "checked" if form.ativo else "" }}>
       Ativo
     </label>
-    {% endif %}
 
     <div class="form-acoes">
       <button type="submit" class="btn-acao">Salvar</button>

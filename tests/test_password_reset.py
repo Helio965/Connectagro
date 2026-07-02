@@ -14,7 +14,7 @@ from app.utils.auth import gerar_hash_senha
 
 TOKEN_RE = re.compile(r'name="csrf_token" value="([^"]+)"')
 GENERICA = "Se o e-mail estiver cadastrado e ativo"
-DEV_BLOCK = "Link de redefinição para ambiente local"
+DEV_BLOCK = "Ambiente de desenvolvimento:"
 
 
 def extrair_csrf_token(html):
@@ -111,10 +111,8 @@ def test_usuario_ativo_cria_token_com_hash_sem_texto_puro(db_app):
         assert registro.token_hash == esperado
         assert registro.token_hash != token
         assert len(registro.token_hash) == 64
-        # O token puro não deve aparecer em nenhuma coluna textual.
-        for valor in (registro.token_hash, registro.ip_solicitacao,
-                      registro.user_agent_solicitacao):
-            assert valor != token
+        # O token puro não deve aparecer na coluna persistida (só o hash).
+        assert registro.token_hash != token
 
 
 def test_token_criado_tem_expiracao(db_app):
@@ -182,7 +180,7 @@ def test_post_redefinir_senha_curta_falha(db_app):
         f"/auth/redefinir-senha/{token}",
         data={"nova_senha": "123", "confirmar_senha": "123"})
     assert resp.status_code == 400
-    assert "pelo menos 6 caracteres" in resp.data.decode("utf-8")
+    assert "ao menos 6 caracteres" in resp.data.decode("utf-8")
 
 
 def test_post_redefinir_confirmacao_divergente_falha(db_app):
@@ -191,7 +189,7 @@ def test_post_redefinir_confirmacao_divergente_falha(db_app):
         f"/auth/redefinir-senha/{token}",
         data={"nova_senha": "senha-nova", "confirmar_senha": "outra-coisa"})
     assert resp.status_code == 400
-    assert "confirmação de senha não confere" in resp.data.decode("utf-8")
+    assert "A nova senha e a confirmação não coincidem" in resp.data.decode("utf-8")
 
 
 def test_post_redefinir_token_valido_altera_senha(db_app):

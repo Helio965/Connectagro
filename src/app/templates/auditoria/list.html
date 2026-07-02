@@ -3,7 +3,7 @@
 {% block title %}Auditoria — ConnectAgro{% endblock %}
 
 {% block content %}
-<section class="card">
+<section class="auditoria-page">
   <div class="card-head">
     <h1>Logs de auditoria</h1>
   </div>
@@ -13,26 +13,70 @@
     Dados mínimos — sem senhas, tokens ou conteúdo de formulários.
   </p>
 
-  {% if logs %}
-  <table class="tabela">
-    <thead>
-      <tr>
-        <th>Data/Hora</th><th>Ação</th><th>Entidade</th><th>Resultado</th><th>Descrição</th><th>IP</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for log in logs %}
-      <tr>
-        <td>{{ log.criado_em[:19] if log.criado_em else "—" }}</td>
-        <td>{{ log.acao }}</td>
-        <td>{{ log.entidade or "—" }}{% if log.entidade_id %} #{{ log.entidade_id }}{% endif %}</td>
-        <td>{{ log.resultado }}</td>
-        <td>{{ log.descricao or "—" }}</td>
-        <td>{{ log.ip or "—" }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  {% if auditoria_agrupada %}
+  <div class="audit-summary" aria-label="Resumo da auditoria">
+    <span><strong>{{ logs|length }}</strong> registros</span>
+    <span><strong>{{ auditoria_agrupada|length }}</strong> usuários/perfis</span>
+  </div>
+
+  <div class="audit-user-list">
+    {% for grupo in auditoria_agrupada %}
+    <details class="audit-user-card audit-profile-{{ grupo.perfil }}" {% if loop.first %}open{% endif %}>
+      <summary class="audit-user-toggle">
+        <span class="audit-user-main">
+          <strong>{{ grupo.titulo }}</strong>
+          <small>{{ grupo.subtitulo }}</small>
+        </span>
+        <span class="audit-user-meta">
+          <span>{{ grupo.total }} ações</span>
+          <span>Última: {{ grupo.ultima_acao }}</span>
+        </span>
+      </summary>
+
+      <div class="audit-user-content">
+        {% for categoria in grupo.categorias %}
+        <details class="audit-action-group" open>
+          <summary class="audit-action-title">
+            <span>{{ categoria.nome }}</span>
+            <small>{{ categoria.total }} registros</small>
+          </summary>
+
+          <div class="audit-table-wrap">
+            <table class="tabela audit-table">
+              <thead>
+                <tr>
+                  <th>Data/Hora</th>
+                  <th>Ação</th>
+                  <th>Entidade</th>
+                  <th>Resultado</th>
+                  <th>Descrição</th>
+                  <th>IP</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for log in categoria.logs %}
+                <tr>
+                  <td>{{ log.data }}</td>
+                  <td><code>{{ log.acao }}</code></td>
+                  <td>{{ log.entidade }}</td>
+                  <td>
+                    <span class="audit-result audit-result-{{ log.resultado_classe }}">
+                      {{ log.resultado }}
+                    </span>
+                  </td>
+                  <td>{{ log.descricao }}</td>
+                  <td>{{ log.ip }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </details>
+        {% endfor %}
+      </div>
+    </details>
+    {% endfor %}
+  </div>
   {% else %}
   <p>Nenhum registro de auditoria encontrado para esta propriedade.</p>
   {% endif %}

@@ -11,6 +11,12 @@ from .auth import is_authenticated, usuario_atual
 
 PERFIS_OFICIAIS = ("admin", "tecnico", "trabalhador")
 
+ROLE_LABELS = {
+    "admin": "Administrador",
+    "tecnico": "Gerente de Plantio",
+    "trabalhador": "Trabalhador",
+}
+
 _ADMIN_PERMISSIONS = {
     "dashboard.view",
     "mapa.view",
@@ -77,6 +83,10 @@ _TECNICO_PERMISSIONS = {
     "upload.view",
     "upload.create",
     "upload.download",
+    "usuarios.view",
+    "usuarios.create",
+    "usuarios.edit",
+    "usuarios.deactivate",
 }
 
 _TRABALHADOR_PERMISSIONS = {
@@ -109,6 +119,11 @@ def perfil_atual():
     if usuario is None:
         return None
     return usuario.get("perfil")
+
+
+def role_label(perfil):
+    """Rótulo amigável do perfil para exibição na interface."""
+    return ROLE_LABELS.get(perfil, perfil or "Perfil não informado")
 
 
 def has_permission(permission):

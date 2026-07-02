@@ -23,20 +23,20 @@
       <tr>
         <td>{{ item.usuario.nome }}</td>
         <td>{{ item.usuario.email }}</td>
-        <td>{{ item.usuario.perfil }}</td>
+        <td>{{ role_label(item.usuario.perfil) }}</td>
         <td>{{ "Ativo" if item.usuario.ativo else "Inativo" }}</td>
         <td class="acoes">
-          {% if can("usuarios.edit") %}
+          {% if can("usuarios.edit") and item.can_manage %}
           <a href="{{ url_for('usuarios.editar', usuario_id=item.usuario.id) }}">Editar</a>
           {% endif %}
-          {% if can("usuarios.deactivate") and item.usuario.ativo %}
+          {% if can("usuarios.deactivate") and item.can_manage and item.usuario.ativo %}
           <form method="post" action="{{ url_for('usuarios.inativar', usuario_id=item.usuario.id) }}"
                 onsubmit="return confirm('Inativar este usuário?');" style="display:inline;">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn-link-danger">Inativar</button>
           </form>
           {% endif %}
-          {% if not can("usuarios.edit") and not can("usuarios.deactivate") %}—{% endif %}
+          {% if not item.can_manage %}—{% endif %}
         </td>
       </tr>
       {% endfor %}
