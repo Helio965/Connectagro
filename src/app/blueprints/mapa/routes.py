@@ -20,27 +20,6 @@ from ...utils.permissions import require_permission
 _GEOJSON_TYPES = {"Feature", "FeatureCollection", "Polygon", "MultiPolygon"}
 
 
-def _numero(valor):
-    """Converte valores numéricos simples sem alterar o dado armazenado."""
-    if valor is None:
-        return None
-    try:
-        return float(valor)
-    except (TypeError, ValueError):
-        return None
-
-
-def _coordenadas_validas(gleba):
-    """Retorna latitude/longitude válidas ou ``None``."""
-    latitude = _numero(gleba.latitude)
-    longitude = _numero(gleba.longitude)
-    if latitude is None or longitude is None:
-        return None
-    if not (-90 <= latitude <= 90 and -180 <= longitude <= 180):
-        return None
-    return latitude, longitude
-
-
 def _poligono_geojson_valido(valor):
     """Lê GeoJSON salvo na gleba; conteúdo inválido é ignorado com segurança."""
     if not valor:
@@ -62,22 +41,15 @@ def _poligono_geojson_valido(valor):
 
 
 def _gleba_payload(gleba):
-    coords = _coordenadas_validas(gleba)
-    latitude, longitude = coords if coords else (None, None)
     return {
         "id": gleba.id,
         "nome": gleba.nome,
         "area_ha": gleba.area_ha,
-        "latitude": latitude,
-        "longitude": longitude,
         "tipo_solo": gleba.tipo_solo,
+        "status": gleba.status,
         "observacoes": gleba.observacoes,
         "poligono_geojson": _poligono_geojson_valido(gleba.poligono_geojson),
     }
-
-
-def _gleba_sem_coordenada_payload(gleba):
-    return {"id": gleba.id, "nome": gleba.nome}
 
 
 def _dados_mapa(propriedade):
@@ -85,16 +57,7 @@ def _dados_mapa(propriedade):
               .filter_by(propriedade_id=propriedade.id)
               .order_by(Gleba.nome.asc())
               .all())
-    com_coordenadas = []
-    sem_coordenadas = []
-
-    for gleba in glebas:
-        if _coordenadas_validas(gleba) is None:
-            sem_coordenadas.append(_gleba_sem_coordenada_payload(gleba))
-        else:
-            com_coordenadas.append(_gleba_payload(gleba))
-
-    return glebas, com_coordenadas, sem_coordenadas
+    return glebas, [_gleba_payload(gleba) for gleba in glebas]
 
 
 @mapa_bp.route("/")
@@ -102,13 +65,12 @@ def _dados_mapa(propriedade):
 @require_permission("mapa.view")
 def index():
     propriedade = propriedade_atual()
-    glebas, glebas_com_coordenadas, glebas_sem_coordenadas = _dados_mapa(propriedade)
+    glebas, glebas_payload = _dados_mapa(propriedade)
     return render_template(
         "mapa/index.html",
         propriedade=propriedade,
         glebas=glebas,
-        glebas_com_coordenadas=glebas_com_coordenadas,
-        glebas_sem_coordenadas=glebas_sem_coordenadas,
+        glebas_mapa=glebas_payload,
         formatar_area=formatar_area,
     )
 
@@ -118,11 +80,10 @@ def index():
 @require_permission("mapa.view")
 def dados():
     propriedade = propriedade_atual()
-    _, glebas_com_coordenadas, glebas_sem_coordenadas = _dados_mapa(propriedade)
+    _, glebas_mapa = _dados_mapa(propriedade)
     return jsonify({
         "propriedade": {"id": propriedade.id, "nome": propriedade.nome},
-        "glebas": glebas_com_coordenadas,
-        "sem_coordenadas": glebas_sem_coordenadas,
+        "glebas": glebas_mapa,
     })
 
 
@@ -145,7 +106,7 @@ def salvar_poligono(gleba_id):
     geojson, erro = validar_poligono_geojson(payload)
     if erro:
         registrar_falha(
-            "mapa.poligono.falha", entidade="gleba", entidade_id=gleba.id,
+            "mapa.poligono.falha", entidade="propriedade", entidade_id=gleba.id,
             descricao="GeoJSON inválido ao salvar polígono",
             propriedade_id=propriedade.id, request=request)
         return jsonify({"ok": False, "error": erro}), 400
@@ -153,8 +114,8 @@ def salvar_poligono(gleba_id):
     atualizar_poligono_gleba(gleba, geojson)
     db.session.commit()
     registrar_sucesso(
-        "mapa.poligono.update", entidade="gleba", entidade_id=gleba.id,
-        descricao="Polígono da gleba atualizado",
+        "mapa.poligono.update", entidade="propriedade", entidade_id=gleba.id,
+        descricao="Polígono da propriedade atualizado",
         propriedade_id=propriedade.id, request=request)
     return jsonify({
         "ok": True,
@@ -174,8 +135,8 @@ def limpar_poligono(gleba_id):
     limpar_poligono_gleba(gleba)
     db.session.commit()
     registrar_sucesso(
-        "mapa.poligono.delete", entidade="gleba", entidade_id=gleba.id,
-        descricao="Polígono da gleba removido",
+        "mapa.poligono.delete", entidade="propriedade", entidade_id=gleba.id,
+        descricao="Polígono da propriedade removido",
         propriedade_id=propriedade.id, request=request)
     return jsonify({
         "ok": True,

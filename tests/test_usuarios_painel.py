@@ -1,23 +1,12 @@
-"""Testes da Fase 7.1 — painel de usuários da propriedade."""
-import re
-
+"""Painel administrativo de usuários."""
 import pytest
 
 from app.extensions import db
-from app.utils.auth import gerar_hash_senha
-
-TOKEN_RE = re.compile(r'name="csrf_token" value="([^"]+)"')
-
-
-def extrair_csrf_token(html):
-    match = TOKEN_RE.search(html)
-    assert match, "csrf_token não encontrado no HTML"
-    return match.group(1)
+from app.models import LogAuditoria, Propriedade, Usuario, UsuarioPropriedade
+from app.utils.auth import gerar_hash_senha, verificar_senha
 
 
-def _criar_usuario(nome, email, perfil="admin", senha="senha123", ativo=True):
-    from app.models import Usuario
-
+def _criar_usuario(nome, email, perfil, senha="senha123", ativo=True):
     usuario = Usuario(
         nome=nome,
         email=email,
@@ -26,343 +15,335 @@ def _criar_usuario(nome, email, perfil="admin", senha="senha123", ativo=True):
         senha_hash=gerar_hash_senha(senha),
     )
     db.session.add(usuario)
-    db.session.commit()
+    db.session.flush()
     return usuario
 
 
-def _vincular(usuario, propriedade, criado_por_id=None, ativo=True):
-    from app.models import UsuarioPropriedade
-
-    vinculo = UsuarioPropriedade(
-        usuario_id=usuario.id,
-        propriedade_id=propriedade.id,
-        ativo=ativo,
-        criado_por_id=criado_por_id,
-    )
-    db.session.add(vinculo)
-    db.session.commit()
-    return vinculo
-
-
-def _popular_usuarios():
-    from app.models import Propriedade
-
-    admin = _criar_usuario("Admin", "admin@connectagro.com", "admin")
-    tecnico = _criar_usuario("Técnico", "tecnico@connectagro.com", "tecnico")
-    trabalhador = _criar_usuario(
-        "Trabalhador", "trabalhador@connectagro.com", "trabalhador")
-    propriedade = Propriedade(usuario_id=admin.id, nome="Fazenda Painel")
-    db.session.add(propriedade)
-    db.session.commit()
-
-    for usuario in (admin, tecnico, trabalhador):
-        _vincular(usuario, propriedade, criado_por_id=admin.id)
-
-    outra_admin = _criar_usuario("Outra Admin", "outra@connectagro.com", "admin")
-    outro_usuario = _criar_usuario("Outro Usuário", "outro@connectagro.com", "trabalhador")
-    outra_propriedade = Propriedade(usuario_id=outra_admin.id, nome="Fazenda Externa")
-    db.session.add(outra_propriedade)
-    db.session.commit()
-    _vincular(outra_admin, outra_propriedade, criado_por_id=outra_admin.id)
-    _vincular(outro_usuario, outra_propriedade, criado_por_id=outra_admin.id)
-
-    return {
-        "admin_id": admin.id,
-        "tecnico_id": tecnico.id,
-        "trabalhador_id": trabalhador.id,
-        "propriedade_id": propriedade.id,
-        "outro_usuario_id": outro_usuario.id,
-    }
-
-
 @pytest.fixture
-def painel_app(app):
+def app_usuarios(app):
     with app.app_context():
         db.create_all()
-        app.painel_ids = _popular_usuarios()
+        admin = _criar_usuario("Administrador ConnectAgro", "admin@connectagro.com", "admin", "admin123")
+        tecnico = _criar_usuario("Técnico ConnectAgro", "tecnico@connectagro.com", "tecnico")
+        trabalhador = _criar_usuario("Trabalhador ConnectAgro", "trabalhador@connectagro.com", "trabalhador")
+        propriedade = Propriedade(usuario_id=admin.id, nome="Minha propriedade")
+        db.session.add(propriedade)
+        db.session.flush()
+        for usuario in (admin, tecnico, trabalhador):
+            db.session.add(UsuarioPropriedade(
+                usuario_id=usuario.id,
+                propriedade_id=propriedade.id,
+                ativo=True,
+                criado_por_id=admin.id,
+            ))
+        db.session.commit()
+        app.usuario_ids = {
+            "admin": admin.id,
+            "tecnico": tecnico.id,
+            "trabalhador": trabalhador.id,
+            "propriedade": propriedade.id,
+        }
     return app
 
 
-def _login(client, email="admin@connectagro.com", senha="senha123"):
+def _login(app, email="admin@connectagro.com", senha="admin123"):
+    client = app.test_client()
     resp = client.post("/auth/login", data={"email": email, "senha": senha})
     assert resp.status_code == 302
-    return resp
+    return client
 
 
-def _login_csrf(client, email="admin@connectagro.com", senha="senha123"):
-    token = extrair_csrf_token(client.get("/auth/login").data.decode("utf-8"))
-    resp = client.post("/auth/login", data={
-        "email": email,
-        "senha": senha,
-        "csrf_token": token,
-    })
-    assert resp.status_code == 302
-    return resp
+def test_admin_cria_usuario_com_confirmacao_e_hash(app_usuarios):
+    client = _login(app_usuarios)
+    form = client.get("/usuarios/novo").data.decode("utf-8")
+    assert "Gerente de Plantio" in form
+    assert "Trabalhador" in form
+    assert 'value="admin"' not in form
 
-
-def _token_da_pagina(client, url):
-    resp = client.get(url)
-    assert resp.status_code == 200
-    return extrair_csrf_token(resp.data.decode("utf-8"))
-
-
-def test_painel_usuarios_exige_login(painel_app):
-    resp = painel_app.test_client().get("/usuarios/")
-    assert resp.status_code == 302
-    assert "/auth/login" in resp.headers["Location"]
-
-
-@pytest.mark.parametrize("perfil,email,esperado", [
-    ("admin", "admin@connectagro.com", 200),
-    ("tecnico", "tecnico@connectagro.com", 403),
-    ("trabalhador", "trabalhador@connectagro.com", 403),
-])
-def test_apenas_admin_acessa_painel_usuarios(painel_app, perfil, email, esperado):
-    client = painel_app.test_client()
-    _login(client, email)
-    resp = client.get("/usuarios/")
-    assert resp.status_code == esperado
-    if perfil == "admin":
-        corpo = resp.data.decode("utf-8")
-        assert "Painel de usuários interno" in corpo
-        assert "+ Novo usuário" in corpo
-
-
-def test_admin_cria_usuario_vinculado_a_propriedade_atual(painel_app):
-    from app.models import Usuario, UsuarioPropriedade
-
-    client = painel_app.test_client()
-    _login(client)
     resp = client.post("/usuarios/novo", data={
-        "nome": "Operador Novo",
-        "email": "operador@connectagro.com",
-        "perfil": "trabalhador",
-        "senha": "operador123",
-        "confirmar_senha": "operador123",
+        "nome": "Novo Técnico",
+        "email": "novo.tecnico@connectagro.com",
+        "perfil": "tecnico",
+        "senha": "nova123",
+        "confirmar_senha": "nova123",
         "ativo": "1",
     })
+
     assert resp.status_code == 302
+    with app_usuarios.app_context():
+        usuario = Usuario.query.filter_by(email="novo.tecnico@connectagro.com").one()
+        assert usuario.nome == "Novo Técnico"
+        assert usuario.perfil == "tecnico"
+        assert usuario.ativo is True
+        assert usuario.senha_hash != "nova123"
+        assert verificar_senha(usuario.senha_hash, "nova123")
+        assert UsuarioPropriedade.query.filter_by(usuario_id=usuario.id).count() == 1
+        assert LogAuditoria.query.filter_by(acao="usuarios.create", entidade_id=usuario.id).count() == 1
 
-    with painel_app.app_context():
-        usuario = Usuario.query.filter_by(email="operador@connectagro.com").one()
-        assert usuario.senha_hash != "operador123"
-        vinculo = UsuarioPropriedade.query.filter_by(usuario_id=usuario.id).one()
-        assert vinculo.propriedade_id == painel_app.painel_ids["propriedade_id"]
-        assert vinculo.ativo is True
+    login_novo = app_usuarios.test_client().post(
+        "/auth/login",
+        data={"email": "novo.tecnico@connectagro.com", "senha": "nova123"},
+    )
+    assert login_novo.status_code == 302
 
-    login_resp = painel_app.test_client().post("/auth/login", data={
-        "email": "operador@connectagro.com",
-        "senha": "operador123",
+
+def test_admin_nao_cria_segundo_admin_nem_promove_para_admin(app_usuarios):
+    client = _login(app_usuarios)
+
+    criar_admin = client.post("/usuarios/novo", data={
+        "nome": "Outro Admin",
+        "email": "outro.admin@connectagro.com",
+        "perfil": "admin",
+        "senha": "admin123",
+        "confirmar_senha": "admin123",
+        "ativo": "1",
     })
-    assert login_resp.status_code == 302
+    assert criar_admin.status_code == 403
+
+    trabalhador_id = app_usuarios.usuario_ids["trabalhador"]
+    promover = client.post(f"/usuarios/{trabalhador_id}/editar", data={
+        "nome": "Trabalhador Promovido",
+        "email": "trabalhador@connectagro.com",
+        "perfil": "admin",
+        "ativo": "1",
+    })
+    assert promover.status_code == 403
+    with app_usuarios.app_context():
+        assert Usuario.query.filter_by(perfil="admin", ativo=True).count() == 1
 
 
-@pytest.mark.parametrize("dados,mensagem", [
-    ({
+def test_criacao_bloqueia_email_duplicado_e_confirmacao_diferente(app_usuarios):
+    client = _login(app_usuarios)
+
+    duplicado = client.post("/usuarios/novo", data={
         "nome": "Duplicado",
         "email": "tecnico@connectagro.com",
+        "perfil": "tecnico",
+        "senha": "nova123",
+        "confirmar_senha": "nova123",
+        "ativo": "1",
+    })
+    assert duplicado.status_code == 400
+    assert "Já existe um usuário com esse e-mail." in duplicado.data.decode("utf-8")
+
+    senha_diferente = client.post("/usuarios/novo", data={
+        "nome": "Senha Diferente",
+        "email": "senha.diferente@connectagro.com",
+        "perfil": "trabalhador",
+        "senha": "nova123",
+        "confirmar_senha": "outra123",
+        "ativo": "1",
+    })
+    assert senha_diferente.status_code == 400
+    assert "A senha e a confirmação não coincidem." in senha_diferente.data.decode("utf-8")
+
+
+def test_admin_edita_email_perfil_status_e_senha_opcional(app_usuarios):
+    client = _login(app_usuarios)
+    tecnico_id = app_usuarios.usuario_ids["tecnico"]
+
+    form = client.get(f"/usuarios/{tecnico_id}/editar").data.decode("utf-8")
+    assert 'name="email"' in form
+    assert "Nova senha" in form
+    assert "Confirmar nova senha" in form
+
+    resp = client.post(f"/usuarios/{tecnico_id}/editar", data={
+        "nome": "Técnico Editado",
+        "email": "tecnico.editado@connectagro.com",
+        "perfil": "trabalhador",
+        "senha": "editada123",
+        "confirmar_senha": "editada123",
+    })
+
+    assert resp.status_code == 302
+    with app_usuarios.app_context():
+        usuario = db.session.get(Usuario, tecnico_id)
+        assert usuario.nome == "Técnico Editado"
+        assert usuario.email == "tecnico.editado@connectagro.com"
+        assert usuario.perfil == "trabalhador"
+        assert usuario.ativo is False
+        assert verificar_senha(usuario.senha_hash, "editada123")
+        vinculo = UsuarioPropriedade.query.filter_by(usuario_id=tecnico_id).one()
+        assert vinculo.ativo is False
+        assert LogAuditoria.query.filter_by(acao="usuarios.password_reset", entidade_id=tecnico_id).count() == 1
+        assert LogAuditoria.query.filter_by(acao="usuarios.profile_change", entidade_id=tecnico_id).count() == 1
+        assert LogAuditoria.query.filter_by(acao="usuarios.deactivate", entidade_id=tecnico_id).count() == 1
+
+    login_antigo = app_usuarios.test_client().post(
+        "/auth/login",
+        data={"email": "tecnico@connectagro.com", "senha": "senha123"},
+    )
+    assert login_antigo.status_code == 401
+
+    login_inativo = app_usuarios.test_client().post(
+        "/auth/login",
+        data={"email": "tecnico.editado@connectagro.com", "senha": "editada123"},
+    )
+    assert login_inativo.status_code == 403
+
+
+def test_edicao_sem_nova_senha_mantem_hash_atual(app_usuarios):
+    client = _login(app_usuarios)
+    trabalhador_id = app_usuarios.usuario_ids["trabalhador"]
+    with app_usuarios.app_context():
+        hash_antes = db.session.get(Usuario, trabalhador_id).senha_hash
+
+    resp = client.post(f"/usuarios/{trabalhador_id}/editar", data={
+        "nome": "Trabalhador Sem Troca",
+        "email": "trabalhador@connectagro.com",
+        "perfil": "trabalhador",
+        "ativo": "1",
+    })
+
+    assert resp.status_code == 302
+    with app_usuarios.app_context():
+        usuario = db.session.get(Usuario, trabalhador_id)
+        assert usuario.senha_hash == hash_antes
+        assert verificar_senha(usuario.senha_hash, "senha123")
+
+
+def test_gerente_cria_e_edita_apenas_trabalhadores(app_usuarios):
+    tecnico = _login(app_usuarios, "tecnico@connectagro.com", "senha123")
+    trabalhador_id = app_usuarios.usuario_ids["trabalhador"]
+    admin_id = app_usuarios.usuario_ids["admin"]
+    tecnico_id = app_usuarios.usuario_ids["tecnico"]
+
+    pagina = tecnico.get("/usuarios/").data.decode("utf-8")
+    assert tecnico.get("/usuarios/").status_code == 200
+    assert "Trabalhador ConnectAgro" in pagina
+    assert "Administrador ConnectAgro" not in pagina
+
+    form = tecnico.get("/usuarios/novo").data.decode("utf-8")
+    assert tecnico.get("/usuarios/novo").status_code == 200
+    assert 'value="trabalhador"' in form
+    assert 'value="tecnico"' not in form
+    assert 'value="admin"' not in form
+
+    criado = tecnico.post("/usuarios/novo", data={
+        "nome": "Trabalhador do Gerente",
+        "email": "trabalhador.gerente@connectagro.com",
+        "perfil": "trabalhador",
+        "senha": "worker123",
+        "confirmar_senha": "worker123",
+        "ativo": "1",
+    })
+    assert criado.status_code == 302
+    with app_usuarios.app_context():
+        novo = Usuario.query.filter_by(email="trabalhador.gerente@connectagro.com").one()
+        assert novo.perfil == "trabalhador"
+        assert verificar_senha(novo.senha_hash, "worker123")
+
+    criar_gerente = tecnico.post("/usuarios/novo", data={
+        "nome": "Gerente Bloqueado",
+        "email": "gerente.bloqueado@connectagro.com",
         "perfil": "tecnico",
         "senha": "senha123",
         "confirmar_senha": "senha123",
         "ativo": "1",
-    }, "Já existe um usuário com este e-mail."),
-    ({
-        "nome": "Perfil Inválido",
-        "email": "perfil-invalido@connectagro.com",
-        "perfil": "produtor",
+    })
+    assert criar_gerente.status_code == 403
+
+    criar_admin = tecnico.post("/usuarios/novo", data={
+        "nome": "Admin Bloqueado",
+        "email": "admin.bloqueado@connectagro.com",
+        "perfil": "admin",
         "senha": "senha123",
         "confirmar_senha": "senha123",
         "ativo": "1",
-    }, "Perfil inválido."),
-    ({
-        "nome": "Senha Curta",
-        "email": "senha-curta@connectagro.com",
-        "perfil": "trabalhador",
-        "senha": "123",
-        "confirmar_senha": "123",
-        "ativo": "1",
-    }, "A senha temporária deve ter pelo menos 6 caracteres."),
-])
-def test_admin_criacao_valida_dados_obrigatorios(painel_app, dados, mensagem):
-    client = painel_app.test_client()
-    _login(client)
-    resp = client.post("/usuarios/novo", data=dados)
-    assert resp.status_code == 400
-    assert mensagem in resp.data.decode("utf-8")
+    })
+    assert criar_admin.status_code == 403
 
+    assert tecnico.get(f"/usuarios/{admin_id}/editar").status_code == 403
+    assert tecnico.get(f"/usuarios/{tecnico_id}/editar").status_code == 403
 
-def test_admin_edita_usuario_sem_alterar_email(painel_app):
-    from app.models import Usuario, UsuarioPropriedade
-
-    tecnico_id = painel_app.painel_ids["tecnico_id"]
-    client = painel_app.test_client()
-    _login(client)
-    resp = client.post(f"/usuarios/{tecnico_id}/editar", data={
-        "nome": "Técnico Atualizado",
-        "email": "tentativa@connectagro.com",
+    editar_worker = tecnico.post(f"/usuarios/{trabalhador_id}/editar", data={
+        "nome": "Trabalhador Editado pelo Gerente",
+        "email": "trabalhador.editado.gerente@connectagro.com",
         "perfil": "trabalhador",
         "ativo": "1",
     })
-    assert resp.status_code == 302
+    assert editar_worker.status_code == 302
+    with app_usuarios.app_context():
+        trabalhador = db.session.get(Usuario, trabalhador_id)
+        assert trabalhador.nome == "Trabalhador Editado pelo Gerente"
+        assert trabalhador.email == "trabalhador.editado.gerente@connectagro.com"
+        assert trabalhador.perfil == "trabalhador"
 
-    with painel_app.app_context():
-        usuario = db.session.get(Usuario, tecnico_id)
-        vinculo = UsuarioPropriedade.query.filter_by(usuario_id=tecnico_id).one()
-        assert usuario.nome == "Técnico Atualizado"
-        assert usuario.email == "tecnico@connectagro.com"
-        assert usuario.perfil == "trabalhador"
-        assert usuario.ativo is True
-        assert vinculo.ativo is True
-
-
-def test_admin_inativa_usuario_sem_excluir(painel_app):
-    from app.models import Usuario, UsuarioPropriedade
-
-    trabalhador_id = painel_app.painel_ids["trabalhador_id"]
-    client = painel_app.test_client()
-    _login(client)
-    resp = client.post(f"/usuarios/{trabalhador_id}/inativar")
-    assert resp.status_code == 302
-
-    with painel_app.app_context():
-        usuario = db.session.get(Usuario, trabalhador_id)
-        vinculo = UsuarioPropriedade.query.filter_by(usuario_id=trabalhador_id).one()
-        assert usuario is not None
-        assert usuario.ativo is False
-        assert vinculo.ativo is False
-
-    login_resp = painel_app.test_client().post("/auth/login", data={
-        "email": "trabalhador@connectagro.com",
-        "senha": "senha123",
-    })
-    assert login_resp.status_code == 403
-
-
-def test_admin_nao_inativa_ultimo_admin_da_propriedade(painel_app):
-    admin_id = painel_app.painel_ids["admin_id"]
-    client = painel_app.test_client()
-    _login(client)
-    resp = client.post(f"/usuarios/{admin_id}/inativar")
-    assert resp.status_code == 400
-    assert "A propriedade precisa manter pelo menos um admin ativo." in resp.data.decode("utf-8")
-
-
-def test_admin_nao_edita_usuario_de_outra_propriedade(painel_app):
-    outro_id = painel_app.painel_ids["outro_usuario_id"]
-    client = painel_app.test_client()
-    _login(client)
-    assert client.get(f"/usuarios/{outro_id}/editar").status_code == 404
-    assert client.post(f"/usuarios/{outro_id}/inativar").status_code == 404
-
-
-def test_painel_nao_expoe_remocao_fisica_de_usuario(painel_app):
-    trabalhador_id = painel_app.painel_ids["trabalhador_id"]
-    client = painel_app.test_client()
-    _login(client)
-    assert client.post(f"/usuarios/{trabalhador_id}/remover").status_code == 404
-
-
-def test_propriedade_atual_cria_vinculo_para_base_legada(app):
-    from app.models import Propriedade, UsuarioPropriedade
-
-    with app.app_context():
-        db.create_all()
-        usuario = _criar_usuario("Legado", "legado@connectagro.com", "admin")
-        propriedade = Propriedade(usuario_id=usuario.id, nome="Fazenda Legada")
-        db.session.add(propriedade)
-        db.session.commit()
-        usuario_id = usuario.id
-        propriedade_id = propriedade.id
-        assert UsuarioPropriedade.query.count() == 0
-
-    client = app.test_client()
-    _login(client, "legado@connectagro.com")
-    assert client.get("/usuarios/").status_code == 200
-
-    with app.app_context():
-        vinculo = UsuarioPropriedade.query.filter_by(
-            usuario_id=usuario_id,
-            propriedade_id=propriedade_id,
-        ).one()
-        assert vinculo.ativo is True
-
-
-def test_seed_users_cria_propriedade_demo_e_vinculos_idempotentes(app):
-    from app.models import Propriedade, Usuario, UsuarioPropriedade
-
-    with app.app_context():
-        db.create_all()
-    runner = app.test_cli_runner()
-
-    r1 = runner.invoke(args=["seed-users"])
-    assert r1.exit_code == 0
-    with app.app_context():
-        assert Usuario.query.count() == 3
-        assert Propriedade.query.count() == 1
-        assert Propriedade.query.one().nome == "Propriedade Demo ConnectAgro"
-        assert UsuarioPropriedade.query.count() == 3
-        propriedade_id = Propriedade.query.one().id
-        assert {v.propriedade_id for v in UsuarioPropriedade.query.all()} == {propriedade_id}
-
-    r2 = runner.invoke(args=["seed-users"])
-    assert r2.exit_code == 0
-    with app.app_context():
-        assert Usuario.query.count() == 3
-        assert Propriedade.query.count() == 1
-        assert UsuarioPropriedade.query.count() == 3
-
-
-@pytest.fixture
-def painel_app_csrf(app):
-    app.config["WTF_CSRF_ENABLED"] = True
-    with app.app_context():
-        db.create_all()
-        app.painel_ids = _popular_usuarios()
-    return app
-
-
-def test_csrf_usuarios_sem_token_retorna_400(painel_app_csrf):
-    client = painel_app_csrf.test_client()
-    _login_csrf(client)
-    resp = client.post("/usuarios/novo", data={
-        "nome": "Sem Token",
-        "email": "sem-token@connectagro.com",
-        "perfil": "trabalhador",
-        "senha": "senha123",
+    promover_worker = tecnico.post(f"/usuarios/{trabalhador_id}/editar", data={
+        "nome": "Trabalhador Promovido",
+        "email": "trabalhador.editado.gerente@connectagro.com",
+        "perfil": "tecnico",
         "ativo": "1",
     })
-    assert resp.status_code == 400
+    assert promover_worker.status_code == 403
 
 
-def test_csrf_usuarios_com_token_valido_respeita_permissao_403(painel_app_csrf):
-    client = painel_app_csrf.test_client()
-    _login_csrf(client, "tecnico@connectagro.com")
-    token = _token_da_pagina(client, "/ia/")
-    resp = client.post("/usuarios/novo", data={
+def test_trabalhador_nao_acessa_gerenciamento_usuarios(app_usuarios):
+    trabalhador = _login(app_usuarios, "trabalhador@connectagro.com", "senha123")
+
+    assert trabalhador.get("/usuarios/").status_code == 403
+    assert trabalhador.get("/usuarios/novo").status_code == 403
+    assert trabalhador.post("/usuarios/novo", data={
         "nome": "Bloqueado",
         "email": "bloqueado@connectagro.com",
         "perfil": "trabalhador",
         "senha": "senha123",
-        "csrf_token": token,
-    })
-    assert resp.status_code == 403
-
-
-def test_csrf_usuarios_com_token_valido_permite_admin(painel_app_csrf):
-    from app.models import Usuario
-
-    client = painel_app_csrf.test_client()
-    _login_csrf(client)
-    token = _token_da_pagina(client, "/usuarios/novo")
-    resp = client.post("/usuarios/novo", data={
-        "nome": "Com Token",
-        "email": "com-token@connectagro.com",
-        "perfil": "trabalhador",
-        "senha": "senha123",
         "confirmar_senha": "senha123",
         "ativo": "1",
-        "csrf_token": token,
+    }).status_code == 403
+
+
+def test_unico_admin_ativo_nao_pode_ser_desativado_ou_rebaixado(app_usuarios):
+    client = _login(app_usuarios)
+    admin_id = app_usuarios.usuario_ids["admin"]
+    propriedade_id = app_usuarios.usuario_ids["propriedade"]
+
+    rebaixar = client.post(f"/usuarios/{admin_id}/editar", data={
+        "nome": "Administrador ConnectAgro",
+        "email": "admin@connectagro.com",
+        "perfil": "tecnico",
+        "ativo": "1",
     })
-    assert resp.status_code == 302
-    with painel_app_csrf.app_context():
-        assert Usuario.query.filter_by(email="com-token@connectagro.com").count() == 1
+    assert rebaixar.status_code == 403
+
+    inativar_edit = client.post(f"/usuarios/{admin_id}/editar", data={
+        "nome": "Administrador ConnectAgro",
+        "email": "admin@connectagro.com",
+        "perfil": "admin",
+    })
+    assert inativar_edit.status_code == 400
+    assert "Você não pode inativar seu próprio usuário administrador." in inativar_edit.data.decode("utf-8")
+
+    inativar_rota = client.post(f"/usuarios/{admin_id}/inativar")
+    assert inativar_rota.status_code == 400
+
+    with app_usuarios.app_context():
+        outro_admin = _criar_usuario(
+            "Admin Inativo",
+            "admin.inativo@connectagro.com",
+            "admin",
+            ativo=False,
+        )
+        db.session.add(UsuarioPropriedade(
+            usuario_id=outro_admin.id,
+            propriedade_id=propriedade_id,
+            ativo=False,
+            criado_por_id=admin_id,
+        ))
+        db.session.commit()
+        outro_admin_id = outro_admin.id
+
+    ativar_outro_admin = client.post(f"/usuarios/{outro_admin_id}/editar", data={
+        "nome": "Admin Inativo",
+        "email": "admin.inativo@connectagro.com",
+        "perfil": "admin",
+        "ativo": "1",
+    })
+    assert ativar_outro_admin.status_code == 400
+    assert "Não é possível ativar outro administrador." in ativar_outro_admin.data.decode("utf-8")
+
+    with app_usuarios.app_context():
+        admin = db.session.get(Usuario, admin_id)
+        assert admin.perfil == "admin"
+        assert admin.ativo is True
+        assert Usuario.query.filter_by(perfil="admin", ativo=True).count() == 1

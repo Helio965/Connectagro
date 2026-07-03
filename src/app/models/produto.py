@@ -39,6 +39,14 @@ class ProdutoBase(db.Model):
     def __repr__(self):
         return f"<ProdutoBase {self.id} {self.slug}>"
 
+    @property
+    def imagem_url(self):
+        """Primeira imagem de referência cadastrada, quando existir."""
+        for imagem in self.imagens:
+            if imagem.url:
+                return imagem.url
+        return None
+
 
 class ProdutoTecnico(db.Model):
     __tablename__ = "produto_tecnico"

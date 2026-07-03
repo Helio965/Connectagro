@@ -59,8 +59,7 @@ def _popular(app):
         db.session.commit()
         for u in (admin, tecnico, trab):
             _vincular(u, prop)
-        gleba = Gleba(propriedade_id=prop.id, nome="Gleba Mapa", area_ha=10,
-                      latitude=-15.1, longitude=-47.2)
+        gleba = Gleba(propriedade_id=prop.id, nome="Gleba Mapa", area_ha=10)
         db.session.add(gleba)
         db.session.commit()
 
@@ -69,8 +68,7 @@ def _popular(app):
         db.session.add(outra_prop)
         db.session.commit()
         _vincular(outro, outra_prop)
-        gleba_externa = Gleba(propriedade_id=outra_prop.id, nome="Externa",
-                              latitude=-10.0, longitude=-45.0)
+        gleba_externa = Gleba(propriedade_id=outra_prop.id, nome="Externa")
         db.session.add(gleba_externa)
         db.session.commit()
         return {"prop_id": prop.id, "gleba_id": gleba.id,
@@ -306,7 +304,10 @@ def test_log_nao_contem_geojson_completo(app_mapa):
     client.post(_salvar_url(app_mapa), json=POLY)
     with app_mapa.app_context():
         for log in LogAuditoria.query.all():
-            blob = " ".join(filter(None, [log.descricao, log.entidade, log.entidade_id]))
+            blob = " ".join(
+                str(campo) for campo in (log.descricao, log.entidade, log.entidade_id)
+                if campo is not None
+            )
             assert "-47.2" not in blob
             assert "coordinates" not in blob
             assert "Polygon" not in blob

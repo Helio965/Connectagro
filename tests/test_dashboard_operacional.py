@@ -147,9 +147,9 @@ def test_dashboard_mostra_nome_da_propriedade_atual(app_db):
     assert "Fazenda B" not in corpo
 
 
-def test_dashboard_mostra_glebas_e_nao_vaza_outra_propriedade(app_db):
+def test_dashboard_mostra_propriedades_e_nao_vaza_outra_propriedade(app_db):
     _, corpo = _corpo_dashboard(app_db)
-    assert "Glebas" in corpo
+    assert "Propriedades" in corpo
     assert "10,50 ha no total" in corpo
     assert "1 sem área" in corpo
     assert "Talhão B secreto" not in corpo
@@ -159,7 +159,7 @@ def test_dashboard_mostra_culturas_por_status(app_db):
     _, corpo = _corpo_dashboard(app_db)
     for texto in ("Planejada", "Em andamento", "Colhida", "Cancelada"):
         assert texto in corpo
-    assert "2 associações cultura↔gleba" in corpo
+    assert "2 associações cultura↔propriedade" in corpo
     assert "Cultura secreta" not in corpo
 
 
@@ -216,7 +216,7 @@ def test_dashboard_mostra_estados_vazios(app_db):
     resp, corpo = _corpo_dashboard(app_db, "vazio@connectagro.com")
     assert resp.status_code == 200
     assert "Fazenda Vazia" in corpo
-    assert "Nenhuma gleba cadastrada ainda." in corpo
+    assert "Nenhuma propriedade cadastrada ainda." in corpo
     assert "Nenhuma cultura cadastrada ainda." in corpo
     assert "Nenhum lançamento financeiro cadastrado." in corpo
     assert "Nenhum upload enviado." in corpo
@@ -225,7 +225,7 @@ def test_dashboard_mostra_estados_vazios(app_db):
 def test_dashboard_contem_atalhos_principais(app_db):
     _, corpo = _corpo_dashboard(app_db)
     for texto in (
-        "Nova Gleba",
+        "Nova Propriedade",
         "Nova Cultura",
         "Novo Lançamento Financeiro",
         "Nova Colheita",

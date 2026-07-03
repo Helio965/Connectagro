@@ -6,10 +6,6 @@
 <section class="card">
   <h1>{{ "Editar usuário" if usuario else "Novo usuário" }}</h1>
 
-  <p class="placeholder-tag">
-    Painel de usuários interno da propriedade. Este painel não é cadastro público.
-  </p>
-
   <form method="post" class="form-vertical"
         action="{{ url_for('usuarios.editar', usuario_id=usuario.id) if usuario else url_for('usuarios.novo') }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -18,28 +14,35 @@
     <input type="text" id="nome" name="nome" required value="{{ form.nome or '' }}">
 
     <label for="email">E-mail *</label>
-    <input type="email" id="email" name="email" required
-           value="{{ form.email or '' }}" {{ "readonly" if usuario else "" }}>
+    <input type="email" id="email" name="email" required value="{{ form.email or '' }}">
+
     {% if usuario %}
-    <p class="hint">O e-mail não é editado nesta versão do painel.</p>
+    <p class="hint">Preencha a senha apenas se quiser alterá-la.</p>
+    <label for="senha">Nova senha</label>
+    <input type="password" id="senha" name="senha" minlength="{{ min_senha }}"
+           autocomplete="new-password" placeholder="Mínimo {{ min_senha }} caracteres">
+
+    <label for="confirmar_senha">Confirmar nova senha</label>
+    <input type="password" id="confirmar_senha" name="confirmar_senha"
+           minlength="{{ min_senha }}" autocomplete="new-password"
+           placeholder="Repita a nova senha">
+    {% else %}
+    <label for="senha">Senha *</label>
+    <input type="password" id="senha" name="senha" required minlength="{{ min_senha }}"
+           autocomplete="new-password" placeholder="Mínimo {{ min_senha }} caracteres">
+
+    <label for="confirmar_senha">Confirmar senha *</label>
+    <input type="password" id="confirmar_senha" name="confirmar_senha" required
+           minlength="{{ min_senha }}" autocomplete="new-password"
+           placeholder="Repita a senha">
     {% endif %}
 
     <label for="perfil">Perfil *</label>
     <select id="perfil" name="perfil" required>
-      {% for perfil in perfis %}
-      <option value="{{ perfil }}" {{ "selected" if form.perfil == perfil else "" }}>
-        {{ perfil }}
-      </option>
+      {% for p in perfis %}
+      <option value="{{ p }}" {{ "selected" if (form.perfil or '') == p else "" }}>{{ role_label(p) }}</option>
       {% endfor %}
     </select>
-
-    {% if not usuario %}
-    <label for="senha">Senha temporária *</label>
-    <input type="password" id="senha" name="senha" required minlength="6">
-
-    <label for="confirmar_senha">Confirmar senha temporária</label>
-    <input type="password" id="confirmar_senha" name="confirmar_senha" minlength="6">
-    {% endif %}
 
     <label class="check-inline">
       <input type="checkbox" name="ativo" value="1" {{ "checked" if form.ativo else "" }}>

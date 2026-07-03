@@ -6,28 +6,51 @@
   "alvos_controle": "Alvos de controle"
 } %}
 
+{% macro imagem_catalogo(produto) -%}
+  {% set imagem = produto.imagem_url %}
+  {% if imagem %}
+    {% if imagem.startswith("http://") or imagem.startswith("https://") or imagem.startswith("/") or imagem.startswith("data:") %}
+      {{- imagem -}}
+    {% elif imagem.startswith("static/") %}
+      {{- url_for("static", filename=imagem[7:]) -}}
+    {% else %}
+      {{- url_for("static", filename=imagem) -}}
+    {% endif %}
+  {% else %}
+    {{- url_for("static", filename="img/placeholder-produto.svg") -}}
+  {% endif %}
+{%- endmacro %}
+
 {% block title %}{{ produto.nome }} — ConnectAgro{% endblock %}
 
 {% block content %}
 <section class="card">
   <h1>{{ produto.nome }}</h1>
   <p class="hint">
-    {{ titulo }} — base técnica de consulta. <strong>Não substitui orientação de
-    um profissional habilitado.</strong> O ConnectAgro <strong>não vende
-    produtos</strong>. O status regulatório <strong>não</strong> representa
-    validação oficial automática.
+    {{ titulo }} de consulta agrícola. As imagens são apenas referências visuais.
+    O ConnectAgro não vende produtos e não substitui orientação técnica
+    profissional.
   </p>
 
-  <h2>Dados principais</h2>
-  <ul class="dados">
-    <li><strong>Categoria:</strong> {{ produto.categoria or "—" }}</li>
-    <li><strong>Descrição:</strong> {{ produto.descricao_curta or "—" }}</li>
-    {% if produto.descricao_completa %}
-    <li><strong>Descrição completa:</strong> {{ produto.descricao_completa }}</li>
-    {% endif %}
-    <li><strong>Status do sistema:</strong> <code>{{ produto.status_sistema }}</code></li>
-    <li><strong>Status regulatório:</strong> <code>{{ produto.status_regulatorio }}</code></li>
-  </ul>
+  <div class="catalog-detail-hero">
+    <div class="catalog-detail-image-wrapper">
+      <img
+        src="{{ imagem_catalogo(produto) }}"
+        alt="Foto de referência de {{ produto.nome }}"
+        class="catalog-detail-image"
+      >
+    </div>
+    <div>
+      <h2>Dados principais</h2>
+      <ul class="dados">
+        <li><strong>Categoria:</strong> {{ produto.categoria or "—" }}</li>
+        <li><strong>Descrição:</strong> {{ produto.descricao_curta or "—" }}</li>
+        {% if produto.descricao_completa %}
+        <li><strong>Descrição completa:</strong> {{ produto.descricao_completa }}</li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
 
   <h2>Dados técnicos</h2>
   {% if tecnico %}
@@ -49,10 +72,10 @@
   <p>Sem dados técnicos cadastrados para este produto.</p>
   {% endif %}
 
-  <h2>Preço e imagem</h2>
+  <h2>Aviso</h2>
   <p class="placeholder-tag">
-    Preço e imagem permanecem <strong>pendentes no MVP</strong>. O ConnectAgro
-    não vende produtos.
+    Esta página é apenas uma consulta inicial. Confirme qualquer uso com um
+    profissional habilitado.
   </p>
 
   <p><a href="{{ url_for(voltar_endpoint) }}">← Voltar à listagem</a></p>

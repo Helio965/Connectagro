@@ -33,7 +33,7 @@ STATUS_BLOQUEADO = "bloqueado_historico"
 
 INTENCOES = (
     ("financeiro", ("financeiro", "saldo", "receita", "despesa", "gasto", "dinheiro")),
-    ("glebas", ("gleba", "glebas", "talhao", "talhoes", "area", "mapa", "coordenadas")),
+    ("glebas", ("gleba", "glebas", "talhao", "talhoes", "area", "mapa")),
     ("culturas", ("cultura", "culturas", "plantio", "safra", "lavoura")),
     ("colheita", ("colheita", "producao", "produtividade", "safra colhida")),
     ("aplicacoes", ("aplicacao", "aplicacoes", "insumo", "insumos", "dose")),
@@ -47,12 +47,6 @@ def _normalizar_texto(texto):
     texto = unicodedata.normalize("NFKD", texto or "")
     texto = "".join(char for char in texto if not unicodedata.combining(char))
     return texto.lower().strip()
-
-
-def _coordenadas_validas(gleba):
-    if gleba.latitude is None or gleba.longitude is None:
-        return False
-    return -90 <= float(gleba.latitude) <= 90 and -180 <= float(gleba.longitude) <= 180
 
 
 def _associacoes_da_propriedade_query(propriedade):
@@ -118,7 +112,6 @@ def montar_contexto_operacional(propriedade):
             "total": len(glebas),
             "area_total": sum(gleba.area_ha or 0 for gleba in glebas),
             "sem_area": sum(1 for gleba in glebas if not gleba.area_ha),
-            "sem_coordenadas_validas": sum(1 for gleba in glebas if not _coordenadas_validas(gleba)),
         },
         "culturas": {
             "total": len(culturas),
@@ -177,19 +170,15 @@ def gerar_alertas_operacionais(propriedade):
     alertas = []
 
     if contexto["glebas"]["total"] == 0:
-        alertas.append("Nenhuma gleba cadastrada ainda.")
+        alertas.append("Nenhuma propriedade cadastrada ainda.")
     else:
         if contexto["glebas"]["sem_area"]:
-            alertas.append(f"Existem {contexto['glebas']['sem_area']} glebas sem área informada.")
-        if contexto["glebas"]["sem_coordenadas_validas"]:
-            alertas.append(
-                f"Existem {contexto['glebas']['sem_coordenadas_validas']} glebas sem coordenadas válidas."
-            )
+            alertas.append(f"Existem {contexto['glebas']['sem_area']} propriedades sem área informada.")
 
     if contexto["culturas"]["total"] == 0:
         alertas.append("Nenhuma cultura cadastrada ainda.")
     elif contexto["culturas"]["total_associacoes"] == 0:
-        alertas.append("Nenhuma associação cultura↔gleba cadastrada ainda.")
+        alertas.append("Nenhuma associação cultura↔propriedade cadastrada ainda.")
 
     if contexto["financeiro"]["total_lancamentos"] == 0:
         alertas.append("Nenhum lançamento financeiro cadastrado.")
@@ -216,7 +205,7 @@ def gerar_resumo_operacional(propriedade):
     linhas = [
         "Resumo operacional da propriedade",
         "",
-        f"* Glebas cadastradas: {contexto['glebas']['total']}",
+        f"* Propriedades cadastradas: {contexto['glebas']['total']}",
         f"* Culturas cadastradas: {contexto['culturas']['total']}",
         f"* Saldo financeiro: {formatar_moeda(contexto['financeiro']['saldo'])}",
         f"* Registros de colheita: {contexto['colheita']['total']}",
@@ -250,12 +239,11 @@ def _responder_financeiro(propriedade):
 def _responder_glebas(propriedade):
     glebas = montar_contexto_operacional(propriedade)["glebas"]
     linhas = [
-        "Resumo de glebas",
+        "Resumo de propriedades",
         "",
-        f"* Glebas cadastradas: {glebas['total']}",
+        f"* Propriedades cadastradas: {glebas['total']}",
         f"* Área total informada: {formatar_area(glebas['area_total'])}",
-        f"* Glebas sem área informada: {glebas['sem_area']}",
-        f"* Glebas sem coordenadas válidas: {glebas['sem_coordenadas_validas']}",
+        f"* Propriedades sem área informada: {glebas['sem_area']}",
         "",
         _rodape_simulado(),
     ]
@@ -267,9 +255,9 @@ def _responder_culturas(propriedade):
     linhas = ["Resumo de culturas", "", f"* Culturas cadastradas: {culturas['total']}"]
     for status, total in culturas["por_status"].items():
         linhas.append(f"* {STATUS_LABELS[status]}: {total}")
-    linhas.append(f"* Associações cultura↔gleba: {culturas['total_associacoes']}")
+    linhas.append(f"* Associações cultura↔propriedade: {culturas['total_associacoes']}")
     if culturas["total"] and culturas["total_associacoes"] == 0:
-        linhas.append("* Há culturas cadastradas sem associação cultura↔gleba.")
+        linhas.append("* Há culturas cadastradas sem associação cultura↔propriedade.")
     elif culturas["total"] == 0:
         linhas.append("* Ainda não há culturas cadastradas.")
     linhas.extend(["", _rodape_simulado()])
@@ -364,7 +352,7 @@ def _responder_ajuda(propriedade):
         "Posso ajudar com estes temas:",
         "* resumo",
         "* financeiro",
-        "* glebas",
+        "* propriedades",
         "* culturas",
         "* colheita",
         "* aplicações",

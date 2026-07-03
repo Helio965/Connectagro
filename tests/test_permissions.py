@@ -149,14 +149,16 @@ def test_matriz_de_permissoes_por_perfil(app_db):
                   "usuarios.view", "usuarios.create", "usuarios.edit",
                   "usuarios.deactivate"),
         "tecnico": ("dashboard.view", "glebas.create", "culturas.edit", "colheita.edit",
-                    "aplicacoes.edit", "upload.download", "financeiro.view", "equipe.view"),
+                    "aplicacoes.edit", "upload.download", "financeiro.view", "equipe.view",
+                    "usuarios.view", "usuarios.create", "usuarios.edit",
+                    "usuarios.deactivate"),
         "trabalhador": ("dashboard.view", "glebas.view", "culturas.view", "colheita.create",
                         "aplicacoes.create", "upload.create", "upload.download"),
     }
     negadas = {
         "tecnico": ("glebas.delete", "culturas.delete", "colheita.delete",
                     "aplicacoes.delete", "upload.delete", "financeiro.create",
-                    "equipe.create", "usuarios.view", "usuarios.create"),
+                    "equipe.create"),
         "trabalhador": ("glebas.create", "culturas.create", "colheita.edit",
                         "aplicacoes.edit", "financeiro.view", "equipe.view",
                         "upload.delete", "usuarios.view", "usuarios.create"),
@@ -190,6 +192,7 @@ def test_rotas_publicas_continuam_publicas(app_db, rota):
 
 @pytest.mark.parametrize("rota", [
     "/", "/mapa/", "/defensivos/", "/fertilizantes/", "/relatorios/", "/ia/",
+    "/usuarios/",
 ])
 def test_tecnico_acessa_modulos_de_consulta_e_apoio(app_db, rota):
     assert _login(app_db, "tecnico").get(rota).status_code == 200
@@ -226,10 +229,16 @@ def test_admin_cria_edita_remove_gleba(app_db):
     from app.models import Gleba
 
     client = _login(app_db, "admin")
-    assert client.post("/glebas/nova", data={"nome": "Gleba Admin Nova"}).status_code == 302
+    assert client.post("/glebas/nova", data={
+        "nome": "Gleba Admin Nova",
+        "area_ha": "5",
+    }).status_code == 302
     with app_db.app_context():
         gleba_id = Gleba.query.filter_by(nome="Gleba Admin Nova").one().id
-    assert client.post(f"/glebas/{gleba_id}/editar", data={"nome": "Gleba Admin Editada"}).status_code == 302
+    assert client.post(f"/glebas/{gleba_id}/editar", data={
+        "nome": "Gleba Admin Editada",
+        "area_ha": "6",
+    }).status_code == 302
     assert client.post(f"/glebas/{gleba_id}/remover").status_code == 302
     with app_db.app_context():
         assert db.session.get(Gleba, gleba_id) is None
@@ -242,12 +251,18 @@ def test_tecnico_cria_edita_gleba_e_cultura_mas_nao_remove(app_db):
     from app.models import Cultura, Gleba
 
     client = _login(app_db, "tecnico")
-    assert client.post("/glebas/nova", data={"nome": "Gleba Tecnico"}).status_code == 302
+    assert client.post("/glebas/nova", data={
+        "nome": "Gleba Tecnico",
+        "area_ha": "7",
+    }).status_code == 302
     assert client.post("/culturas/nova", data={"nome": "Cultura Tecnico"}).status_code == 302
     with app_db.app_context():
         gleba_id = Gleba.query.filter_by(nome="Gleba Tecnico").one().id
         cultura_id = Cultura.query.filter_by(nome="Cultura Tecnico").one().id
-    assert client.post(f"/glebas/{gleba_id}/editar", data={"nome": "Gleba Tecnico Editada"}).status_code == 302
+    assert client.post(f"/glebas/{gleba_id}/editar", data={
+        "nome": "Gleba Tecnico Editada",
+        "area_ha": "8",
+    }).status_code == 302
     assert client.post(f"/culturas/{cultura_id}/editar",
                        data={"nome": "Cultura Tecnico Editada", "status": "em_andamento"}).status_code == 302
     assert client.post(f"/glebas/{gleba_id}/remover").status_code == 403
@@ -366,7 +381,7 @@ def test_templates_escondem_menu_e_acoes_sem_permissao(app_db):
     assert "Usuários" not in trabalhador_home
 
     tecnico = _login(app_db, "tecnico")
-    assert "Usuários" not in tecnico.get("/").data.decode("utf-8")
+    assert "Usuários" in tecnico.get("/").data.decode("utf-8")
     financeiro = tecnico.get("/financeiro/").data.decode("utf-8")
     assert "Financeiro" in financeiro
     assert "+ Novo lançamento" not in financeiro
@@ -375,7 +390,7 @@ def test_templates_escondem_menu_e_acoes_sem_permissao(app_db):
 
     admin = _login(app_db, "admin")
     assert "Usuários" in admin.get("/").data.decode("utf-8")
-    assert "+ Nova gleba" in admin.get("/glebas/").data.decode("utf-8")
+    assert "+ Nova propriedade" in admin.get("/glebas/").data.decode("utf-8")
     assert "+ Novo lançamento" in admin.get("/financeiro/").data.decode("utf-8")
     assert "Remover" in admin.get("/upload/").data.decode("utf-8")
 

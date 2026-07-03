@@ -19,10 +19,10 @@
 
   {% if not opcoes_cultura_gleba %}
   <p class="placeholder-tag">
-    Você ainda não tem associações <strong>cultura↔gleba</strong>. Cadastre uma
-    <a href="{{ url_for('glebas.nova') }}">gleba</a> e uma
+    Você ainda não tem associações <strong>cultura↔propriedade</strong>. Cadastre uma
+    <a href="{{ url_for('glebas.nova') }}">propriedade</a> e uma
     <a href="{{ url_for('culturas.nova') }}">cultura</a>, associando a cultura à
-    gleba, antes de registrar uma aplicação de insumo.
+    propriedade, antes de registrar uma aplicação de insumo.
   </p>
   {% endif %}
 
@@ -38,7 +38,7 @@
         action="{{ url_for('aplicacoes.editar', aplicacao_id=aplicacao.id) if aplicacao else url_for('aplicacoes.nova') }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-    <label for="cultura_gleba_id">Cultura ↔ Gleba *</label>
+    <label for="cultura_gleba_id">Cultura ↔ Propriedade *</label>
     <select id="cultura_gleba_id" name="cultura_gleba_id" required>
       <option value="">Selecione…</option>
       {% for cg_id, rotulo in opcoes_cultura_gleba %}

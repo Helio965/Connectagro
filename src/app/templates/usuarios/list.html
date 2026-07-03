@@ -5,60 +5,45 @@
 {% block content %}
 <section class="card">
   <div class="card-head">
-    <div>
-      <h1>Usuários</h1>
-      <p>Painel de usuários interno da propriedade.</p>
-    </div>
+    <h1>Usuários da propriedade</h1>
     {% if can("usuarios.create") %}
     <a class="btn-acao" href="{{ url_for('usuarios.novo') }}">+ Novo usuário</a>
     {% endif %}
   </div>
 
-  <p class="placeholder-tag">
-    Este painel não é cadastro público. Usuários criados aqui acessam a
-    propriedade atual conforme seu perfil.
-  </p>
-
-  {% if vinculos %}
+  {% if usuarios %}
   <table class="tabela">
     <thead>
       <tr>
-        <th>Nome</th>
-        <th>E-mail</th>
-        <th>Perfil</th>
-        <th>Status</th>
-        <th>Criado em</th>
-        <th>Ações</th>
+        <th>Nome</th><th>E-mail</th><th>Perfil</th><th>Status</th><th>Ações</th>
       </tr>
     </thead>
     <tbody>
-      {% for vinculo in vinculos %}
-      {% set u = vinculo.usuario %}
+      {% for item in usuarios %}
       <tr>
-        <td>{{ u.nome }}</td>
-        <td>{{ u.email }}</td>
-        <td>{{ u.perfil }}</td>
-        <td>{{ "Ativo" if u.ativo and vinculo.ativo else "Inativo" }}</td>
-        <td>{{ u.criado_em }}</td>
+        <td>{{ item.usuario.nome }}</td>
+        <td>{{ item.usuario.email }}</td>
+        <td>{{ role_label(item.usuario.perfil) }}</td>
+        <td>{{ "Ativo" if item.usuario.ativo else "Inativo" }}</td>
         <td class="acoes">
-          {% if can("usuarios.edit") %}
-          <a href="{{ url_for('usuarios.editar', usuario_id=u.id) }}">Editar</a>
+          {% if can("usuarios.edit") and item.can_manage %}
+          <a href="{{ url_for('usuarios.editar', usuario_id=item.usuario.id) }}">Editar</a>
           {% endif %}
-          {% if can("usuarios.deactivate") and u.ativo and vinculo.ativo %}
-          <form method="post" action="{{ url_for('usuarios.inativar', usuario_id=u.id) }}"
-                onsubmit="return confirm('Inativar este usuário?');">
+          {% if can("usuarios.deactivate") and item.can_manage and item.usuario.ativo %}
+          <form method="post" action="{{ url_for('usuarios.inativar', usuario_id=item.usuario.id) }}"
+                onsubmit="return confirm('Inativar este usuário?');" style="display:inline;">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn-link-danger">Inativar</button>
           </form>
           {% endif %}
-          {% if not can("usuarios.edit") and not can("usuarios.deactivate") %}—{% endif %}
+          {% if not item.can_manage %}—{% endif %}
         </td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
   {% else %}
-  <p>Nenhum usuário vinculado à propriedade atual.</p>
+  <p>Nenhum usuário vinculado a esta propriedade.{% if can("usuarios.create") %} <a href="{{ url_for('usuarios.novo') }}">Adicionar o primeiro</a>.{% endif %}</p>
   {% endif %}
 </section>
 {% endblock %}

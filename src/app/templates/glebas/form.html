@@ -1,26 +1,29 @@
 {% extends "base.html" %}
 
-{% block title %}{{ "Editar" if gleba else "Nova" }} gleba — ConnectAgro{% endblock %}
+{% block title %}{{ "Editar" if gleba else "Nova" }} propriedade — ConnectAgro{% endblock %}
 
 {% block content %}
 <section class="card">
-  <h1>{{ "Editar gleba" if gleba else "Nova gleba" }}</h1>
+  <h1>{{ "Editar propriedade" if gleba else "Cadastrar nova propriedade" }}</h1>
 
   <form method="post" class="form-vertical"
         action="{{ url_for('glebas.editar', gleba_id=gleba.id) if gleba else url_for('glebas.nova') }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-    <label for="nome">Nome *</label>
+    <label for="nome">Nome da propriedade *</label>
     <input type="text" id="nome" name="nome" required value="{{ form.nome or '' }}">
 
-    <label for="area_ha">Área (ha)</label>
-    <input type="text" id="area_ha" name="area_ha" value="{{ form.area_ha if form.area_ha is not none else '' }}">
+    <label for="area_ha">Área total (ha) *</label>
+    <input type="text" id="area_ha" name="area_ha" required value="{{ form.area_ha if form.area_ha is not none else '' }}">
 
-    <label for="latitude">Latitude</label>
-    <input type="text" id="latitude" name="latitude" value="{{ form.latitude if form.latitude is not none else '' }}">
-
-    <label for="longitude">Longitude</label>
-    <input type="text" id="longitude" name="longitude" value="{{ form.longitude if form.longitude is not none else '' }}">
+    <label for="status">Status</label>
+    <select id="status" name="status">
+      {% for status in status_validos %}
+      <option value="{{ status }}" {{ "selected" if (form.status or "ativa") == status else "" }}>
+        {{ status.replace("_", " ").capitalize() }}
+      </option>
+      {% endfor %}
+    </select>
 
     <label for="tipo_solo">Tipo de solo</label>
     <input type="text" id="tipo_solo" name="tipo_solo" value="{{ form.tipo_solo or '' }}">

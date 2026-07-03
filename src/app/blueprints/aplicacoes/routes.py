@@ -88,9 +88,9 @@ def _ler_e_validar_form(propriedade):
     dose_raw = request.form.get("dose")
 
     if not cg_raw:
-        return None, "Selecione uma associação cultura↔gleba válida."
+        return None, "Selecione uma associação cultura↔propriedade válida."
     if not cg_raw.isdigit() or int(cg_raw) not in _ids_cultura_gleba_validos(propriedade):
-        return None, "Selecione uma associação cultura↔gleba válida da propriedade atual."
+        return None, "Selecione uma associação cultura↔propriedade válida."
 
     if not produto_raw:
         return None, "Selecione um produto do catálogo."

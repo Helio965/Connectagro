@@ -56,10 +56,17 @@ def test_todas_as_tabelas_registradas(app):
         ("log_auditoria", "acao"),
         ("log_auditoria", "resultado"),
         ("log_auditoria", "criado_em"),
+        ("gleba", "status"),
     ],
 )
 def test_colunas_principais(app, tabela, coluna):
     assert coluna in db.metadata.tables[tabela].columns
+
+
+def test_gleba_nao_tem_campos_de_coordenadas(app):
+    colunas = db.metadata.tables["gleba"].columns
+    assert "latitude" not in colunas
+    assert "longitude" not in colunas
 
 
 def test_create_all_em_memoria(app):

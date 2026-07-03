@@ -11,7 +11,7 @@ from app.utils.auth import gerar_hash_senha
 
 SENHA = "senha123"
 RELATORIOS = ["geral", "financeiro", "agricola", "aplicacoes", "uploads"]
-AVISO_TRECHO = "Não é cotação, venda"
+AVISO_TRECHO = "Não constitui cotação, venda"
 
 
 def _criar_usuario(nome, email, perfil):
@@ -47,7 +47,7 @@ def _popular(app):
         _vincular(tecnico, prop)
 
         gleba = Gleba(propriedade_id=prop.id, nome="Gleba Export", area_ha=20,
-                      latitude=-15.0, longitude=-47.0, tipo_solo="argiloso")
+                      tipo_solo="argiloso")
         cultura = Cultura(propriedade_id=prop.id, nome="Soja Export",
                           status="em_andamento", safra="2026")
         produto = ProdutoBase(nome="Produto Export", slug="produto-export",
@@ -161,7 +161,7 @@ def test_financeiro_csv_tem_lancamento(app_exp):
     client = app_exp.test_client()
     _login(client)
     corpo = client.get("/relatorios/financeiro/exportar.csv").data.decode("utf-8")
-    assert "1234.50" in corpo
+    assert "1.234,50" in corpo
     assert "entrada" in corpo
 
 
@@ -169,7 +169,9 @@ def test_aplicacoes_csv_tem_dados(app_exp):
     client = app_exp.test_client()
     _login(client)
     corpo = client.get("/relatorios/aplicacoes/exportar.csv").data.decode("utf-8")
-    assert "Soja Export" in corpo
+    # O CSV atual traz a propriedade no cabeçalho e o produto nas linhas
+    # (a coluna Cultura saiu do layout na revisão das exportações).
+    assert "Fazenda Export" in corpo
     assert "Produto Export" in corpo
 
 
@@ -211,7 +213,7 @@ def test_financeiro_exporta_com_filtros_validos(app_exp):
     resp = client.get("/relatorios/financeiro/exportar.csv"
                       "?data_inicio=2026-01-01&data_fim=2026-12-31&tipo=receita")
     assert resp.status_code == 200
-    assert "1234.50" in resp.data.decode("utf-8")
+    assert "1.234,50" in resp.data.decode("utf-8")
 
 
 def test_financeiro_filtro_invalido_400(app_exp):
@@ -327,5 +329,9 @@ def test_servico_csv_direto_sem_dados_de_venda(app_exp):
     client = app_exp.test_client()
     _login(client)
     corpo = client.get("/relatorios/geral/exportar.csv").data.decode("utf-8").lower()
+    # O aviso legal cita "checkout" ao negar comércio; ignora a linha do aviso.
+    corpo_sem_aviso = "\n".join(
+        linha for linha in corpo.splitlines() if "não constitui" not in linha
+    )
     for termo in ("carrinho", "checkout", "comprar", "adicionar ao carrinho"):
-        assert termo not in corpo
+        assert termo not in corpo_sem_aviso

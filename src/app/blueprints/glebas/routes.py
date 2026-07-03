@@ -10,12 +10,35 @@ from ...utils.contexto import parse_float, propriedade_atual, vazio_para_none
 from ...utils.permissions import require_permission
 from . import glebas_bp
 
+STATUS_GLEBA_VALIDOS = ("ativa", "em_preparo", "em_cultivo", "pousio", "inativa")
+
 
 def _gleba_da_propriedade_ou_404(gleba_id, propriedade):
     gleba = Gleba.query.filter_by(id=gleba_id, propriedade_id=propriedade.id).first()
     if gleba is None:
         abort(404)
     return gleba
+
+
+def _ler_e_validar_form():
+    nome = vazio_para_none(request.form.get("nome"))
+    area_ha = parse_float(request.form.get("area_ha"))
+    status = request.form.get("status") or "ativa"
+
+    if not nome:
+        return None, "O nome da propriedade é obrigatório."
+    if area_ha is None or area_ha <= 0:
+        return None, "A área da propriedade deve ser informada e maior que zero."
+    if status not in STATUS_GLEBA_VALIDOS:
+        status = "ativa"
+
+    return {
+        "nome": nome,
+        "area_ha": area_ha,
+        "tipo_solo": vazio_para_none(request.form.get("tipo_solo")),
+        "status": status,
+        "observacoes": vazio_para_none(request.form.get("observacoes")),
+    }, None
 
 
 @glebas_bp.route("/")
@@ -36,28 +59,25 @@ def index():
 def nova():
     propriedade = propriedade_atual()
     if request.method == "POST":
-        nome = vazio_para_none(request.form.get("nome"))
-        if not nome:
-            flash("O nome da gleba é obrigatório.", "error")
+        dados, erro = _ler_e_validar_form()
+        if erro:
+            flash(erro, "error")
             return render_template("glebas/form.html", gleba=None,
-                                   form=request.form), 400
+                                   form=request.form,
+                                   status_validos=STATUS_GLEBA_VALIDOS), 400
         gleba = Gleba(
             propriedade_id=propriedade.id,
-            nome=nome,
-            area_ha=parse_float(request.form.get("area_ha")),
-            latitude=parse_float(request.form.get("latitude")),
-            longitude=parse_float(request.form.get("longitude")),
-            tipo_solo=vazio_para_none(request.form.get("tipo_solo")),
-            observacoes=vazio_para_none(request.form.get("observacoes")),
+            **dados,
         )
         db.session.add(gleba)
         db.session.commit()
-        registrar_sucesso("glebas.create", entidade="gleba", entidade_id=gleba.id,
-                          descricao="Gleba criada", propriedade_id=propriedade.id,
+        registrar_sucesso("glebas.create", entidade="propriedade", entidade_id=gleba.id,
+                          descricao="Propriedade criada", propriedade_id=propriedade.id,
                           request=request)
-        flash("Gleba criada com sucesso.", "success")
+        flash("Propriedade cadastrada com sucesso.", "success")
         return redirect(url_for("glebas.index"))
-    return render_template("glebas/form.html", gleba=None, form={})
+    return render_template("glebas/form.html", gleba=None, form={"status": "ativa"},
+                           status_validos=STATUS_GLEBA_VALIDOS)
 
 
 @glebas_bp.route("/<int:gleba_id>/editar", methods=["GET", "POST"])
@@ -67,25 +87,26 @@ def editar(gleba_id):
     propriedade = propriedade_atual()
     gleba = _gleba_da_propriedade_ou_404(gleba_id, propriedade)
     if request.method == "POST":
-        nome = vazio_para_none(request.form.get("nome"))
-        if not nome:
-            flash("O nome da gleba é obrigatório.", "error")
+        dados, erro = _ler_e_validar_form()
+        if erro:
+            flash(erro, "error")
             return render_template("glebas/form.html", gleba=gleba,
-                                   form=request.form), 400
-        gleba.nome = nome
-        gleba.area_ha = parse_float(request.form.get("area_ha"))
-        gleba.latitude = parse_float(request.form.get("latitude"))
-        gleba.longitude = parse_float(request.form.get("longitude"))
-        gleba.tipo_solo = vazio_para_none(request.form.get("tipo_solo"))
-        gleba.observacoes = vazio_para_none(request.form.get("observacoes"))
+                                   form=request.form,
+                                   status_validos=STATUS_GLEBA_VALIDOS), 400
+        gleba.nome = dados["nome"]
+        gleba.area_ha = dados["area_ha"]
+        gleba.tipo_solo = dados["tipo_solo"]
+        gleba.status = dados["status"]
+        gleba.observacoes = dados["observacoes"]
         gleba.atualizado_em = iso_now()
         db.session.commit()
-        registrar_sucesso("glebas.edit", entidade="gleba", entidade_id=gleba.id,
-                          descricao="Gleba editada", propriedade_id=propriedade.id,
+        registrar_sucesso("glebas.edit", entidade="propriedade", entidade_id=gleba.id,
+                          descricao="Propriedade editada", propriedade_id=propriedade.id,
                           request=request)
-        flash("Gleba atualizada.", "success")
+        flash("Propriedade atualizada com sucesso.", "success")
         return redirect(url_for("glebas.index"))
-    return render_template("glebas/form.html", gleba=gleba, form=gleba)
+    return render_template("glebas/form.html", gleba=gleba, form=gleba,
+                           status_validos=STATUS_GLEBA_VALIDOS)
 
 
 @glebas_bp.route("/<int:gleba_id>/remover", methods=["POST"])
@@ -99,8 +120,8 @@ def remover(gleba_id):
         db.session.delete(cg)
     db.session.delete(gleba)
     db.session.commit()
-    registrar_sucesso("glebas.delete", entidade="gleba", entidade_id=gleba_id,
-                      descricao="Gleba removida", propriedade_id=propriedade.id,
+    registrar_sucesso("glebas.delete", entidade="propriedade", entidade_id=gleba_id,
+                      descricao="Propriedade removida", propriedade_id=propriedade.id,
                       request=request)
-    flash("Gleba removida.", "success")
+    flash("Propriedade excluída com sucesso.", "success")
     return redirect(url_for("glebas.index"))

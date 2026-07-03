@@ -56,7 +56,7 @@ def _ler_e_validar_form(propriedade):
     quantidade_raw = request.form.get("quantidade")
 
     if not cg_raw.isdigit() or int(cg_raw) not in _ids_cultura_gleba_validos(propriedade):
-        return None, "Selecione uma associação cultura↔gleba válida."
+        return None, "Selecione uma associação cultura↔propriedade válida."
     if not data_colheita:
         return None, "A data da colheita é obrigatória."
 

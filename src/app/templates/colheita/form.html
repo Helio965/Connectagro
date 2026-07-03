@@ -8,17 +8,17 @@
 
   {% if not opcoes %}
   <p class="placeholder-tag">
-    🚧 Você ainda não tem associações <strong>cultura↔gleba</strong>. Cadastre uma
-    <a href="{{ url_for('glebas.nova') }}">gleba</a> e uma
+    🚧 Você ainda não tem associações <strong>cultura↔propriedade</strong>. Cadastre uma
+    <a href="{{ url_for('glebas.nova') }}">propriedade</a> e uma
     <a href="{{ url_for('culturas.nova') }}">cultura</a>, associando a cultura à
-    gleba, antes de registrar uma colheita.
+    propriedade, antes de registrar uma colheita.
   </p>
   {% else %}
   <form method="post" class="form-vertical"
         action="{{ url_for('colheita.editar', colheita_id=colheita.id) if colheita else url_for('colheita.nova') }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-    <label for="cultura_gleba_id">Cultura ↔ Gleba *</label>
+    <label for="cultura_gleba_id">Cultura ↔ Propriedade *</label>
     <select id="cultura_gleba_id" name="cultura_gleba_id" required>
       <option value="">Selecione…</option>
       {% for cg_id, rotulo in opcoes %}

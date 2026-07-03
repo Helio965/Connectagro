@@ -39,12 +39,11 @@
 
   function textoPopup(gleba) {
     const linhas = [`<strong>${escaparHtml(gleba.nome)}</strong>`];
-    if (gleba.latitude !== null && gleba.latitude !== undefined) {
-      linhas.push(`Lat: ${Number(gleba.latitude).toFixed(6)}`);
-      linhas.push(`Lon: ${Number(gleba.longitude).toFixed(6)}`);
-    }
     if (gleba.area_ha !== null && gleba.area_ha !== undefined) {
       linhas.push(`Área: ${Number(gleba.area_ha).toLocaleString("pt-BR")} ha`);
+    }
+    if (gleba.status) {
+      linhas.push(`Status: ${escaparHtml(String(gleba.status).replace(/_/g, " "))}`);
     }
     if (gleba.tipo_solo) {
       linhas.push(`Solo: ${escaparHtml(gleba.tipo_solo)}`);
@@ -69,6 +68,7 @@
     }
     try {
       const camada = L.geoJSON(gleba.poligono_geojson, { style: poligonoEstilo }).addTo(mapa);
+      camada.bindPopup(textoPopup(gleba));
       poligonoLayers[gleba.id] = camada;
       const b = camada.getBounds();
       if (b.isValid()) {
@@ -149,7 +149,7 @@
 
   function enviarPoligono(urlPost, corpo, sucessoMsg) {
     if (!glebaAtivaId) {
-      definirStatus("Selecione uma gleba primeiro.", "erro");
+      definirStatus("Selecione uma propriedade primeiro.", "erro");
       return;
     }
     fetch(urlPost, {
@@ -227,7 +227,7 @@
     if (!select) {
       return;
     }
-    select.innerHTML = '<option value="">Selecione uma gleba…</option>';
+    select.innerHTML = '<option value="">Selecione uma propriedade…</option>';
     glebas.forEach((gleba) => {
       const opt = document.createElement("option");
       opt.value = gleba.id;
@@ -248,12 +248,6 @@
 
       glebas.forEach((gleba) => {
         glebasPorId[gleba.id] = gleba;
-        const latitude = Number(gleba.latitude);
-        const longitude = Number(gleba.longitude);
-        if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
-          L.marker([latitude, longitude]).addTo(mapa).bindPopup(textoPopup(gleba));
-          limites.extend([latitude, longitude]);
-        }
         desenharPoligono(gleba);
       });
 

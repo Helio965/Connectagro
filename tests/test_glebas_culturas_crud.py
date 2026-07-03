@@ -45,11 +45,18 @@ def test_criar_gleba(app_db):
         assert g is not None
         assert g.area_ha == 12.5
         assert g.tipo_solo == "argiloso"
+        assert g.status == "ativa"
 
 
 def test_gleba_exige_nome(app_db):
     client = _login(app_db, "a@connectagro.com")
-    resp = client.post("/glebas/nova", data={"nome": ""})
+    resp = client.post("/glebas/nova", data={"nome": "", "area_ha": "1"})
+    assert resp.status_code == 400
+
+
+def test_gleba_exige_area(app_db):
+    client = _login(app_db, "a@connectagro.com")
+    resp = client.post("/glebas/nova", data={"nome": "Sem area", "area_ha": ""})
     assert resp.status_code == 400
 
 
@@ -57,15 +64,20 @@ def test_editar_gleba(app_db):
     from app.models import Gleba
 
     client = _login(app_db, "a@connectagro.com")
-    client.post("/glebas/nova", data={"nome": "G1"})
+    client.post("/glebas/nova", data={"nome": "G1", "area_ha": "2"})
     with app_db.app_context():
         gid = Gleba.query.filter_by(nome="G1").first().id
-    resp = client.post(f"/glebas/{gid}/editar", data={"nome": "G1 editada", "area_ha": "3"})
+    resp = client.post(f"/glebas/{gid}/editar", data={
+        "nome": "G1 editada",
+        "area_ha": "3",
+        "status": "pousio",
+    })
     assert resp.status_code == 302
     with app_db.app_context():
         g = db.session.get(Gleba, gid)
         assert g.nome == "G1 editada"
         assert g.area_ha == 3.0
+        assert g.status == "pousio"
         assert g.atualizado_em is not None
 
 
@@ -73,7 +85,7 @@ def test_remover_gleba(app_db):
     from app.models import Gleba
 
     client = _login(app_db, "a@connectagro.com")
-    client.post("/glebas/nova", data={"nome": "G-del"})
+    client.post("/glebas/nova", data={"nome": "G-del", "area_ha": "1"})
     with app_db.app_context():
         gid = Gleba.query.filter_by(nome="G-del").first().id
     resp = client.post(f"/glebas/{gid}/remover")
@@ -87,7 +99,7 @@ def test_escopo_gleba_por_propriedade(app_db):
     from app.models import Gleba
 
     client_a = _login(app_db, "a@connectagro.com")
-    client_a.post("/glebas/nova", data={"nome": "Gleba A"})
+    client_a.post("/glebas/nova", data={"nome": "Gleba A", "area_ha": "1"})
     with app_db.app_context():
         gid = Gleba.query.filter_by(nome="Gleba A").first().id
 
@@ -102,7 +114,7 @@ def test_criar_cultura_com_glebas(app_db):
     from app.models import Cultura, Gleba
 
     client = _login(app_db, "a@connectagro.com")
-    client.post("/glebas/nova", data={"nome": "Gleba X"})
+    client.post("/glebas/nova", data={"nome": "Gleba X", "area_ha": "1"})
     with app_db.app_context():
         gid = Gleba.query.filter_by(nome="Gleba X").first().id
 
@@ -121,8 +133,8 @@ def test_editar_cultura_sincroniza_glebas(app_db):
     from app.models import Cultura, Gleba
 
     client = _login(app_db, "a@connectagro.com")
-    client.post("/glebas/nova", data={"nome": "G-A"})
-    client.post("/glebas/nova", data={"nome": "G-B"})
+    client.post("/glebas/nova", data={"nome": "G-A", "area_ha": "1"})
+    client.post("/glebas/nova", data={"nome": "G-B", "area_ha": "2"})
     with app_db.app_context():
         ga = Gleba.query.filter_by(nome="G-A").first().id
         gb = Gleba.query.filter_by(nome="G-B").first().id
@@ -150,7 +162,7 @@ def test_remover_cultura_remove_associacoes(app_db):
     from app.models import Cultura, CulturaGleba, Gleba
 
     client = _login(app_db, "a@connectagro.com")
-    client.post("/glebas/nova", data={"nome": "G-rm"})
+    client.post("/glebas/nova", data={"nome": "G-rm", "area_ha": "1"})
     with app_db.app_context():
         gid = Gleba.query.filter_by(nome="G-rm").first().id
     client.post("/culturas/nova", data={"nome": "Feijão", "glebas": [str(gid)]})

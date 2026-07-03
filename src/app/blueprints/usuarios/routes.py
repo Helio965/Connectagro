@@ -1,25 +1,197 @@
-"""Painel de usuários internos da propriedade."""
-from flask import abort, flash, redirect, render_template, request, url_for
+"""Painel de Usuários — somente admin, escopo: propriedade atual (Fase 7.1).
 
-from ...services.usuarios_service import (
-    criar_usuario_da_propriedade,
-    editar_usuario_da_propriedade,
-    inativar_usuario_da_propriedade,
-    listar_usuarios_da_propriedade,
-    obter_vinculo_usuario,
-)
-from ...services.auditoria_service import registrar_sucesso
-from ...utils.auth import login_required, usuario_atual
-from ...utils.contexto import propriedade_atual
-from ...utils.permissions import PERFIS_OFICIAIS, require_permission
+Permite listar, criar, editar dados principais, redefinir senha e ativar/
+inativar usuários vinculados à propriedade atual. Não há cadastro público,
+remoção física nem painel de roles.
+"""
+import re
+
+from flask import abort, flash, redirect, render_template, request, session, url_for
+
+from ...extensions import db
+from ...models import Usuario, UsuarioPropriedade
+from ...models._helpers import iso_now
+from ...services.auditoria_service import registrar_negado, registrar_sucesso
+from ...utils.auth import gerar_hash_senha, login_required, usuario_atual
+from ...utils.contexto import propriedade_atual, vazio_para_none
+from ...utils.permissions import PERFIS_OFICIAIS, require_permission, role_label
 from . import usuarios_bp
 
+EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+MIN_SENHA = 6
 
-def _vinculo_ou_404(usuario_id, propriedade):
-    vinculo = obter_vinculo_usuario(propriedade, usuario_id)
+
+def _usuario_da_propriedade_ou_404(usuario_id, propriedade):
+    """Busca um usuário vinculado à propriedade atual ou retorna 404."""
+    vinculo = UsuarioPropriedade.query.filter_by(
+        usuario_id=usuario_id,
+        propriedade_id=propriedade.id,
+    ).first()
     if vinculo is None:
         abort(404)
-    return vinculo
+    usuario = db.session.get(Usuario, usuario_id)
+    if usuario is None:
+        abort(404)
+    return usuario, vinculo
+
+
+def _email_valido(email):
+    return bool(EMAIL_RE.match(email or ""))
+
+
+def _email_em_uso(email, usuario_id=None):
+    query = Usuario.query.filter_by(email=email)
+    if usuario_id is not None:
+        query = query.filter(Usuario.id != usuario_id)
+    return query.first() is not None
+
+
+def _usuario_logado_model():
+    atual = usuario_atual()
+    if not atual:
+        return None
+    return db.session.get(Usuario, atual["id"])
+
+
+def _is_admin(usuario):
+    return bool(usuario and usuario.perfil == "admin")
+
+
+def _is_manager(usuario):
+    return bool(usuario and usuario.perfil == "tecnico")
+
+
+def _allowed_roles_to_create(usuario):
+    if _is_admin(usuario):
+        return ("tecnico", "trabalhador")
+    if _is_manager(usuario):
+        return ("trabalhador",)
+    return ()
+
+
+def _allowed_roles_to_edit(usuario_logado, alvo):
+    if _is_admin(usuario_logado):
+        if alvo.perfil == "admin":
+            return ("admin",)
+        return ("tecnico", "trabalhador")
+    if _is_manager(usuario_logado) and alvo.perfil == "trabalhador":
+        return ("trabalhador",)
+    return ()
+
+
+def _can_edit_target_user(usuario_logado, alvo):
+    return bool(_allowed_roles_to_edit(usuario_logado, alvo))
+
+
+def _bloquear_acao_usuario(acao, descricao, propriedade=None, usuario_id=None):
+    registrar_negado(
+        acao,
+        entidade="usuario",
+        entidade_id=usuario_id,
+        descricao=descricao,
+        propriedade_id=(propriedade.id if propriedade else None),
+        request=request,
+    )
+    abort(403)
+
+
+def _ativo_form(default=False):
+    return bool(request.form.get("ativo")) if request.method == "POST" else default
+
+
+def _contar_admins_ativos():
+    return Usuario.query.filter_by(perfil="admin", ativo=True).count()
+
+
+def _validar_admin_preservado(usuario, novo_perfil, novo_ativo):
+    atual = usuario_atual()
+    erros = []
+    if atual and atual.get("id") == usuario.id:
+        if not novo_ativo:
+            erros.append("Você não pode inativar seu próprio usuário administrador.")
+        if novo_perfil != "admin":
+            erros.append("Você não pode alterar seu próprio perfil de administrador.")
+
+    unico_admin_ativo = (
+        usuario.perfil == "admin"
+        and usuario.ativo
+        and _contar_admins_ativos() <= 1
+    )
+    if unico_admin_ativo and novo_perfil != "admin":
+        erros.append("Não é possível alterar o perfil do único admin ativo.")
+    if unico_admin_ativo and not novo_ativo:
+        erros.append("Não é possível inativar o único admin ativo.")
+    if usuario.perfil == "admin" and not usuario.ativo and novo_ativo and _contar_admins_ativos() >= 1:
+        erros.append("Não é possível ativar outro administrador.")
+    return erros
+
+
+def _validar_dados_usuario(*, usuario=None, perfis_permitidos=()):
+    nome = vazio_para_none(request.form.get("nome"))
+    email = (request.form.get("email") or "").strip().lower()
+    perfil = request.form.get("perfil") or ""
+    ativo = _ativo_form(default=True if usuario is None else bool(usuario.ativo))
+    senha = request.form.get("senha") or ""
+    confirmar_senha = request.form.get("confirmar_senha") or ""
+
+    erros = []
+    if not nome:
+        erros.append("O nome é obrigatório.")
+    if not email:
+        erros.append("O e-mail é obrigatório.")
+    elif not _email_valido(email):
+        erros.append("Informe um e-mail válido.")
+    elif _email_em_uso(email, usuario.id if usuario else None):
+        erros.append("Já existe um usuário com esse e-mail.")
+    if perfil not in PERFIS_OFICIAIS:
+        erros.append("Perfil inválido.")
+    elif perfil not in perfis_permitidos:
+        erros.append(f"Perfil não permitido: {role_label(perfil)}.")
+
+    if usuario is None:
+        if not senha:
+            erros.append("A senha é obrigatória.")
+        if not confirmar_senha:
+            erros.append("A confirmação de senha é obrigatória.")
+    elif confirmar_senha and not senha:
+        erros.append("Preencha a nova senha antes da confirmação.")
+
+    if senha and len(senha) < MIN_SENHA:
+        erros.append(f"A senha deve ter ao menos {MIN_SENHA} caracteres.")
+    if senha or confirmar_senha:
+        if senha != confirmar_senha:
+            erros.append("A senha e a confirmação não coincidem.")
+
+    if usuario is not None:
+        erros.extend(_validar_admin_preservado(usuario, perfil, ativo))
+
+    return {
+        "nome": nome,
+        "email": email,
+        "perfil": perfil,
+        "ativo": ativo,
+        "senha": senha,
+        "confirmar_senha": confirmar_senha,
+    }, erros
+
+
+def _render_form(usuario, form, perfis, status=200):
+    return render_template(
+        "usuarios/form.html",
+        usuario=usuario,
+        form=form,
+        perfis=perfis,
+        min_senha=MIN_SENHA,
+    ), status
+
+
+def _sincronizar_sessao_se_usuario_atual(usuario):
+    atual = usuario_atual()
+    if not atual or atual.get("id") != usuario.id:
+        return
+    session["user_email"] = usuario.email
+    session["user_nome"] = usuario.nome
+    session["user_perfil"] = usuario.perfil
 
 
 @usuarios_bp.route("/")
@@ -27,9 +199,21 @@ def _vinculo_ou_404(usuario_id, propriedade):
 @require_permission("usuarios.view")
 def index():
     propriedade = propriedade_atual()
-    vinculos = listar_usuarios_da_propriedade(propriedade)
-    return render_template("usuarios/list.html", vinculos=vinculos,
-                           propriedade=propriedade)
+    usuario_logado = _usuario_logado_model()
+    vinculos = (UsuarioPropriedade.query
+                .filter_by(propriedade_id=propriedade.id)
+                .order_by(UsuarioPropriedade.id)
+                .all())
+    usuarios = []
+    for v in vinculos:
+        u = db.session.get(Usuario, v.usuario_id)
+        if u and (_is_admin(usuario_logado) or (_is_manager(usuario_logado) and u.perfil == "trabalhador")):
+            usuarios.append({
+                "usuario": u,
+                "vinculo": v,
+                "can_manage": _can_edit_target_user(usuario_logado, u),
+            })
+    return render_template("usuarios/list.html", usuarios=usuarios)
 
 
 @usuarios_bp.route("/novo", methods=["GET", "POST"])
@@ -37,32 +221,60 @@ def index():
 @require_permission("usuarios.create")
 def novo():
     propriedade = propriedade_atual()
-    if request.method == "POST":
-        usuario, erros = criar_usuario_da_propriedade(
+    usuario_logado = _usuario_logado_model()
+    perfis_permitidos = _allowed_roles_to_create(usuario_logado)
+    if not perfis_permitidos:
+        _bloquear_acao_usuario(
+            "usuarios.create.blocked",
+            "Tentativa bloqueada de acessar criação de usuário",
             propriedade,
-            request.form,
-            usuario_atual()["id"],
         )
+    if request.method == "POST":
+        perfil_solicitado = request.form.get("perfil") or ""
+        if perfil_solicitado not in perfis_permitidos:
+            _bloquear_acao_usuario(
+                "usuarios.create.blocked",
+                f"Tentativa bloqueada de criar perfil {perfil_solicitado or 'vazio'}",
+                propriedade,
+            )
+
+        dados, erros = _validar_dados_usuario(perfis_permitidos=perfis_permitidos)
         if erros:
-            for erro in erros:
-                flash(erro, "error")
-            return render_template(
-                "usuarios/form.html",
-                usuario=None,
-                form=request.form,
-                perfis=PERFIS_OFICIAIS,
-            ), 400
+            for e in erros:
+                flash(e, "error")
+            return _render_form(None, request.form, perfis_permitidos, 400)
+
+        usuario = Usuario(
+            nome=dados["nome"],
+            email=dados["email"],
+            perfil=dados["perfil"],
+            ativo=dados["ativo"],
+            senha_hash=gerar_hash_senha(dados["senha"]),
+        )
+        db.session.add(usuario)
+        db.session.flush()
+
+        atual = usuario_atual()
+        db.session.add(UsuarioPropriedade(
+            usuario_id=usuario.id,
+            propriedade_id=propriedade.id,
+            ativo=dados["ativo"],
+            criado_por_id=atual["id"] if atual else None,
+        ))
+        db.session.commit()
+
+        descricao = f"Usuário criado: {usuario.email}"
+        if _is_manager(usuario_logado):
+            descricao = f"Gerente criou trabalhador: {usuario.email}"
         registrar_sucesso("usuarios.create", entidade="usuario",
-                          entidade_id=usuario.id, descricao="Usuário criado pelo painel",
+                          entidade_id=usuario.id,
+                          descricao=descricao,
                           propriedade_id=propriedade.id, request=request)
-        flash(f"Usuário {usuario.email} criado e vinculado à propriedade.", "success")
+        flash("Usuário criado com sucesso.", "success")
         return redirect(url_for("usuarios.index"))
-    return render_template(
-        "usuarios/form.html",
-        usuario=None,
-        form={"ativo": True},
-        perfis=PERFIS_OFICIAIS,
-    )
+
+    return _render_form(None, {"perfil": perfis_permitidos[0], "ativo": True},
+                        perfis_permitidos)[0]
 
 
 @usuarios_bp.route("/<int:usuario_id>/editar", methods=["GET", "POST"])
@@ -70,32 +282,82 @@ def novo():
 @require_permission("usuarios.edit")
 def editar(usuario_id):
     propriedade = propriedade_atual()
-    vinculo = _vinculo_ou_404(usuario_id, propriedade)
-    usuario = vinculo.usuario
+    usuario_logado = _usuario_logado_model()
+    usuario, vinculo = _usuario_da_propriedade_ou_404(usuario_id, propriedade)
+    perfis_permitidos = _allowed_roles_to_edit(usuario_logado, usuario)
+    if not perfis_permitidos:
+        _bloquear_acao_usuario(
+            "usuarios.edit.blocked",
+            f"Tentativa bloqueada de editar usuário #{usuario.id}",
+            propriedade,
+            usuario.id,
+        )
+
     if request.method == "POST":
-        erros = editar_usuario_da_propriedade(propriedade, vinculo, request.form)
+        perfil_solicitado = request.form.get("perfil") or ""
+        if perfil_solicitado not in perfis_permitidos:
+            _bloquear_acao_usuario(
+                "usuarios.profile_change.blocked",
+                f"Tentativa bloqueada de alterar perfil para {perfil_solicitado or 'vazio'}",
+                propriedade,
+                usuario.id,
+            )
+
+        dados, erros = _validar_dados_usuario(
+            usuario=usuario,
+            perfis_permitidos=perfis_permitidos,
+        )
         if erros:
-            for erro in erros:
-                flash(erro, "error")
-            form = dict(request.form)
-            form["email"] = usuario.email
-            return render_template(
-                "usuarios/form.html",
-                usuario=usuario,
-                form=form,
-                perfis=PERFIS_OFICIAIS,
-            ), 400
+            for e in erros:
+                flash(e, "error")
+            return _render_form(usuario, request.form, perfis_permitidos, 400)
+
+        perfil_anterior = usuario.perfil
+        ativo_anterior = bool(usuario.ativo)
+        email_anterior = usuario.email
+        senha_alterada = bool(dados["senha"])
+
+        usuario.nome = dados["nome"]
+        usuario.email = dados["email"]
+        usuario.perfil = dados["perfil"]
+        usuario.ativo = dados["ativo"]
+        if senha_alterada:
+            usuario.senha_hash = gerar_hash_senha(dados["senha"])
+        usuario.atualizado_em = iso_now()
+        vinculo.ativo = dados["ativo"]
+        vinculo.atualizado_em = iso_now()
+        db.session.commit()
+        _sincronizar_sessao_se_usuario_atual(usuario)
+
         registrar_sucesso("usuarios.edit", entidade="usuario",
-                          entidade_id=usuario.id, descricao="Usuário editado pelo painel",
+                          entidade_id=usuario.id,
+                          descricao=f"Usuário editado: #{usuario.id}",
                           propriedade_id=propriedade.id, request=request)
+        if email_anterior != usuario.email:
+            registrar_sucesso("usuarios.email_change", entidade="usuario",
+                              entidade_id=usuario.id,
+                              descricao=f"E-mail alterado: {email_anterior} -> {usuario.email}",
+                              propriedade_id=propriedade.id, request=request)
+        if perfil_anterior != usuario.perfil:
+            registrar_sucesso("usuarios.profile_change", entidade="usuario",
+                              entidade_id=usuario.id,
+                              descricao=f"Perfil alterado: {perfil_anterior} -> {usuario.perfil}",
+                              propriedade_id=propriedade.id, request=request)
+        if ativo_anterior != usuario.ativo:
+            acao = "usuarios.activate" if usuario.ativo else "usuarios.deactivate"
+            descricao = "Usuário ativado" if usuario.ativo else "Usuário desativado"
+            registrar_sucesso(acao, entidade="usuario", entidade_id=usuario.id,
+                              descricao=f"{descricao}: #{usuario.id}",
+                              propriedade_id=propriedade.id, request=request)
+        if senha_alterada:
+            registrar_sucesso("usuarios.password_reset", entidade="usuario",
+                              entidade_id=usuario.id,
+                              descricao=f"Senha redefinida para usuário #{usuario.id}",
+                              propriedade_id=propriedade.id, request=request)
         flash("Usuário atualizado.", "success")
         return redirect(url_for("usuarios.index"))
-    return render_template(
-        "usuarios/form.html",
-        usuario=usuario,
-        form=usuario,
-        perfis=PERFIS_OFICIAIS,
-    )
+
+    return _render_form(usuario, usuario, perfis_permitidos)[0]
 
 
 @usuarios_bp.route("/<int:usuario_id>/inativar", methods=["POST"])
@@ -103,19 +365,32 @@ def editar(usuario_id):
 @require_permission("usuarios.deactivate")
 def inativar(usuario_id):
     propriedade = propriedade_atual()
-    vinculo = _vinculo_ou_404(usuario_id, propriedade)
-    erros = inativar_usuario_da_propriedade(propriedade, vinculo)
-    if erros:
-        for erro in erros:
-            flash(erro, "error")
-        vinculos = listar_usuarios_da_propriedade(propriedade)
-        return render_template(
-            "usuarios/list.html",
-            vinculos=vinculos,
-            propriedade=propriedade,
-        ), 400
+    usuario_logado = _usuario_logado_model()
+    usuario, vinculo = _usuario_da_propriedade_ou_404(usuario_id, propriedade)
+    if not _can_edit_target_user(usuario_logado, usuario):
+        _bloquear_acao_usuario(
+            "usuarios.deactivate.blocked",
+            f"Tentativa bloqueada de inativar usuário #{usuario.id}",
+            propriedade,
+            usuario.id,
+        )
+    atual = usuario_atual()
+    if atual and atual.get("id") == usuario.id:
+        flash("Você não pode inativar seu próprio usuário administrador.", "error")
+        return redirect(url_for("usuarios.index")), 400
+    if usuario.perfil == "admin" and usuario.ativo and _contar_admins_ativos() <= 1:
+        flash("Não é possível inativar o único admin ativo.", "error")
+        return redirect(url_for("usuarios.index")), 400
+
+    usuario.ativo = False
+    usuario.atualizado_em = iso_now()
+    vinculo.ativo = False
+    vinculo.atualizado_em = iso_now()
+    db.session.commit()
+
     registrar_sucesso("usuarios.deactivate", entidade="usuario",
-                      entidade_id=usuario_id, descricao="Usuário inativado pelo painel",
+                      entidade_id=usuario.id,
+                      descricao=f"Usuário desativado: #{usuario.id}",
                       propriedade_id=propriedade.id, request=request)
     flash("Usuário inativado.", "success")
     return redirect(url_for("usuarios.index"))

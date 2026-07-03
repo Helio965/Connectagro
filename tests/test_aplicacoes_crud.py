@@ -298,7 +298,7 @@ def test_nova_sem_cultura_gleba_orienta_usuario(app_db):
     resp = _login(app_db, "x@connectagro.com").get("/aplicacoes/nova")
     corpo = resp.data.decode("utf-8").lower()
     assert resp.status_code == 200
-    assert "gleba" in corpo
+    assert "propriedade" in corpo
     assert "cultura" in corpo
 
 

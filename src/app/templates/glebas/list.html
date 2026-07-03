@@ -1,13 +1,16 @@
 {% extends "base.html" %}
 
-{% block title %}Glebas — ConnectAgro{% endblock %}
+{% block title %}Propriedades — ConnectAgro{% endblock %}
 
 {% block content %}
 <section class="card">
   <div class="card-head">
-    <h1>Glebas</h1>
+    <div>
+      <h1>Propriedades</h1>
+      <p class="hint">Gerencie as propriedades rurais cadastradas no ConnectAgro.</p>
+    </div>
     {% if can("glebas.create") %}
-    <a class="btn-acao" href="{{ url_for('glebas.nova') }}">+ Nova gleba</a>
+    <a class="btn-acao" href="{{ url_for('glebas.nova') }}">+ Nova propriedade</a>
     {% endif %}
   </div>
 
@@ -15,7 +18,7 @@
   <table class="tabela">
     <thead>
       <tr>
-        <th>Nome</th><th>Área (ha)</th><th>Tipo de solo</th><th>Ações</th>
+        <th>Nome</th><th>Área (ha)</th><th>Status</th><th>Tipo de solo</th><th>Ações</th>
       </tr>
     </thead>
     <tbody>
@@ -23,6 +26,7 @@
       <tr>
         <td>{{ g.nome }}</td>
         <td>{{ g.area_ha if g.area_ha is not none else "—" }}</td>
+        <td>{{ (g.status or "ativa").replace("_", " ").capitalize() }}</td>
         <td>{{ g.tipo_solo or "—" }}</td>
         <td class="acoes">
           {% if can("glebas.edit") %}
@@ -30,7 +34,7 @@
           {% endif %}
           {% if can("glebas.delete") %}
           <form method="post" action="{{ url_for('glebas.remover', gleba_id=g.id) }}"
-                onsubmit="return confirm('Remover esta gleba?');">
+                onsubmit="return confirm('Remover esta propriedade?');">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn-link-danger">Remover</button>
           </form>
@@ -42,7 +46,7 @@
     </tbody>
   </table>
   {% else %}
-  <p>Nenhuma gleba cadastrada ainda.{% if can("glebas.create") %} <a href="{{ url_for('glebas.nova') }}">Criar a primeira</a>.{% endif %}</p>
+  <p>Nenhuma propriedade cadastrada ainda.{% if can("glebas.create") %} <a href="{{ url_for('glebas.nova') }}">Criar a primeira</a>.{% endif %}</p>
   {% endif %}
 </section>
 {% endblock %}
