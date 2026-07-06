@@ -29,11 +29,12 @@ Arquivos existentes:
   perfil possui permissão.
 - **`test_models_schema.py`** — registro das 18 tabelas no metadata; colunas
   principais; `db.create_all()`; inserção mínima; unicidade de `usuario.email` e
-  `produto_base.slug`; `produto_preco`/`produto_imagem` existem mas vazias; seed
+  `produto_base.slug`; `produto_preco`/`produto_imagem` existem como tabelas; seed
   não importado automaticamente.
 - **`test_catalogo_seed.py`** — Flask-Migrate inicializado sem quebrar a app;
-  validação do seed; importação idempotente; preço/imagem vazios; itens
-  bloqueados ignorados.
+  validação do seed (incl. FK/url das imagens); importação idempotente; preço
+  segue vazio e imagem é populada para todos os produtos; arquivos locais das
+  imagens existem; itens bloqueados ignorados.
 - **`test_auth.py`** — autenticação: `/auth/login`, login válido, senha errada,
   usuário inativo, logout, rotas protegidas, `/health` público, sessão sem senha,
   senha armazenada como hash e `seed-users` idempotente.
@@ -113,8 +114,9 @@ Arquivos existentes:
   propriedade, listagem, orientação sem associação e exigência de login.
 - **`test_catalogo_consulta.py`** — consulta somente leitura do catálogo: exige
   login; listagens filtram por `classe`; busca e filtros; detalhe por slug e 404;
-  ausência de termos de compra; aviso de preço/imagem pendentes; render de campos
-  JSON; `produto_preco`/`produto_imagem` seguem vazios.
+  ausência de termos de compra; cards exibem imagem real/local do catálogo com
+  placeholder como fallback; render de campos JSON; `produto_preco` segue vazio e
+  `produto_imagem` é populado.
 - **`test_aplicacoes_crud.py`** — CRUD de Aplicações de Insumo: exige login;
   cria/edita/remove aplicação válida; valida `cultura_gleba_id`, produto e data;
   bloqueia produto histórico; impede cultura↔gleba de outra propriedade; aceita

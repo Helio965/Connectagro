@@ -2,11 +2,13 @@
 
 Regras do MVP (ver docs/03-regras-de-negocio.md e data/seeds/README.md):
 
-- Importa apenas ``produto_base`` + ``produto_tecnico``.
-- **Não** importa ``produto_preco`` nem ``produto_imagem`` (pendentes no MVP).
+- Importa ``produto_base`` + ``produto_tecnico`` + ``produto_imagem``.
+- **Não** importa ``produto_preco`` (pendente no MVP; fica no sistema final).
 - **Não** importa ``itens_bloqueados_ou_excluidos`` (ex.: Paraquate, Oxamil).
 - Importação **idempotente**: rodar duas vezes não duplica registros.
-- Não inventa preço, imagem, fabricante nem validação oficial.
+- Não inventa preço, fabricante nem validação oficial. As imagens são
+  referências visuais de fonte pública (Wikimedia Commons), rastreadas no
+  manifesto ``data/seeds/catalogo_imagens_manifest.*``.
 """
 import json
 from pathlib import Path
@@ -79,11 +81,23 @@ def validar_seed(dados):
                 f"{t.get('produto_id')} sem produto_base correspondente."
             )
 
-    # preço e imagem devem estar vazios no MVP
+    # preço continua vazio no MVP (menor valor diário fica no sistema final)
     if dados["produto_preco"]:
         raise SeedInvalidoError("Seed inválido: produto_preco deve estar vazio no MVP.")
-    if dados["produto_imagem"]:
-        raise SeedInvalidoError("Seed inválido: produto_imagem deve estar vazio no MVP.")
+
+    # imagens são opcionais; quando presentes, cada uma referencia um
+    # produto_base válido e traz um caminho/url não vazio.
+    for img in dados["produto_imagem"]:
+        if img.get("produto_id") not in base_ids:
+            raise SeedInvalidoError(
+                f"Seed inválido: produto_imagem.produto_id "
+                f"{img.get('produto_id')} sem produto_base correspondente."
+            )
+        if not (img.get("url") or "").strip():
+            raise SeedInvalidoError(
+                f"Seed inválido: produto_imagem sem url "
+                f"(produto_id={img.get('produto_id')})."
+            )
 
     # itens bloqueados/excluídos não podem aparecer como produto_base
     bloqueados = {b.get("slug") for b in dados.get("itens_bloqueados_ou_excluidos", [])}
@@ -109,12 +123,13 @@ def importar_seed_catalogo(db_session, dados):
     Não importa preço, imagem nem itens bloqueados. Retorna um resumo com as
     contagens de registros inseridos e ignorados.
     """
-    from ..models import ProdutoBase, ProdutoTecnico
+    from ..models import ProdutoBase, ProdutoTecnico, ProdutoImagem
 
     validar_seed(dados)
 
     resumo = {"base_inseridos": 0, "base_ignorados": 0,
-              "tecnico_inseridos": 0, "tecnico_ignorados": 0}
+              "tecnico_inseridos": 0, "tecnico_ignorados": 0,
+              "imagem_inseridos": 0, "imagem_ignorados": 0}
 
     # Idempotência de produto_base pela chave slug.
     slugs_existentes = {p.slug for p in db_session.query(ProdutoBase).all()}
@@ -167,6 +182,27 @@ def importar_seed_catalogo(db_session, dados):
         ))
         tec_existentes.add(pid)
         resumo["tecnico_inseridos"] += 1
+
+    # Idempotência de produto_imagem por produto_id (uma imagem de referência
+    # por produto). Preço continua sem importação no MVP.
+    img_existentes = {im.produto_id for im in db_session.query(ProdutoImagem).all()}
+    for img in dados["produto_imagem"]:
+        pid = img.get("produto_id")
+        if pid in img_existentes:
+            resumo["imagem_ignorados"] += 1
+            continue
+        if db_session.get(ProdutoBase, pid) is None:
+            resumo["imagem_ignorados"] += 1
+            continue
+        db_session.add(ProdutoImagem(
+            produto_id=pid,
+            url=img.get("url"),
+            fonte=img.get("fonte"),
+            status_validacao=img.get("status_validacao", "nao_consolidado"),
+            observacoes=img.get("observacoes"),
+        ))
+        img_existentes.add(pid)
+        resumo["imagem_inseridos"] += 1
 
     db_session.commit()
     return resumo

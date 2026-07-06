@@ -60,9 +60,17 @@ def test_validador_detecta_preco_nao_vazio(seed):
         validar_seed(seed)
 
 
-def test_validador_detecta_imagem_nao_vazia(seed):
-    seed["produto_imagem"] = [{"id": 1, "produto_id": 1, "url": "x"}]
-    with pytest.raises(SeedInvalidoError, match="produto_imagem deve estar vazio"):
+def test_validador_detecta_imagem_fk_invalida(seed):
+    seed["produto_imagem"].append(
+        {"id": 99999, "produto_id": 999999, "url": "img/x.jpg"})
+    with pytest.raises(SeedInvalidoError, match="produto_base correspondente"):
+        validar_seed(seed)
+
+
+def test_validador_detecta_imagem_sem_url(seed):
+    pid = seed["produto_base"][0]["id"]
+    seed["produto_imagem"].append({"id": 99998, "produto_id": pid, "url": ""})
+    with pytest.raises(SeedInvalidoError, match="produto_imagem sem url"):
         validar_seed(seed)
 
 
@@ -80,14 +88,53 @@ def test_importacao_popula_base_e_tecnico(app, seed):
         assert ProdutoTecnico.query.count() == len(seed["produto_tecnico"])
 
 
-def test_importacao_nao_popula_preco_nem_imagem(app, seed):
-    from app.models import ProdutoPreco, ProdutoImagem
+def test_importacao_nao_popula_preco(app, seed):
+    """Preço continua vazio no MVP (fica para o sistema final)."""
+    from app.models import ProdutoPreco
 
     with app.app_context():
         db.create_all()
         importar_seed_catalogo(db.session, seed)
         assert ProdutoPreco.query.count() == 0
-        assert ProdutoImagem.query.count() == 0
+
+
+def test_importacao_popula_imagem_para_todos(app, seed):
+    """Toda a base recebe uma imagem de referência ao importar o seed."""
+    from app.models import ProdutoBase, ProdutoImagem
+
+    with app.app_context():
+        db.create_all()
+        resumo = importar_seed_catalogo(db.session, seed)
+        total = len(seed["produto_base"])
+        assert resumo["imagem_inseridos"] == total
+        assert ProdutoImagem.query.count() == total
+        # nenhum produto fica sem imagem_url
+        sem_imagem = [p.slug for p in ProdutoBase.query.all() if not p.imagem_url]
+        assert sem_imagem == []
+
+
+def test_seed_tem_imagem_para_todos_os_produtos(seed):
+    """O seed cobre 100% dos produtos e cada imagem aponta para um produto."""
+    ids_base = {p["id"] for p in seed["produto_base"]}
+    ids_imagem = {i["produto_id"] for i in seed["produto_imagem"]}
+    assert ids_imagem == ids_base
+    assert len(seed["produto_imagem"]) == len(seed["produto_base"])
+
+
+def test_arquivos_locais_das_imagens_existem(app, seed):
+    """Todo caminho local declarado no seed existe em src/app/static/."""
+    import os
+
+    faltando = []
+    for img in seed["produto_imagem"]:
+        url = img["url"]
+        # só validamos caminhos locais (relativos ao static)
+        if url.startswith(("http://", "https://", "data:", "/")):
+            continue
+        caminho = os.path.join(app.static_folder, url.replace("/", os.sep))
+        if not os.path.isfile(caminho):
+            faltando.append(url)
+    assert faltando == []
 
 
 def test_itens_bloqueados_nao_importados(app, seed):

@@ -76,14 +76,27 @@ def test_listagem_nao_exibe_status_regulatorio(app_cat):
         assert "tipo_tecnico_generico" not in corpo
 
 
-def test_listagem_usa_cards_com_placeholder(app_cat):
+def test_listagem_usa_cards_com_imagem_real(app_cat):
     client = _login(app_cat)
     for url in ("/defensivos/", "/fertilizantes/"):
         corpo = client.get(url).data.decode("utf-8")
         assert "catalog-grid" in corpo
         assert "catalog-card" in corpo
-        assert "placeholder-produto.svg" in corpo
+        # imagens reais/locais do catálogo (não o placeholder)
+        assert "img/catalogo/produtos/" in corpo
         assert "Ver detalhes" in corpo
+
+
+def test_placeholder_como_fallback_sem_imagem(app_cat):
+    """Se um produto não tiver imagem cadastrada, o card cai no placeholder."""
+    from app.models import ProdutoBase, ProdutoImagem
+
+    with app_cat.app_context():
+        prod = ProdutoBase.query.filter_by(slug="glifosato").first()
+        ProdutoImagem.query.filter_by(produto_id=prod.id).delete()
+        db.session.commit()
+    corpo = _login(app_cat).get("/defensivos/glifosato").data.decode("utf-8")
+    assert "placeholder-produto.svg" in corpo
 
 
 def test_detalhe_defensivo(app_cat):
@@ -121,9 +134,9 @@ def test_sem_termos_de_venda(app_cat):
             assert proibido not in corpo, f"'{proibido}' não deveria aparecer em {url}"
 
 
-def test_detalhe_usa_placeholder_e_nao_exibe_status_cru(app_cat):
+def test_detalhe_exibe_imagem_real_e_nao_status_cru(app_cat):
     corpo = _login(app_cat).get("/defensivos/glifosato").data.decode("utf-8")
-    assert "placeholder-produto.svg" in corpo
+    assert "img/catalogo/produtos/glifosato" in corpo
     assert "Status regulatório" not in corpo
     assert "Status do sistema" not in corpo
     assert "nao_validado_agrofit" not in corpo
@@ -153,8 +166,8 @@ def test_json_invalido_nao_quebra_pagina(app_cat):
     assert "{json invalido" in resp.data.decode("utf-8")
 
 
-def test_preco_e_imagem_seguem_vazios(app_cat):
-    from app.models import ProdutoPreco, ProdutoImagem
+def test_preco_segue_vazio_e_imagem_populada(app_cat):
+    from app.models import ProdutoPreco, ProdutoImagem, ProdutoBase
 
     client = _login(app_cat)
     client.get("/defensivos/")
@@ -162,4 +175,4 @@ def test_preco_e_imagem_seguem_vazios(app_cat):
     client.get("/fertilizantes/ureia")
     with app_cat.app_context():
         assert ProdutoPreco.query.count() == 0
-        assert ProdutoImagem.query.count() == 0
+        assert ProdutoImagem.query.count() == ProdutoBase.query.count()

@@ -5,8 +5,8 @@
   (Flask-Migrate): ``flask db upgrade``.
 - ``flask validate-catalog-seed``: valida o seed técnico do catálogo.
 - ``flask import-catalog-seed``: valida e importa o catálogo técnico
-  (``produto_base`` + ``produto_tecnico``), de forma idempotente. **Não** importa
-  preço, imagem nem itens bloqueados.
+  (``produto_base`` + ``produto_tecnico`` + ``produto_imagem``), de forma
+  idempotente. **Não** importa preço nem itens bloqueados.
 
 Nenhum comando é executado automaticamente; o banco gerado não é versionado.
 """
@@ -60,8 +60,10 @@ def import_catalog_seed():
         f"produto_base: +{resumo['base_inseridos']} "
         f"(ignorados {resumo['base_ignorados']}); "
         f"produto_tecnico: +{resumo['tecnico_inseridos']} "
-        f"(ignorados {resumo['tecnico_ignorados']}). "
-        "Preço e imagem permanecem vazios no MVP."
+        f"(ignorados {resumo['tecnico_ignorados']}); "
+        f"produto_imagem: +{resumo['imagem_inseridos']} "
+        f"(ignorados {resumo['imagem_ignorados']}). "
+        "Preço permanece vazio no MVP."
     )
 
 
