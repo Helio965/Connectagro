@@ -378,6 +378,36 @@ body {
 }
 .btn-entrar:hover { background: var(--ca-green-500); box-shadow: var(--ca-shadow-hover); }
 
+/* Campo de senha com botão de mostrar/ocultar */
+.password-field { position: relative; }
+.password-field input { width: 100%; padding-right: 2.75rem; }
+.password-toggle {
+  position: absolute;
+  right: .5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  color: var(--ca-text-muted);
+  cursor: pointer;
+  padding: .35rem;
+  border-radius: 6px;
+  line-height: 0;
+}
+.password-toggle:hover { color: var(--ca-text); }
+.password-toggle:focus-visible {
+  outline: 2px solid var(--ca-green-500);
+  outline-offset: 1px;
+  color: var(--ca-text);
+}
+.password-toggle-icon { width: 1.15rem; height: 1.15rem; display: block; }
+.password-toggle .icon-eye-off { display: none; }
+.password-toggle.is-visible .icon-eye { display: none; }
+.password-toggle.is-visible .icon-eye-off { display: block; }
+
 /* Cabeçalho de cartão com ação à direita */
 .card-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .card-head h1 { margin: 0; }

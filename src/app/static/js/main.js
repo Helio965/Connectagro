@@ -9,6 +9,20 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 5000);
   });
 
+  // Mostrar/ocultar senha nos campos com botão de olho.
+  document.querySelectorAll("[data-password-toggle]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      var input = document.getElementById(button.getAttribute("data-target"));
+      if (!input) return;
+
+      var mostrar = input.type === "password";
+      input.type = mostrar ? "text" : "password";
+      button.classList.toggle("is-visible", mostrar);
+      button.setAttribute("aria-pressed", String(mostrar));
+      button.setAttribute("aria-label", mostrar ? "Ocultar senha" : "Mostrar senha");
+    });
+  });
+
   var toggle = document.getElementById("sidebar-toggle");
   var sidebar = document.getElementById("sidebar");
   var backdrop = document.getElementById("sidebar-backdrop");
