@@ -62,7 +62,8 @@ def import_catalog_seed():
         f"produto_tecnico: +{resumo['tecnico_inseridos']} "
         f"(ignorados {resumo['tecnico_ignorados']}); "
         f"produto_imagem: +{resumo['imagem_inseridos']} "
-        f"(ignorados {resumo['imagem_ignorados']}). "
+        f"(atualizados {resumo['imagem_atualizados']}, "
+        f"ignorados {resumo['imagem_ignorados']}). "
         "Preço permanece vazio no MVP."
     )
 

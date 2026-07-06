@@ -427,19 +427,23 @@ body {
 }
 .catalog-image-wrapper {
   width: 100%;
-  aspect-ratio: 16 / 10;
-  /* Painel claro: estruturas químicas (traço escuro/transparente) e fotos
-     ficam legíveis sobre o tema escuro. */
+  /* 3:2 = mesmo canvas 900x600 das imagens normalizadas: área idêntica em
+     todos os cards, sem sobras nem cortes. */
+  aspect-ratio: 3 / 2;
   background: #ffffff;
-  padding: .6rem;
   border-bottom: 1px solid var(--ca-border-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 .catalog-image {
   display: block;
   width: 100%;
   height: 100%;
-  /* contain: mostra a imagem inteira (não corta a molécula/rótulo). */
+  /* contain: mostra o produto inteiro (não corta a embalagem/rótulo). */
   object-fit: contain;
+  background: #ffffff;
 }
 .catalog-card-body {
   display: flex;
@@ -500,17 +504,20 @@ body {
 }
 .catalog-detail-image-wrapper {
   overflow: hidden;
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 3 / 2;
   background: #ffffff;
-  padding: .75rem;
   border: 1px solid var(--ca-border-soft);
   border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .catalog-detail-image {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
+  background: #ffffff;
 }
 @media (max-width: 760px) {
   .catalog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }

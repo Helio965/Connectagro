@@ -5,15 +5,15 @@
     "nome": "Imidacloprido",
     "classe": "defensivo",
     "categoria": "inseticida",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Imidacloprid_use_USA.png",
+    "url_original": "https://commons.wikimedia.org/wiki/File:Girl_applies_Insect_spray.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "Public domain | autor: US Geographical Survey",
-    "arquivo_commons": "File:Imidacloprid use USA.png",
-    "arquivo_local": "img/catalogo/produtos/imidacloprido.png",
-    "tipo_imagem": "estrutura_quimica",
+    "licenca_ou_observacao": "CC BY-SA 3.0 | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:Girl applies Insect spray.jpg",
+    "arquivo_local": "img/catalogo/produtos/imidacloprido.jpg",
+    "tipo_imagem": "generico_embalado",
     "data_acesso": "2026-07-06",
-    "termo_busca": "Imidacloprid",
-    "bytes": 30723
+    "termo_busca": "",
+    "bytes": 89038
   },
   {
     "produto_id": 2,
@@ -21,15 +21,15 @@
     "nome": "Lambda-cialotrina",
     "classe": "defensivo",
     "categoria": "inseticida",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Cyhalothrin_lambda_use_in_USA.png",
+    "url_original": "https://commons.wikimedia.org/wiki/File:Lead_arsenate_insecticide_powder_by_schering_ag_3.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "Public domain | autor: US Geological Survey",
-    "arquivo_commons": "File:Cyhalothrin lambda use in USA.png",
-    "arquivo_local": "img/catalogo/produtos/lambda-cialotrina.png",
-    "tipo_imagem": "estrutura_quimica",
+    "licenca_ou_observacao": "CC BY-SA 4.0 | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:Lead arsenate insecticide powder by schering ag 3.jpg",
+    "arquivo_local": "img/catalogo/produtos/lambda-cialotrina.jpg",
+    "tipo_imagem": "generico_embalado",
     "data_acesso": "2026-07-06",
-    "termo_busca": "Lambda-cyhalothrin",
-    "bytes": 772739
+    "termo_busca": "",
+    "bytes": 103107
   },
   {
     "produto_id": 3,
@@ -37,15 +37,15 @@
     "nome": "Clorpirifós",
     "classe": "defensivo",
     "categoria": "inseticida",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Chlorpyrifos-3D-vdW.png",
+    "url_original": "https://commons.wikimedia.org/wiki/File:Lorsban-S_(40632953810).jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "Public domain | autor: Benjah-bmm27",
-    "arquivo_commons": "File:Chlorpyrifos-3D-vdW.png",
-    "arquivo_local": "img/catalogo/produtos/clorpirifos.png",
-    "tipo_imagem": "estrutura_quimica",
+    "licenca_ou_observacao": "Public domain | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:Lorsban-S (40632953810).jpg",
+    "arquivo_local": "img/catalogo/produtos/clorpirifos.jpg",
+    "tipo_imagem": "embalagem",
     "data_acesso": "2026-07-06",
-    "termo_busca": "Chlorpyrifos",
-    "bytes": 175581
+    "termo_busca": "",
+    "bytes": 105667
   },
   {
     "produto_id": 4,
@@ -53,15 +53,15 @@
     "nome": "Espinetoram",
     "classe": "defensivo",
     "categoria": "inseticida",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Spinetoram-j.svg",
+    "url_original": "https://commons.wikimedia.org/wiki/File:Lead_arsenate_insecticide_powder_by_schering_ag_2.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "Public domain | autor: Der rausch",
-    "arquivo_commons": "File:Spinetoram-j.svg",
-    "arquivo_local": "img/catalogo/produtos/espinetoram.png",
-    "tipo_imagem": "estrutura_quimica",
+    "licenca_ou_observacao": "CC BY-SA 4.0 | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:Lead arsenate insecticide powder by schering ag 2.jpg",
+    "arquivo_local": "img/catalogo/produtos/espinetoram.jpg",
+    "tipo_imagem": "generico_embalado",
     "data_acesso": "2026-07-06",
-    "termo_busca": "Spinetoram",
-    "bytes": 40059
+    "termo_busca": "",
+    "bytes": 108159
   },
   {
     "produto_id": 5,
@@ -69,15 +69,15 @@
     "nome": "Metomil",
     "classe": "defensivo",
     "categoria": "inseticida",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Methomyl_Structural_Formulae_.V.1.svg",
+    "url_original": "https://commons.wikimedia.org/wiki/File:Lead_arsenate_insecticide_powder_by_schering_ag_4.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "Public domain | autor: Jü",
-    "arquivo_commons": "File:Methomyl Structural Formulae .V.1.svg",
-    "arquivo_local": "img/catalogo/produtos/metomil.png",
-    "tipo_imagem": "estrutura_quimica",
+    "licenca_ou_observacao": "CC BY-SA 4.0 | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:Lead arsenate insecticide powder by schering ag 4.jpg",
+    "arquivo_local": "img/catalogo/produtos/metomil.jpg",
+    "tipo_imagem": "generico_embalado",
     "data_acesso": "2026-07-06",
-    "termo_busca": "Methomyl",
-    "bytes": 25820
+    "termo_busca": "",
+    "bytes": 72638
   },
   {
     "produto_id": 6,
@@ -85,15 +85,15 @@
     "nome": "Abamectina",
     "classe": "defensivo",
     "categoria": "acaricida",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Avermectin_B1a.png",
+    "url_original": "https://commons.wikimedia.org/wiki/File:Farmer_spraying_his_orchard_(I0003223).jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "Public domain | autor: Edgar181 (talk)",
-    "arquivo_commons": "File:Avermectin B1a.png",
-    "arquivo_local": "img/catalogo/produtos/abamectina.png",
-    "tipo_imagem": "estrutura_quimica",
+    "licenca_ou_observacao": "OGL-ON | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:Farmer spraying his orchard (I0003223).jpg",
+    "arquivo_local": "img/catalogo/produtos/abamectina.jpg",
+    "tipo_imagem": "generico_embalado",
     "data_acesso": "2026-07-06",
-    "termo_busca": "Abamectin",
-    "bytes": 48967
+    "termo_busca": "",
+    "bytes": 114666
   },
   {
     "produto_id": 7,
@@ -101,15 +101,15 @@
     "nome": "Acefato",
     "classe": "defensivo",
     "categoria": "inseticida",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Acephat.svg",
+    "url_original": "https://commons.wikimedia.org/wiki/File:Lead_arsenate_insecticide_powder_by_schering_ag_5.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "Public domain | autor: Kopiersperre",
-    "arquivo_commons": "File:Acephat.svg",
-    "arquivo_local": "img/catalogo/produtos/acefato.png",
-    "tipo_imagem": "estrutura_quimica",
+    "licenca_ou_observacao": "CC BY-SA 4.0 | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:Lead arsenate insecticide powder by schering ag 5.jpg",
+    "arquivo_local": "img/catalogo/produtos/acefato.jpg",
+    "tipo_imagem": "generico_embalado",
     "data_acesso": "2026-07-06",
-    "termo_busca": "Acephate",
-    "bytes": 16146
+    "termo_busca": "",
+    "bytes": 67979
   },
   {
     "produto_id": 8,
@@ -117,15 +117,15 @@
     "nome": "Clorantraniliprole",
     "classe": "defensivo",
     "categoria": "inseticida",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Chlorantraniliprole_Ball-N-Stick_Avogadro_20200908.png",
+    "url_original": "https://commons.wikimedia.org/wiki/File:Lead_arsenate_insecticide_powder_by_schering_ag_6.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "CC BY-SA 4.0 | autor: Mplanine",
-    "arquivo_commons": "File:Chlorantraniliprole Ball-N-Stick Avogadro 20200908.png",
-    "arquivo_local": "img/catalogo/produtos/clorantraniliprole.png",
-    "tipo_imagem": "estrutura_quimica",
+    "licenca_ou_observacao": "CC BY-SA 4.0 | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:Lead arsenate insecticide powder by schering ag 6.jpg",
+    "arquivo_local": "img/catalogo/produtos/clorantraniliprole.jpg",
+    "tipo_imagem": "generico_embalado",
     "data_acesso": "2026-07-06",
-    "termo_busca": "Chlorantraniliprole",
-    "bytes": 272107
+    "termo_busca": "",
+    "bytes": 66136
   },
   {
     "produto_id": 9,
@@ -133,15 +133,15 @@
     "nome": "Fipronil",
     "classe": "defensivo",
     "categoria": "inseticida",
-    "url_original": "https://commons.wikimedia.org/wiki/File:(%C2%B1)-Fipronil_enantiomers_structural_formulae.png",
+    "url_original": "https://commons.wikimedia.org/wiki/File:Lead_arsenate_insecticide_powder_by_schering_ag_1.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "Public domain | autor: Jü",
-    "arquivo_commons": "File:(±)-Fipronil enantiomers structural formulae.png",
-    "arquivo_local": "img/catalogo/produtos/fipronil.png",
-    "tipo_imagem": "estrutura_quimica",
+    "licenca_ou_observacao": "CC BY-SA 4.0 | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:Lead arsenate insecticide powder by schering ag 1.jpg",
+    "arquivo_local": "img/catalogo/produtos/fipronil.jpg",
+    "tipo_imagem": "generico_embalado",
     "data_acesso": "2026-07-06",
-    "termo_busca": "Fipronil",
-    "bytes": 58857
+    "termo_busca": "",
+    "bytes": 103786
   },
   {
     "produto_id": 10,
@@ -149,15 +149,15 @@
     "nome": "Deltametrina",
     "classe": "defensivo",
     "categoria": "inseticida",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Deltamethrin_2.svg",
+    "url_original": "https://commons.wikimedia.org/wiki/File:Aerosol_1943.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "Public domain | autor: Anagkai",
-    "arquivo_commons": "File:Deltamethrin 2.svg",
-    "arquivo_local": "img/catalogo/produtos/deltametrina.png",
-    "tipo_imagem": "estrutura_quimica",
+    "licenca_ou_observacao": "Public domain | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:Aerosol 1943.jpg",
+    "arquivo_local": "img/catalogo/produtos/deltametrina.jpg",
+    "tipo_imagem": "generico_embalado",
     "data_acesso": "2026-07-06",
-    "termo_busca": "Deltamethrin",
-    "bytes": 15430
+    "termo_busca": "",
+    "bytes": 52103
   },
   {
     "produto_id": 11,
@@ -165,15 +165,15 @@
     "nome": "Mancozebe",
     "classe": "defensivo",
     "categoria": "fungicida",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Mancozeb_Molecular_Structure.png",
+    "url_original": "https://commons.wikimedia.org/wiki/File:AN_ENVIRONMENTAL_PROTECTION_AGENCY_PESTICIDES_INSPECTOR_CHECKS_CONTAINERS_ON_THE_DOCKS_AT_THE_PORT_OF_NEWARK,_NEW..._-_NARA_-_555279.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "CC BY-SA 4.0 | autor: Marketing Amanda at UPL Europe Ltd",
-    "arquivo_commons": "File:Mancozeb Molecular Structure.png",
-    "arquivo_local": "img/catalogo/produtos/mancozebe.png",
-    "tipo_imagem": "estrutura_quimica",
+    "licenca_ou_observacao": "Public domain | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:AN ENVIRONMENTAL PROTECTION AGENCY PESTICIDES INSPECTOR CHECKS CONTAINERS ON THE DOCKS AT THE PORT OF NEWARK, NEW... - NARA - 555279.jpg",
+    "arquivo_local": "img/catalogo/produtos/mancozebe.jpg",
+    "tipo_imagem": "generico_embalado",
     "data_acesso": "2026-07-06",
-    "termo_busca": "Mancozeb",
-    "bytes": 8027
+    "termo_busca": "",
+    "bytes": 51177
   },
   {
     "produto_id": 12,
@@ -181,15 +181,15 @@
     "nome": "Tebuconazol",
     "classe": "defensivo",
     "categoria": "fungicida",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Tebuconazole_structure.svg",
+    "url_original": "https://commons.wikimedia.org/wiki/File:DISCARDED_PESTICIDE_CANS_-_NARA_-_542494.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "CC BY-SA 4.0 | autor: SSamadi15",
-    "arquivo_commons": "File:Tebuconazole structure.svg",
-    "arquivo_local": "img/catalogo/produtos/tebuconazol.png",
-    "tipo_imagem": "estrutura_quimica",
+    "licenca_ou_observacao": "Public domain | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:DISCARDED PESTICIDE CANS - NARA - 542494.jpg",
+    "arquivo_local": "img/catalogo/produtos/tebuconazol.jpg",
+    "tipo_imagem": "generico_embalado",
     "data_acesso": "2026-07-06",
-    "termo_busca": "Tebuconazole",
-    "bytes": 39261
+    "termo_busca": "",
+    "bytes": 132307
   },
   {
     "produto_id": 13,
@@ -197,15 +197,15 @@
     "nome": "Azoxistrobina",
     "classe": "defensivo",
     "categoria": "fungicida",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Azoxystrobin_colour.svg",
+    "url_original": "https://commons.wikimedia.org/wiki/File:ENVIRONMENTAL_PROTECTION_AGENCY_INSPECTOR_CHECKS_A_LABEL_ON_A_PESTICIDE_CONTAINER_DURING_A_ROUTINE_INSPECTION_AT_THE..._-_NARA_-_555238.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "CC BY-SA 4.0 | autor: Michael D. Turnbull",
-    "arquivo_commons": "File:Azoxystrobin colour.svg",
-    "arquivo_local": "img/catalogo/produtos/azoxistrobina.png",
-    "tipo_imagem": "estrutura_quimica",
+    "licenca_ou_observacao": "Public domain | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:ENVIRONMENTAL PROTECTION AGENCY INSPECTOR CHECKS A LABEL ON A PESTICIDE CONTAINER DURING A ROUTINE INSPECTION AT THE... - NARA - 555238.jpg",
+    "arquivo_local": "img/catalogo/produtos/azoxistrobina.jpg",
+    "tipo_imagem": "generico_embalado",
     "data_acesso": "2026-07-06",
-    "termo_busca": "Azoxystrobin",
-    "bytes": 19819
+    "termo_busca": "",
+    "bytes": 68919
   },
   {
     "produto_id": 14,
@@ -213,15 +213,15 @@
     "nome": "Ciproconazol",
     "classe": "defensivo",
     "categoria": "fungicida",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Cyproconazole_structure.svg",
+    "url_original": "https://commons.wikimedia.org/wiki/File:ENVIRONMENTAL_PROTECTION_AGENCY_PESTICIDES_INSPECTOR_CHECKS_LABELS_ON_CONTAINERS_DURING_A_ROUTINE_INSPECTION_OF_THE..._-_NARA_-_555237.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "CC BY-SA 4.0 | autor: SSamadi15",
-    "arquivo_commons": "File:Cyproconazole structure.svg",
-    "arquivo_local": "img/catalogo/produtos/ciproconazol.png",
-    "tipo_imagem": "estrutura_quimica",
+    "licenca_ou_observacao": "Public domain | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:ENVIRONMENTAL PROTECTION AGENCY PESTICIDES INSPECTOR CHECKS LABELS ON CONTAINERS DURING A ROUTINE INSPECTION OF THE... - NARA - 555237.jpg",
+    "arquivo_local": "img/catalogo/produtos/ciproconazol.jpg",
+    "tipo_imagem": "generico_embalado",
     "data_acesso": "2026-07-06",
-    "termo_busca": "Cyproconazole",
-    "bytes": 52353
+    "termo_busca": "",
+    "bytes": 58630
   },
   {
     "produto_id": 15,
@@ -229,15 +229,15 @@
     "nome": "Captana",
     "classe": "defensivo",
     "categoria": "fungicida",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Captan_Structural_Formula_V.1.svg",
+    "url_original": "https://commons.wikimedia.org/wiki/File:AN_ENVIRONMENTAL_PROTECTION_AGENCY_INSPECTOR_CHECKS_A_LABEL_ON_A_PESTICIDE_CONTAINER_DURING_A_ROUTINE_INSPECTION_AT..._-_NARA_-_555242.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "Public domain | autor: Jü",
-    "arquivo_commons": "File:Captan Structural Formula V.1.svg",
-    "arquivo_local": "img/catalogo/produtos/captana.png",
-    "tipo_imagem": "estrutura_quimica",
+    "licenca_ou_observacao": "Public domain | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:AN ENVIRONMENTAL PROTECTION AGENCY INSPECTOR CHECKS A LABEL ON A PESTICIDE CONTAINER DURING A ROUTINE INSPECTION AT... - NARA - 555242.jpg",
+    "arquivo_local": "img/catalogo/produtos/captana.jpg",
+    "tipo_imagem": "generico_embalado",
     "data_acesso": "2026-07-06",
-    "termo_busca": "Captan",
-    "bytes": 22679
+    "termo_busca": "",
+    "bytes": 40740
   },
   {
     "produto_id": 16,
@@ -245,15 +245,15 @@
     "nome": "Difenoconazol",
     "classe": "defensivo",
     "categoria": "fungicida",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Difenoconazole.svg",
+    "url_original": "https://commons.wikimedia.org/wiki/File:ENVIRONMENTAL_PROTECTION_AGENCY_PESTICIDES_INSPECTORS_DISCUSS_CONTENTS_OF_WAREHOUSE_CONTAINERS_WITH_AN_OFFICIAL_OF..._-_NARA_-_555236.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "Public domain | autor: Epop",
-    "arquivo_commons": "File:Difenoconazole.svg",
-    "arquivo_local": "img/catalogo/produtos/difenoconazol.png",
-    "tipo_imagem": "estrutura_quimica",
+    "licenca_ou_observacao": "Public domain | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:ENVIRONMENTAL PROTECTION AGENCY PESTICIDES INSPECTORS DISCUSS CONTENTS OF WAREHOUSE CONTAINERS WITH AN OFFICIAL OF... - NARA - 555236.jpg",
+    "arquivo_local": "img/catalogo/produtos/difenoconazol.jpg",
+    "tipo_imagem": "generico_embalado",
     "data_acesso": "2026-07-06",
-    "termo_busca": "Difenoconazole",
-    "bytes": 16883
+    "termo_busca": "",
+    "bytes": 96480
   },
   {
     "produto_id": 17,
@@ -261,15 +261,15 @@
     "nome": "Clorotalonil",
     "classe": "defensivo",
     "categoria": "fungicida",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Chlorothalonil_usage_2002.png",
+    "url_original": "https://commons.wikimedia.org/wiki/File:AN_ENVIRONMENTAL_PROTECTION_AGENCY_INSPECTOR_EXAMINES_A_CONTAINER_OF_PESTICIDE_THAT_HE_JUST_HAS_PULLED_FROM_A_CRATE..._-_NARA_-_555244.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "Public domain | autor: USGS",
-    "arquivo_commons": "File:Chlorothalonil usage 2002.png",
-    "arquivo_local": "img/catalogo/produtos/clorotalonil.png",
-    "tipo_imagem": "estrutura_quimica",
+    "licenca_ou_observacao": "Public domain | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:AN ENVIRONMENTAL PROTECTION AGENCY INSPECTOR EXAMINES A CONTAINER OF PESTICIDE THAT HE JUST HAS PULLED FROM A CRATE... - NARA - 555244.jpg",
+    "arquivo_local": "img/catalogo/produtos/clorotalonil.jpg",
+    "tipo_imagem": "generico_embalado",
     "data_acesso": "2026-07-06",
-    "termo_busca": "Chlorothalonil",
-    "bytes": 383551
+    "termo_busca": "",
+    "bytes": 93380
   },
   {
     "produto_id": 18,
@@ -277,15 +277,15 @@
     "nome": "Fluxapiroxade",
     "classe": "defensivo",
     "categoria": "fungicida",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Fluxapyroxad_structure.svg",
+    "url_original": "https://commons.wikimedia.org/wiki/File:AN_ENVIRONMENTAL_PROTECTION_AGENCY_INSPECTOR_EXAMINES_A_CONTAINER_OF_PESTICIDE_THAT_HE_JUST_HAS_PULLED_FROM_A_CRATE..._-_NARA_-_555243.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "Public domain | autor: Codc (talk)",
-    "arquivo_commons": "File:Fluxapyroxad structure.svg",
-    "arquivo_local": "img/catalogo/produtos/fluxapiroxade.png",
-    "tipo_imagem": "estrutura_quimica",
+    "licenca_ou_observacao": "Public domain | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:AN ENVIRONMENTAL PROTECTION AGENCY INSPECTOR EXAMINES A CONTAINER OF PESTICIDE THAT HE JUST HAS PULLED FROM A CRATE... - NARA - 555243.jpg",
+    "arquivo_local": "img/catalogo/produtos/fluxapiroxade.jpg",
+    "tipo_imagem": "generico_embalado",
     "data_acesso": "2026-07-06",
-    "termo_busca": "Fluxapyroxad",
-    "bytes": 20567
+    "termo_busca": "",
+    "bytes": 38995
   },
   {
     "produto_id": 19,
@@ -293,15 +293,15 @@
     "nome": "Glifosato",
     "classe": "defensivo",
     "categoria": "herbicida",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Glyphosate,_dye,_and_sprayer.jpg",
+    "url_original": "https://commons.wikimedia.org/wiki/File:Empty_Glyphosate_(Herbolex)_container_discarded_in_Corfu_olive_grove.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "CC BY-SA 4.0 | autor: Slknight",
-    "arquivo_commons": "File:Glyphosate, dye, and sprayer.jpg",
+    "licenca_ou_observacao": "CC BY-SA 4.0 | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:Empty Glyphosate (Herbolex) container discarded in Corfu olive grove.jpg",
     "arquivo_local": "img/catalogo/produtos/glifosato.jpg",
-    "tipo_imagem": "estrutura_quimica",
+    "tipo_imagem": "generico_embalado",
     "data_acesso": "2026-07-06",
-    "termo_busca": "Glyphosate",
-    "bytes": 80367
+    "termo_busca": "",
+    "bytes": 117419
   },
   {
     "produto_id": 20,
@@ -309,15 +309,15 @@
     "nome": "Atrazina",
     "classe": "defensivo",
     "categoria": "herbicida",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Atrazine_USA_2019.png",
+    "url_original": "https://commons.wikimedia.org/wiki/File:CONTAINERS_OF_PESTICIDES_ON_A_DOCK_AT_THE_PORT_OF_NEWARK,_NEW_JERSEY._AN_ENVIRONMENTAL_PROTECTION_AGENCY_INSPECTOR..._-_NARA_-_555277.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "Public domain | autor: United States Geological Survey",
-    "arquivo_commons": "File:Atrazine USA 2019.png",
-    "arquivo_local": "img/catalogo/produtos/atrazina.png",
-    "tipo_imagem": "estrutura_quimica",
+    "licenca_ou_observacao": "Public domain | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:CONTAINERS OF PESTICIDES ON A DOCK AT THE PORT OF NEWARK, NEW JERSEY. AN ENVIRONMENTAL PROTECTION AGENCY INSPECTOR... - NARA - 555277.jpg",
+    "arquivo_local": "img/catalogo/produtos/atrazina.jpg",
+    "tipo_imagem": "generico_embalado",
     "data_acesso": "2026-07-06",
-    "termo_busca": "Atrazine",
-    "bytes": 717574
+    "termo_busca": "",
+    "bytes": 93979
   },
   {
     "produto_id": 21,
@@ -325,15 +325,15 @@
     "nome": "2,4-D",
     "classe": "defensivo",
     "categoria": "herbicida",
-    "url_original": "https://commons.wikimedia.org/wiki/File:2,4-Dichlorophenoxyacetic_acid_structure.svg",
+    "url_original": "https://commons.wikimedia.org/wiki/File:ENVIRONMENTAL_PROTECTION_AGENCY_PESTICIDES_INSPECTOR_PHOTOGRAPHS_THE_LABEL_OF_A_CONTAINER_AT_THE_VALLEY_CHEMICAL..._-_NARA_-_555235.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "Public domain | autor: User:Mysid",
-    "arquivo_commons": "File:2,4-Dichlorophenoxyacetic acid structure.svg",
-    "arquivo_local": "img/catalogo/produtos/2-4-d.png",
-    "tipo_imagem": "estrutura_quimica",
+    "licenca_ou_observacao": "Public domain | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:ENVIRONMENTAL PROTECTION AGENCY PESTICIDES INSPECTOR PHOTOGRAPHS THE LABEL OF A CONTAINER AT THE VALLEY CHEMICAL... - NARA - 555235.jpg",
+    "arquivo_local": "img/catalogo/produtos/2-4-d.jpg",
+    "tipo_imagem": "generico_embalado",
     "data_acesso": "2026-07-06",
-    "termo_busca": "2,4-Dichlorophenoxyacetic acid",
-    "bytes": 12729
+    "termo_busca": "",
+    "bytes": 82764
   },
   {
     "produto_id": 22,
@@ -341,15 +341,15 @@
     "nome": "S-metolacloro",
     "classe": "defensivo",
     "categoria": "herbicida",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Metolachlor_USA_2012.png",
+    "url_original": "https://commons.wikimedia.org/wiki/File:Crop_sprayer_-_geograph.org.uk_-_3038217.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "Public domain | autor: Unknown authorUnknown author",
-    "arquivo_commons": "File:Metolachlor USA 2012.png",
-    "arquivo_local": "img/catalogo/produtos/s-metolacloro.png",
-    "tipo_imagem": "estrutura_quimica",
+    "licenca_ou_observacao": "CC BY-SA 2.0 | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:Crop sprayer - geograph.org.uk - 3038217.jpg",
+    "arquivo_local": "img/catalogo/produtos/s-metolacloro.jpg",
+    "tipo_imagem": "generico_embalado",
     "data_acesso": "2026-07-06",
     "termo_busca": "Metolachlor",
-    "bytes": 258788
+    "bytes": 128579
   },
   {
     "produto_id": 23,
@@ -357,15 +357,15 @@
     "nome": "Dicamba",
     "classe": "defensivo",
     "categoria": "herbicida",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Dicamba_USA_2014.png",
+    "url_original": "https://commons.wikimedia.org/wiki/File:Filling_sprayer_tank_on_tractor_with_Banvel_(1985).jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "Public domain | autor: Unknown authorUnknown author",
-    "arquivo_commons": "File:Dicamba USA 2014.png",
-    "arquivo_local": "img/catalogo/produtos/dicamba.png",
-    "tipo_imagem": "estrutura_quimica",
+    "licenca_ou_observacao": "Public domain | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:Filling sprayer tank on tractor with Banvel (1985).jpg",
+    "arquivo_local": "img/catalogo/produtos/dicamba.jpg",
+    "tipo_imagem": "embalagem",
     "data_acesso": "2026-07-06",
-    "termo_busca": "Dicamba",
-    "bytes": 224763
+    "termo_busca": "",
+    "bytes": 102199
   },
   {
     "produto_id": 24,
@@ -373,15 +373,15 @@
     "nome": "Cletodim",
     "classe": "defensivo",
     "categoria": "herbicida",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Clethodim_FormulaV1.svg",
+    "url_original": "https://commons.wikimedia.org/wiki/File:Pre-emergence_spray.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "Public domain | autor: Jü",
-    "arquivo_commons": "File:Clethodim FormulaV1.svg",
-    "arquivo_local": "img/catalogo/produtos/cletodim.png",
-    "tipo_imagem": "estrutura_quimica",
+    "licenca_ou_observacao": "CC BY 2.0 | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:Pre-emergence spray.jpg",
+    "arquivo_local": "img/catalogo/produtos/cletodim.jpg",
+    "tipo_imagem": "generico_embalado",
     "data_acesso": "2026-07-06",
     "termo_busca": "Clethodim",
-    "bytes": 15684
+    "bytes": 136547
   },
   {
     "produto_id": 25,
@@ -389,15 +389,15 @@
     "nome": "Clomazona",
     "classe": "defensivo",
     "categoria": "herbicida",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Clomazone_USA_2011.png",
+    "url_original": "https://commons.wikimedia.org/wiki/File:Herbicide_Application_(14464724313).jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "Public domain | autor: Unknown authorUnknown author",
-    "arquivo_commons": "File:Clomazone USA 2011.png",
-    "arquivo_local": "img/catalogo/produtos/clomazona.png",
-    "tipo_imagem": "estrutura_quimica",
+    "licenca_ou_observacao": "Public domain | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:Herbicide Application (14464724313).jpg",
+    "arquivo_local": "img/catalogo/produtos/clomazona.jpg",
+    "tipo_imagem": "generico_embalado",
     "data_acesso": "2026-07-06",
     "termo_busca": "Clomazone",
-    "bytes": 203069
+    "bytes": 119466
   },
   {
     "produto_id": 26,
@@ -405,15 +405,15 @@
     "nome": "Sulfentrazona",
     "classe": "defensivo",
     "categoria": "herbicida",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Sulfentrazone.svg",
+    "url_original": "https://commons.wikimedia.org/wiki/File:Crop_spraying_helicopter_on_a_landing_pad_atop_it%E2%80%99s_refueling_truck.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "Public domain | autor: Vaccinationist",
-    "arquivo_commons": "File:Sulfentrazone.svg",
-    "arquivo_local": "img/catalogo/produtos/sulfentrazona.png",
-    "tipo_imagem": "estrutura_quimica",
+    "licenca_ou_observacao": "CC BY-SA 4.0 | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:Crop spraying helicopter on a landing pad atop it’s refueling truck.jpg",
+    "arquivo_local": "img/catalogo/produtos/sulfentrazona.jpg",
+    "tipo_imagem": "generico_embalado",
     "data_acesso": "2026-07-06",
     "termo_busca": "Sulfentrazone",
-    "bytes": 20700
+    "bytes": 111288
   },
   {
     "produto_id": 27,
@@ -421,15 +421,15 @@
     "nome": "Fluopiram",
     "classe": "defensivo",
     "categoria": "fungicida",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Fluopyram.svg",
+    "url_original": "https://commons.wikimedia.org/wiki/File:Copper_sulfate_pentahydrate_crystals.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "Public domain | autor: Yikrazuul (talk)",
-    "arquivo_commons": "File:Fluopyram.svg",
-    "arquivo_local": "img/catalogo/produtos/fluopiram.png",
-    "tipo_imagem": "estrutura_quimica",
+    "licenca_ou_observacao": "CC BY-SA 3.0 | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:Copper sulfate pentahydrate crystals.jpg",
+    "arquivo_local": "img/catalogo/produtos/fluopiram.jpg",
+    "tipo_imagem": "produto_fisico",
     "data_acesso": "2026-07-06",
     "termo_busca": "Fluopyram",
-    "bytes": 12954
+    "bytes": 52165
   },
   {
     "produto_id": 28,
@@ -437,15 +437,15 @@
     "nome": "Propargito",
     "classe": "defensivo",
     "categoria": "acaricida",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Propargite_Structural_Formula_V.1.svg",
+    "url_original": "https://commons.wikimedia.org/wiki/File:Spraying_in_the_apple_orchard_on_Leaherd%27s_Field_-_geograph.org.uk_-_6199395.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "Public domain | autor: Jü",
-    "arquivo_commons": "File:Propargite Structural Formula V.1.svg",
-    "arquivo_local": "img/catalogo/produtos/propargito.png",
-    "tipo_imagem": "estrutura_quimica",
+    "licenca_ou_observacao": "CC BY-SA 2.0 | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:Spraying in the apple orchard on Leaherd's Field - geograph.org.uk - 6199395.jpg",
+    "arquivo_local": "img/catalogo/produtos/propargito.jpg",
+    "tipo_imagem": "generico_embalado",
     "data_acesso": "2026-07-06",
-    "termo_busca": "Propargite",
-    "bytes": 21322
+    "termo_busca": "",
+    "bytes": 151764
   },
   {
     "produto_id": 29,
@@ -453,15 +453,15 @@
     "nome": "Metaldeído",
     "classe": "defensivo",
     "categoria": "moluscicida",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Metaldehyde_structuur.png",
+    "url_original": "https://commons.wikimedia.org/wiki/File:Not_only_seeded_but_slug_pellets_applied_-_geograph.org.uk_-_5559833.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "CC BY-SA 3.0 | autor: Capaccio",
-    "arquivo_commons": "File:Metaldehyde structuur.png",
-    "arquivo_local": "img/catalogo/produtos/metaldeido.png",
-    "tipo_imagem": "estrutura_quimica",
+    "licenca_ou_observacao": "CC BY-SA 2.0 | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:Not only seeded but slug pellets applied - geograph.org.uk - 5559833.jpg",
+    "arquivo_local": "img/catalogo/produtos/metaldeido.jpg",
+    "tipo_imagem": "embalagem",
     "data_acesso": "2026-07-06",
-    "termo_busca": "Metaldehyde",
-    "bytes": 5661
+    "termo_busca": "",
+    "bytes": 181416
   },
   {
     "produto_id": 30,
@@ -469,15 +469,15 @@
     "nome": "Fosfato férrico",
     "classe": "defensivo",
     "categoria": "moluscicida",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Iron(III)-phosphate-pentahydrate-sample.jpg",
+    "url_original": "https://commons.wikimedia.org/wiki/File:Applying_molluscicide.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "Public domain | autor: Benjah-bmm27",
-    "arquivo_commons": "File:Iron(III)-phosphate-pentahydrate-sample.jpg",
+    "licenca_ou_observacao": "Public domain | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:Applying molluscicide.jpg",
     "arquivo_local": "img/catalogo/produtos/fosfato-ferrico.jpg",
-    "tipo_imagem": "estrutura_quimica",
+    "tipo_imagem": "generico_embalado",
     "data_acesso": "2026-07-06",
-    "termo_busca": "Iron(III) phosphate",
-    "bytes": 157623
+    "termo_busca": "",
+    "bytes": 171537
   },
   {
     "produto_id": 40,
@@ -487,13 +487,13 @@
     "categoria": "mineral",
     "url_original": "https://commons.wikimedia.org/wiki/File:NPK_Fertilizer.png",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "CC0 | autor: DBlaine83",
+    "licenca_ou_observacao": "CC0 | autor: DBlaine83 | normalizada 900x600 fundo branco",
     "arquivo_commons": "File:NPK Fertilizer.png",
-    "arquivo_local": "img/catalogo/produtos/npk-04-14-08.png",
+    "arquivo_local": "img/catalogo/produtos/npk-04-14-08.jpg",
     "tipo_imagem": "generico",
     "data_acesso": "2026-07-06",
     "termo_busca": "Fertilizer granules",
-    "bytes": 728452
+    "bytes": 104027
   },
   {
     "produto_id": 41,
@@ -503,13 +503,13 @@
     "categoria": "mineral",
     "url_original": "https://commons.wikimedia.org/wiki/File:Compound_fertiliser.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "CC BY-SA 4.0 | autor: Wee Hong",
+    "licenca_ou_observacao": "CC BY-SA 4.0 | autor: Wee Hong | normalizada 900x600 fundo branco",
     "arquivo_commons": "File:Compound fertiliser.jpg",
     "arquivo_local": "img/catalogo/produtos/npk-20-05-20.jpg",
     "tipo_imagem": "generico",
     "data_acesso": "2026-07-06",
     "termo_busca": "Compound fertilizer",
-    "bytes": 208616
+    "bytes": 144799
   },
   {
     "produto_id": 42,
@@ -519,13 +519,13 @@
     "categoria": "mineral",
     "url_original": "https://commons.wikimedia.org/wiki/File:NPK_19-19-19_Fertilizer_(2).jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "CC BY-SA 4.0 | autor: Suyash Dwivedi",
+    "licenca_ou_observacao": "CC BY-SA 4.0 | autor: Suyash Dwivedi | normalizada 900x600 fundo branco",
     "arquivo_commons": "File:NPK 19-19-19 Fertilizer (2).jpg",
     "arquivo_local": "img/catalogo/produtos/npk-10-10-10.jpg",
     "tipo_imagem": "generico",
     "data_acesso": "2026-07-06",
     "termo_busca": "NPK fertilizer",
-    "bytes": 89802
+    "bytes": 52350
   },
   {
     "produto_id": 43,
@@ -533,15 +533,15 @@
     "nome": "Ureia",
     "classe": "fertilizante",
     "categoria": "mineral",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Granular_Urea_application_-_geograph.org.uk_-_1219037.jpg",
+    "url_original": "https://commons.wikimedia.org/wiki/File:Sample_of_Urea.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "CC BY-SA 2.0 | autor: Michael Trolove",
-    "arquivo_commons": "File:Granular Urea application - geograph.org.uk - 1219037.jpg",
+    "licenca_ou_observacao": "CC BY-SA 3.0 | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:Sample of Urea.jpg",
     "arquivo_local": "img/catalogo/produtos/ureia.jpg",
-    "tipo_imagem": "foto",
+    "tipo_imagem": "produto_fisico",
     "data_acesso": "2026-07-06",
     "termo_busca": "Urea fertilizer",
-    "bytes": 85518
+    "bytes": 28631
   },
   {
     "produto_id": 44,
@@ -551,13 +551,13 @@
     "categoria": "mineral",
     "url_original": "https://commons.wikimedia.org/wiki/File:Ammonium_sulfate_sample.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "CC BY-SA 4.0 | autor: Adam Rędzikowski",
+    "licenca_ou_observacao": "CC BY-SA 4.0 | autor: Adam Rędzikowski | normalizada 900x600 fundo branco",
     "arquivo_commons": "File:Ammonium sulfate sample.jpg",
     "arquivo_local": "img/catalogo/produtos/sulfato-de-amonio.jpg",
     "tipo_imagem": "foto",
     "data_acesso": "2026-07-06",
     "termo_busca": "Ammonium sulfate",
-    "bytes": 83440
+    "bytes": 68221
   },
   {
     "produto_id": 45,
@@ -567,13 +567,13 @@
     "categoria": "mineral",
     "url_original": "https://commons.wikimedia.org/wiki/File:Dusi%C4%8Dnan_v%C3%A1penat%C3%BD.JPG",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "Public domain | autor: Ondřej Mangl",
+    "licenca_ou_observacao": "Public domain | autor: Ondřej Mangl | normalizada 900x600 fundo branco",
     "arquivo_commons": "File:Dusičnan vápenatý.JPG",
     "arquivo_local": "img/catalogo/produtos/nitrato-de-calcio.jpg",
     "tipo_imagem": "foto",
     "data_acesso": "2026-07-06",
     "termo_busca": "Calcium nitrate",
-    "bytes": 142656
+    "bytes": 80049
   },
   {
     "produto_id": 46,
@@ -581,15 +581,15 @@
     "nome": "MAP",
     "classe": "fertilizante",
     "categoria": "mineral",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Monoammonium-phosphate-3D-balls.png",
+    "url_original": "https://commons.wikimedia.org/wiki/File:DAP_(Di-Ammonium_Phosphate)_in_a_1_kg_commercial_package_(2).jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "Public domain | autor: Jynto and Ben Mills",
-    "arquivo_commons": "File:Monoammonium-phosphate-3D-balls.png",
-    "arquivo_local": "img/catalogo/produtos/map.png",
-    "tipo_imagem": "estrutura_quimica",
+    "licenca_ou_observacao": "CC BY-SA 4.0 | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:DAP (Di-Ammonium Phosphate) in a 1 kg commercial package (2).jpg",
+    "arquivo_local": "img/catalogo/produtos/map.jpg",
+    "tipo_imagem": "produto_fisico",
     "data_acesso": "2026-07-06",
     "termo_busca": "Monoammonium phosphate",
-    "bytes": 89721
+    "bytes": 79947
   },
   {
     "produto_id": 47,
@@ -599,13 +599,13 @@
     "categoria": "mineral",
     "url_original": "https://commons.wikimedia.org/wiki/File:DAP_(Diammonium_Phosphate)_Granules_(3).jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "CC BY-SA 4.0 | autor: Suyash Dwivedi",
+    "licenca_ou_observacao": "CC BY-SA 4.0 | autor: Suyash Dwivedi | normalizada 900x600 fundo branco",
     "arquivo_commons": "File:DAP (Diammonium Phosphate) Granules (3).jpg",
     "arquivo_local": "img/catalogo/produtos/dap.jpg",
-    "tipo_imagem": "estrutura_quimica",
+    "tipo_imagem": "produto_fisico",
     "data_acesso": "2026-07-06",
     "termo_busca": "Diammonium phosphate",
-    "bytes": 107783
+    "bytes": 64246
   },
   {
     "produto_id": 48,
@@ -615,13 +615,13 @@
     "categoria": "mineral",
     "url_original": "https://commons.wikimedia.org/wiki/File:Superfosfato.png",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "Public domain | autor: BlakWolf",
+    "licenca_ou_observacao": "Public domain | autor: BlakWolf | normalizada 900x600 fundo branco",
     "arquivo_commons": "File:Superfosfato.png",
-    "arquivo_local": "img/catalogo/produtos/superfosfato-simples.png",
+    "arquivo_local": "img/catalogo/produtos/superfosfato-simples.jpg",
     "tipo_imagem": "foto",
     "data_acesso": "2026-07-06",
     "termo_busca": "Superphosphate",
-    "bytes": 12449
+    "bytes": 21771
   },
   {
     "produto_id": 49,
@@ -631,13 +631,13 @@
     "categoria": "mineral",
     "url_original": "https://commons.wikimedia.org/wiki/File:Tripelsuperfosfaat_(triple_phosphate).jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "CC BY-SA 3.0 | autor: Rasbak",
+    "licenca_ou_observacao": "CC BY-SA 3.0 | autor: Rasbak | normalizada 900x600 fundo branco",
     "arquivo_commons": "File:Tripelsuperfosfaat (triple phosphate).jpg",
     "arquivo_local": "img/catalogo/produtos/superfosfato-triplo.jpg",
     "tipo_imagem": "foto",
     "data_acesso": "2026-07-06",
     "termo_busca": "Triple superphosphate",
-    "bytes": 297139
+    "bytes": 92207
   },
   {
     "produto_id": 50,
@@ -647,13 +647,13 @@
     "categoria": "mineral",
     "url_original": "https://commons.wikimedia.org/wiki/File:Potassium_chloride.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "Public domain",
+    "licenca_ou_observacao": "Public domain | normalizada 900x600 fundo branco",
     "arquivo_commons": "File:Potassium chloride.jpg",
     "arquivo_local": "img/catalogo/produtos/cloreto-de-potassio.jpg",
     "tipo_imagem": "foto",
     "data_acesso": "2026-07-06",
     "termo_busca": "Potassium chloride",
-    "bytes": 27144
+    "bytes": 53597
   },
   {
     "produto_id": 51,
@@ -661,15 +661,15 @@
     "nome": "Fosfato monopotássico MKP",
     "classe": "fertilizante",
     "categoria": "mineral",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Monopotassium-phosphate-3D-vdW.png",
+    "url_original": "https://commons.wikimedia.org/wiki/File:Monopotassium_phosphate_Cr%C3%A9er_le_cristal.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "Public domain | autor: Hoa112008",
-    "arquivo_commons": "File:Monopotassium-phosphate-3D-vdW.png",
-    "arquivo_local": "img/catalogo/produtos/fosfato-monopotassico-mkp.png",
-    "tipo_imagem": "foto",
+    "licenca_ou_observacao": "CC BY 4.0 | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:Monopotassium phosphate Créer le cristal.jpg",
+    "arquivo_local": "img/catalogo/produtos/fosfato-monopotassico-mkp.jpg",
+    "tipo_imagem": "produto_fisico",
     "data_acesso": "2026-07-06",
     "termo_busca": "Monopotassium phosphate",
-    "bytes": 74856
+    "bytes": 54585
   },
   {
     "produto_id": 52,
@@ -679,13 +679,13 @@
     "categoria": "mineral",
     "url_original": "https://commons.wikimedia.org/wiki/File:Potassium_nitrate.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "Public domain | autor: w:User:Walkerma",
+    "licenca_ou_observacao": "Public domain | autor: w:User:Walkerma | normalizada 900x600 fundo branco",
     "arquivo_commons": "File:Potassium nitrate.jpg",
     "arquivo_local": "img/catalogo/produtos/nitrato-de-potassio.jpg",
     "tipo_imagem": "foto",
     "data_acesso": "2026-07-06",
     "termo_busca": "Potassium nitrate",
-    "bytes": 34107
+    "bytes": 66714
   },
   {
     "produto_id": 53,
@@ -695,13 +695,13 @@
     "categoria": "mineral",
     "url_original": "https://commons.wikimedia.org/wiki/File:Magnesium_sulfate_anhydrous.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "Public domain",
+    "licenca_ou_observacao": "Public domain | normalizada 900x600 fundo branco",
     "arquivo_commons": "File:Magnesium sulfate anhydrous.jpg",
     "arquivo_local": "img/catalogo/produtos/sulfato-de-magnesio.jpg",
     "tipo_imagem": "foto",
     "data_acesso": "2026-07-06",
     "termo_busca": "Magnesium sulfate",
-    "bytes": 48701
+    "bytes": 81775
   },
   {
     "produto_id": 54,
@@ -711,13 +711,13 @@
     "categoria": "mineral",
     "url_original": "https://commons.wikimedia.org/wiki/File:Sulfur_-_El_Desierto_mine,_San_Pablo_de_Napa,_Daniel_Campos_Province,_Potos%C3%AD,_Bolivia.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "CC BY-SA 4.0 | autor: Ivar Leidus",
+    "licenca_ou_observacao": "CC BY-SA 4.0 | autor: Ivar Leidus | normalizada 900x600 fundo branco",
     "arquivo_commons": "File:Sulfur - El Desierto mine, San Pablo de Napa, Daniel Campos Province, Potosí, Bolivia.jpg",
     "arquivo_local": "img/catalogo/produtos/enxofre-bentonita.jpg",
     "tipo_imagem": "foto",
     "data_acesso": "2026-07-06",
     "termo_busca": "Sulfur mineral",
-    "bytes": 175009
+    "bytes": 89492
   },
   {
     "produto_id": 55,
@@ -727,13 +727,13 @@
     "categoria": "mineral",
     "url_original": "https://commons.wikimedia.org/wiki/File:Borax_-_Kramer_Borate_deposit,_Boron,_Kern_Co,_California,_USA.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "CC BY 3.0 | autor: Rock Currier",
+    "licenca_ou_observacao": "CC BY 3.0 | autor: Rock Currier | normalizada 900x600 fundo branco",
     "arquivo_commons": "File:Borax - Kramer Borate deposit, Boron, Kern Co, California, USA.jpg",
     "arquivo_local": "img/catalogo/produtos/boro-granubor.jpg",
     "tipo_imagem": "foto",
     "data_acesso": "2026-07-06",
     "termo_busca": "Borax mineral",
-    "bytes": 164266
+    "bytes": 70595
   },
   {
     "produto_id": 56,
@@ -743,13 +743,13 @@
     "categoria": "mineral",
     "url_original": "https://commons.wikimedia.org/wiki/File:Phosphorite_(GeoDIL_number_-_493).jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "CC0",
+    "licenca_ou_observacao": "CC0 | normalizada 900x600 fundo branco",
     "arquivo_commons": "File:Phosphorite (GeoDIL number - 493).jpg",
     "arquivo_local": "img/catalogo/produtos/fosfato-natural-reativo.jpg",
     "tipo_imagem": "foto",
     "data_acesso": "2026-07-06",
     "termo_busca": "Phosphate rock",
-    "bytes": 231584
+    "bytes": 153917
   },
   {
     "produto_id": 57,
@@ -759,13 +759,13 @@
     "categoria": "mineral",
     "url_original": "https://commons.wikimedia.org/wiki/File:Ammonium_nitrate_33,5_EC-fertilizer_by_Borealis.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "CC BY-SA 4.0",
+    "licenca_ou_observacao": "CC BY-SA 4.0 | normalizada 900x600 fundo branco",
     "arquivo_commons": "File:Ammonium nitrate 33,5 EC-fertilizer by Borealis.jpg",
     "arquivo_local": "img/catalogo/produtos/npk-s-granulado.jpg",
     "tipo_imagem": "generico",
     "data_acesso": "2026-07-06",
     "termo_busca": "Fertilizer pellets",
-    "bytes": 285158
+    "bytes": 52758
   },
   {
     "produto_id": 58,
@@ -773,15 +773,15 @@
     "nome": "Esterco bovino curtido",
     "classe": "fertilizante",
     "categoria": "organico",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Cows_in_Manure_-_geograph.org.uk_-_1913234.jpg",
+    "url_original": "https://commons.wikimedia.org/wiki/File:Manure_Heap_-_geograph.org.uk_-_47293.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "CC BY-SA 2.0 | autor: David Anstiss",
-    "arquivo_commons": "File:Cows in Manure - geograph.org.uk - 1913234.jpg",
+    "licenca_ou_observacao": "CC BY-SA 2.0 | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:Manure Heap - geograph.org.uk - 47293.jpg",
     "arquivo_local": "img/catalogo/produtos/esterco-bovino-curtido.jpg",
-    "tipo_imagem": "foto",
+    "tipo_imagem": "produto_fisico",
     "data_acesso": "2026-07-06",
-    "termo_busca": "Cattle manure",
-    "bytes": 184348
+    "termo_busca": "",
+    "bytes": 107561
   },
   {
     "produto_id": 59,
@@ -791,13 +791,13 @@
     "categoria": "organico",
     "url_original": "https://commons.wikimedia.org/wiki/File:Poultry_manure_waiting_to_be_spread_-_geograph.org.uk_-_6077039.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "CC BY-SA 2.0 | autor: David Pashley",
+    "licenca_ou_observacao": "CC BY-SA 2.0 | autor: David Pashley | normalizada 900x600 fundo branco",
     "arquivo_commons": "File:Poultry manure waiting to be spread - geograph.org.uk - 6077039.jpg",
     "arquivo_local": "img/catalogo/produtos/cama-de-frango-curtida.jpg",
     "tipo_imagem": "foto",
     "data_acesso": "2026-07-06",
     "termo_busca": "Poultry manure",
-    "bytes": 145487
+    "bytes": 95989
   },
   {
     "produto_id": 60,
@@ -807,13 +807,13 @@
     "categoria": "organico",
     "url_original": "https://commons.wikimedia.org/wiki/File:Compost_Heap.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "CC BY-SA 4.0 | autor: Photograph © Andrew Dunn, http://www.andrewdunnphoto.com",
+    "licenca_ou_observacao": "CC BY-SA 4.0 | autor: Photograph © Andrew Dunn, http://www.andrewdunnphoto.com | normalizada 900x600 fundo branco",
     "arquivo_commons": "File:Compost Heap.jpg",
     "arquivo_local": "img/catalogo/produtos/composto-organico.jpg",
     "tipo_imagem": "foto",
     "data_acesso": "2026-07-06",
     "termo_busca": "Compost heap",
-    "bytes": 371688
+    "bytes": 117439
   },
   {
     "produto_id": 61,
@@ -823,13 +823,13 @@
     "categoria": "organico",
     "url_original": "https://commons.wikimedia.org/wiki/File:Sifted_vermicompost_vermicast.png",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "CC BY-SA 4.0 | autor: Renatotcm",
+    "licenca_ou_observacao": "CC BY-SA 4.0 | autor: Renatotcm | normalizada 900x600 fundo branco",
     "arquivo_commons": "File:Sifted vermicompost vermicast.png",
-    "arquivo_local": "img/catalogo/produtos/humus-de-minhoca.png",
+    "arquivo_local": "img/catalogo/produtos/humus-de-minhoca.jpg",
     "tipo_imagem": "foto",
     "data_acesso": "2026-07-06",
     "termo_busca": "Vermicompost",
-    "bytes": 1022270
+    "bytes": 122291
   },
   {
     "produto_id": 62,
@@ -839,13 +839,13 @@
     "categoria": "organico",
     "url_original": "https://commons.wikimedia.org/wiki/File:Castor_seeds.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "CC BY-SA 4.0 | autor: தீப்தி செந்தில்",
+    "licenca_ou_observacao": "CC BY-SA 4.0 | autor: தீப்தி செந்தில் | normalizada 900x600 fundo branco",
     "arquivo_commons": "File:Castor seeds.jpg",
     "arquivo_local": "img/catalogo/produtos/torta-de-mamona.jpg",
     "tipo_imagem": "foto",
     "data_acesso": "2026-07-06",
     "termo_busca": "Castor seed",
-    "bytes": 424050
+    "bytes": 84403
   },
   {
     "produto_id": 63,
@@ -855,13 +855,13 @@
     "categoria": "organomineral",
     "url_original": "https://commons.wikimedia.org/wiki/File:CF_fertilizer.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "CC BY-SA 4.0",
+    "licenca_ou_observacao": "CC BY-SA 4.0 | normalizada 900x600 fundo branco",
     "arquivo_commons": "File:CF fertilizer.jpg",
     "arquivo_local": "img/catalogo/produtos/organomineral-npk-granulado.jpg",
     "tipo_imagem": "generico",
     "data_acesso": "2026-07-06",
     "termo_busca": "Fertilizer granules pile",
-    "bytes": 304134
+    "bytes": 191200
   },
   {
     "produto_id": 64,
@@ -871,13 +871,13 @@
     "categoria": "biofertilizante",
     "url_original": "https://commons.wikimedia.org/wiki/File:2023_Naw%C3%B3z_do_kwiat%C3%B3w.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "CC BY-SA 4.0 | autor: Jacek Halicki",
+    "licenca_ou_observacao": "CC BY-SA 4.0 | autor: Jacek Halicki | normalizada 900x600 fundo branco",
     "arquivo_commons": "File:2023 Nawóz do kwiatów.jpg",
     "arquivo_local": "img/catalogo/produtos/biofertilizante-liquido-fermentado.jpg",
     "tipo_imagem": "generico",
     "data_acesso": "2026-07-06",
     "termo_busca": "Liquid fertilizer",
-    "bytes": 57455
+    "bytes": 47556
   },
   {
     "produto_id": 65,
@@ -887,13 +887,13 @@
     "categoria": "biofertilizante",
     "url_original": "https://commons.wikimedia.org/wiki/File:Kelp_as_food_-_Japanese_seaweed_food_product_in_a_Vietnamese_shop.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "CC BY-SA 4.0 | autor: Tttrung",
+    "licenca_ou_observacao": "CC BY-SA 4.0 | autor: Tttrung | normalizada 900x600 fundo branco",
     "arquivo_commons": "File:Kelp as food - Japanese seaweed food product in a Vietnamese shop.jpg",
     "arquivo_local": "img/catalogo/produtos/extrato-de-algas.jpg",
     "tipo_imagem": "foto",
     "data_acesso": "2026-07-06",
     "termo_busca": "Kelp seaweed",
-    "bytes": 379999
+    "bytes": 63428
   },
   {
     "produto_id": 66,
@@ -903,13 +903,13 @@
     "categoria": "inoculante",
     "url_original": "https://commons.wikimedia.org/wiki/File:Soybean-root-nodules.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "Public domain",
+    "licenca_ou_observacao": "Public domain | normalizada 900x600 fundo branco",
     "arquivo_commons": "File:Soybean-root-nodules.jpg",
     "arquivo_local": "img/catalogo/produtos/inoculante-bradyrhizobium-soja.jpg",
     "tipo_imagem": "foto",
     "data_acesso": "2026-07-06",
     "termo_busca": "Root nodule soybean",
-    "bytes": 57850
+    "bytes": 139710
   },
   {
     "produto_id": 67,
@@ -917,15 +917,15 @@
     "nome": "Inoculante Azospirillum para milho",
     "classe": "fertilizante",
     "categoria": "inoculante",
-    "url_original": "https://commons.wikimedia.org/wiki/File:Maize_roots.svg",
+    "url_original": "https://commons.wikimedia.org/wiki/File:Field_of_maize_seedlings_-_geograph.org.uk_-_442573.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "CC BY-SA 4.0 | autor: Joel Swift (User: Kenizzer)",
-    "arquivo_commons": "File:Maize roots.svg",
-    "arquivo_local": "img/catalogo/produtos/inoculante-azospirillum-milho.png",
-    "tipo_imagem": "foto",
+    "licenca_ou_observacao": "CC BY-SA 2.0 | normalizada 900x600 fundo branco",
+    "arquivo_commons": "File:Field of maize seedlings - geograph.org.uk - 442573.jpg",
+    "arquivo_local": "img/catalogo/produtos/inoculante-azospirillum-milho.jpg",
+    "tipo_imagem": "produto_fisico",
     "data_acesso": "2026-07-06",
-    "termo_busca": "Azospirillum",
-    "bytes": 55004
+    "termo_busca": "",
+    "bytes": 218343
   },
   {
     "produto_id": 68,
@@ -935,13 +935,13 @@
     "categoria": "corretivo",
     "url_original": "https://commons.wikimedia.org/wiki/File:Agricultural_lime_in_field._Lime_pile.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "CC BY-SA 4.0 | autor: Slknight",
+    "licenca_ou_observacao": "CC BY-SA 4.0 | autor: Slknight | normalizada 900x600 fundo branco",
     "arquivo_commons": "File:Agricultural lime in field. Lime pile.jpg",
     "arquivo_local": "img/catalogo/produtos/calcario-dolomitico.jpg",
     "tipo_imagem": "foto",
     "data_acesso": "2026-07-06",
     "termo_busca": "Dolomite rock",
-    "bytes": 196180
+    "bytes": 159449
   },
   {
     "produto_id": 69,
@@ -951,12 +951,12 @@
     "categoria": "corretivo",
     "url_original": "https://commons.wikimedia.org/wiki/File:Gypsum_-_Sieroszowice_mine,_Lubin,_Lower_Silesia,_Poland.jpg",
     "fonte": "Wikimedia Commons",
-    "licenca_ou_observacao": "CC BY-SA 4.0 | autor: Ivar Leidus",
+    "licenca_ou_observacao": "CC BY-SA 4.0 | autor: Ivar Leidus | normalizada 900x600 fundo branco",
     "arquivo_commons": "File:Gypsum - Sieroszowice mine, Lubin, Lower Silesia, Poland.jpg",
     "arquivo_local": "img/catalogo/produtos/gesso-agricola.jpg",
     "tipo_imagem": "foto",
     "data_acesso": "2026-07-06",
     "termo_busca": "Gypsum mineral",
-    "bytes": 127980
+    "bytes": 65782
   }
 ]

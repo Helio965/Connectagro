@@ -137,6 +137,58 @@ def test_arquivos_locais_das_imagens_existem(app, seed):
     assert faltando == []
 
 
+def test_imagens_padronizadas_900x600(app):
+    """Todas as imagens do catálogo têm o canvas padronizado de 900x600."""
+    import os
+
+    from PIL import Image
+
+    pasta = os.path.join(app.static_folder, "img", "catalogo", "produtos")
+    arquivos = sorted(os.listdir(pasta))
+    assert len(arquivos) == 60
+    fora_do_padrao = []
+    for nome in arquivos:
+        with Image.open(os.path.join(pasta, nome)) as im:
+            if im.size != (900, 600):
+                fora_do_padrao.append(f"{nome}={im.size}")
+    assert fora_do_padrao == []
+
+
+def test_manifesto_sem_tipos_proibidos():
+    """O manifesto não pode voltar a usar diagramas/estruturas químicas."""
+    import json
+    import os
+
+    proibidos = {"estrutura_quimica", "formula", "diagrama",
+                 "grafico", "chart", "machine", "paisagem"}
+    raiz = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    caminho = os.path.join(raiz, "data", "seeds", "catalogo_imagens_manifest.json")
+    manifesto = json.load(open(caminho, encoding="utf-8"))
+    assert len(manifesto) == 60
+    tipos_ruins = [f"{e['slug']}={e['tipo_imagem']}" for e in manifesto
+                   if e["tipo_imagem"] in proibidos]
+    assert tipos_ruins == []
+
+
+def test_importacao_atualiza_imagem_quando_seed_muda(app, seed):
+    """Reimportar com url nova atualiza a imagem existente sem duplicar."""
+    from app.models import ProdutoImagem
+
+    with app.app_context():
+        db.create_all()
+        importar_seed_catalogo(db.session, seed)
+        total = ProdutoImagem.query.count()
+        seed2 = copy.deepcopy(seed)
+        seed2["produto_imagem"][0]["url"] = "img/catalogo/produtos/nova.jpg"
+        resumo = importar_seed_catalogo(db.session, seed2)
+        assert resumo["imagem_inseridos"] == 0
+        assert resumo["imagem_atualizados"] == 1
+        assert ProdutoImagem.query.count() == total
+        pid = seed2["produto_imagem"][0]["produto_id"]
+        assert (ProdutoImagem.query.filter_by(produto_id=pid).one().url
+                == "img/catalogo/produtos/nova.jpg")
+
+
 def test_itens_bloqueados_nao_importados(app, seed):
     from app.models import ProdutoBase
 

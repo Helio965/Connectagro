@@ -129,7 +129,8 @@ def importar_seed_catalogo(db_session, dados):
 
     resumo = {"base_inseridos": 0, "base_ignorados": 0,
               "tecnico_inseridos": 0, "tecnico_ignorados": 0,
-              "imagem_inseridos": 0, "imagem_ignorados": 0}
+              "imagem_inseridos": 0, "imagem_ignorados": 0,
+              "imagem_atualizados": 0}
 
     # Idempotência de produto_base pela chave slug.
     slugs_existentes = {p.slug for p in db_session.query(ProdutoBase).all()}
@@ -184,24 +185,36 @@ def importar_seed_catalogo(db_session, dados):
         resumo["tecnico_inseridos"] += 1
 
     # Idempotência de produto_imagem por produto_id (uma imagem de referência
-    # por produto). Preço continua sem importação no MVP.
-    img_existentes = {im.produto_id for im in db_session.query(ProdutoImagem).all()}
+    # por produto): insere quando não existe e atualiza quando o seed mudou
+    # (ex.: troca de arquivo/fonte). Preço continua sem importação no MVP.
+    img_existentes = {im.produto_id: im for im in db_session.query(ProdutoImagem).all()}
     for img in dados["produto_imagem"]:
         pid = img.get("produto_id")
-        if pid in img_existentes:
-            resumo["imagem_ignorados"] += 1
-            continue
         if db_session.get(ProdutoBase, pid) is None:
             resumo["imagem_ignorados"] += 1
             continue
-        db_session.add(ProdutoImagem(
+        existente = img_existentes.get(pid)
+        if existente is not None:
+            if (existente.url != img.get("url")
+                    or existente.fonte != img.get("fonte")
+                    or existente.observacoes != img.get("observacoes")):
+                existente.url = img.get("url")
+                existente.fonte = img.get("fonte")
+                existente.status_validacao = img.get("status_validacao", "nao_consolidado")
+                existente.observacoes = img.get("observacoes")
+                resumo["imagem_atualizados"] += 1
+            else:
+                resumo["imagem_ignorados"] += 1
+            continue
+        novo = ProdutoImagem(
             produto_id=pid,
             url=img.get("url"),
             fonte=img.get("fonte"),
             status_validacao=img.get("status_validacao", "nao_consolidado"),
             observacoes=img.get("observacoes"),
-        ))
-        img_existentes.add(pid)
+        )
+        db_session.add(novo)
+        img_existentes[pid] = novo
         resumo["imagem_inseridos"] += 1
 
     db_session.commit()
