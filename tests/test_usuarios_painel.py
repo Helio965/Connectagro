@@ -347,3 +347,135 @@ def test_unico_admin_ativo_nao_pode_ser_desativado_ou_rebaixado(app_usuarios):
         assert admin.perfil == "admin"
         assert admin.ativo is True
         assert Usuario.query.filter_by(perfil="admin", ativo=True).count() == 1
+
+
+# --- Usuários e Acessos: listagem em blocos e rotas com perfil travado ----
+
+def test_admin_ve_blocos_e_botoes_separados(app_usuarios):
+    client = _login(app_usuarios)
+    corpo = client.get("/usuarios/").data.decode("utf-8")
+    assert "Usuários e Acessos" in corpo
+    assert "Administrador" in corpo
+    assert "Gerentes de Plantio" in corpo
+    assert "Trabalhadores" in corpo
+    assert "+ Novo gerente" in corpo
+    assert "+ Novo trabalhador" in corpo
+    assert "Admin principal" in corpo
+
+
+def test_gerente_ve_apenas_bloco_e_botao_de_trabalhador(app_usuarios):
+    client = _login(app_usuarios, "tecnico@connectagro.com", "senha123")
+    corpo = client.get("/usuarios/").data.decode("utf-8")
+    assert "Trabalhadores" in corpo
+    assert "+ Novo trabalhador" in corpo
+    assert "+ Novo gerente" not in corpo
+    assert "Gerentes de Plantio</h2>" not in corpo
+    assert "Administrador</h2>" not in corpo
+
+
+def test_rota_novo_gerente_trava_perfil_no_formulario(app_usuarios):
+    client = _login(app_usuarios)
+    corpo = client.get("/usuarios/novo/gerente").data.decode("utf-8")
+    assert "Novo Gerente de Plantio" in corpo
+    assert 'type="hidden" name="perfil" value="tecnico"' in corpo
+    assert "<select" not in corpo
+
+
+def test_admin_cria_gerente_pela_rota_dedicada(app_usuarios):
+    client = _login(app_usuarios)
+    resp = client.post("/usuarios/novo/gerente", data={
+        "nome": "Gerente Novo", "email": "gerente.novo@example.com",
+        "senha": "senha123", "confirmar_senha": "senha123", "ativo": "1",
+        "perfil": "tecnico",
+    })
+    assert resp.status_code == 302
+    with app_usuarios.app_context():
+        criado = Usuario.query.filter_by(email="gerente.novo@example.com").one()
+        assert criado.perfil == "tecnico"
+
+
+def test_admin_cria_trabalhador_pela_rota_dedicada(app_usuarios):
+    client = _login(app_usuarios)
+    resp = client.post("/usuarios/novo/trabalhador", data={
+        "nome": "Trabalhador Novo", "email": "trab.novo@example.com",
+        "senha": "senha123", "confirmar_senha": "senha123", "ativo": "1",
+        "perfil": "trabalhador",
+    })
+    assert resp.status_code == 302
+    with app_usuarios.app_context():
+        criado = Usuario.query.filter_by(email="trab.novo@example.com").one()
+        assert criado.perfil == "trabalhador"
+
+
+def test_rota_travada_bloqueia_post_com_outro_perfil(app_usuarios):
+    client = _login(app_usuarios)
+    resp = client.post("/usuarios/novo/trabalhador", data={
+        "nome": "Escalada", "email": "escalada@example.com",
+        "senha": "senha123", "confirmar_senha": "senha123", "ativo": "1",
+        "perfil": "tecnico",
+    })
+    assert resp.status_code == 403
+    with app_usuarios.app_context():
+        assert Usuario.query.filter_by(email="escalada@example.com").first() is None
+
+
+def test_gerente_nao_acessa_rota_novo_gerente(app_usuarios):
+    client = _login(app_usuarios, "tecnico@connectagro.com", "senha123")
+    assert client.get("/usuarios/novo/gerente").status_code == 403
+    resp = client.post("/usuarios/novo/gerente", data={
+        "nome": "Gerente Ilegal", "email": "gerente.ilegal@example.com",
+        "senha": "senha123", "confirmar_senha": "senha123",
+        "perfil": "tecnico",
+    })
+    assert resp.status_code == 403
+    with app_usuarios.app_context():
+        assert Usuario.query.filter_by(email="gerente.ilegal@example.com").first() is None
+        bloqueio = (LogAuditoria.query
+                    .filter_by(acao="usuarios.create.blocked")
+                    .order_by(LogAuditoria.id.desc())
+                    .first())
+        assert bloqueio is not None
+
+
+def test_gerente_cria_trabalhador_pela_rota_dedicada(app_usuarios):
+    client = _login(app_usuarios, "tecnico@connectagro.com", "senha123")
+    resp = client.post("/usuarios/novo/trabalhador", data={
+        "nome": "Trab do Gerente", "email": "trab.do.gerente@example.com",
+        "senha": "senha123", "confirmar_senha": "senha123", "ativo": "1",
+        "perfil": "trabalhador",
+    })
+    assert resp.status_code == 302
+    with app_usuarios.app_context():
+        criado = Usuario.query.filter_by(email="trab.do.gerente@example.com").one()
+        assert criado.perfil == "trabalhador"
+
+
+def test_trabalhador_nao_acessa_rotas_dedicadas(app_usuarios):
+    client = _login(app_usuarios, "trabalhador@connectagro.com", "senha123")
+    assert client.get("/usuarios/novo/gerente").status_code == 403
+    assert client.get("/usuarios/novo/trabalhador").status_code == 403
+
+
+def test_unico_admin_nao_mostra_botao_inativar_na_listagem(app_usuarios):
+    client = _login(app_usuarios)
+    corpo = client.get("/usuarios/").data.decode("utf-8")
+    admin_id = app_usuarios.usuario_ids["admin"]
+    assert f"/usuarios/{admin_id}/editar" in corpo
+    assert f"/usuarios/{admin_id}/inativar" not in corpo
+
+
+def test_listagem_nao_apaga_usuarios_existentes(app_usuarios):
+    client = _login(app_usuarios)
+    with app_usuarios.app_context():
+        antes = Usuario.query.count()
+    client.get("/usuarios/")
+    client.post("/usuarios/novo/trabalhador", data={
+        "nome": "Mais Um", "email": "mais.um@example.com",
+        "senha": "senha123", "confirmar_senha": "senha123", "ativo": "1",
+        "perfil": "trabalhador",
+    })
+    with app_usuarios.app_context():
+        assert Usuario.query.count() == antes + 1
+        for email in ("admin@connectagro.com", "tecnico@connectagro.com",
+                      "trabalhador@connectagro.com"):
+            assert Usuario.query.filter_by(email=email).first() is not None

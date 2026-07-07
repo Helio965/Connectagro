@@ -175,13 +175,15 @@ def _validar_dados_usuario(*, usuario=None, perfis_permitidos=()):
     }, erros
 
 
-def _render_form(usuario, form, perfis, status=200):
+def _render_form(usuario, form, perfis, status=200, titulo=None, form_action=None):
     return render_template(
         "usuarios/form.html",
         usuario=usuario,
         form=form,
         perfis=perfis,
         min_senha=MIN_SENHA,
+        titulo=titulo,
+        form_action=form_action,
     ), status
 
 
@@ -198,28 +200,80 @@ def _sincronizar_sessao_se_usuario_atual(usuario):
 @login_required
 @require_permission("usuarios.view")
 def index():
+    """Usuários e Acessos — listagem agrupada por perfil.
+
+    Admin vê os três blocos (Administrador, Gerentes de Plantio,
+    Trabalhadores); gerente vê apenas o bloco de Trabalhadores.
+    """
     propriedade = propriedade_atual()
     usuario_logado = _usuario_logado_model()
+    atual = usuario_atual()
+    admins_ativos = _contar_admins_ativos()
     vinculos = (UsuarioPropriedade.query
                 .filter_by(propriedade_id=propriedade.id)
                 .order_by(UsuarioPropriedade.id)
                 .all())
-    usuarios = []
+
+    grupos = {"admin": [], "tecnico": [], "trabalhador": []}
     for v in vinculos:
         u = db.session.get(Usuario, v.usuario_id)
-        if u and (_is_admin(usuario_logado) or (_is_manager(usuario_logado) and u.perfil == "trabalhador")):
-            usuarios.append({
-                "usuario": u,
-                "vinculo": v,
-                "can_manage": _can_edit_target_user(usuario_logado, u),
-            })
-    return render_template("usuarios/list.html", usuarios=usuarios)
+        if not u or u.perfil not in grupos:
+            continue
+        if not (_is_admin(usuario_logado)
+                or (_is_manager(usuario_logado) and u.perfil == "trabalhador")):
+            continue
+        can_manage = _can_edit_target_user(usuario_logado, u)
+        eh_proprio = bool(atual and atual.get("id") == u.id)
+        eh_unico_admin = (u.perfil == "admin" and u.ativo and admins_ativos <= 1)
+        grupos[u.perfil].append({
+            "usuario": u,
+            "vinculo": v,
+            "can_manage": can_manage,
+            "admin_principal": (u.perfil == "admin"
+                                and propriedade.usuario_id == u.id),
+            # Botão de inativar some para o único admin ativo e para o
+            # próprio usuário (o backend também bloqueia as duas ações).
+            "mostrar_inativar": (can_manage and u.ativo
+                                 and not eh_unico_admin and not eh_proprio),
+        })
+
+    perfis_criaveis = _allowed_roles_to_create(usuario_logado)
+    return render_template(
+        "usuarios/list.html",
+        admins=grupos["admin"],
+        gerentes=grupos["tecnico"],
+        trabalhadores=grupos["trabalhador"],
+        pode_criar_gerente="tecnico" in perfis_criaveis,
+        pode_criar_trabalhador="trabalhador" in perfis_criaveis,
+        eh_admin=_is_admin(usuario_logado),
+    )
 
 
 @usuarios_bp.route("/novo", methods=["GET", "POST"])
 @login_required
 @require_permission("usuarios.create")
 def novo():
+    """Criação genérica (perfil escolhido no formulário)."""
+    return _fluxo_novo()
+
+
+@usuarios_bp.route("/novo/gerente", methods=["GET", "POST"])
+@login_required
+@require_permission("usuarios.create")
+def novo_gerente():
+    """Criação com perfil travado em Gerente de Plantio (interno: tecnico)."""
+    return _fluxo_novo(perfil_fixo="tecnico")
+
+
+@usuarios_bp.route("/novo/trabalhador", methods=["GET", "POST"])
+@login_required
+@require_permission("usuarios.create")
+def novo_trabalhador():
+    """Criação com perfil travado em Trabalhador."""
+    return _fluxo_novo(perfil_fixo="trabalhador")
+
+
+def _fluxo_novo(perfil_fixo=None):
     propriedade = propriedade_atual()
     usuario_logado = _usuario_logado_model()
     perfis_permitidos = _allowed_roles_to_create(usuario_logado)
@@ -229,6 +283,22 @@ def novo():
             "Tentativa bloqueada de acessar criação de usuário",
             propriedade,
         )
+    titulo = None
+    form_action = None
+    if perfil_fixo is not None:
+        if perfil_fixo not in perfis_permitidos:
+            _bloquear_acao_usuario(
+                "usuarios.create.blocked",
+                f"Tentativa bloqueada de criar perfil {perfil_fixo}",
+                propriedade,
+            )
+        # Trava o perfil: o POST manipulado com outro perfil cai no bloqueio
+        # padrão logo abaixo (perfil fora de perfis_permitidos -> 403).
+        perfis_permitidos = (perfil_fixo,)
+        titulo = f"Novo {role_label(perfil_fixo)}"
+        endpoint = ("usuarios.novo_gerente" if perfil_fixo == "tecnico"
+                    else "usuarios.novo_trabalhador")
+        form_action = url_for(endpoint)
     if request.method == "POST":
         perfil_solicitado = request.form.get("perfil") or ""
         if perfil_solicitado not in perfis_permitidos:
@@ -242,7 +312,8 @@ def novo():
         if erros:
             for e in erros:
                 flash(e, "error")
-            return _render_form(None, request.form, perfis_permitidos, 400)
+            return _render_form(None, request.form, perfis_permitidos, 400,
+                                titulo=titulo, form_action=form_action)
 
         usuario = Usuario(
             nome=dados["nome"],
@@ -274,7 +345,8 @@ def novo():
         return redirect(url_for("usuarios.index"))
 
     return _render_form(None, {"perfil": perfis_permitidos[0], "ativo": True},
-                        perfis_permitidos)[0]
+                        perfis_permitidos, titulo=titulo,
+                        form_action=form_action)[0]
 
 
 @usuarios_bp.route("/<int:usuario_id>/editar", methods=["GET", "POST"])

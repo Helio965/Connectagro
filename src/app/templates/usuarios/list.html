@@ -1,49 +1,87 @@
 {% extends "base.html" %}
 
-{% block title %}Usuários — ConnectAgro{% endblock %}
+{% block title %}Usuários e Acessos — ConnectAgro{% endblock %}
+
+{% macro item_usuario(item) %}
+<li class="usuario-item">
+  <div class="usuario-info">
+    <strong>{{ item.usuario.nome }}</strong>
+    <span class="usuario-email">{{ item.usuario.email }}</span>
+  </div>
+  <div class="usuario-badges">
+    <span class="badge badge-perfil">{{ role_label(item.usuario.perfil) }}</span>
+    {% if item.admin_principal %}
+    <span class="badge badge-principal">Admin principal</span>
+    {% endif %}
+    {% if item.usuario.ativo %}
+    <span class="badge badge-ativo">Ativo</span>
+    {% else %}
+    <span class="badge badge-inativo">Inativo</span>
+    {% endif %}
+  </div>
+  <div class="usuario-acoes acoes">
+    {% if can("usuarios.edit") and item.can_manage %}
+    <a href="{{ url_for('usuarios.editar', usuario_id=item.usuario.id) }}">Editar</a>
+    {% endif %}
+    {% if can("usuarios.deactivate") and item.mostrar_inativar %}
+    <form method="post" action="{{ url_for('usuarios.inativar', usuario_id=item.usuario.id) }}"
+          onsubmit="return confirm('Inativar este usuário?');" style="display:inline;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="btn-link-danger">Inativar</button>
+    </form>
+    {% endif %}
+    {% if not item.can_manage %}—{% endif %}
+  </div>
+</li>
+{% endmacro %}
 
 {% block content %}
 <section class="card">
   <div class="card-head">
-    <h1>Usuários da propriedade</h1>
-    {% if can("usuarios.create") %}
-    <a class="btn-acao" href="{{ url_for('usuarios.novo') }}">+ Novo usuário</a>
-    {% endif %}
+    <h1>Usuários e Acessos</h1>
+    <div class="usuarios-botoes">
+      {% if can("usuarios.create") and pode_criar_gerente %}
+      <a class="btn-acao" href="{{ url_for('usuarios.novo_gerente') }}">+ Novo gerente</a>
+      {% endif %}
+      {% if can("usuarios.create") and pode_criar_trabalhador %}
+      <a class="btn-acao" href="{{ url_for('usuarios.novo_trabalhador') }}">+ Novo trabalhador</a>
+      {% endif %}
+    </div>
   </div>
 
-  {% if usuarios %}
-  <table class="tabela">
-    <thead>
-      <tr>
-        <th>Nome</th><th>E-mail</th><th>Perfil</th><th>Status</th><th>Ações</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for item in usuarios %}
-      <tr>
-        <td>{{ item.usuario.nome }}</td>
-        <td>{{ item.usuario.email }}</td>
-        <td>{{ role_label(item.usuario.perfil) }}</td>
-        <td>{{ "Ativo" if item.usuario.ativo else "Inativo" }}</td>
-        <td class="acoes">
-          {% if can("usuarios.edit") and item.can_manage %}
-          <a href="{{ url_for('usuarios.editar', usuario_id=item.usuario.id) }}">Editar</a>
-          {% endif %}
-          {% if can("usuarios.deactivate") and item.can_manage and item.usuario.ativo %}
-          <form method="post" action="{{ url_for('usuarios.inativar', usuario_id=item.usuario.id) }}"
-                onsubmit="return confirm('Inativar este usuário?');" style="display:inline;">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" class="btn-link-danger">Inativar</button>
-          </form>
-          {% endif %}
-          {% if not item.can_manage %}—{% endif %}
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% else %}
-  <p>Nenhum usuário vinculado a esta propriedade.{% if can("usuarios.create") %} <a href="{{ url_for('usuarios.novo') }}">Adicionar o primeiro</a>.{% endif %}</p>
+  {% if eh_admin %}
+  <section class="usuarios-grupo">
+    <h2>Administrador</h2>
+    {% if admins %}
+    <ul class="usuarios-lista">
+      {% for item in admins %}{{ item_usuario(item) }}{% endfor %}
+    </ul>
+    {% else %}
+    <p class="empty-state">Nenhum administrador vinculado.</p>
+    {% endif %}
+  </section>
+
+  <section class="usuarios-grupo">
+    <h2>Gerentes de Plantio</h2>
+    {% if gerentes %}
+    <ul class="usuarios-lista">
+      {% for item in gerentes %}{{ item_usuario(item) }}{% endfor %}
+    </ul>
+    {% else %}
+    <p class="empty-state">Nenhum gerente de plantio cadastrado ainda.</p>
+    {% endif %}
+  </section>
   {% endif %}
+
+  <section class="usuarios-grupo">
+    <h2>Trabalhadores</h2>
+    {% if trabalhadores %}
+    <ul class="usuarios-lista">
+      {% for item in trabalhadores %}{{ item_usuario(item) }}{% endfor %}
+    </ul>
+    {% else %}
+    <p class="empty-state">Nenhum trabalhador cadastrado ainda.</p>
+    {% endif %}
+  </section>
 </section>
 {% endblock %}
