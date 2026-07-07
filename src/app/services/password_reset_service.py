@@ -66,6 +66,42 @@ def solicitar_reset_por_email(email, *, request=None):
     return {"token": token_puro}
 
 
+def gerar_token_definicao_senha(usuario):
+    """Gera token de **definição de senha** (convite de novo usuário).
+
+    Mesma mecânica do reset: invalida tokens abertos do usuário, persiste
+    apenas o hash SHA-256, expira e é de uso único. A validade vem de
+    ``PASSWORD_INVITE_TOKEN_MINUTES`` (maior que a do reset, pois depende
+    do destinatário abrir o e-mail). Retorna o token puro apenas para a
+    montagem do link — nunca é persistido.
+    """
+    if usuario is None or not usuario.ativo:
+        return None
+
+    tokens_abertos = SenhaResetToken.query.filter_by(
+        usuario_id=usuario.id, usado=False
+    ).all()
+    for t in tokens_abertos:
+        t.usado = True
+        t.usado_em = iso_now()
+    if tokens_abertos:
+        db.session.commit()
+
+    token_puro = secrets.token_urlsafe(32)
+    minutos = current_app.config.get("PASSWORD_INVITE_TOKEN_MINUTES", 24 * 60)
+    expira = _agora_utc() + timedelta(minutes=minutos)
+
+    registro = SenhaResetToken(
+        usuario_id=usuario.id,
+        token_hash=_hash_token(token_puro),
+        expira_em=expira.isoformat(),
+    )
+    db.session.add(registro)
+    db.session.commit()
+
+    return token_puro
+
+
 def validar_token_reset(token):
     """Valida um token de recuperação de senha.
 

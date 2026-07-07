@@ -53,19 +53,21 @@ def _login(app, email="admin@connectagro.com", senha="admin123"):
     return client
 
 
-def test_admin_cria_usuario_com_confirmacao_e_hash(app_usuarios):
+def test_admin_cria_usuario_sem_definir_senha(app_usuarios):
+    """Fluxo de convite: admin cria sem senha; login só após definir a própria."""
     client = _login(app_usuarios)
     form = client.get("/usuarios/novo").data.decode("utf-8")
     assert "Gerente de Plantio" in form
     assert "Trabalhador" in form
     assert 'value="admin"' not in form
+    # O formulário de criação não pede senha (convite por e-mail).
+    assert 'name="senha"' not in form
+    assert "convite" in form.lower()
 
     resp = client.post("/usuarios/novo", data={
         "nome": "Novo Técnico",
         "email": "novo.tecnico@connectagro.com",
         "perfil": "tecnico",
-        "senha": "nova123",
-        "confirmar_senha": "nova123",
         "ativo": "1",
     })
 
@@ -75,16 +77,16 @@ def test_admin_cria_usuario_com_confirmacao_e_hash(app_usuarios):
         assert usuario.nome == "Novo Técnico"
         assert usuario.perfil == "tecnico"
         assert usuario.ativo is True
-        assert usuario.senha_hash != "nova123"
-        assert verificar_senha(usuario.senha_hash, "nova123")
+        assert usuario.senha_hash
         assert UsuarioPropriedade.query.filter_by(usuario_id=usuario.id).count() == 1
         assert LogAuditoria.query.filter_by(acao="usuarios.create", entidade_id=usuario.id).count() == 1
 
+    # A senha inicial é aleatória e desconhecida: nenhum palpite loga.
     login_novo = app_usuarios.test_client().post(
         "/auth/login",
         data={"email": "novo.tecnico@connectagro.com", "senha": "nova123"},
     )
-    assert login_novo.status_code == 302
+    assert login_novo.status_code == 401
 
 
 def test_admin_nao_cria_segundo_admin_nem_promove_para_admin(app_usuarios):
@@ -119,17 +121,17 @@ def test_criacao_bloqueia_email_duplicado_e_confirmacao_diferente(app_usuarios):
         "nome": "Duplicado",
         "email": "tecnico@connectagro.com",
         "perfil": "tecnico",
-        "senha": "nova123",
-        "confirmar_senha": "nova123",
         "ativo": "1",
     })
     assert duplicado.status_code == 400
     assert "Já existe um usuário com esse e-mail." in duplicado.data.decode("utf-8")
 
-    senha_diferente = client.post("/usuarios/novo", data={
-        "nome": "Senha Diferente",
-        "email": "senha.diferente@connectagro.com",
-        "perfil": "trabalhador",
+    # Confirmação de senha continua validada na EDIÇÃO (troca manual).
+    tecnico_id = app_usuarios.usuario_ids["tecnico"]
+    senha_diferente = client.post(f"/usuarios/{tecnico_id}/editar", data={
+        "nome": "Técnico ConnectAgro",
+        "email": "tecnico@connectagro.com",
+        "perfil": "tecnico",
         "senha": "nova123",
         "confirmar_senha": "outra123",
         "ativo": "1",
@@ -231,7 +233,9 @@ def test_gerente_cria_e_edita_apenas_trabalhadores(app_usuarios):
     with app_usuarios.app_context():
         novo = Usuario.query.filter_by(email="trabalhador.gerente@connectagro.com").one()
         assert novo.perfil == "trabalhador"
-        assert verificar_senha(novo.senha_hash, "worker123")
+        # Convite: a senha enviada no formulário é ignorada; a inicial é
+        # aleatória e desconhecida até o usuário definir a dele pelo link.
+        assert not verificar_senha(novo.senha_hash, "worker123")
 
     criar_gerente = tecnico.post("/usuarios/novo", data={
         "nome": "Gerente Bloqueado",
