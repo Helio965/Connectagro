@@ -60,9 +60,17 @@ def test_validador_detecta_preco_nao_vazio(seed):
         validar_seed(seed)
 
 
-def test_validador_detecta_imagem_nao_vazia(seed):
-    seed["produto_imagem"] = [{"id": 1, "produto_id": 1, "url": "x"}]
-    with pytest.raises(SeedInvalidoError, match="produto_imagem deve estar vazio"):
+def test_validador_detecta_imagem_fk_invalida(seed):
+    seed["produto_imagem"].append(
+        {"id": 99999, "produto_id": 999999, "url": "img/x.jpg"})
+    with pytest.raises(SeedInvalidoError, match="produto_base correspondente"):
+        validar_seed(seed)
+
+
+def test_validador_detecta_imagem_sem_url(seed):
+    pid = seed["produto_base"][0]["id"]
+    seed["produto_imagem"].append({"id": 99998, "produto_id": pid, "url": ""})
+    with pytest.raises(SeedInvalidoError, match="produto_imagem sem url"):
         validar_seed(seed)
 
 
@@ -80,14 +88,105 @@ def test_importacao_popula_base_e_tecnico(app, seed):
         assert ProdutoTecnico.query.count() == len(seed["produto_tecnico"])
 
 
-def test_importacao_nao_popula_preco_nem_imagem(app, seed):
-    from app.models import ProdutoPreco, ProdutoImagem
+def test_importacao_nao_popula_preco(app, seed):
+    """Preço continua vazio no MVP (fica para o sistema final)."""
+    from app.models import ProdutoPreco
 
     with app.app_context():
         db.create_all()
         importar_seed_catalogo(db.session, seed)
         assert ProdutoPreco.query.count() == 0
-        assert ProdutoImagem.query.count() == 0
+
+
+def test_importacao_popula_imagem_para_todos(app, seed):
+    """Toda a base recebe uma imagem de referência ao importar o seed."""
+    from app.models import ProdutoBase, ProdutoImagem
+
+    with app.app_context():
+        db.create_all()
+        resumo = importar_seed_catalogo(db.session, seed)
+        total = len(seed["produto_base"])
+        assert resumo["imagem_inseridos"] == total
+        assert ProdutoImagem.query.count() == total
+        # nenhum produto fica sem imagem_url
+        sem_imagem = [p.slug for p in ProdutoBase.query.all() if not p.imagem_url]
+        assert sem_imagem == []
+
+
+def test_seed_tem_imagem_para_todos_os_produtos(seed):
+    """O seed cobre 100% dos produtos e cada imagem aponta para um produto."""
+    ids_base = {p["id"] for p in seed["produto_base"]}
+    ids_imagem = {i["produto_id"] for i in seed["produto_imagem"]}
+    assert ids_imagem == ids_base
+    assert len(seed["produto_imagem"]) == len(seed["produto_base"])
+
+
+def test_arquivos_locais_das_imagens_existem(app, seed):
+    """Todo caminho local declarado no seed existe em src/app/static/."""
+    import os
+
+    faltando = []
+    for img in seed["produto_imagem"]:
+        url = img["url"]
+        # só validamos caminhos locais (relativos ao static)
+        if url.startswith(("http://", "https://", "data:", "/")):
+            continue
+        caminho = os.path.join(app.static_folder, url.replace("/", os.sep))
+        if not os.path.isfile(caminho):
+            faltando.append(url)
+    assert faltando == []
+
+
+def test_imagens_padronizadas_900x600(app):
+    """Todas as imagens do catálogo têm o canvas padronizado de 900x600."""
+    import os
+
+    from PIL import Image
+
+    pasta = os.path.join(app.static_folder, "img", "catalogo", "produtos")
+    arquivos = sorted(os.listdir(pasta))
+    assert len(arquivos) == 60
+    fora_do_padrao = []
+    for nome in arquivos:
+        with Image.open(os.path.join(pasta, nome)) as im:
+            if im.size != (900, 600):
+                fora_do_padrao.append(f"{nome}={im.size}")
+    assert fora_do_padrao == []
+
+
+def test_manifesto_sem_tipos_proibidos():
+    """O manifesto não pode voltar a usar diagramas/estruturas químicas."""
+    import json
+    import os
+
+    proibidos = {"estrutura_quimica", "formula", "diagrama",
+                 "grafico", "chart", "machine", "paisagem"}
+    raiz = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    caminho = os.path.join(raiz, "data", "seeds", "catalogo_imagens_manifest.json")
+    manifesto = json.load(open(caminho, encoding="utf-8"))
+    assert len(manifesto) == 60
+    tipos_ruins = [f"{e['slug']}={e['tipo_imagem']}" for e in manifesto
+                   if e["tipo_imagem"] in proibidos]
+    assert tipos_ruins == []
+
+
+def test_importacao_atualiza_imagem_quando_seed_muda(app, seed):
+    """Reimportar com url nova atualiza a imagem existente sem duplicar."""
+    from app.models import ProdutoImagem
+
+    with app.app_context():
+        db.create_all()
+        importar_seed_catalogo(db.session, seed)
+        total = ProdutoImagem.query.count()
+        seed2 = copy.deepcopy(seed)
+        seed2["produto_imagem"][0]["url"] = "img/catalogo/produtos/nova.jpg"
+        resumo = importar_seed_catalogo(db.session, seed2)
+        assert resumo["imagem_inseridos"] == 0
+        assert resumo["imagem_atualizados"] == 1
+        assert ProdutoImagem.query.count() == total
+        pid = seed2["produto_imagem"][0]["produto_id"]
+        assert (ProdutoImagem.query.filter_by(produto_id=pid).one().url
+                == "img/catalogo/produtos/nova.jpg")
 
 
 def test_itens_bloqueados_nao_importados(app, seed):

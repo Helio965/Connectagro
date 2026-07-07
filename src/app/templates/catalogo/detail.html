@@ -27,16 +27,17 @@
 <section class="card">
   <h1>{{ produto.nome }}</h1>
   <p class="hint">
-    {{ titulo }} de consulta agrícola. As imagens são apenas referências visuais.
-    O ConnectAgro não vende produtos e não substitui orientação técnica
-    profissional.
+    {{ titulo }} de consulta agrícola. A imagem é uma referência visual obtida de
+    fonte pública (Wikimedia Commons) e não representa venda, cotação,
+    recomendação ou validação oficial. O ConnectAgro não vende produtos e não
+    substitui orientação técnica profissional.
   </p>
 
   <div class="catalog-detail-hero">
     <div class="catalog-detail-image-wrapper">
       <img
         src="{{ imagem_catalogo(produto) }}"
-        alt="Foto de referência de {{ produto.nome }}"
+        alt="Imagem de referência de {{ produto.nome }}"
         class="catalog-detail-image"
       >
     </div>
