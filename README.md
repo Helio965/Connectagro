@@ -126,7 +126,7 @@ como pós-MVP e devem preservar os limites de produto abaixo.
 ## Stack tecnológica (MVP)
 
 - **Backend:** Python + Flask
-- **Banco de dados:** SQLite + Flask-SQLAlchemy + Flask-Migrate
+- **Banco de dados:** SQLite (dev local) ou PostgreSQL/Supabase via `DATABASE_URL` + Flask-SQLAlchemy + Flask-Migrate
 - **Segurança de formulários:** Flask-WTF / CSRFProtect
 - **Exportações:** `csv` (biblioteca padrão) + ReportLab (PDF)
 - **Mapa:** Leaflet + Leaflet.draw (via CDN)
@@ -200,6 +200,39 @@ pytest
 O acesso exige **login** (sessão Flask + `werkzeug.security`): a rota `/` e os
 módulos são protegidos e redirecionam para `/auth/login`; `/health` é público. O
 arquivo de banco gerado **não** é versionado.
+
+### Banco de dados: SQLite local ou PostgreSQL/Supabase
+
+O ConnectAgro usa **SQLite por padrão** no desenvolvimento local (sem
+`DATABASE_URL`, o fallback é `sqlite:///connectagro.db` em `src/instance/`).
+Os testes usam sempre SQLite em memória e não dependem de PostgreSQL.
+
+Para PostgreSQL/Supabase, configure no `.env` (nunca commitado):
+
+```env
+# Aplicação (Supabase: porta 6543 via pooler)
+DATABASE_URL=postgresql+psycopg2://USER:PASSWORD@HOST:6543/postgres
+# Migrations/conexão direta (opcional; Supabase: porta 5432)
+DIRECT_URL=postgresql+psycopg2://USER:PASSWORD@HOST:5432/postgres
+```
+
+- `DATABASE_URL` é a URL usada pela aplicação; `postgres://`,
+  `postgresql://` e `postgresql+psycopg://` são normalizadas para
+  `postgresql+psycopg2://` (único driver instalado), e parâmetros de pooler
+  (`pgbouncer`, `connection_limit`, `pool_timeout`, `schema`) são removidos
+  automaticamente. O `.env` é carregado tanto pelo CLI `flask` quanto por
+  `python src/run.py`.
+- `DIRECT_URL` é opcional e recomendada para `flask db upgrade` em
+  provedores com pooler (Supabase), pois DDL deve evitar o PgBouncer.
+- Banco local, `.env`, `backups/` e `instance/` não são versionados.
+
+Comandos (iguais nos dois bancos):
+
+```bash
+flask --app src/run.py db upgrade
+flask --app src/run.py seed-users
+flask --app src/run.py import-catalog-seed
+```
 
 ### Dashboard operacional
 
