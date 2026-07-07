@@ -275,6 +275,7 @@ def test_exportacao_pdf_gera_log(app_exp):
         logs = LogAuditoria.query.filter_by(acao="exportacao.gerada").all()
         assert logs
         assert all(l.entidade == "relatorio" for l in logs)
+        assert all(l.entidade_id is None for l in logs)
         assert all(l.propriedade_id == app_exp.exp_ids["prop_id"] for l in logs)
 
 
@@ -286,7 +287,7 @@ def test_exportacao_log_escopado_e_sem_dados_sensiveis(app_exp):
     client.get("/relatorios/financeiro/exportar.csv")
     with app_exp.app_context():
         for log in LogAuditoria.query.filter_by(acao="exportacao.gerada").all():
-            blob = " ".join(filter(None, [log.descricao, log.entidade, log.entidade_id]))
+            blob = " ".join(filter(None, [log.descricao, log.entidade]))
             assert "1234.50" not in blob
             assert "senha" not in blob.lower()
 
