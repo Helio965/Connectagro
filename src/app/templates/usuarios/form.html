@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}{{ "Editar" if usuario else "Novo" }} usuário — ConnectAgro{% endblock %}
+{% block title %}{{ titulo or ("Editar usuário" if usuario else "Novo usuário") }} — ConnectAgro{% endblock %}
 
 {% block content %}
 <section class="card">
-  <h1>{{ "Editar usuário" if usuario else "Novo usuário" }}</h1>
+  <h1>{{ titulo or ("Editar usuário" if usuario else "Novo usuário") }}</h1>
 
   <form method="post" class="form-vertical"
-        action="{{ url_for('usuarios.editar', usuario_id=usuario.id) if usuario else url_for('usuarios.novo') }}">
+        action="{{ form_action or (url_for('usuarios.editar', usuario_id=usuario.id) if usuario else url_for('usuarios.novo')) }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
     <label for="nome">Nome *</label>
@@ -37,12 +37,22 @@
            placeholder="Repita a senha">
     {% endif %}
 
+    {% if perfis|length == 1 %}
+    {# Perfil travado pela rota (Novo gerente / Novo trabalhador): o backend
+       rejeita qualquer outro perfil mesmo com POST manipulado. #}
+    <label>Perfil</label>
+    <p class="perfil-fixo">
+      <span class="badge badge-perfil">{{ role_label(perfis[0]) }}</span>
+    </p>
+    <input type="hidden" name="perfil" value="{{ perfis[0] }}">
+    {% else %}
     <label for="perfil">Perfil *</label>
     <select id="perfil" name="perfil" required>
       {% for p in perfis %}
       <option value="{{ p }}" {{ "selected" if (form.perfil or '') == p else "" }}>{{ role_label(p) }}</option>
       {% endfor %}
     </select>
+    {% endif %}
 
     <label class="check-inline">
       <input type="checkbox" name="ativo" value="1" {{ "checked" if form.ativo else "" }}>

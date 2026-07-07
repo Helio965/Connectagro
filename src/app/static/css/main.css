@@ -610,6 +610,51 @@ body {
 .fin-despesa { border-left: 4px solid var(--ca-danger); }
 .fin-saldo   { border-left: 4px solid var(--ca-info); }
 
+/* Usuários e Acessos — blocos por perfil */
+.usuarios-botoes { display: flex; flex-wrap: wrap; gap: .5rem; }
+.usuarios-grupo { margin-top: 1.25rem; }
+.usuarios-grupo h2 {
+  color: var(--ca-green-400);
+  font-size: 1.02rem;
+  margin: 0 0 .5rem;
+  padding-bottom: .35rem;
+  border-bottom: 1px solid var(--ca-border-soft);
+}
+.usuarios-lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .5rem; }
+.usuario-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem 1rem;
+  background: var(--ca-bg-card-soft);
+  border: 1px solid var(--ca-border-soft);
+  border-radius: 10px;
+  padding: .65rem .85rem;
+}
+.usuario-info { display: flex; flex-direction: column; min-width: 220px; flex: 1 1 220px; }
+.usuario-info strong { color: var(--ca-text); }
+.usuario-email { color: var(--ca-text-muted); font-size: .88rem; }
+.usuario-badges { display: flex; flex-wrap: wrap; gap: .35rem; }
+.usuario-acoes { margin-left: auto; }
+.badge {
+  display: inline-block;
+  font-size: .72rem;
+  font-weight: 700;
+  padding: .14rem .5rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.badge-perfil { background: rgba(34, 197, 94, .16); border-color: var(--ca-border); color: var(--ca-green-400); }
+.badge-principal { background: rgba(56, 189, 248, .14); border-color: rgba(56, 189, 248, .5); color: #9bdcf8; }
+.badge-ativo { background: rgba(34, 197, 94, .14); border-color: var(--ca-green-600); color: #bdf0cb; }
+.badge-inativo { background: rgba(168, 184, 173, .14); border-color: var(--ca-border-soft); color: var(--ca-text-soft); }
+.perfil-fixo { margin: .15rem 0 .3rem; }
+
+@media (max-width: 640px) {
+  .usuario-acoes { margin-left: 0; }
+}
+
 /* Filtros do catálogo */
 .filtros { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin: 1rem 0; }
 .filtros input[type="text"],
