@@ -377,11 +377,20 @@ propriedade.
 
 ### Painel de usuários
 
-A Fase 7.1 adiciona o módulo `/usuarios/`, disponível somente para `admin`.
-Ele permite listar usuários vinculados à propriedade atual, criar usuário com
-senha temporária, editar nome/perfil/status e inativar acesso. Não há cadastro
+A Fase 7.1 adiciona o módulo `/usuarios/`, hoje organizado em blocos por
+perfil (Administrador, Gerentes de Plantio, Trabalhadores). Não há cadastro
 público, remoção física de usuário ou painel de roles nesta fase. Recuperação de
 senha e auditoria foram entregues em fluxos próprios nas Fases 7.2 e 7.3.
+
+**Convite por e-mail (definição de senha):** ao criar um novo usuário,
+admin/gerente **não define a senha de terceiros**. O usuário nasce com uma
+senha aleatória desconhecida e recebe por e-mail um link seguro
+(`/auth/definir-senha/<token>`, expirável e de uso único) para criar a
+própria senha antes do primeiro login. A ação **Reenviar convite** gera um
+novo link e invalida os anteriores. O SMTP é configurado pelas variáveis
+`MAIL_*` do `.env` (ver `.env.example`); sem SMTP em desenvolvimento, o link
+aparece em tela quando `PASSWORD_RESET_SHOW_DEV_LINK=true` — em produção o
+link **nunca** é exibido. Senhas jamais são enviadas por e-mail.
 
 O vínculo entre conta e propriedade passa pela tabela `usuario_propriedade`.
 `propriedade.usuario_id` continua preservado para compatibilidade; quando uma

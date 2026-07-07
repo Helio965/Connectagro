@@ -27,14 +27,11 @@
            minlength="{{ min_senha }}" autocomplete="new-password"
            placeholder="Repita a nova senha">
     {% else %}
-    <label for="senha">Senha *</label>
-    <input type="password" id="senha" name="senha" required minlength="{{ min_senha }}"
-           autocomplete="new-password" placeholder="Mínimo {{ min_senha }} caracteres">
-
-    <label for="confirmar_senha">Confirmar senha *</label>
-    <input type="password" id="confirmar_senha" name="confirmar_senha" required
-           minlength="{{ min_senha }}" autocomplete="new-password"
-           placeholder="Repita a senha">
+    <p class="placeholder-tag">
+      Você não define a senha deste usuário: ele receberá um
+      <strong>convite por e-mail</strong> com um link seguro (expirável e de
+      uso único) para criar a própria senha antes do primeiro acesso.
+    </p>
     {% endif %}
 
     {% if perfis|length == 1 %}

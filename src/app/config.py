@@ -120,6 +120,35 @@ class BaseConfig:
         os.environ.get("PASSWORD_RESET_TOKEN_MINUTES", 30)
     )
     PASSWORD_RESET_SHOW_DEV_LINK = _env_bool("PASSWORD_RESET_SHOW_DEV_LINK", "false")
+    # Convite de definição de senha (novos usuários): validade maior que a do
+    # reset, pois depende do destinatário abrir o e-mail (padrão: 24h).
+    PASSWORD_INVITE_TOKEN_MINUTES = int(
+        os.environ.get("PASSWORD_INVITE_TOKEN_MINUTES", 24 * 60)
+    )
+
+    # ------------------------------------------------------------------
+    # E-mail transacional (Flask-Mail). MAIL_ATIVO só liga quando a flag
+    # está true E servidor/credenciais/sender estão configurados — sem
+    # SMTP o sistema não tenta envio real (modo dev usa link em tela).
+    # ------------------------------------------------------------------
+    MAIL_SERVER = os.environ.get("MAIL_SERVER", "")
+    MAIL_PORT = int(os.environ.get("MAIL_PORT", 587))
+    MAIL_USE_TLS = _env_bool("MAIL_USE_TLS", "true")
+    MAIL_USE_SSL = _env_bool("MAIL_USE_SSL", "false")
+    MAIL_USERNAME = os.environ.get("MAIL_USERNAME", "")
+    MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD", "")
+    MAIL_DEFAULT_SENDER = os.environ.get("MAIL_DEFAULT_SENDER", "")
+    MAIL_SUPPRESS_SEND = _env_bool("MAIL_SUPPRESS_SEND", "false")
+    MAIL_ATIVO = (
+        _env_bool("MAIL_ATIVO", "false")
+        and bool(os.environ.get("MAIL_SERVER"))
+        and bool(os.environ.get("MAIL_USERNAME"))
+        and bool(os.environ.get("MAIL_PASSWORD"))
+        and bool(os.environ.get("MAIL_DEFAULT_SENDER"))
+    )
+    # Base pública para montar links absolutos em e-mails (fallback: host
+    # da requisição via url_for(_external=True)).
+    APP_BASE_URL = os.environ.get("APP_BASE_URL", "")
 
 
 class DevelopmentConfig(BaseConfig):
@@ -144,6 +173,9 @@ class TestingConfig(BaseConfig):
     SQLALCHEMY_DIRECT_URI = "sqlite:///:memory:"
     WTF_CSRF_ENABLED = False
     PASSWORD_RESET_SHOW_DEV_LINK = True
+    # Testes nunca enviam e-mail real.
+    MAIL_ATIVO = False
+    MAIL_SUPPRESS_SEND = True
 
 
 class ProductionConfig(BaseConfig):

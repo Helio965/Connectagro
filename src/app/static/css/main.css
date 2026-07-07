@@ -407,6 +407,15 @@ body {
   padding: 0;
   text-decoration: underline;
 }
+.btn-link-acao {
+  background: none;
+  border: none;
+  color: var(--ca-green-400);
+  cursor: pointer;
+  font-size: .9rem;
+  padding: 0;
+  text-decoration: underline;
+}
 
 /* Catálogo visual de defensivos e fertilizantes */
 .catalog-grid {

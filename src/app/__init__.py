@@ -8,7 +8,7 @@ from flask import Flask, jsonify, render_template
 from flask_wtf.csrf import CSRFError
 
 from .config import get_config
-from .extensions import csrf, db, migrate
+from .extensions import csrf, db, mail, migrate
 from .blueprints import register_blueprints
 from .commands import register_commands
 
@@ -25,6 +25,7 @@ def create_app(config_name=None):
     # Extensões
     db.init_app(app)
     csrf.init_app(app)
+    mail.init_app(app)
 
     # Registra os modelos no metadata do SQLAlchemy (não cria tabelas aqui).
     from . import models  # noqa: F401

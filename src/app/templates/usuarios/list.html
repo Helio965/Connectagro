@@ -23,6 +23,14 @@
     {% if can("usuarios.edit") and item.can_manage %}
     <a href="{{ url_for('usuarios.editar', usuario_id=item.usuario.id) }}">Editar</a>
     {% endif %}
+    {% if can("usuarios.edit") and item.can_manage and item.usuario.ativo
+          and item.usuario.perfil != "admin" %}
+    <form method="post" action="{{ url_for('usuarios.reenviar_convite', usuario_id=item.usuario.id) }}"
+          style="display:inline;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="btn-link-acao">Reenviar convite</button>
+    </form>
+    {% endif %}
     {% if can("usuarios.deactivate") and item.mostrar_inativar %}
     <form method="post" action="{{ url_for('usuarios.inativar', usuario_id=item.usuario.id) }}"
           onsubmit="return confirm('Inativar este usuário?');" style="display:inline;">

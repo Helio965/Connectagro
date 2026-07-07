@@ -4,6 +4,7 @@ Este módulo apenas centraliza a instância ``db`` (Flask-SQLAlchemy), criada se
 aplicação e inicializada na Application Factory (``create_app``) via ``init_app``.
 Os modelos de domínio ficam em ``src/app/models/`` e usam esta mesma instância.
 """
+from flask_mail import Mail
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
@@ -16,3 +17,6 @@ migrate = Migrate()
 
 # Proteção CSRF global dos formulários POST.
 csrf = CSRFProtect()
+
+# E-mails transacionais (convite de definição de senha, recuperação).
+mail = Mail()

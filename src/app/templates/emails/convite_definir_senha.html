@@ -1,0 +1,30 @@
+{% extends "emails/_base.html" %}
+
+{% block titulo %}Defina sua senha — ConnectAgro{% endblock %}
+
+{% block conteudo %}
+<p>Olá, <strong>{{ nome }}</strong>.</p>
+
+<p>Sua conta no <strong>ConnectAgro</strong> foi criada.</p>
+
+<p>Para ativar seu acesso, defina sua senha pessoal clicando no botão abaixo:</p>
+
+<p style="text-align:center; margin:28px 0;">
+  <a href="{{ link_definir }}"
+     style="background-color:#16a34a; color:#ffffff; text-decoration:none;
+            font-weight:bold; padding:12px 28px; border-radius:8px; display:inline-block;">
+    Definir minha senha
+  </a>
+</p>
+
+<p style="font-size:13px; color:#4f6355;">
+  Este link expira em <strong>{{ validade_horas }} hora(s)</strong> e só pode
+  ser usado uma vez. Depois de definir a senha, entre normalmente pela tela
+  de login.
+</p>
+
+<p style="font-size:13px; color:#4f6355;">
+  Se o botão não funcionar, copie e cole este endereço no navegador:<br>
+  <span style="word-break:break-all;">{{ link_definir }}</span>
+</p>
+{% endblock %}

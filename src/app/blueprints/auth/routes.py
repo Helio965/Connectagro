@@ -15,6 +15,11 @@ from ...services.auditoria_service import (
     registrar_falha,
     registrar_sucesso,
 )
+from ...services.email_service import (
+    email_ativo,
+    email_recuperacao_senha,
+    montar_link_absoluto,
+)
 from ...services.password_reset_service import (
     redefinir_senha_com_token,
     solicitar_reset_por_email,
@@ -137,8 +142,18 @@ def esqueci_senha():
             request=request,
         )
 
+        # Com SMTP configurado, envia o e-mail real de recuperação
+        # (fail-safe: falha de envio não altera a resposta genérica).
+        if resultado.get("token") and usuario is not None and email_ativo():
+            link = montar_link_absoluto(
+                url_for("auth.redefinir_senha", token=resultado["token"])
+            )
+            email_recuperacao_senha(usuario, link)
+
         dev_link = None
-        if current_app.config.get("PASSWORD_RESET_SHOW_DEV_LINK") and resultado.get("token"):
+        if (not email_ativo()
+                and current_app.config.get("PASSWORD_RESET_SHOW_DEV_LINK")
+                and resultado.get("token")):
             dev_link = url_for("auth.redefinir_senha", token=resultado["token"])
 
         flash(MENSAGEM_RESET_GENERICA, "info")
@@ -147,9 +162,13 @@ def esqueci_senha():
     return render_template("auth/esqueci_senha.html", dev_link=None)
 
 
-@auth_bp.route("/redefinir-senha/<token>", methods=["GET", "POST"])
-def redefinir_senha(token):
-    """Redefinição de senha mediante token válido, expirável e de uso único."""
+def _fluxo_senha_com_token(token, *, definicao=False):
+    """Fluxo compartilhado de redefinição (reset) e definição (convite).
+
+    ``definicao=True`` só muda o texto exibido — a validação do token, o
+    uso único, a expiração e o hash da senha são idênticos.
+    """
+    endpoint = "auth.definir_senha" if definicao else "auth.redefinir_senha"
     registro = validar_token_reset(token)
     if registro is None:
         registrar_falha(
@@ -160,7 +179,8 @@ def redefinir_senha(token):
         )
         flash(MENSAGEM_TOKEN_INVALIDO, "error")
         return render_template(
-            "auth/redefinir_senha.html", token=token, token_valido=False
+            "auth/redefinir_senha.html", token=token, token_valido=False,
+            definicao=definicao, form_endpoint=endpoint,
         ), 400
 
     usuario_id_token = registro.usuario_id
@@ -176,19 +196,40 @@ def redefinir_senha(token):
             # não exibimos o formulário novamente.
             ainda_valido = validar_token_reset(token) is not None
             return render_template(
-                "auth/redefinir_senha.html", token=token, token_valido=ainda_valido
+                "auth/redefinir_senha.html", token=token, token_valido=ainda_valido,
+                definicao=definicao, form_endpoint=endpoint,
             ), 400
+        acao = ("auth.password_definida" if definicao
+                else "auth.password_reset.redefinido")
+        descricao = ("Senha definida via convite"
+                     if definicao else "Senha redefinida via token")
         registrar_sucesso(
-            "auth.password_reset.redefinido",
+            acao,
             entidade="usuario",
             entidade_id=usuario_id_token,
-            descricao="Senha redefinida via token",
+            descricao=descricao,
             usuario_id=usuario_id_token,
             request=request,
         )
-        flash("Senha redefinida com sucesso. Faça login novamente.", "success")
+        mensagem = ("Senha definida com sucesso. Faça login para começar."
+                    if definicao
+                    else "Senha redefinida com sucesso. Faça login novamente.")
+        flash(mensagem, "success")
         return redirect(url_for("auth.login"))
 
     return render_template(
-        "auth/redefinir_senha.html", token=token, token_valido=True
+        "auth/redefinir_senha.html", token=token, token_valido=True,
+        definicao=definicao, form_endpoint=endpoint,
     )
+
+
+@auth_bp.route("/redefinir-senha/<token>", methods=["GET", "POST"])
+def redefinir_senha(token):
+    """Redefinição de senha mediante token válido, expirável e de uso único."""
+    return _fluxo_senha_com_token(token, definicao=False)
+
+
+@auth_bp.route("/definir-senha/<token>", methods=["GET", "POST"])
+def definir_senha(token):
+    """Definição de senha de novo usuário (convite) — mesmo token seguro."""
+    return _fluxo_senha_com_token(token, definicao=True)

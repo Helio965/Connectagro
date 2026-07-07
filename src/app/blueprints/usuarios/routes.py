@@ -5,13 +5,28 @@ inativar usuários vinculados à propriedade atual. Não há cadastro público,
 remoção física nem painel de roles.
 """
 import re
+import secrets
 
-from flask import abort, flash, redirect, render_template, request, session, url_for
+from flask import (
+    abort, current_app, flash, redirect, render_template, request, session,
+    url_for,
+)
 
 from ...extensions import db
 from ...models import Usuario, UsuarioPropriedade
 from ...models._helpers import iso_now
-from ...services.auditoria_service import registrar_negado, registrar_sucesso
+from ...services.auditoria_service import (
+    mascarar_email,
+    registrar_evento,
+    registrar_negado,
+    registrar_sucesso,
+)
+from ...services.email_service import (
+    email_ativo,
+    email_convite_definir_senha,
+    montar_link_absoluto,
+)
+from ...services.password_reset_service import gerar_token_definicao_senha
 from ...utils.auth import gerar_hash_senha, login_required, usuario_atual
 from ...utils.contexto import propriedade_atual, vazio_para_none
 from ...utils.permissions import PERFIS_OFICIAIS, require_permission, role_label
@@ -126,13 +141,18 @@ def _validar_admin_preservado(usuario, novo_perfil, novo_ativo):
     return erros
 
 
-def _validar_dados_usuario(*, usuario=None, perfis_permitidos=()):
+def _validar_dados_usuario(*, usuario=None, perfis_permitidos=(), com_senha=True):
+    """Valida o formulário de usuário.
+
+    ``com_senha=False`` (criação por convite): os campos de senha são
+    ignorados — o próprio usuário definirá a senha pelo link do convite.
+    """
     nome = vazio_para_none(request.form.get("nome"))
     email = (request.form.get("email") or "").strip().lower()
     perfil = request.form.get("perfil") or ""
     ativo = _ativo_form(default=True if usuario is None else bool(usuario.ativo))
-    senha = request.form.get("senha") or ""
-    confirmar_senha = request.form.get("confirmar_senha") or ""
+    senha = request.form.get("senha") or "" if com_senha else ""
+    confirmar_senha = request.form.get("confirmar_senha") or "" if com_senha else ""
 
     erros = []
     if not nome:
@@ -148,12 +168,12 @@ def _validar_dados_usuario(*, usuario=None, perfis_permitidos=()):
     elif perfil not in perfis_permitidos:
         erros.append(f"Perfil não permitido: {role_label(perfil)}.")
 
-    if usuario is None:
+    if usuario is None and com_senha:
         if not senha:
             erros.append("A senha é obrigatória.")
         if not confirmar_senha:
             erros.append("A confirmação de senha é obrigatória.")
-    elif confirmar_senha and not senha:
+    elif usuario is not None and confirmar_senha and not senha:
         erros.append("Preencha a nova senha antes da confirmação.")
 
     if senha and len(senha) < MIN_SENHA:
@@ -308,19 +328,23 @@ def _fluxo_novo(perfil_fixo=None):
                 propriedade,
             )
 
-        dados, erros = _validar_dados_usuario(perfis_permitidos=perfis_permitidos)
+        dados, erros = _validar_dados_usuario(perfis_permitidos=perfis_permitidos,
+                                              com_senha=False)
         if erros:
             for e in erros:
                 flash(e, "error")
             return _render_form(None, request.form, perfis_permitidos, 400,
                                 titulo=titulo, form_action=form_action)
 
+        # O admin/gerente NÃO define a senha: o usuário nasce com uma senha
+        # aleatória forte e desconhecida (inutilizável para login) e recebe
+        # por e-mail o link seguro para definir a própria senha.
         usuario = Usuario(
             nome=dados["nome"],
             email=dados["email"],
             perfil=dados["perfil"],
             ativo=dados["ativo"],
-            senha_hash=gerar_hash_senha(dados["senha"]),
+            senha_hash=gerar_hash_senha(secrets.token_urlsafe(32)),
         )
         db.session.add(usuario)
         db.session.flush()
@@ -342,11 +366,91 @@ def _fluxo_novo(perfil_fixo=None):
                           descricao=descricao,
                           propriedade_id=propriedade.id, request=request)
         flash("Usuário criado com sucesso.", "success")
+        _enviar_convite(usuario, propriedade)
         return redirect(url_for("usuarios.index"))
 
     return _render_form(None, {"perfil": perfis_permitidos[0], "ativo": True},
                         perfis_permitidos, titulo=titulo,
                         form_action=form_action)[0]
+
+
+def _link_definir_senha(token):
+    """Link absoluto de definição de senha (APP_BASE_URL ou host da requisição)."""
+    if current_app.config.get("APP_BASE_URL"):
+        return montar_link_absoluto(url_for("auth.definir_senha", token=token))
+    return url_for("auth.definir_senha", token=token, _external=True)
+
+
+def _enviar_convite(usuario, propriedade, *, reenvio=False):
+    """Gera o token de definição de senha e envia (ou exibe, em dev) o convite.
+
+    Fail-safe: falha de envio não desfaz o cadastro — registra auditoria e
+    orienta usar "Reenviar convite". Nunca registra token/link em auditoria.
+    """
+    token = gerar_token_definicao_senha(usuario)
+    if token is None:
+        return False
+    link = _link_definir_senha(token)
+    email_mascarado = mascarar_email(usuario.email)
+    acao = "usuarios.convite_reenviado" if reenvio else "usuarios.convite_enviado"
+
+    if email_ativo():
+        if email_convite_definir_senha(usuario, link):
+            registrar_evento(
+                acao, entidade="usuario", entidade_id=usuario.id,
+                resultado="sucesso",
+                descricao=f"Convite de definição de senha enviado para {email_mascarado}",
+                propriedade_id=propriedade.id, request=request)
+            flash(f"Convite enviado para {usuario.email}.", "success")
+            return True
+        registrar_evento(
+            "usuarios.convite_falha_envio", entidade="usuario",
+            entidade_id=usuario.id, resultado="falha",
+            descricao=f"Falha no envio do convite para {email_mascarado}",
+            propriedade_id=propriedade.id, request=request)
+        flash("Não foi possível enviar o e-mail de convite agora. "
+              "Use 'Reenviar convite' mais tarde.", "warning")
+        return False
+
+    # SMTP inativo: em dev/local o link aparece em tela para teste manual;
+    # em produção (PASSWORD_RESET_SHOW_DEV_LINK=false) nunca aparece.
+    registrar_evento(
+        acao, entidade="usuario", entidade_id=usuario.id,
+        resultado="sucesso",
+        descricao=f"Convite gerado para {email_mascarado} (envio de e-mail inativo)",
+        propriedade_id=propriedade.id, request=request)
+    if current_app.config.get("PASSWORD_RESET_SHOW_DEV_LINK"):
+        flash(f"E-mail inativo (modo dev) — link de definição de senha: {link}", "info")
+    else:
+        flash("Envio de e-mail não está configurado. Use 'Reenviar convite' "
+              "quando o SMTP estiver ativo.", "warning")
+    return False
+
+
+@usuarios_bp.route("/<int:usuario_id>/reenviar-convite", methods=["POST"])
+@login_required
+@require_permission("usuarios.edit")
+def reenviar_convite(usuario_id):
+    """Reenvia o convite de definição de senha (invalida tokens anteriores).
+
+    Admin reenvia para gerente/trabalhador; gerente apenas para trabalhador;
+    nunca para admin. Não altera senha, e-mail, perfil nem status do usuário.
+    """
+    propriedade = propriedade_atual()
+    usuario_logado = _usuario_logado_model()
+    usuario, _vinculo = _usuario_da_propriedade_ou_404(usuario_id, propriedade)
+    if usuario.perfil == "admin" or not _can_edit_target_user(usuario_logado, usuario):
+        _bloquear_acao_usuario(
+            "usuarios.convite.blocked",
+            f"Tentativa bloqueada de reenviar convite para usuário #{usuario.id}",
+            propriedade,
+            usuario.id,
+        )
+    if not usuario.ativo:
+        flash("Usuário inativo não pode receber convite.", "error")
+        return redirect(url_for("usuarios.index")), 400
+    _enviar_convite(usuario, propriedade, reenvio=True)
+    return redirect(url_for("usuarios.index"))
 
 
 @usuarios_bp.route("/<int:usuario_id>/editar", methods=["GET", "POST"])
