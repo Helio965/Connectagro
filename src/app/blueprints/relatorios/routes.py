@@ -48,14 +48,14 @@ _NOMES_RELATORIO = {
 
 def _auditar_exportacao(slug, formato, propriedade):
     registrar_sucesso(
-        "exportacao.gerada", entidade="relatorio", entidade_id=slug,
+        "exportacao.gerada", entidade="relatorio",
         descricao=f"Exportação {formato.upper()} do relatório {_NOMES_RELATORIO[slug]}",
         propriedade_id=propriedade.id, request=request)
 
 
 def _falha_exportacao(slug, formato, propriedade, erro):
     registrar_falha(
-        "exportacao.falha", entidade="relatorio", entidade_id=slug,
+        "exportacao.falha", entidade="relatorio",
         descricao=f"Filtro inválido na exportação {formato.upper()} de {slug}",
         propriedade_id=propriedade.id, request=request)
     flash(str(erro), "error")
