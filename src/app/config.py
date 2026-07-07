@@ -139,6 +139,9 @@ class BaseConfig:
     MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD", "")
     MAIL_DEFAULT_SENDER = os.environ.get("MAIL_DEFAULT_SENDER", "")
     MAIL_SUPPRESS_SEND = _env_bool("MAIL_SUPPRESS_SEND", "false")
+    # Nunca imprimir o diálogo SMTP (contém credenciais codificadas em
+    # base64). Sem isto, Flask-Mail herda app.debug e vaza o AUTH no console.
+    MAIL_DEBUG = _env_bool("MAIL_DEBUG", "false")
     MAIL_ATIVO = (
         _env_bool("MAIL_ATIVO", "false")
         and bool(os.environ.get("MAIL_SERVER"))
