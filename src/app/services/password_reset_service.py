@@ -150,7 +150,7 @@ def redefinir_senha_com_token(token, nova_senha, confirmar_senha):
     if registro is None:
         return False, ["Link de redefinição inválido, expirado ou já utilizado."]
 
-    usuario = Usuario.query.get(registro.usuario_id)
+    usuario = db.session.get(Usuario, registro.usuario_id)
     if usuario is None or not usuario.ativo:
         return False, ["Usuário não encontrado ou inativo."]
 
