@@ -13,7 +13,7 @@ Código-fonte da aplicação **ConnectAgro** (backend Flask + frontend).
 ## Stack
 
 - **Backend:** Python + Flask
-- **Banco de dados:** SQLite
+- **Banco de dados:** SQLite local ou PostgreSQL/Supabase por configuração
 - **Frontend:** HTML, CSS, JavaScript
 
 ## Estrutura profissional planejada

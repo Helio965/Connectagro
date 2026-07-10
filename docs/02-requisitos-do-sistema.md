@@ -78,9 +78,10 @@
   **expiração** configurável; armazenar apenas o **hash** do token.
 - RF-23 — Permitir redefinir a senha mediante token válido em
   `/auth/redefinir-senha/<token>`, sem expor a senha; token de **uso único**.
-- RF-24 — **Sem envio real de e-mail** nesta fase: em ambiente local/dev/teste o
-  link de redefinição é exibido na tela (`PASSWORD_RESET_SHOW_DEV_LINK`); em
-  produção, nunca. Usuário inativo não recupera senha e não é reativado.
+- RF-24 — Enviar o link por Flask-Mail/SMTP quando `MAIL_ATIVO` e as credenciais
+  estiverem configurados. Sem envio ativo, exibi-lo somente em local/dev/teste
+  quando `PASSWORD_RESET_SHOW_DEV_LINK=true`; em produção, nunca. Usuário
+  inativo não recupera senha e não é reativado.
 
 ### Auditoria/logs (Fase 7.3) ✅
 - RF-25 — Registrar eventos de **login/logout** (`auth.login.sucesso`,
@@ -128,8 +129,8 @@
 
 ## Requisitos Não Funcionais (RNF)
 
-- RNF-01 — **Tecnologia:** backend em Python/Flask, banco SQLite, frontend em
-  HTML/CSS/JavaScript.
+- RNF-01 — **Tecnologia:** backend em Python/Flask, SQLite como banco local
+  padrão ou PostgreSQL/Supabase por configuração, frontend em HTML/CSS/JavaScript.
 - RNF-02 — **Segurança:** senhas armazenadas de forma segura (hash); acesso
   protegido por autenticação.
 - RNF-03 — **Usabilidade:** interface simples e adequada ao público produtor.
@@ -154,8 +155,8 @@
   operacionais e **não** podem ser apresentados como cotação ou documento
   comercial.
 - RNF-11 — **Limites pós-MVP:** IA real/LLM, OCR, deploy completo, validação
-  regulatória real e preço/imagem com fontes reais permanecem fora do MVP
-  ampliado.
+  regulatória real, preço atualizado e imagens oficiais/do fabricante
+  permanecem fora do MVP ampliado.
 
 ---
 

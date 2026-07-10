@@ -10,8 +10,9 @@
 
 ## Visão geral
 
-O ConnectAgro (MVP) será uma aplicação web monolítica baseada em **Flask**, com
-banco **SQLite** e frontend renderizado em **HTML/CSS/JavaScript**. A
+O ConnectAgro (MVP) é uma aplicação web monolítica baseada em **Flask**, com
+**SQLite** como banco local padrão e suporte configurável a
+**PostgreSQL/Supabase**, além de frontend renderizado em **HTML/CSS/JavaScript**. A
 organização favorece a separação por módulos para facilitar evolução futura.
 
 ## Camadas
@@ -22,7 +23,7 @@ organização favorece a separação por módulos para facilitar evolução futu
   lógica de cada funcionalidade.
 - **Domínio / regras:** regras de negócio aplicadas no backend (ver
   [03 — Regras de Negócio](./03-regras-de-negocio.md)).
-- **Dados:** camada de acesso ao SQLite.
+- **Dados:** Flask-SQLAlchemy sobre SQLite local ou PostgreSQL/Supabase.
 
 ## Organização técnica
 
@@ -39,17 +40,19 @@ templates**, conforme detalhado no documento 06.1.
 
 ## Decisões e restrições
 
-- **Stack fixa no MVP:** Python/Flask, SQLite, HTML/CSS/JS.
+- **Stack do MVP:** Python/Flask e HTML/CSS/JS; SQLite é o padrão local e
+  PostgreSQL/Supabase é suportado por configuração.
 - **IA simulada:** no MVP, o módulo de IA retorna respostas simuladas; não há
   integração com modelos em produção.
-- **Catálogo como consulta:** sem venda; preço/imagem como pendência quando não
-  consolidados.
+- **Catálogo como consulta:** sem venda; preço pendente e imagens locais de
+  referência com status não consolidado.
 - **Sem serviços externos obrigatórios:** o MVP deve rodar localmente de forma
   simples.
 
 ## Evolução futura
 
-- Possível migração de SQLite para um SGBD mais robusto no sistema final.
+- PostgreSQL/Supabase já é suportado por `DATABASE_URL`/`DIRECT_URL`; SQLite
+  permanece como opção local padrão.
 - Integração de IA real e da validação diária de menor valor de produtos.
 
 ---

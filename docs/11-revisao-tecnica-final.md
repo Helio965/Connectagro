@@ -129,8 +129,8 @@ git diff --check
   `js/`, o que facilita um redesenho incremental.
 - **Limites permanentes do produto:** venda, carrinho, checkout e cotação **não**
   entram. **Fora do MVP ampliado** (avaliados depois): IA real/LLM, validação
-  regulatória real do catálogo, preço/imagem com fontes reais, OCR/leitura
-  automática de uploads e deploy/produção completo.
+  regulatória real do catálogo, preço atualizado, imagens oficiais/do
+  fabricante, OCR/leitura automática de uploads e deploy/produção completo.
 
 ---
 

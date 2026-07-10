@@ -40,8 +40,9 @@
 > `services/password_reset_service.py` e as rotas públicas
 > `/auth/esqueci-senha` e `/auth/redefinir-senha/<token>`. O token é seguro
 > (`secrets.token_urlsafe`), expirável e de **uso único**; apenas o **hash**
-> (SHA-256) é armazenado. **Sem envio real de e-mail**: o link de redefinição
-> aparece em tela apenas em local/dev/teste (`PASSWORD_RESET_SHOW_DEV_LINK`).
+> (SHA-256) é armazenado. Com `MAIL_ATIVO` e SMTP configurados, o link é enviado
+> por Flask-Mail; sem envio ativo, aparece em tela apenas em local/dev/teste
+> quando `PASSWORD_RESET_SHOW_DEV_LINK=true`.
 > Usuário inativo não recupera senha e não é reativado; a tabela `usuario` não
 > é alterada.
 
@@ -101,7 +102,8 @@ Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetur
 > **Painel de Usuários**, **Recuperação de Senha**, **Auditoria/logs**,
 > **Exportações CSV/PDF** e **Mapa avançado**,
 > além da consulta somente leitura de Defensivos e Fertilizantes.
-> `ProdutoPreco`/`ProdutoImagem` seguem vazios no MVP.
+> `ProdutoPreco` segue vazio; `ProdutoImagem` é populado com uma imagem local de
+> referência por produto, com fonte/licença rastreadas.
 >
 > **Dashboard Operacional:** agrega dados já existentes da propriedade atual,
 > usando consultas aos módulos operacionais. Ele não cria registros, não altera
@@ -126,8 +128,8 @@ Este documento **complementa** o [06 — Arquitetura do Sistema](./06-arquitetur
 > `/static/uploads`.
 >
 > **Estado final:** MVP base consolidado e MVP ampliado concluído. Validação
-> regulatória real, preço/imagem real,
-> OCR, deploy completo e IA externa ficam fora do MVP ampliado.
+> regulatória real, preço atualizado, imagens oficiais/do fabricante, OCR,
+> deploy completo e IA externa ficam fora do MVP ampliado.
 
 ## Objetivo
 
@@ -139,8 +141,9 @@ consistente para a implementação incremental.
 ## 1. Visão técnica geral
 
 O MVP é uma **aplicação web monolítica** em **Flask**, renderizada no servidor
-(Server-Side Rendering com Jinja2), com banco **SQLite** e frontend em
-**HTML/CSS/JavaScript**. A organização segue separação por camadas e por módulos
+(Server-Side Rendering com Jinja2), com **SQLite** como banco local padrão ou
+**PostgreSQL/Supabase** por configuração e frontend em **HTML/CSS/JavaScript**.
+A organização segue separação por camadas e por módulos
 (blueprints), favorecendo manutenção, testes e evolução futura.
 
 ```text
@@ -150,7 +153,7 @@ Navegador (HTML/CSS/JS)
 Flask (rotas/blueprints)  ──►  Serviços/helpers  ──►  Modelos/Acesso a dados
         │                                                       │
         ▼                                                       ▼
-   Templates Jinja2                                         SQLite (instance/)
+   Templates Jinja2                                  SQLite / PostgreSQL
 ```
 
 ### Princípios técnicos
@@ -186,7 +189,7 @@ Flask (rotas/blueprints)  ──►  Serviços/helpers  ──►  Modelos/Acess
 | Linguagem        | Python 3.11+                                 | Testado localmente também em Python 3.12       |
 | Framework web    | Flask                                        | Monólito com blueprints                        |
 | Templates        | Jinja2                                       | SSR                                            |
-| Banco de dados   | SQLite                                       | Arquivo local em `instance/`                   |
+| Banco de dados   | SQLite ou PostgreSQL                         | SQLite local; Supabase via configuração        |
 | Acesso a dados   | Flask-SQLAlchemy                             | ORM adotado                                    |
 | Migrations       | Flask-Migrate (Alembic)                      | Pasta `migrations/` versionada                 |
 | Upload local     | Werkzeug `secure_filename` + Flask `send_from_directory` | Arquivos fora de `static` e do Git |
@@ -197,6 +200,7 @@ Flask (rotas/blueprints)  ──►  Serviços/helpers  ──►  Modelos/Acess
 | Autenticação     | Sessão Flask + hash de senha (Werkzeug)      | Helpers em `utils/auth.py`                     |
 | Autorização      | Matriz em código                             | `utils/permissions.py`; sem tabela de roles    |
 | Formulários/CSRF | Flask-WTF / CSRFProtect                     | Token em formulários POST; testes específicos  |
+| E-mail transacional | Flask-Mail + SMTP                        | Convites e recuperação quando configurado      |
 | Frontend         | HTML, CSS, JavaScript                        | Sem framework JS obrigatório no MVP            |
 | Testes           | pytest                                       | SQLite em memória e pasta temporária para upload |
 
@@ -275,15 +279,15 @@ instance/
 
 ---
 
-## 6. Acesso a dados, banco SQLite e arquivos
+## 6. Acesso a dados, bancos e arquivos
 
-- **Banco:** arquivo SQLite em `instance/` ou caminho configurado por ambiente.
+- **Banco:** SQLite em `instance/` por padrão local; PostgreSQL/Supabase por
+  `DATABASE_URL`, com `DIRECT_URL` opcional para migrations/conexão direta.
 - **ORM:** `Flask-SQLAlchemy`, com instância `db` em `src/app/extensions.py`.
 - **Migrations:** `Flask-Migrate/Alembic`, com migration inicial e evoluções
   versionadas.
-- **Seeds:** `flask --app src/run.py import-catalog-seed` popula apenas
-  `produto_base` + `produto_tecnico`. `produto_preco`/`produto_imagem` continuam
-  vazios no MVP.
+- **Seeds:** `flask --app src/run.py import-catalog-seed` popula `produto_base` +
+  `produto_tecnico` + `produto_imagem`. `produto_preco` continua vazio no MVP.
 - **Dashboard:** não exige migration nova porque apenas consulta tabelas já
   existentes.
 - **Aplicações de Insumo:** não exigem migration nova porque a tabela
@@ -513,9 +517,10 @@ Matriz resumida:
   reset invalida os tokens abertos anteriores do usuário.
 - A solicitação responde sempre com **mensagem genérica** (sem enumeração de
   e-mails). E-mail inexistente ou usuário inativo **não** geram token válido.
-- **Sem envio real de e-mail nesta fase.** Em local/dev/teste
-  (`PASSWORD_RESET_SHOW_DEV_LINK`), a tela exibe o link de redefinição para uso
-  manual; em produção, nunca.
+- Com `MAIL_ATIVO` e as credenciais SMTP configurados,
+  `services/email_service.py` envia o link via Flask-Mail. Sem envio ativo, a
+  tela pode exibir o link somente em local/dev/teste quando
+  `PASSWORD_RESET_SHOW_DEV_LINK=true`; em produção, nunca.
 - A redefinição valida o token novamente, exige nova senha (mínimo 6 caracteres)
   e confirmação, grava o **hash** da nova senha, marca o token como usado, **não
   reativa** usuário inativo e **não** autentica automaticamente (redireciona ao
@@ -599,7 +604,8 @@ Matriz resumida:
   propriedade e registro histórico de aplicações.
 - Produtos ficam em **`produto_base`**; dados técnicos em **`produto_tecnico`**;
   preços em **`produto_preco`**; imagens em **`produto_imagem`**.
-- No MVP, **preço e imagem são pendentes / não consolidados**.
+- No MVP, **preço permanece pendente**; imagens locais de referência são
+  importadas com fonte/licença rastreadas e status não consolidado.
 - O MVP **não** busca preços automaticamente e **não** afirma validação oficial
   AGROFIT/MAPA ou SIPEAGRO/MAPA sem fonte real.
 - `status_regulatorio` é informativo.
@@ -849,7 +855,8 @@ Matriz resumida:
 - Todo formulário POST deve renderizar `csrf_token()`.
 - Upload multipart também deve enviar token CSRF.
 - CSRF não substitui autenticação, permissões nem escopo por propriedade.
-- No MVP, **preço e imagem** devem aparecer como pendentes / não consolidados.
+- No MVP, **preço** deve aparecer como pendente; imagens de referência podem
+  aparecer com status não consolidado e placeholder apenas como fallback.
 - A **validação diária do menor preço** pertence ao sistema final.
 - Usar nomes de tabelas e campos compatíveis com o DER e o dicionário de dados.
 - Priorizar código simples, modular e testável.
@@ -869,7 +876,8 @@ Matriz resumida:
 - [x] DER revisado
 - [x] Dicionário de dados revisado
 - [x] Catálogo de produtos corrigido com IDs, slugs e classe
-- [x] Estratégia de seed definida (`produto_base` + `produto_tecnico`; preço/imagem vazios no MVP)
+- [x] Estratégia de seed definida (`produto_base` + `produto_tecnico` +
+  `produto_imagem`; preço vazio no MVP)
 - [x] Decisão final sobre ORM: Flask-SQLAlchemy
 - [x] Fundação Flask criada (`src/run.py` + `src/app/`)
 - [x] Blueprints placeholders criados
@@ -908,7 +916,7 @@ Matriz resumida:
 **Fora do MVP ampliado (avaliados depois):**
 
 - [ ] Validação regulatória real do catálogo
-- [ ] Preço/imagem com fontes reais e atualização periódica
+- [ ] Preço com fontes reais e atualização periódica; imagens oficiais/do fabricante
 - [ ] OCR/leitura automática de uploads
 - [ ] Deploy/produção completo
 - [ ] IA real/LLM, se futuramente aprovado
@@ -939,8 +947,9 @@ Matriz resumida:
 
 - Tabela de tokens `senha_reset_token` (migration própria) com **expiração**.
 - Token **armazenado apenas como hash** (SHA-256), nunca em claro; uso único.
-- Fluxo que **não expõe** senha nem token; **sem envio real de e-mail** — link de
-  redefinição visível só em local/dev/teste (`PASSWORD_RESET_SHOW_DEV_LINK`).
+- Fluxo que **não expõe** senha nem token; na entrega original, o link aparecia
+  apenas em local/dev/teste. O envio por Flask-Mail/SMTP foi incorporado
+  posteriormente e é usado quando configurado.
 - Mensagem genérica (sem enumeração); usuário inativo não recupera senha e não é
   reativado. Detalhes na seção "Recuperação de senha" acima.
 
@@ -987,8 +996,9 @@ Matriz resumida:
 ### Fora do MVP ampliado
 
 Permanecem fora do MVP ampliado, como pós-MVP: **IA real/LLM**, **validação
-regulatória real** do catálogo, **preço/imagem real** com atualização periódica,
-**OCR/leitura automática** de uploads e **deploy/produção completo**. A IA do
+regulatória real** do catálogo, **preço atualizado**, **imagens oficiais/do
+fabricante**, **OCR/leitura automática** de uploads e **deploy/produção
+completo**. A IA do
 produto continua **simulada**. **Venda, carrinho, checkout e cotação** nunca
 entram no produto.
 

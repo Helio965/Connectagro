@@ -4,7 +4,8 @@
 > base**. Ele define o escopo do **MVP ampliado** (Fase 7), o que fica de fora e o
 > que **nunca** entra no produto. A **Fase 7.0** foi somente documental, a
 > **Fase 7.1** implementa o painel interno de usuários, a **Fase 7.2** implementa
-> a recuperação de senha (token seguro, sem envio real de e-mail), a **Fase 7.3**
+> a recuperação de senha (token seguro, sem envio real na entrega original;
+> Flask-Mail/SMTP foi incorporado posteriormente), a **Fase 7.3**
 > implementa a auditoria/logs administrativos (somente admin, sem dados sensíveis)
 > a **Fase 7.4** implementa as exportações CSV/PDF dos relatórios (operacionais,
 > nunca cotação/venda) e a **Fase 7.5** implementa o mapa avançado (edição do
@@ -52,7 +53,7 @@ flask --app src/run.py seed-users
 | Fase | Item | Resumo |
 | ---- | ---- | ------ |
 | 7.1 | Painel de usuários | **Concluído:** admin lista, cria, edita perfil/status e inativa usuários da propriedade. **Sem cadastro público.** |
-| 7.2 | Recuperação de senha | **Concluído:** token seguro/expirável, armazenado só como hash, uso único; mensagem genérica; sem envio real de e-mail (link dev em local/teste). |
+| 7.2 | Recuperação de senha | **Concluído:** token seguro/expirável, armazenado só como hash, uso único; mensagem genérica; sem envio real na entrega original (Flask-Mail/SMTP incorporado posteriormente). |
 | 7.3 | Auditoria/logs | **Concluído:** tabela `log_auditoria`, serviço central, eventos sensíveis (auth, reset, CRUDs, usuários, upload, permissão negada); tela `/auditoria/` só admin, escopo por propriedade, sem dados sensíveis. |
 | 7.4 | PDF/exportações | **Concluído:** CSV (lib padrão) + PDF (ReportLab) dos 5 relatórios, em memória; escopo por propriedade/permissão; filtros preservados; auditoria `exportacao.gerada`; nunca cotação/venda. |
 | 7.5 | Mapa avançado | **Concluído:** edição/salvamento/limpeza do polígono da gleba (Leaflet.draw), `mapa.edit` (admin/técnico), validação GeoJSON no backend, CSRF, auditoria; sem PostGIS/GPS/shapefile. |
@@ -64,7 +65,7 @@ Reconhecidos, mas **não** incluídos no MVP ampliado (avaliados depois):
 
 - IA real/LLM (a IA do produto permanece **simulada**);
 - validação regulatória real do catálogo (AGROFIT/MAPA/SIPEAGRO);
-- preço/imagem com fontes reais e atualização periódica;
+- preço com fontes reais e atualização periódica; imagens oficiais/do fabricante;
 - OCR/leitura automática de uploads;
 - deploy/produção completo.
 

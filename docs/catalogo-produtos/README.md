@@ -9,7 +9,7 @@ do seed do banco. Serve para:
 
 - consulta rápida e organização de insumos;
 - apoio ao registro futuro de aplicação de insumos;
-- base inicial para o seed do SQLite;
+- base inicial para o seed do banco configurado via ORM;
 - documentação técnica do sistema.
 
 Abrange as categorias: **Defensivos**, **Fertilizantes**, **Corretivos**,
@@ -31,12 +31,14 @@ Abrange as categorias: **Defensivos**, **Fertilizantes**, **Corretivos**,
 
 - **`produto_base`** (id, slug, nome, classe, categoria, descrições, status) e
   **`produto_tecnico`** (dados técnicos): **preenchidos** como base técnica.
+- **`produto_imagem`**: uma imagem local de referência por produto, com
+  fonte/licença rastreadas e status não consolidado.
 - 30 defensivos + 30 fertilizantes/corretivos/inoculantes pré-cadastrados.
 
 ## O que fica para o sistema final
 
-- **`produto_preco`** e **`produto_imagem`**: **pendentes / não consolidados** no
-  MVP (tabelas vazias no seed).
+- **`produto_preco`**: pendente / não consolidado no MVP (tabela vazia no seed).
+- Imagens oficiais/do fabricante e eventual consolidação das referências atuais.
 - **Validação diária do menor valor** atualizado de cada produto (com fonte,
   data, unidade, URL e status).
 - Validação oficial **AGROFIT/MAPA** (defensivos) e **SIPEAGRO/MAPA**
@@ -61,7 +63,7 @@ Abrange as categorias: **Defensivos**, **Fertilizantes**, **Corretivos**,
 > Inegociáveis para qualquer dado adicionado aqui.
 
 1. **Consulta, não venda.** Valores são apenas referência de consulta rápida.
-2. **Preço e imagem são pendência no MVP** — nunca inventados.
+2. **Preço é pendência; imagens exigem fonte/licença rastreável** — nunca inventados.
 3. **Sem validação oficial inventada** (AGROFIT/MAPA ou SIPEAGRO/MAPA) sem fonte real.
 4. **Base técnica, não verdade regulatória.**
 5. **Validação diária de menor valor fica para o sistema final.**

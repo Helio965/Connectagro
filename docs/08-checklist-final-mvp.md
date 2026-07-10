@@ -69,7 +69,8 @@ ampliado** (Fase 7).
 - [x] Sem CRUD de produto no MVP.
 - [x] Sem venda, carrinho, checkout ou cotação.
 - [x] Sem validação oficial automática AGROFIT/MAPA.
-- [x] `produto_preco` e `produto_imagem` permanecem vazios/pendentes no MVP.
+- [x] Na conclusão do MVP base, `produto_preco` e `produto_imagem` estavam
+  vazios/pendentes; `produto_imagem` foi populado posteriormente.
 
 ## 6. Upload
 
@@ -150,7 +151,7 @@ Recursos **ainda não implementados** no MVP base. Os itens marcados com
 - Sem PDF/exportação. **(MVP ampliado — Fase 7.4)**
 - Sem mapa avançado. **(MVP ampliado — Fase 7.5)**
 - Sem validação oficial automática AGROFIT/MAPA. **(fora do MVP ampliado)**
-- Preço e imagem de produto pendentes. **(fora do MVP ampliado)**
+- Preço pendente; imagens locais de referência foram incorporadas posteriormente.
 - Sem OCR / leitura automática de upload. **(fora do MVP ampliado)**
 - Sem LLM/API externa (IA permanece simulada). **(fora do MVP ampliado)**
 - Sem deploy/produção completo. **(fora do MVP ampliado)**
@@ -173,7 +174,7 @@ Itens que **passaram a integrar o MVP** (Fase 7), antes tratados como pós-MVP:
 
 - IA real/LLM, se futuramente aprovado.
 - Validação regulatória real do catálogo.
-- Preço/imagem com fontes reais e atualização periódica.
+- Preço com fontes reais e atualização periódica; imagens oficiais/do fabricante.
 - OCR/leitura automática de uploads.
 - Deploy/produção completo.
 - Melhorias avançadas que não entrarem na Fase 7.

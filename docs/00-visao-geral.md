@@ -37,9 +37,9 @@ Produtores rurais de pequeno, médio e grande porte e suas equipes de gestão.
   **recuperação de senha**, **auditoria/logs administrativos**,
   **PDF/exportações** e **mapa avançado**.
 - **Fora do MVP ampliado** (avaliados depois): IA real/LLM, validação
-  regulatória real do catálogo, preço/imagem com fontes reais, OCR/leitura
-  automática de uploads e deploy/produção completo. A IA do produto continua
-  **simulada** também no MVP ampliado.
+  regulatória real do catálogo, preço com atualização periódica, imagens
+  oficiais/do fabricante, OCR/leitura automática de uploads e deploy/produção
+  completo. A IA do produto continua **simulada** também no MVP ampliado.
 - **Limite permanente do produto:** o ConnectAgro **não** terá venda, carrinho,
   checkout ou cotação. Ele é uma plataforma de **gestão e consulta técnica**, não
   um marketplace, salvo mudança radical de produto explicitamente aprovada.
@@ -54,8 +54,9 @@ em todas as etapas:
 2. **Valores são consulta, não cotação oficial.** Os preços exibidos são
    referência. A validação diária do menor valor atualizado fica para o
    **sistema final**, não para o MVP.
-3. **Preço e imagem no MVP são pendência.** Devem ser tratados como
-   **dado não consolidado** enquanto não houver fonte confiável.
+3. **Preço continua pendente; imagens de referência estão disponíveis.** O
+   catálogo possui imagens locais com fonte/licença rastreadas, ainda tratadas
+   como **dado não consolidado** e não como imagem oficial do fabricante.
 4. **Sem validação regulatória inventada.** Não se deve afirmar validação
    AGROFIT/MAPA nem dizer que um produto está "validado oficialmente" sem
    comprovação por fonte real.
@@ -68,7 +69,8 @@ em todas as etapas:
 ## Stack do MVP
 
 - **Backend:** Python + Flask
-- **Banco de dados:** SQLite + Flask-SQLAlchemy + Flask-Migrate
+- **Banco de dados:** SQLite local ou PostgreSQL/Supabase por configuração, com
+  Flask-SQLAlchemy + Flask-Migrate
 - **Segurança:** sessão Flask, permissões por perfil e CSRF/Flask-WTF
 - **Exportações:** CSV com biblioteca padrão e PDF com ReportLab
 - **Mapa:** Leaflet + Leaflet.draw via CDN

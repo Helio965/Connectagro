@@ -62,9 +62,9 @@ obrigatoriedade, chave, descrição e observações.
   `BOOLEAN`).
 
 > **Pendências e limites importantes do MVP:**
-> - **Preço** (`produto_preco`) e **imagem** (`produto_imagem`) ficam
->   **pendentes**: `valor`/`url` podem ser `NULL` e `status_validacao` indica
->   `pendente`/`nao_consolidado`. Nunca inventar valores.
+> - **Preço** (`produto_preco`) fica pendente. **Imagem** (`produto_imagem`) é
+>   populada pelo seed com referências locais e fonte/licença rastreadas; seu
+>   `status_validacao` permanece `nao_consolidado`. Nunca inventar valores.
 > - A **validação diária do menor preço** fica para o **sistema final**.
 > - **Não existe validação AGROFIT/MAPA presumida**; o catálogo é base técnica
 >   inicial, não base regulatória definitiva.
@@ -247,8 +247,9 @@ Registros de colheita por cultura/gleba.
 
 ## Catálogo de produtos
 
-> Base técnica inicial de consulta rápida. **Preço e imagem são pendências no
-> MVP.** Sem validação AGROFIT/MAPA presumida.
+> Base técnica inicial de consulta rápida. **Preço é pendência no MVP; imagens
+> locais de referência são populadas com status não consolidado.** Sem validação
+> AGROFIT/MAPA presumida.
 
 ### Tabela: `produto_base`
 Tabela central do catálogo.
@@ -328,7 +329,8 @@ Preços de **referência** (consulta rápida). **Pendência no MVP.**
 > checkout.
 
 ### Tabela: `produto_imagem`
-Imagem do produto. **Pendência no MVP.**
+Imagem local de referência do produto, populada pelo seed com fonte/licença
+rastreadas e status ainda não consolidado.
 
 | Campo            | Tipo    | Obrigatório | Chave | Descrição             | Observações                       |
 |------------------|---------|-------------|-------|-----------------------|-----------------------------------|
