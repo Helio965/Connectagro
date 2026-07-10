@@ -5,6 +5,7 @@ no backend (Polygon/MultiPolygon/Feature, coordenadas em faixa, tamanho
 limitado); inválido retorna erro e não é salvo.
 """
 import json
+import math
 
 from ..models._helpers import iso_now
 
@@ -38,13 +39,9 @@ def validar_poligono_geojson(payload):
         return None, f"Tipo GeoJSON não suportado: {tipo}. Use Polygon, MultiPolygon ou Feature."
 
     if tipo in {"Polygon", "MultiPolygon"}:
-        coords = payload.get("coordinates")
-        if not isinstance(coords, list):
-            return None, "Coordenadas ausentes ou inválidas."
-        if not _validar_coordenadas_recursive(coords):
-            return None, "Coordenadas fora da faixa válida (-90/90 lat, -180/180 lng)."
-        if not _validar_aneis(tipo, coords):
-            return None, "Cada anel do polígono precisa de ao menos 4 pontos."
+        erro = _validar_geometria(tipo, payload.get("coordinates"))
+        if erro:
+            return None, erro
 
     if tipo == "Feature":
         geometry = payload.get("geometry")
@@ -53,13 +50,9 @@ def validar_poligono_geojson(payload):
         geo_tipo = geometry.get("type")
         if geo_tipo not in {"Polygon", "MultiPolygon"}:
             return None, f"Geometria não suportada dentro de Feature: {geo_tipo}."
-        coords = geometry.get("coordinates")
-        if not isinstance(coords, list):
-            return None, "Coordenadas ausentes na geometria."
-        if not _validar_coordenadas_recursive(coords):
-            return None, "Coordenadas fora da faixa válida."
-        if not _validar_aneis(geo_tipo, coords):
-            return None, "Cada anel do polígono precisa de ao menos 4 pontos."
+        erro = _validar_geometria(geo_tipo, geometry.get("coordinates"))
+        if erro:
+            return None, erro
 
     geojson_str = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
     if len(geojson_str.encode("utf-8")) > _MAX_GEOJSON_BYTES:
@@ -68,35 +61,59 @@ def validar_poligono_geojson(payload):
     return geojson_str, None
 
 
-def _validar_aneis(tipo, coords):
-    """Exige ao menos 4 pontos por anel (mínimo de um anel fechado)."""
+def _validar_geometria(tipo, coords):
+    """Valida as ``coordinates`` de um Polygon/MultiPolygon.
+
+    Retorna ``None`` quando válidas ou a mensagem de erro apropriada.
+    """
+    if not isinstance(coords, list) or not coords:
+        return "Coordenadas ausentes ou inválidas."
     if tipo == "Polygon":
-        aneis = coords
-    else:  # MultiPolygon: lista de polígonos, cada um com seus anéis.
-        aneis = [anel for poligono in coords if isinstance(poligono, list)
-                 for anel in poligono]
+        return _validar_poligono(coords)
+    # MultiPolygon: lista não vazia de polígonos.
+    for poligono in coords:
+        erro = _validar_poligono(poligono)
+        if erro:
+            return erro
+    return None
+
+
+def _validar_poligono(aneis):
+    """Valida um polígono: lista não vazia de anéis lineares válidos."""
+    if not isinstance(aneis, list) or not aneis:
+        return "O polígono deve conter ao menos um anel de coordenadas."
     for anel in aneis:
-        if not isinstance(anel, list) or len(anel) < 4:
-            return False
-    return True
+        erro = _validar_anel(anel)
+        if erro:
+            return erro
+    return None
 
 
-def _validar_coordenadas_recursive(coords, depth=0):
-    """Valida coordenadas recursivamente (listas de listas de [lng, lat])."""
-    if depth > 4:
+def _validar_anel(anel):
+    """Valida um anel linear: >= 4 posições válidas e fechado."""
+    if not isinstance(anel, list) or len(anel) < 4:
+        return "Cada anel do polígono precisa de ao menos 4 pontos."
+    for posicao in anel:
+        if not _posicao_valida(posicao):
+            return ("Coordenadas inválidas: cada posição deve ser [lng, lat] "
+                    "numérica, com longitude entre -180 e 180 e latitude "
+                    "entre -90 e 90.")
+    if anel[0] != anel[-1]:
+        return "Cada anel do polígono deve ser fechado (último ponto igual ao primeiro)."
+    return None
+
+
+def _posicao_valida(posicao):
+    """Posição GeoJSON: [lng, lat] (altitude opcional) numérica e em faixa."""
+    if not isinstance(posicao, list) or len(posicao) < 2:
         return False
-    if not isinstance(coords, list):
-        return False
-    if len(coords) == 0:
-        return True
-    # Se é uma coordenada [lng, lat] ou [lng, lat, alt]
-    if isinstance(coords[0], (int, float)):
-        if len(coords) < 2:
+    lng, lat = posicao[0], posicao[1]
+    for valor in (lng, lat):
+        if isinstance(valor, bool) or not isinstance(valor, (int, float)):
             return False
-        lng, lat = coords[0], coords[1]
-        return -180 <= lng <= 180 and -90 <= lat <= 90
-    # Caso contrário é uma lista de coordenadas
-    return all(_validar_coordenadas_recursive(c, depth + 1) for c in coords)
+        if not math.isfinite(valor):
+            return False
+    return -180 <= lng <= 180 and -90 <= lat <= 90
 
 
 def atualizar_poligono_gleba(gleba, geojson_str):

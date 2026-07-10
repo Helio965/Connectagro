@@ -99,9 +99,9 @@
 - RN-11n — O painel de usuários trabalha somente com usuários vinculados à
   propriedade atual por `usuario_propriedade`; usuários de outra propriedade não
   podem ser editados/inativados e retornam **404** quando o perfil tem permissão.
-- RN-11o — Criar usuário pelo painel exige e-mail único, perfil oficial e senha
-  temporária com hash. Não há cadastro público; a redefinição de senha ocorre
-  apenas pelo fluxo próprio da Fase 7.2.
+- RN-11o — Criar usuário pelo painel exige e-mail único e perfil permitido. Não
+  há cadastro público; o próprio usuário define a senha por link de convite
+  seguro, expirável e de uso único, enviado por e-mail quando configurado.
 - RN-11p — Inativar usuário desativa o login e o vínculo com a propriedade, sem
   remoção física do registro. A propriedade deve manter pelo menos um `admin`
   ativo.
@@ -122,9 +122,9 @@
   abertos anteriores do usuário são invalidados. Token usado/expirado/inválido é
   recusado, e a redefinição **não** autentica o usuário automaticamente.
 - RN-11w — Exibir o **link/token de redefinição em tela** só é permitido em
-  ambiente **local/dev/teste** (`PASSWORD_RESET_SHOW_DEV_LINK`). Em produção,
-  nunca. **Não há envio real de e-mail** nesta fase; SMTP/serviço de e-mail e
-  deploy ficam fora do escopo.
+  ambiente **local/dev/teste**, quando `PASSWORD_RESET_SHOW_DEV_LINK=true` e o
+  envio não está ativo. Em produção, nunca. Com `MAIL_ATIVO` e credenciais SMTP
+  configurados, o link é enviado por Flask-Mail.
 
 ## Regras de auditoria/logs (Fase 7.3)
 
@@ -252,8 +252,8 @@
   senha**, **auditoria/logs**, **PDF/exportações** e **mapa avançado**, todos
   concluídos nas Fases 7.1 a 7.5 e revisados na Fase 7.6.
 - RN-39 — Ficam **fora do MVP ampliado** (avaliados depois): **IA real/LLM**,
-  **validação regulatória real** do catálogo, **preço/imagem real** com
-  atualização periódica, **OCR/leitura automática** de uploads e
+  **validação regulatória real** do catálogo, **preço atualizado** e **imagens
+  oficiais/do fabricante**, **OCR/leitura automática** de uploads e
   **deploy/produção completo**. A IA do produto continua **simulada**.
 - RN-40 — **Venda, carrinho, checkout e cotação** são **proibidos** como regra
   permanente do produto, salvo mudança radical de produto explicitamente

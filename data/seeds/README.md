@@ -7,8 +7,8 @@ Dados de **carga inicial (seeds)** do ConnectAgro.
 > Os seeds aqui são **técnicos/documentais**. Já existem a **aplicação Flask**, os
 > **modelos SQLAlchemy** (`src/app/models/`), **migrations** (Flask-Migrate) e
 > comandos CLI para **validar** e **importar** o catálogo. A importação popula
-> apenas `produto_base` + `produto_tecnico`; `produto_preco`/`produto_imagem`
-> permanecem **vazios** no MVP e itens bloqueados (Paraquate/Oxamil) **não** são
+> `produto_base` + `produto_tecnico` + `produto_imagem`; `produto_preco`
+> permanece **vazio** no MVP e itens bloqueados (Paraquate/Oxamil) **não** são
 > importados. O **banco populado não é versionado**. O menor valor diário fica
 > para o **sistema final** (apenas consulta rápida — o ConnectAgro não vende).
 
@@ -28,8 +28,8 @@ flask --app src/run.py import-catalog-seed
 ## Arquivos
 
 - **`connectagro_produtos_seed.json`** — seed técnico do catálogo de produtos.
-  Contém `produto_base` e `produto_tecnico` **preenchidos**; `produto_preco` e
-  `produto_imagem` **vazios** (pendência do MVP); além de
+  Contém `produto_base`, `produto_tecnico` e `produto_imagem` **preenchidos**;
+  `produto_preco` vazio; além de
   `itens_bloqueados_ou_excluidos` e `pendencias_validacao`.
 - **`connectagro_produtos_seed_compacto.csv`** — visão compacta do `produto_base`
   com colunas `id,slug,nome,classe,categoria,status_sistema,status_regulatorio,
@@ -37,11 +37,11 @@ flask --app src/run.py import-catalog-seed
 
 ## Regras dos seeds
 
-1. O seed do MVP deve usar **`produto_base` + `produto_tecnico`**.
-2. **`produto_preco` e `produto_imagem` são estruturas futuras** — permanecem
-   **vazias** no MVP (preço/imagem não consolidados).
-3. **Sem dados inventados:** nenhum preço, imagem, fabricante ou fonte oficial
-   fictícios.
+1. O seed do MVP usa **`produto_base` + `produto_tecnico` + `produto_imagem`**.
+2. **`produto_preco` permanece vazio**. `produto_imagem` contém uma referência
+   local por produto, com fonte/licença rastreadas e status não consolidado.
+3. **Sem dados inventados:** nenhum preço, fabricante, validação oficial ou
+   imagem sem fonte/licença rastreável.
 4. **Sem validação oficial não comprovada** (AGROFIT/MAPA, SIPEAGRO/MAPA).
 5. Itens **bloqueados/excluídos** (ex.: Paraquate, Oxamil) ficam apenas em
    `itens_bloqueados_ou_excluidos` e **não** são oferecidos para registro de
@@ -49,7 +49,7 @@ flask --app src/run.py import-catalog-seed
 6. Estrutura alinhada ao [DER](../../docs/04-modelagem-banco-der.md) e ao
    [dicionário de dados](../../docs/05-dicionario-de-dados.md).
 7. **`produto_tecnico.id` é omitido no JSON.** No banco, `produto_tecnico.id` é
-   PK autoincremento; na futura importação para o SQLite/ORM, o banco gera esse
+   PK autoincremento; na importação pelo ORM, o banco configurado gera esse
    identificador automaticamente. No seed, o vínculo com o produto é feito apenas
    por **`produto_id`** (FK para `produto_base.id`).
 8. **`status_regulatorio`** segue o enum oficial do MVP: `nao_validado_agrofit`,
@@ -74,7 +74,8 @@ assert len(ids) == len(set(ids)), "ids duplicados"
 assert len(slugs) == len(set(slugs)), "slugs duplicados"
 base = set(ids)
 assert all(t["produto_id"] in base for t in d["produto_tecnico"]), "FK invalida"
-assert d["produto_preco"] == [] and d["produto_imagem"] == [], "preco/imagem devem estar vazios no MVP"
+assert d["produto_preco"] == [], "preco deve estar vazio no MVP"
+assert {i["produto_id"] for i in d["produto_imagem"]} == base, "imagem ausente"
 print("Seed OK:", len(d["produto_base"]), "produtos")
 PY
 ```

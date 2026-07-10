@@ -64,7 +64,8 @@ auditoria/logs, PDF/exportações, mapa avançado e revisão final.
 - [x] Token armazenado somente como hash.
 - [x] Mensagem genérica, sem enumeração de e-mail.
 - [x] Usuário inativo não recupera senha nem é reativado.
-- [x] Sem envio real de e-mail nesta fase.
+- [x] Sem envio real na entrega original desta fase; Flask-Mail/SMTP foi
+  incorporado posteriormente.
 
 ## 9. Auditoria/logs
 
@@ -104,7 +105,8 @@ auditoria/logs, PDF/exportações, mapa avançado e revisão final.
 
 - [x] Catálogo segue como consulta técnica.
 - [x] Sem CRUD de produto.
-- [x] `produto_preco` e `produto_imagem` continuam vazios/pendentes.
+- [x] Na conclusão desta fase, `produto_preco` e `produto_imagem` estavam
+  vazios/pendentes; `produto_imagem` foi populado posteriormente.
 - [x] Sem validação oficial automática AGROFIT/MAPA/SIPEAGRO.
 - [x] Sem venda, carrinho, checkout ou cotação.
 
@@ -155,7 +157,7 @@ flask --app src/run.py seed-users
 - Sem OCR/leitura automática de uploads.
 - Sem deploy/produção completo.
 - Sem validação regulatória real.
-- Sem preço/imagem real com fontes externas.
+- Sem preço atualizado nem imagens oficiais/do fabricante.
 - Sem Excel/XLSX.
 - Sem PostGIS, GPS em tempo real, shapefile/KML ou georreferenciamento oficial.
 
@@ -163,7 +165,7 @@ flask --app src/run.py seed-users
 
 - IA real/LLM.
 - Validação regulatória real do catálogo.
-- Preço/imagem real com fontes e atualização periódica.
+- Preço com fontes e atualização periódica; imagens oficiais/do fabricante.
 - OCR/leitura automática de uploads.
 - Deploy/produção completo.
 

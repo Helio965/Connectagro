@@ -36,10 +36,10 @@
 
 ## 4. Imagem
 
-- **Situação:** **pendente / não consolidada**. A tabela `produto_imagem` está
-  **vazia** no seed.
-- Nenhuma URL de imagem foi inventada. Imagens só poderão ser incluídas com
-  **fonte/licença confiável** (preferencialmente oficial/do fabricante).
+- **Situação:** o seed possui uma imagem local de referência para cada produto,
+  com **fonte/licença rastreadas** e `status_validacao = nao_consolidado`.
+- Imagens oficiais/do fabricante e eventual validação específica permanecem
+  pendentes; o placeholder é apenas fallback quando uma imagem não está disponível.
 
 ## 5. Fabricante / produto comercial
 

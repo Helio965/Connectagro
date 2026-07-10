@@ -9,7 +9,7 @@ agrícolas para consulta rápida.
 > **Status do projeto:** fundação Flask, **modelos SQLAlchemy** (18 tabelas),
 > **migrations** (Flask-Migrate), **importação do catálogo técnico** (via CLI),
 > **autenticação real** (login/logout), **recuperação de senha** (token seguro,
-> sem e-mail real), **permissões finas por perfil**,
+> com envio do link por Flask-Mail/SMTP quando configurado), **permissões finas por perfil**,
 > **CSRF/Flask-WTF** nos formulários POST,
 > **Painel de Usuários** interno por propriedade,
 > **Auditoria/logs** administrativos (somente admin),
@@ -23,7 +23,8 @@ agrícolas para consulta rápida.
 > metadados), além da **consulta somente leitura** do catálogo de **Defensivos** e
 > **Fertilizantes** e dos **Relatórios Operacionais HTML** (geral, financeiro,
 > agrícola, aplicações e uploads), somente leitura. Não há CRUD de produtos;
-> `produto_preco`/`produto_imagem` continuam **vazios** no MVP. Os relatórios
+> `produto_preco` continua **vazio**; `produto_imagem` é populado com imagens
+> locais de referência e fontes/licenças rastreadas. Os relatórios
 > têm **exportação CSV/PDF** operacional (Fase 7.4) e o mapa permite **editar o
 > polígono** da gleba (Fase 7.5). O sistema **não vende produtos**, não recomenda
 > produtos, não valida dose, não usa LLM/API externa, não faz OCR/IA/extração
@@ -37,14 +38,16 @@ agrícolas para consulta rápida.
 > **MVP ampliado concluído:** após decisão de produto, foi aberto o **MVP
 > ampliado** (Fase 7). A Fase 7.0 registrou a decisão de escopo, a **Fase 7.1
 > implementa o painel de usuários** interno da propriedade, a **Fase 7.2
-> implementa a recuperação de senha** (token seguro/expirável, sem envio real de
-> e-mail), a **Fase 7.3 implementa a auditoria/logs administrativos** (somente
+> implementa a recuperação de senha** (token seguro/expirável, sem envio real
+> na entrega original; Flask-Mail/SMTP foi incorporado posteriormente), a
+> **Fase 7.3 implementa a auditoria/logs administrativos** (somente
 > admin, sem dados sensíveis), a **Fase 7.4 implementa as exportações CSV/PDF**
 > dos relatórios (operacionais, nunca cotação/venda) e a **Fase 7.5 implementa o
 > mapa avançado** (edição do polígono da gleba). A **Fase 7.6 conclui a revisão
 > final** do MVP ampliado.
 > Continuam **fora do MVP ampliado** IA real/LLM, validação regulatória real
-> do catálogo, preço/imagem com fontes reais, OCR/leitura automática de uploads e
+> do catálogo, preço com atualização periódica, imagens oficiais/do fabricante,
+> OCR/leitura automática de uploads e
 > deploy/produção completo. **Venda, carrinho, checkout e cotação nunca entram no
 > produto.**
 
@@ -102,7 +105,7 @@ como pós-MVP e devem preservar os limites de produto abaixo.
 | Módulo         | Descrição resumida                                              |
 | -------------- | --------------------------------------------------------------- |
 | Login          | Autenticação e controle de acesso                               |
-| Recuperar senha| Redefinição por token seguro/expirável, sem e-mail real         |
+| Recuperar senha| Token seguro; envio por Flask-Mail/SMTP quando configurado      |
 | Permissões     | Matriz por perfil (`admin`, `tecnico`, `trabalhador`)           |
 | CSRF           | Token CSRF em formulários POST com Flask-WTF                    |
 | Usuários       | Painel interno de usuários da propriedade, sem cadastro público |
@@ -400,8 +403,9 @@ vincula os três usuários de teste de forma idempotente.
 
 ### Recuperação de senha
 
-A Fase 7.2 adiciona um fluxo seguro de redefinição de senha, **sem envio real de
-e-mail** nesta etapa. No login há o link **"Esqueci minha senha"**
+A Fase 7.2 adiciona um fluxo seguro de redefinição de senha, posteriormente
+integrado ao envio transacional por Flask-Mail/SMTP. No login há o link
+**"Esqueci minha senha"**
 (`/auth/esqueci-senha`): o usuário informa o e-mail e o sistema responde sempre
 com a **mesma mensagem genérica**, evitando revelar se o e-mail existe.
 
@@ -411,12 +415,15 @@ Se o usuário existir e estiver **ativo**, é gerado um **token seguro**
 (SHA-256) do token — o token puro nunca é persistido e nenhuma senha é gravada
 nessa tabela. Solicitar um novo reset invalida os tokens abertos anteriores.
 
-Em ambiente **local/dev/teste** (`PASSWORD_RESET_SHOW_DEV_LINK`), o link de
-redefinição é exibido na própria tela para teste manual; em **produção, nunca**.
+Com `MAIL_ATIVO` e as credenciais SMTP configurados, o link é enviado por
+e-mail. Sem envio ativo, em ambiente **local/dev/teste** o link pode ser exibido
+na própria tela quando `PASSWORD_RESET_SHOW_DEV_LINK=true`; em **produção,
+nunca**.
 A redefinição (`/auth/redefinir-senha/<token>`) valida o token, exige nova senha
 (mínimo 6 caracteres) e confirmação, grava o hash, marca o token como usado,
 **não reativa** usuário inativo e **não** faz login automático — redireciona ao
-login. Não há SMTP/Flask-Mail, fila, agendador ou deploy nesta fase.
+login. O envio usa Flask-Mail/SMTP quando configurado; não há fila, agendador ou
+deploy automatizado.
 
 ### Auditoria/logs
 
@@ -448,8 +455,8 @@ logs, retenção automática, SIEM ou integração externa nesta fase.
 > `seed-users` cria/garante também uma propriedade demo e vínculos ativos em
 > `usuario_propriedade` para os três usuários, sem sobrescrever senhas existentes.
 >
-> A importação do catálogo popula apenas `produto_base` + `produto_tecnico`;
-> `produto_preco`/`produto_imagem` permanecem vazios no MVP e itens bloqueados
+> A importação do catálogo popula `produto_base` + `produto_tecnico` +
+> `produto_imagem`; `produto_preco` permanece vazio e itens bloqueados
 > (Paraquate/Oxamil) não são importados. Alternativa pontual ao passo 3 (sem
 > migrations): `flask --app src/run.py init-db`.
 
@@ -487,8 +494,9 @@ O **MVP base está consolidado** e o **MVP ampliado está concluído**
 e **7.6 — Revisão final do MVP ampliado** estão implementadas.
 
 Continuam **fora do MVP ampliado** (avaliados depois): IA real/LLM, validação
-regulatória real do catálogo, preço/imagem com fontes reais e atualização
-periódica, OCR/leitura automática de uploads e deploy/produção completo. A IA
+regulatória real do catálogo, preço com fontes reais e atualização periódica,
+imagens oficiais/do fabricante, OCR/leitura automática de uploads e
+deploy/produção completo. A IA
 **simulada** continua sendo a IA oficial também no MVP ampliado.
 
 **Nunca entram no produto** (regra permanente, salvo mudança radical de produto

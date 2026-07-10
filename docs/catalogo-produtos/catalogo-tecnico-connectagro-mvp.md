@@ -150,7 +150,8 @@ Resumo (detalhes em [pendencias-validacao.md](./pendencias-validacao.md)):
 - **Defensivos:** validação AGROFIT/MAPA **pendente**.
 - **Fertilizantes:** validação SIPEAGRO/MAPA **pendente**.
 - **Preço:** pendente / não consolidado (tabela `produto_preco` vazia).
-- **Imagem:** pendente / não consolidada (tabela `produto_imagem` vazia).
+- **Imagem:** uma referência local por produto, com fonte/licença rastreadas e
+  status não consolidado; imagens oficiais/do fabricante seguem pendentes.
 - **Fabricante / produto comercial:** pendente (itens são genéricos).
 - **Fonte técnica:** pendente de validação oficial.
 
@@ -158,14 +159,14 @@ Resumo (detalhes em [pendencias-validacao.md](./pendencias-validacao.md)):
 
 ## Regras para uso futuro no banco
 
-- O seed deve popular **`produto_base`** + **`produto_tecnico`**; **`produto_preco`
-  e `produto_imagem` permanecem vazios** no MVP.
+- O seed deve popular **`produto_base`** + **`produto_tecnico`** +
+  **`produto_imagem`**; `produto_preco` permanece vazio no MVP.
 - Usar os **mesmos `id`/`slug`/`classe`** definidos aqui e no seed JSON/CSV.
 - `slug` é **único**, minúsculo, sem acentos, separado por hífen.
 - Itens **bloqueados/excluídos** (Paraquate, Oxamil) **não** devem ser
   oferecidos para registro de aplicação.
-- Nenhum dado de **preço/imagem** deve ser inserido como definitivo sem fonte/
-  licença real.
+- Nenhum **preço** nem **imagem** deve ser inserido como definitivo sem fonte/
+  licença rastreável.
 - A **validação diária do menor preço** é funcionalidade do **sistema final**.
 
 ---

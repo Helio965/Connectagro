@@ -28,8 +28,8 @@
   [catálogo técnico](./catalogo-produtos/catalogo-tecnico-connectagro-mvp.md).
 - [x] Definir formato dos dados em `data/seeds/`
   (`connectagro_produtos_seed.json` + `.csv`).
-- [x] Tratar **preço e imagem** como pendência / não consolidado
-  (`produto_preco`/`produto_imagem` vazios; ver
+- [x] Na entrega desta etapa, tratar **preço e imagem** como pendência / não
+  consolidado (`produto_preco`/`produto_imagem` vazios naquele momento; ver
   [pendências](./catalogo-produtos/pendencias-validacao.md)).
 
 ## Etapa 4 — Fundação Flask da aplicação ✅
@@ -61,11 +61,13 @@
 - [x] **Validação** do seed técnico (`flask validate-catalog-seed`).
 - [x] **Importação idempotente** do catálogo (`flask import-catalog-seed`):
   popula `produto_base` + `produto_tecnico`.
-- [x] `produto_preco`/`produto_imagem` permanecem **vazios**; itens
-  bloqueados (Paraquate/Oxamil) **não** importados.
+- [x] Na entrega original, `produto_preco`/`produto_imagem` permaneceram
+  **vazios**; `produto_imagem` foi populado posteriormente. Itens bloqueados
+  (Paraquate/Oxamil) **não** são importados.
 
 > O seed é **importado sob demanda** via CLI; o banco populado **não** é
-> versionado. Preço e imagem seguem pendentes para o sistema final.
+> versionado. Preço segue pendente; imagens locais de referência foram
+> incorporadas posteriormente com fonte/licença rastreadas.
 
 ## Etapa 5.1 — Autenticação real ✅
 
@@ -114,12 +116,14 @@
   detalhe por `slug`), filtrando por `classe`.
 - [x] Busca textual (`q`) e filtros por `categoria` e `status_regulatorio`.
 - [x] Detalhe com dados de `ProdutoBase` + `ProdutoTecnico`.
-- [x] Avisos: base técnica de consulta, **não vende**, preço/imagem pendentes,
-  status regulatório **sem** validação oficial automática.
+- [x] Avisos: base técnica de consulta, **não vende**, preço pendente, imagens
+  de referência não consolidadas e status regulatório **sem** validação oficial
+  automática.
 - [x] Testes (`tests/test_catalogo_consulta.py`).
 
-> **Somente leitura:** sem cadastro/edição/remoção de produto. `produto_preco`/
-> `produto_imagem` seguem **vazios**; sem migration nova.
+> **Somente leitura:** sem cadastro/edição/remoção de produto. Na entrega desta
+> etapa, `produto_preco`/`produto_imagem` estavam vazios; posteriormente,
+> `produto_imagem` passou a ser populado pelo seed, sem migration nova.
 
 ## Etapa 5.6 — Registro de Aplicação de Insumo ✅
 
@@ -309,8 +313,8 @@ produto, foi aberto o **MVP ampliado** (Fase 7) antes do encerramento definitivo
   armazenado apenas como **hash** (SHA-256) em `senha_reset_token`.
 - [x] Mensagem genérica (sem enumeração de e-mails); usuário inativo não recupera
   senha e não é reativado.
-- [x] Sem envio real de e-mail: link de redefinição visível apenas em
-  local/dev/teste (`PASSWORD_RESET_SHOW_DEV_LINK`).
+- [x] Sem envio real de e-mail na entrega original: link de redefinição visível
+  apenas em local/dev/teste. Flask-Mail/SMTP foi incorporado posteriormente.
 - [x] Migration `senha_reset_token` (sem alterar `usuario`); CSRF nos POSTs.
 - [x] Testes em `tests/test_password_reset.py`.
 
@@ -410,7 +414,7 @@ Permanecem como **pós-MVP** (avaliados depois):
 
 - IA real/LLM, se futuramente aprovado;
 - validação regulatória real do catálogo;
-- preço/imagem com fontes reais e atualização periódica;
+- preço com fontes reais e atualização periódica; imagens oficiais/do fabricante;
 - OCR/leitura automática de uploads;
 - deploy/produção completo;
 - melhorias avançadas que não entrarem na Fase 7.

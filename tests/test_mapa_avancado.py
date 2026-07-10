@@ -410,3 +410,84 @@ def test_csrf_limpar_com_token_funciona(app_mapa_csrf):
     token = _csrf_token(client)
     resp = client.post(_limpar_url(app_mapa_csrf), headers={"X-CSRFToken": token})
     assert resp.status_code == 200
+
+
+# --- Validação reforçada de GeoJSON (estabilização técnica) -----------------
+
+PAYLOADS_INVALIDOS = [
+    # coordenadas vazias / polígono vazio
+    {"type": "Polygon", "coordinates": []},
+    # multipolígono vazio
+    {"type": "MultiPolygon", "coordinates": []},
+    # multipolígono com polígono vazio
+    {"type": "MultiPolygon", "coordinates": [[]]},
+    # anel vazio
+    {"type": "Polygon", "coordinates": [[]]},
+    # anel não fechado (4 pontos, último != primeiro)
+    {"type": "Polygon", "coordinates": [[
+        [-47.21, -15.11], [-47.20, -15.11], [-47.20, -15.10], [-47.21, -15.10]]]},
+    # posições vazias dentro do anel
+    {"type": "Polygon", "coordinates": [[[], [], [], []]]},
+    # posição incompleta (sem latitude)
+    {"type": "Polygon", "coordinates": [[
+        [-47.21], [-47.20, -15.11], [-47.20, -15.10], [-47.21]]]},
+    # latitude não numérica (antes provocava TypeError/500)
+    {"type": "Polygon", "coordinates": [[
+        [-47.21, "x"], [-47.20, -15.11], [-47.20, -15.10], [-47.21, "x"]]]},
+    # longitude não numérica
+    {"type": "Polygon", "coordinates": [[
+        ["x", -15.11], [-47.20, -15.11], [-47.20, -15.10], ["x", -15.11]]]},
+    # booleanos não são coordenadas
+    {"type": "Polygon", "coordinates": [[
+        [True, False], [-47.20, -15.11], [-47.20, -15.10], [True, False]]]},
+    # latitude fora da faixa (-90..90)
+    {"type": "Polygon", "coordinates": [[
+        [-47.21, -95.0], [-47.20, -15.11], [-47.20, -15.10], [-47.21, -95.0]]]},
+    # longitude fora da faixa (-180..180)
+    {"type": "Polygon", "coordinates": [[
+        [200.0, -15.11], [-47.20, -15.11], [-47.20, -15.10], [200.0, -15.11]]]},
+    # estrutura interna inválida (anel não é lista)
+    {"type": "Polygon", "coordinates": ["anel"]},
+    # estrutura interna inválida (multipolígono com item não-lista)
+    {"type": "MultiPolygon", "coordinates": ["poligono"]},
+    # Feature sem geometria válida
+    {"type": "Feature", "properties": {}, "geometry": None},
+    # Feature com geometria não suportada
+    {"type": "Feature", "properties": {},
+     "geometry": {"type": "Point", "coordinates": [0, 0]}},
+    # Feature com polígono vazio
+    {"type": "Feature", "properties": {},
+     "geometry": {"type": "Polygon", "coordinates": []}},
+]
+
+
+@pytest.mark.parametrize("payload", PAYLOADS_INVALIDOS)
+def test_geojson_invalido_retorna_400_e_nao_persiste(app_mapa, payload):
+    client = app_mapa.test_client()
+    _login(client)
+    resp = client.post(_salvar_url(app_mapa), json=payload)
+    assert resp.status_code == 400
+    assert resp.get_json()["ok"] is False
+    assert _gleba(app_mapa).poligono_geojson is None
+
+
+def test_geojson_invalido_nao_sobrescreve_poligono_existente(app_mapa):
+    client = app_mapa.test_client()
+    _login(client)
+    assert client.post(_salvar_url(app_mapa), json=POLY).status_code == 200
+    resp = client.post(_salvar_url(app_mapa),
+                       json={"type": "Polygon", "coordinates": []})
+    assert resp.status_code == 400
+    assert json.loads(_gleba(app_mapa).poligono_geojson) == POLY
+
+
+def test_poligono_com_furo_valido_aceito(app_mapa):
+    """Polygon com anel externo + anel interno (furo), ambos fechados."""
+    payload = {"type": "Polygon", "coordinates": [
+        POLY["coordinates"][0],
+        [[-47.208, -15.108], [-47.202, -15.108], [-47.202, -15.102],
+         [-47.208, -15.108]],
+    ]}
+    client = app_mapa.test_client()
+    _login(client)
+    assert client.post(_salvar_url(app_mapa), json=payload).status_code == 200

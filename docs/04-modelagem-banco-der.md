@@ -28,9 +28,9 @@ operação agrícola, catálogo de produtos, financeiro, upload e IA simulada.
 - Chaves estrangeiras seguem o padrão `<entidade>_id` (ex.: `propriedade_id`).
 - Campos que representam **listas** podem ser `TEXT` contendo **JSON** no MVP,
   com normalização prevista para o futuro.
-- **Preço e imagem de produtos são pendências no MVP** — ficam `NULL` e com
-  `status_validacao` indicando `pendente` / `nao_consolidado`. Nunca preencher
-  com dados inventados.
+- **Preço de produtos é pendência no MVP**. Imagens locais de referência são
+  populadas com fonte/licença rastreadas e mantêm `status_validacao` como
+  `nao_consolidado`; nunca preencher os campos com dados inventados.
 - A **validação diária do menor preço** fica para o **sistema final**; o MVP não
   consolida preço.
 - **Validação regulatória AGROFIT/MAPA não é presumida.** O catálogo é uma
@@ -255,7 +255,8 @@ Preços de **referência** para **consulta rápida** (informativo, **não** vend
 > venda ou marketplace.
 
 ### `produto_imagem`
-Imagem/foto do produto. **Pendência no MVP.**
+Imagem/foto de referência do produto. O seed atual popula uma imagem local por
+produto, com fonte/licença rastreadas e status ainda não consolidado.
 
 - `id` — PK.
 - `produto_id` — FK → `produto_base`.
@@ -365,7 +366,7 @@ erDiagram
 - Normalização futura dos campos de **lista** (JSON → tabelas auxiliares).
 - Separação formal entre **produto técnico/genérico** e **produto comercial
   específico** no sistema final.
-- Consolidação de **preço/imagem** e fontes técnicas reais (hoje pendentes).
+- Consolidação de **preços**, imagens oficiais/do fabricante e fontes técnicas.
 
 ## Documentos relacionados
 

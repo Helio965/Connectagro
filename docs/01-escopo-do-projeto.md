@@ -59,7 +59,8 @@ o **MVP ampliado** (Fase 7), que incorpora ao escopo do MVP:
   admin (listar, criar, editar perfil/status, inativar). **Não** é cadastro
   público. **Concluído na Fase 7.1.**
 - **Recuperação de senha** — solicitação de redefinição com token seguro e
-  expirável, sem expor senha e sem envio real de e-mail. **Concluída na Fase 7.2.**
+  expirável, sem expor senha, com envio do link por Flask-Mail/SMTP quando
+  configurado. **Concluída na Fase 7.2.**
 - **Auditoria/logs administrativos** — registro de ações sensíveis (login/
   logout, criação/edição/remoção, upload/download, acesso negado e exportações).
   **Concluída na Fase 7.3.**
@@ -76,7 +77,7 @@ Itens reconhecidos, mas **não** incluídos no MVP ampliado (avaliados depois):
 
 - IA real/LLM (a IA do produto permanece **simulada**).
 - Validação regulatória real do catálogo (AGROFIT/MAPA/SIPEAGRO).
-- Preço/imagem com fontes reais e atualização periódica.
+- Preço com fontes reais e atualização periódica; imagens oficiais/do fabricante.
 - OCR/leitura automática de uploads.
 - Deploy/produção completo.
 
@@ -96,12 +97,13 @@ marketplace e **não** um sistema de comércio.
 ## Premissas
 
 - O desenvolvimento ocorre em etapas e o MVP ampliado foi concluído na Fase 7.6.
-- O catálogo técnico é consulta inicial; preço/imagem reais e validação
-  regulatória oficial seguem fora do MVP ampliado.
+- O catálogo técnico é consulta inicial; preço atualizado, imagens oficiais/do
+  fabricante e validação regulatória oficial seguem fora do MVP ampliado.
 
 ## Restrições
 
-- Stack fixada para o MVP: Python, Flask, SQLite, HTML, CSS, JavaScript.
+- Stack do MVP: Python, Flask, HTML, CSS e JavaScript; SQLite é o padrão local e
+  PostgreSQL/Supabase é suportado por configuração.
 - Nenhum dado de produto deve ser inventado ou apresentado como oficial sem
   fonte real.
 
