@@ -75,6 +75,12 @@
   aplicações; cria colheitas, aplicações e uploads; baixa uploads. Não acessa
   equipe/financeiro e não cria/edita/remove glebas/culturas nem edita/remove
   colheitas, aplicações ou uploads.
+- RN-11c1 — Por decisão expressa da Etapa 04, o Trabalhador pode consultar
+  **somente totais agregados** financeiros e de equipe nos relatórios gerais e
+  na IA simulada. Não recebe lançamentos individuais, descrições, categorias
+  financeiras nem detalhes de membros. O relatório financeiro detalhado e suas
+  exportações exigem também `financeiro.view`; os totais do relatório geral
+  permanecem disponíveis com `relatorios.view`.
 - RN-11d — Dashboard, Mapa, IA simulada, Relatórios e Catálogo são acessíveis aos
   perfis autenticados conforme a matriz de permissões.
 - RN-11e — Permissões por perfil **não substituem** o escopo por propriedade. As
@@ -94,8 +100,12 @@
   propriedade. Com token válido, ações sem permissão continuam retornando **403**.
 - RN-11l — Formulários multipart do Upload também exigem token CSRF.
 - RN-11m — O painel `/usuarios/` é interno e exige permissões `usuarios.view`,
-  `usuarios.create`, `usuarios.edit` e `usuarios.deactivate`, concedidas apenas
-  ao perfil `admin`.
+  `usuarios.create`, `usuarios.edit` e `usuarios.deactivate`, concedidas a
+  `admin` e `tecnico`. Administrador gerencia Gerentes e Trabalhadores; Gerente
+  gerencia somente Trabalhadores do contexto autorizado, sem criar/editar
+  Administrador ou Gerente nem elevar seu próprio perfil. Essa regra preserva
+  o fluxo de convites já implementado e testado, corrigindo o texto antigo
+  conflitante que dizia “apenas admin”.
 - RN-11n — O painel de usuários trabalha somente com usuários vinculados à
   propriedade atual por `usuario_propriedade`; usuários de outra propriedade não
   podem ser editados/inativados e retornam **404** quando o perfil tem permissão.
@@ -140,8 +150,9 @@
 - RN-11aa — Os logs **não** guardam senha, nova senha, `senha_hash`, token puro,
   `token_hash`, `csrf_token`, conteúdo de arquivo, corpo completo de formulário
   nem dados sensíveis desnecessários. E-mails, quando úteis, são **mascarados**.
-- RN-11ab — A auditoria **nunca** quebra o fluxo principal: falha ao gravar log
-  não impede a ação do usuário.
+- RN-11ab — Os atalhos independentes de auditoria preservam o fluxo principal
+  diante de falha no log. Cadastro/edição de Propriedade usam auditoria na mesma
+  transação por decisão da Etapa 03; nesse caso, falha do log desfaz a operação.
 - RN-11ac — A auditoria **não** substitui backup, segurança de infraestrutura
   nem monitoramento de produção (SIEM); é um registro interno simples.
 

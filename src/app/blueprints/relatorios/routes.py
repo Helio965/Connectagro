@@ -1,7 +1,7 @@
-"""Relatórios Operacionais HTML (somente leitura) — escopo: propriedade atual.
+"""Relatórios HTML/CSV/PDF somente leitura no contexto autorizado.
 
-Não criam, alteram ou removem dados. Sem PDF/exportação nesta fase; a impressão
-é feita pelo navegador (``window.print()``).
+Detalhes financeiros exigem também financeiro.view; totais do relatório geral
+continuam disponíveis aos perfis com relatorios.view.
 """
 from flask import abort, flash, render_template, request
 
@@ -95,6 +95,7 @@ def geral():
 @relatorios_bp.route("/financeiro")
 @login_required
 @require_permission("relatorios.view")
+@require_permission("financeiro.view")
 def financeiro():
     propriedade = propriedade_atual()
     data_inicio = vazio_para_none(request.args.get("data_inicio"))
@@ -191,6 +192,7 @@ def geral_exportar_pdf():
 @relatorios_bp.route("/financeiro/exportar.csv")
 @login_required
 @require_permission("relatorios.view")
+@require_permission("financeiro.view")
 def financeiro_exportar_csv():
     propriedade = propriedade_atual()
     di, df, tipo = _filtros_financeiro()
@@ -206,6 +208,7 @@ def financeiro_exportar_csv():
 @relatorios_bp.route("/financeiro/exportar.pdf")
 @login_required
 @require_permission("relatorios.view")
+@require_permission("financeiro.view")
 def financeiro_exportar_pdf():
     propriedade = propriedade_atual()
     di, df, tipo = _filtros_financeiro()

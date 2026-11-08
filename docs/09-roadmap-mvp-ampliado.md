@@ -103,9 +103,9 @@ Critérios gerais (valem para todas as fases 7.x):
 
 Por fase:
 
-- **7.1 Painel de usuários:** admin lista/cria/edita/inativa usuários da
-  propriedade; não há cadastro público; ações exigem perfil `admin` e respeitam o
-  escopo por propriedade. Implementado com `usuario_propriedade`,
+- **7.1 Painel de usuários:** Administrador gerencia Gerentes/Trabalhadores e
+  Gerente gerencia somente Trabalhadores da propriedade autorizada; não há
+  cadastro público. As ações validam perfil e escopo no backend. Implementado com `usuario_propriedade`,
   `usuarios_bp`, permissões `usuarios.*` e testes próprios.
 - **7.2 Recuperação de senha:** token seguro e expirável; senha/token nunca
   expostos; redefinição válida apenas com token válido e não expirado.

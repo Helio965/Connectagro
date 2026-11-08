@@ -342,7 +342,7 @@ comercial. Sem Excel/XLSX, sem nova tabela/migration e sem armazenamento de PDFs
 A Fase 6.3 adicionou permissões finas usando `src/app/utils/permissions.py`.
 A autorização usa o campo `usuario.perfil`, sem tabela de roles/permissões e sem
 dependência externa de RBAC. A Fase 7.1 acrescentou permissões `usuarios.*`,
-liberadas apenas para `admin`.
+usadas por `admin` e `tecnico`, com limites sobre os perfis gerenciados.
 
 Elementos principais:
 
@@ -363,6 +363,14 @@ Resumo dos perfis:
 | admin | Acessa todos os módulos e pode criar, editar e remover registros nos CRUDs da sua propriedade atual; pode enviar, baixar e remover uploads. |
 | tecnico | Acessa dashboard, mapa, catálogo, relatórios, IA, equipe e financeiro em leitura; cria/edita glebas, culturas, colheitas e aplicações; envia e baixa uploads; não remove registros críticos nem gerencia equipe/financeiro. |
 | trabalhador | Acessa dashboard, mapa, catálogo, relatórios e IA; visualiza glebas, culturas, colheitas e aplicações; cria colheitas, aplicações e uploads; baixa upload; não acessa equipe/financeiro e não edita/remove registros críticos. |
+
+Na Etapa 04 foi confirmado que o Trabalhador pode consultar totais agregados
+financeiros e de equipe no relatório geral e na IA simulada. Lançamentos
+individuais e detalhes de membros continuam restritos. O relatório financeiro
+detalhado, inclusive CSV/PDF, exige `financeiro.view` além de `relatorios.view`.
+Administrador não recebe acesso global: todos os perfis dependem de vínculo
+ativo com a propriedade. Administrador e Gerente podem criar/editar propriedades
+autorizadas, conforme a decisão da Etapa 03.
 
 ### Proteção CSRF
 
@@ -395,11 +403,18 @@ novo link e invalida os anteriores. O SMTP é configurado pelas variáveis
 aparece em tela quando `PASSWORD_RESET_SHOW_DEV_LINK=true` — em produção o
 link **nunca** é exibido. Senhas jamais são enviadas por e-mail.
 
+Administrador gerencia Gerentes e Trabalhadores; Gerente gerencia somente
+Trabalhadores vinculados à propriedade atual, sem promover perfis ou alterar
+contas administrativas. Contas compartilhadas têm inativação somente do vínculo
+local; alterações globais fora do escopo do operador são bloqueadas.
+
 O vínculo entre conta e propriedade passa pela tabela `usuario_propriedade`.
-`propriedade.usuario_id` continua preservado para compatibilidade; quando uma
-base antiga ainda não tem vínculo, `propriedade_atual()` cria a associação ativa
-automaticamente. O comando `seed-users` também cria uma propriedade demo e
-vincula os três usuários de teste de forma idempotente.
+`propriedade.usuario_id` continua preservado. A migration da Etapa 03 reconcilia
+somente vínculos ausentes do responsável legado, sem reativar vínculos inativos.
+`propriedade_atual()` consulta e valida o ambiente selecionado, sem criar dados.
+O seletor permite alternar entre propriedades autorizadas por POST com CSRF.
+O comando explícito `seed-users` cria propriedade e vínculos demo de forma
+idempotente em desenvolvimento/teste, sendo bloqueado em produção.
 
 ### Recuperação de senha
 

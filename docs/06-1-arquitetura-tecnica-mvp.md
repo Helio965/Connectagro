@@ -54,9 +54,10 @@
 > **somente documental** — não há implementação de funcionalidade nova.
 
 > **Painel de Usuários (Fase 7.1):** o MVP ampliado adiciona `usuarios_bp`
-> (`/usuarios`), `services/usuarios_service.py`, o modelo
+> (`/usuarios`), validações no próprio blueprint e o modelo
 > `UsuarioPropriedade`, a migration `usuario_propriedade` e permissões
-> `usuarios.*` apenas para `admin`. O painel é interno, sem cadastro público,
+> `usuarios.*` para `admin` e `tecnico`, limitando Gerente a Trabalhadores.
+> O painel é interno, sem cadastro público,
 > sem remoção física e sem recuperação de senha nesta fase.
 
 > **Revisão Final do MVP (Fase 6.5):** o MVP foi revisado como conjunto
@@ -481,22 +482,27 @@ Matriz resumida:
 
 - `src/app/blueprints/usuarios/routes.py` expõe `/usuarios/`,
   `/usuarios/novo`, `/usuarios/<id>/editar` e `/usuarios/<id>/inativar`.
-- Todas as rotas exigem login, CSRF em POST e permissões `usuarios.*`; no MVP
-  ampliado, essas permissões pertencem apenas ao perfil `admin`.
-- `src/app/services/usuarios_service.py` concentra criação, edição, inativação,
-  listagem e validações do painel.
+- Todas as rotas exigem login, CSRF em POST e permissões `usuarios.*`.
+  Administrador gerencia Gerentes/Trabalhadores; Gerente somente Trabalhadores
+  do contexto autorizado, sem promoção de perfil ou gestão de contas administrativas.
+- `src/app/blueprints/usuarios/routes.py` concentra criação, edição, inativação,
+  listagem e validações do painel; não existe `usuarios_service.py` separado.
 - `src/app/models/usuario_propriedade.py` representa a associação explícita entre
   conta e propriedade, com par (`usuario_id`, `propriedade_id`) único.
-- `utils/contexto.py` resolve a propriedade atual primeiro por vínculo ativo em
-  `usuario_propriedade`. Se a base ainda usa apenas `propriedade.usuario_id`, a
-  associação ativa é criada automaticamente para manter compatibilidade.
+- `utils/contexto.py` valida o ID selecionado na sessão por vínculo ativo em
+  `usuario_propriedade`, sem inserir ou reativar associações em leituras.
+  A migration da Etapa 03 reconcilia pares legados ausentes, preservando inativos.
 - `seed-users` cria/garante os três usuários de teste, uma propriedade demo e os
   vínculos ativos, sem sobrescrever senhas existentes e sem duplicar associações.
-- O painel não implementa cadastro público, recuperação de senha, auditoria,
-  remoção física de usuário, tabela de roles/permissões ou múltiplas propriedades
-  selecionáveis.
-- A inativação marca `usuario.ativo = 0` e `usuario_propriedade.ativo = 0`; o
-  serviço impede deixar a propriedade sem nenhum `admin` ativo.
+- Cadastro público, remoção física e tabela de roles/permissões não existem.
+  Recuperação/convite e auditoria usam seus fluxos próprios. Múltiplas
+  propriedades são selecionáveis pelo blueprint `propriedades` da Etapa 03.
+- A inativação de conta compartilhada altera somente o vínculo local; para
+  conta com um único vínculo, preserva o bloqueio global anterior. O painel
+  protege o próprio Administrador e o último Administrador ativo do contexto.
+- Trabalhador consulta somente totais agregados financeiros/de equipe em
+  relatório geral e IA. Relatório financeiro detalhado e CSV/PDF exigem
+  `financeiro.view` além de `relatorios.view`, conforme decisão da Etapa 04.
 
 ### Recuperação de senha
 
@@ -939,7 +945,8 @@ Matriz resumida:
 - `utils/contexto.py` usa vínculo ativo como fonte da propriedade atual, mantendo
   compatibilidade com bases antigas.
 - Mantém as **permissões por perfil** (`utils/permissions.py`); a gestão de
-  usuários exige permissões `usuarios.*`, concedidas apenas ao `admin`.
+  usuários exige permissões `usuarios.*`, concedidas ao Administrador e ao
+  Gerente, este limitado a Trabalhadores do ambiente autorizado.
 - Não inclui remoção física de usuário nem tabela de roles/permissões. Recuperação
   de senha e auditoria/logs foram entregues em fluxos próprios.
 

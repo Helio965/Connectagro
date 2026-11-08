@@ -48,7 +48,8 @@ Arquivos existentes:
   rotas GET sem token, mensagem amigável de erro e convivência com permissões
   403 quando o token é válido.
 - **`test_usuarios_painel.py`** — Fase 7.1: painel interno de usuários; exige
-  `admin`; cria/edita/inativa usuários; valida dados obrigatórios; preserva
+  permissões de Administrador ou Gerente (este somente sobre Trabalhadores);
+  cria/edita/inativa usuários; valida dados obrigatórios; preserva
   escopo por propriedade; impede inativar o último admin ativo; testa
   `usuario_propriedade`, compatibilidade com base legada, `seed-users`
   idempotente e convivência com CSRF/permissões.
@@ -166,6 +167,13 @@ suíte atual passando:
   validação da suíte completa sem adicionar funcionalidade nova.
 
 ## Evolução pós-MVP
+
+- **`test_permissions_stage4.py`** — contrato completo dos três perfis;
+  relatório financeiro detalhado HTML/CSV/PDF exige autorização no backend;
+  Trabalhador mantém apenas totais agregados em relatório geral/IA, sem dados
+  individuais; cards acompanham permissões; acesso negado gera auditoria com
+  ID numérico/nulo; Gerente não eleva perfil nem acessa trabalhadores de outro
+  contexto. Confirma também escopo das exportações e CSRF junto à autorização.
 
 - Testes end-to-end de interface, caso o projeto passe a ter uma camada de
   validação visual/navegador.

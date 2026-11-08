@@ -15,10 +15,12 @@
       <strong>Relatório Geral</strong>
       <span>Resumo consolidado da propriedade.</span>
     </a>
+    {% if can('financeiro.view') %}
     <a class="relatorio-card" href="{{ url_for('relatorios.financeiro') }}">
       <strong>Relatório Financeiro</strong>
       <span>Lançamentos, receitas, despesas e saldo.</span>
     </a>
+    {% endif %}
     <a class="relatorio-card" href="{{ url_for('relatorios.agricola') }}">
       <strong>Relatório Agrícola</strong>
       <span>Áreas de Plantio, culturas, associações e colheitas.</span>

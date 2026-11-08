@@ -8,12 +8,13 @@ import re
 import secrets
 
 from flask import (
-    abort, current_app, flash, redirect, render_template, request,
+    abort, current_app, flash, redirect, render_template, request, session,
     url_for,
 )
+from sqlalchemy.exc import OperationalError
 
 from ...extensions import db
-from ...models import Usuario, UsuarioPropriedade
+from ...models import Propriedade, Usuario, UsuarioPropriedade
 from ...models._helpers import iso_now
 from ...services.auditoria_service import (
     mascarar_email,
@@ -27,9 +28,9 @@ from ...services.email_service import (
     montar_link_absoluto,
 )
 from ...services.password_reset_service import gerar_token_definicao_senha
-from ...utils.auth import gerar_hash_senha, login_required, usuario_atual
-from ...utils.contexto import propriedade_atual, propriedades_autorizadas, vazio_para_none
-from ...utils.permissions import PERFIS_OFICIAIS, require_permission, role_label
+from ...utils.auth import _limpar_sessao_local, gerar_hash_senha, login_required, usuario_atual
+from ...utils.contexto import invalidar_contexto, propriedade_atual, propriedades_autorizadas, vazio_para_none
+from ...utils.permissions import PERFIS_OFICIAIS, has_permission, require_permission, role_label
 from . import usuarios_bp
 
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
@@ -41,10 +42,10 @@ def _usuario_da_propriedade_ou_404(usuario_id, propriedade):
     vinculo = UsuarioPropriedade.query.filter_by(
         usuario_id=usuario_id,
         propriedade_id=propriedade.id,
-    ).first()
+    ).populate_existing().first()
     if vinculo is None:
         abort(404)
-    usuario = db.session.get(Usuario, usuario_id)
+    usuario = db.session.get(Usuario, usuario_id, populate_existing=True)
     if usuario is None:
         abort(404)
     return usuario, vinculo
@@ -112,6 +113,60 @@ def _bloquear_acao_usuario(acao, descricao, propriedade=None, usuario_id=None):
 
 def _ativo_form(default=False):
     return bool(request.form.get("ativo")) if request.method == "POST" else default
+
+
+def _serializar_alteracao_usuario(propriedade, permissao):
+    """Mantém verificação e escrita no mesmo lock/transação do contexto.
+
+    A linha da propriedade é comum a todos os administradores. No SQLite,
+    BEGIN IMMEDIATE reserva a escrita antes de ler a contagem. Se o chamador
+    já abriu uma transação física, um UPDATE sem mudar valores obtém o lock;
+    falha de upgrade de snapshot é recusada, nunca repetida com estado antigo.
+    Não confirma nem descarta uma alteração de usuário bem-sucedida aqui.
+    """
+    ator_id = usuario_atual()["id"]
+    conexao = db.session.connection()
+    sqlite = conexao.dialect.name == "sqlite"
+    try:
+        with db.session.no_autoflush:
+            if sqlite:
+                if conexao.connection.driver_connection.in_transaction:
+                    existe = conexao.execute(db.update(Propriedade.__table__).where(
+                        Propriedade.id == propriedade.id).values(id=Propriedade.id)).rowcount
+                else:
+                    conexao.exec_driver_sql("BEGIN IMMEDIATE")
+                    existe = conexao.execute(db.select(Propriedade.id).where(
+                        Propriedade.id == propriedade.id)).first() is not None
+            else:
+                existe = conexao.execute(db.select(Propriedade.id).where(
+                    Propriedade.id == propriedade.id).with_for_update()).first() is not None
+            if not existe:
+                abort(404)
+            ator = db.session.get(Usuario, ator_id, populate_existing=True)
+            vinculo = UsuarioPropriedade.query.filter_by(usuario_id=ator_id,
+                propriedade_id=propriedade.id, ativo=True).populate_existing().first()
+    except OperationalError as erro:
+        codigo = getattr(erro.orig, "sqlite_errorcode", 0) or 0
+        if sqlite and codigo & 0xff in {5, 6}:  # SQLITE_BUSY / SQLITE_LOCKED
+            db.session.rollback()
+            flash("Outra alteração está em andamento. Recarregue e tente novamente.", "warning")
+            abort(409)
+        raise
+
+    # Autenticação/contexto foram consultados antes da espera; não reutilizar
+    # essa autorização caso outro administrador a tenha revogado enquanto isso.
+    invalidar_contexto()
+    if (ator is None or not ator.ativo or ator.perfil not in PERFIS_OFICIAIS
+            or ator.auth_version != session.get("auth_version")):
+        db.session.rollback()
+        _limpar_sessao_local()
+        flash("Seu acesso foi atualizado. Faça login novamente.", "warning")
+        abort(redirect(url_for("auth.login")))
+    if vinculo is None or not has_permission(permissao):
+        db.session.rollback()
+        _bloquear_acao_usuario("usuarios.alteracao.blocked",
+            "Acesso revogado durante a alteração de usuário", propriedade)
+    return ator
 
 
 def _contar_admins_ativos():
@@ -481,7 +536,8 @@ def reenviar_convite(usuario_id):
 @require_permission("usuarios.edit")
 def editar(usuario_id):
     propriedade = propriedade_atual()
-    usuario_logado = _usuario_logado_model()
+    usuario_logado = (_serializar_alteracao_usuario(propriedade, "usuarios.edit")
+                      if request.method == "POST" else _usuario_logado_model())
     usuario, vinculo = _usuario_da_propriedade_ou_404(usuario_id, propriedade)
     perfis_permitidos = _allowed_roles_to_edit(usuario_logado, usuario)
     if not perfis_permitidos:
@@ -569,7 +625,7 @@ def editar(usuario_id):
 @require_permission("usuarios.deactivate")
 def inativar(usuario_id):
     propriedade = propriedade_atual()
-    usuario_logado = _usuario_logado_model()
+    usuario_logado = _serializar_alteracao_usuario(propriedade, "usuarios.deactivate")
     usuario, vinculo = _usuario_da_propriedade_ou_404(usuario_id, propriedade)
     if not _can_edit_target_user(usuario_logado, usuario):
         _bloquear_acao_usuario(

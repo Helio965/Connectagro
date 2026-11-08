@@ -156,7 +156,6 @@ def require_permission(permission):
                     registrar_negado(
                         "permissao.negada",
                         entidade="permission",
-                        entidade_id=permission,
                         descricao=f"Permissão negada: {permission}",
                         request=request,
                     )
