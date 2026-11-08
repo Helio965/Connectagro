@@ -1,0 +1,3 @@
+# Preserve audited upstream assets byte for byte, including their CRLF endings.
+src/app/static/vendor/leaflet-1.9.4/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+src/app/static/vendor/leaflet-draw-1.0.4/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

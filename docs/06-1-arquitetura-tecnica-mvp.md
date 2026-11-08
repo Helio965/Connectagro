@@ -4,6 +4,15 @@
 
 **Arquitetura técnica — v0.26 (MVP base consolidado + MVP ampliado concluído: painel de usuários + recuperação de senha + auditoria/logs + PDF/exportações + mapa avançado + CRUDs + catálogo + upload + dashboard + IA simulada + relatórios operacionais + permissões finas + CSRF + revisão final).**
 
+> **Atualização territorial (Etapa 05):** Propriedade passa a ter contorno
+> próprio opcional em `poligono_geojson`, pela migration `e4ca60b1d732`, sem
+> substituir geometrias de Gleba ou hectares informados. Leaflet/Leaflet.draw
+> permanecem nas mesmas versões e agora são arquivos locais com licenças e
+> integridade registradas. Shapely/GEOS valida topologia; a comparação de limites
+> apenas informa. `mapa.view/edit`, contexto e CSRF continuam sendo a autorização.
+> As notas da Fase 7.5 abaixo são históricas; o estado atual está descrito no
+> [relatório da Etapa 05](auditoria/05-mapas-organizacao-territorial.md).
+
 > **Mapa avançado (Fase 7.5):** o módulo Mapa passa a permitir **editar, salvar e
 > limpar** o polígono (`gleba.poligono_geojson`) de cada gleba, com Leaflet +
 > **Leaflet.draw** (via CDN). Adiciona `services/mapa_service.py` (validação/
@@ -194,7 +203,7 @@ Flask (rotas/blueprints)  ──►  Serviços/helpers  ──►  Modelos/Acess
 | Acesso a dados   | Flask-SQLAlchemy                             | ORM adotado                                    |
 | Migrations       | Flask-Migrate (Alembic)                      | Pasta `migrations/` versionada                 |
 | Upload local     | Werkzeug `secure_filename` + Flask `send_from_directory` | Arquivos fora de `static` e do Git |
-| Mapa frontend    | Leaflet.js + Leaflet.draw via CDN            | Edição de polígono; sem dependência Python/NPM |
+| Mapa frontend    | Leaflet.js + Leaflet.draw locais | Contornos e Áreas de Plantio; Shapely/GEOS no backend |
 | IA simulada      | Regras locais em Python                      | Sem LLM/API externa/internet                   |
 | Relatórios       | Serviços Python + Jinja2                     | HTML somente leitura + CSV/PDF operacional     |
 | Exportações      | `csv` (lib padrão) + ReportLab (PDF)         | CSV/PDF em memória; `exportacoes_service.py`   |

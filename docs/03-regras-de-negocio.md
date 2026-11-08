@@ -174,20 +174,32 @@
 
 ## Regras de mapa avançado (Fase 7.5)
 
-- RN-11ai — O mapa permite **editar, salvar e limpar** o polígono
-  (`gleba.poligono_geojson`) de cada gleba, com **um polígono por gleba**.
+- RN-11ai — O mapa permite **editar, salvar e limpar** uma delimitação própria
+  opcional de cada Propriedade e de cada Área de Plantio (modelo `Gleba`), em
+  campos `poligono_geojson` separados. Não substitui os hectares informados.
 - RN-11aj — A edição de polígono exige a permissão **`mapa.edit`** (admin e
   técnico). O **trabalhador apenas visualiza** (tem `mapa.view`, não `mapa.edit`).
 - RN-11ak — O **GeoJSON é validado no backend** (Polygon/MultiPolygon/Feature;
-  coordenadas em faixa; tamanho limitado). GeoJSON inválido **não** é salvo e
-  retorna 400; FeatureCollection/GeometryCollection são recusados nesta fase.
+  coordenadas finitas/em faixa; tamanho/complexidade limitados; topologia
+  verificada por GEOS). GeoJSON inválido **não** é salvo e retorna 400.
+  FeatureCollection/GeometryCollection não são aceitos em novas escritas;
+  FeatureCollection poligonal legada válida pode ser exibida sem reescrever dados.
 - RN-11al — Salvar/limpar polígono respeita **escopo por propriedade** (gleba de
   outra propriedade retorna 404), exige **CSRF** e registra **auditoria**
   (`mapa.poligono.update`/`mapa.poligono.delete`), sem gravar o GeoJSON/coordenadas
-  no log.
+  no log. Contornos de Propriedade usam as rotas `/mapa/propriedades/<id>/poligono`
+  e `.../limpar`, exigindo que o ID seja do contexto ativo, e eventos
+  `mapa.propriedade.poligono.*` com entidade `propriedade`.
 - RN-11am — O mapa avançado é **apoio operacional** e **não** substitui medição
   técnica ou georreferenciamento oficial. Não há **PostGIS**, **GPS em tempo
   real**, **shapefile/KML** nem integração com CAR/SIGEF/INCRA nesta fase.
+- RN-11an — A comparação entre Área de Plantio e contorno da Propriedade é
+  informativa enquanto não houver regra de bloqueio aprovada. Nenhum polígono
+  é recortado, movido ou corrigido automaticamente; ausência de delimitação não
+  impede o funcionamento agrícola.
+- RN-11ao — Áreas de Plantio independentes aguardam regras de responsável,
+  concessão/revogação de acesso, contexto e relacionamentos operacionais.
+  A Etapa 05 preserva a FK atual e não cria Propriedades fictícias.
 
 ## Regras operacionais
 

@@ -3,8 +3,8 @@
 {% block title %}Mapa da propriedade — ConnectAgro{% endblock %}
 
 {% block extra_head %}
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/leaflet-1.9.4/leaflet.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/leaflet-draw-1.0.4/leaflet.draw.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -12,43 +12,55 @@
   <div class="card-head">
     <div>
       <h1>Mapa da propriedade</h1>
-      <p class="hint">{{ propriedade.nome }}</p>
+      <p class="hint">Propriedade ativa: <strong>{{ propriedade_mapa.nome }}</strong></p>
     </div>
   </div>
 
   <div class="mapa-aviso">
-    <p>O mapa permite a <strong>edição do polígono</strong> de cada Área de Plantio para
+    <p>O mapa permite a <strong>edição do polígono</strong> da Propriedade e de cada Área de Plantio para
        apoio operacional, sem exigir dados técnicos no cadastro.</p>
     <p>É apoio operacional: <strong>não substitui medição técnica ou
        georreferenciamento oficial</strong> e não usa GPS em tempo real.</p>
+    <p>Áreas em hectares são valores informados no cadastro. A comparação dos limites é informativa e não ajusta os desenhos automaticamente.</p>
   </div>
 
-  {% if not glebas %}
-    <p class="mapa-empty">Nenhuma Área de Plantio cadastrada ainda.</p>
-  {% endif %}
+  <div class="mapa-legenda" aria-label="Legenda do mapa">
+    <span><i class="mapa-amostra-propriedade" aria-hidden="true"></i>Contorno da Propriedade</span>
+    <span><i class="mapa-amostra-area" aria-hidden="true"></i>Áreas de Plantio</span>
+  </div>
+  <p id="mapa-disponibilidade" class="mapa-disponibilidade" role="status" hidden></p>
+  {% if not glebas %}<p class="mapa-empty">Nenhuma Área de Plantio cadastrada ainda. O contorno da Propriedade pode ser delimitado separadamente.</p>{% endif %}
 
   <div class="mapa-layout">
     <div class="mapa-container">
       <div id="mapa-glebas"
+           aria-label="Mapa da Propriedade e suas Áreas de Plantio"
+           data-propriedade-id="{{ propriedade_mapa.id }}"
            data-mapa-url="{{ url_for('mapa.dados') }}"
            data-csrf-token="{{ csrf_token() }}"
-           data-can-edit="{{ '1' if can('mapa.edit') else '0' }}">
-        {% if not glebas %}
-          <p class="mapa-empty">Nenhuma Área de Plantio cadastrada para exibir no mapa.</p>
-        {% endif %}
-      </div>
+           data-can-edit="{{ '1' if can('mapa.edit') else '0' }}"></div>
+      <noscript><p class="mapa-empty">Ative JavaScript para visualizar o mapa. As informações textuais estão disponíveis ao lado.</p></noscript>
     </div>
 
     <aside class="mapa-sidebar">
       {% if can("mapa.edit") %}
       <section class="mapa-edicao" id="mapa-edicao">
         <h2>Editar polígono</h2>
-        <p class="hint">Selecione uma Área de Plantio, desenhe ou ajuste o polígono e salve.</p>
-        <label for="mapa-gleba-select">Área de Plantio</label>
-        <select id="mapa-gleba-select"></select>
+        <label for="mapa-entidade-tipo">Elemento em edição</label>
+        <select id="mapa-entidade-tipo" disabled>
+          <option value="propriedade">Propriedade</option>
+          <option value="gleba">Área de Plantio</option>
+        </select>
+        <div id="mapa-area-campo" hidden>
+          <label for="mapa-gleba-select">Área de Plantio</label>
+          <select id="mapa-gleba-select" disabled></select>
+        </div>
+        <h3 id="mapa-em-edicao">Carregando editor…</h3>
+        <p class="hint">Desenhe uma ou mais partes ou ajuste os vértices com a ferramenta de edição. Para substituir uma parte, remova-a no editor antes de desenhar. Confirme as alterações em Salvar polígono.</p>
+        <p id="mapa-legado" class="mapa-disponibilidade" hidden>Coleção legada: ao salvar, todos os polígonos serão reunidos em Polygon ou MultiPolygon. A geometria original permanece no cadastro até a confirmação.</p>
         <div class="mapa-edicao-acoes">
-          <button type="button" id="mapa-salvar" class="btn-acao">Salvar polígono</button>
-          <button type="button" id="mapa-limpar">Limpar polígono</button>
+          <button type="button" id="mapa-salvar" class="btn-acao" disabled>Salvar polígono</button>
+          <button type="button" id="mapa-limpar" disabled>Limpar polígono</button>
         </div>
         <p class="mapa-status" id="mapa-status" role="status"></p>
       </section>
@@ -58,21 +70,24 @@
       </section>
       {% endif %}
 
+      <section class="mapa-propriedade-infos" data-mapa-entidade="propriedade:{{ propriedade_mapa.id }}">
+        <h2>Propriedade</h2>
+        <strong>{{ propriedade_mapa.nome }}</strong>
+        {% if propriedade_mapa.municipio or propriedade_mapa.uf %}<p>{{ propriedade_mapa.municipio or 'Município não informado' }}{% if propriedade_mapa.uf %} / {{ propriedade_mapa.uf }}{% endif %}</p>{% endif %}
+        <p>Área informada: {{ formatar_area(propriedade_mapa.area_total_ha) if propriedade_mapa.area_total_ha is not none else 'não informada' }}</p>
+        <small data-mapa-poligono-estado>{% if propriedade_mapa.poligono_estado == 'invalido' %}Delimitação antiga inválida: preservada no cadastro e não exibida.{% elif propriedade_mapa.poligono_geojson %}Polígono cadastrado{% else %}Sem polígono cadastrado{% endif %}</small>
+      </section>
+
       <section>
         <h2>Áreas de Plantio no mapa</h2>
         <ul class="mapa-lista">
           {% for gleba in glebas_mapa %}
-            <li>
+            <li data-mapa-entidade="gleba:{{ gleba.id }}">
               <strong>{{ gleba.nome }}</strong>
-              {% if gleba.area_ha is not none %}
-                <span>Área: {{ formatar_area(gleba.area_ha) }}</span>
-              {% else %}
-                <span>Área não informada</span>
-              {% endif %}
-              {% if gleba.tipo_solo %}
-                <span>Solo: {{ gleba.tipo_solo }}</span>
-              {% endif %}
-              <small>{{ "Polígono cadastrado" if gleba.poligono_geojson else "Sem polígono cadastrado" }}</small>
+              <span>Área informada: {{ formatar_area(gleba.area_ha) if gleba.area_ha is not none else 'não informada' }}</span>
+              {% if gleba.tipo_solo %}<span>Solo: {{ gleba.tipo_solo }}</span>{% endif %}
+              <small data-mapa-poligono-estado>{% if gleba.poligono_estado == 'invalido' %}Delimitação antiga inválida: preservada no cadastro e não exibida.{% elif gleba.poligono_geojson %}Polígono cadastrado{% else %}Sem polígono cadastrado{% endif %}</small>
+              <small data-mapa-contencao class="{{ 'mapa-contencao-aviso' if gleba.contencao.status == 'fora_do_limite' }}">{{ gleba.contencao.mensagem }}</small>
             </li>
           {% else %}
             <li class="mapa-empty">Nenhuma Área de Plantio cadastrada para exibir no mapa.</li>
@@ -85,7 +100,8 @@
 {% endblock %}
 
 {% block extra_scripts %}
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
-  <script src="{{ url_for('static', filename='js/mapa.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendor/leaflet-1.9.4/leaflet.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/mapa-loader.js') }}"
+          data-draw-script="{{ url_for('static', filename='vendor/leaflet-draw-1.0.4/leaflet.draw.js') }}"
+          data-mapa-script="{{ url_for('static', filename='js/mapa.js') }}"></script>
 {% endblock %}

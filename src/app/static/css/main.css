@@ -814,6 +814,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: .9rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .mapa-sidebar h2 {
   color: var(--ca-text);
@@ -849,6 +851,18 @@ body {
 .mapa-aviso p { margin: .2rem 0; font-size: .9rem; }
 .mapa-empty { color: var(--ca-text-soft); margin: .25rem 0; }
 .mapa-container .mapa-empty { padding: 1rem; }
+.mapa-legenda { display: flex; flex-wrap: wrap; gap: .6rem 1.25rem; margin: .75rem 0; }
+.mapa-legenda span { display: inline-flex; align-items: center; gap: .45rem; font-size: .9rem; }
+.mapa-legenda i { display: inline-block; width: 1.8rem; height: 1rem; border-radius: 3px; }
+.mapa-amostra-propriedade { border: 3px dashed #d4a94f; background: rgba(212, 169, 79, .06); }
+.mapa-amostra-area { border: 2px solid #2e7d32; background: rgba(129, 199, 132, .23); }
+.mapa-propriedade-infos { border: 1px solid #d4a94f; border-radius: 10px; padding: .75rem; }
+.mapa-propriedade-infos p { margin: .45rem 0; }
+.mapa-propriedade-infos small { color: var(--ca-text-muted); display: block; }
+.mapa-disponibilidade { border-left: 3px solid #d4a94f; padding: .6rem .75rem; background: var(--ca-bg-card-soft); color: var(--ca-text); }
+.mapa-disponibilidade[hidden], #mapa-area-campo[hidden] { display: none; }
+.mapa-contencao-aviso { color: #d4a94f !important; margin-top: .3rem; }
+.mapa-editor-bloqueado { pointer-events: none; opacity: .45; }
 
 /* IA simulada */
 .ia-layout {
@@ -1182,9 +1196,11 @@ body {
   margin-bottom: 1rem; background: var(--ca-bg-secondary);
 }
 .mapa-edicao h2 { margin-top: 0; color: var(--ca-text); }
+.mapa-edicao h3 { font-size: .95rem; margin: .7rem 0; color: var(--ca-text); }
 .mapa-edicao select { width: 100%; padding: .4rem .5rem; border: 1px solid var(--ca-border);
-  border-radius: 8px; background: var(--ca-bg-card-soft); color: var(--ca-text); margin-bottom: .5rem; }
+  min-width: 0; max-width: 100%; border-radius: 8px; background: var(--ca-bg-card-soft); color: var(--ca-text); margin-bottom: .5rem; }
 .mapa-edicao-acoes { display: flex; flex-wrap: wrap; gap: .5rem; }
+.mapa-edicao :disabled { opacity: .55; cursor: not-allowed; }
 .mapa-status { margin: .5rem 0 0; font-size: .85rem; min-height: 1.1rem; }
 .mapa-status-ok { color: var(--ca-green-400); }
 .mapa-status-erro { color: var(--ca-danger); }

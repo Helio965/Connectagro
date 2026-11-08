@@ -13,6 +13,8 @@ class Propriedade(db.Model):
     municipio = db.Column(db.String(120), nullable=True)
     uf = db.Column(db.String(2), nullable=True)
     area_total_ha = db.Column(db.Float, nullable=True)
+    # Contorno próprio, independente dos polígonos das Áreas de Plantio.
+    poligono_geojson = db.Column(db.Text, nullable=True)
     criado_em = db.Column(db.String(40), nullable=False, default=iso_now)
     atualizado_em = db.Column(db.String(40), nullable=True)
 

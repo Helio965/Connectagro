@@ -256,29 +256,42 @@ Indicadores principais:
 
 O Dashboard não cria dados, não altera schema e não implementa gráficos externos.
 
-### Mapa avançado
+### Mapa e delimitação territorial
 
-O módulo Mapa em `/mapa/` é protegido por login e mostra as glebas da propriedade
-atual usando as coordenadas já cadastradas em `Gleba.latitude`/`Gleba.longitude`.
-A rota `/mapa/dados` entrega JSON escopado pela propriedade atual, sem dados de
-usuário/e-mail e separando glebas sem coordenadas válidas.
+O módulo `/mapa/` distingue o contorno da **Propriedade ativa** dos polígonos
+individuais de suas **Áreas de Plantio** (`Gleba`). Ambos são opcionais. O JSON
+`/mapa/dados` mantém as chaves `propriedade` e `glebas`, restritas ao contexto
+validado, sem dados de usuário/e-mail.
 
-O frontend usa **Leaflet + Leaflet.draw** via CDN. Além de marcadores e polígonos
-existentes, a **Fase 7.5** permite **desenhar, editar, salvar e limpar** o
-polígono (`poligono_geojson`) de cada gleba — um polígono por gleba. A edição
-exige a permissão **`mapa.edit`** (admin e técnico); o **trabalhador apenas
-visualiza** (os controles de edição nem aparecem).
+Leaflet 1.9.4 e Leaflet.draw 1.0.4 são servidos localmente, com licenças e
+manifesto de origem/integridade em `src/app/static/vendor/`. A imagem de fundo
+continua usando OpenStreetMap; sua indisponibilidade é informada sem impedir
+consulta textual ou edição dos polígonos. O editor permite escolher Propriedade
+ou Área de Plantio, preserva partes/furos e avisa sobre alterações não salvas.
+Salvar/limpar só modifica o desenho confirmado após sucesso do servidor.
 
-O salvamento é um `POST` protegido (`/mapa/glebas/<id>/poligono` e
-`.../poligono/limpar`) com **CSRF** (token via header `X-CSRFToken`). O **GeoJSON
-é validado no backend** (Polygon/MultiPolygon/Feature, coordenadas em faixa,
-tamanho limitado); inválido retorna 400 e não é salvo. Gleba de outra propriedade
-retorna 404 e cada alteração gera **auditoria** (`mapa.poligono.update`/`delete`),
-sem gravar o GeoJSON no log.
+Edição exige `mapa.edit` (Administrador/Gerente), vínculo ativo e CSRF;
+Trabalhador somente visualiza. Rotas antigas de Área de Plantio continuam em
+`/mapa/glebas/<id>/poligono` e `.../limpar`. O contorno usa as novas rotas
+`/mapa/propriedades/<id>/poligono` e `.../limpar`; o ID deve ser da Propriedade
+ativa, mesmo quando houver outro vínculo legítimo.
 
-O mapa é **apoio operacional**: não substitui medição técnica nem
-georreferenciamento oficial. Sem PostGIS, GPS em tempo real, shapefile/KML,
-importação/exportação geográfica ou alteração de schema.
+Shapely/GEOS valida Polygon, MultiPolygon e Feature, incluindo autointerseções,
+furos, vértices, números finitos, faixa, tamanho e complexidade. Entrada inválida
+retorna 400 e preserva a geometria anterior. Conteúdo legado não exibível é
+sinalizado sem reescrever o banco; FeatureCollection poligonal legada válida pode
+ser exibida. Os logs identificam o tipo de entidade sem guardar GeoJSON.
+
+A comparação de limites é **informativa**: estar fora do contorno não bloqueia
+salvamento e não recorta/move áreas. `area_total_ha` e `area_ha` permanecem valores
+informados; não há cálculo geodésico de hectares. Áreas independentes aguardam
+regras de autorização/contexto; a FK atual foi preservada, sem Propriedade fictícia.
+
+Aplique a migration `e4ca60b1d732` em uma base adequada, após backup e validação
+em cópia, antes de iniciar esta versão em uma instalação anterior. A Etapa 05
+usou somente bancos descartáveis. Veja o [relatório territorial](docs/auditoria/05-mapas-organizacao-territorial.md).
+O mapa é apoio operacional e não substitui medição ou georreferenciamento oficial.
+Não há PostGIS, GPS em tempo real, shapefile/KML ou integração cadastral oficial.
 
 ### IA simulada operacional
 

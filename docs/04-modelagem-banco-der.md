@@ -61,7 +61,8 @@ Propriedade rural gerida no sistema. Um usuário pode ter mais de uma.
 - `usuario_id` — FK → `usuario` (dono/responsável).
 - `nome` — nome da propriedade/fazenda.
 - `municipio`, `uf` — localização (opcionais).
-- `area_total_ha` — área total em hectares (opcional).
+- `area_total_ha` — área total informada em hectares (opcional), não substituída por polígono.
+- `poligono_geojson` — contorno próprio da Propriedade (`TEXT`, opcional; Etapa 05).
 - `criado_em`, `atualizado_em` — controle temporal.
 
 Observação: `usuario_id` permanece como dono/responsável legado da propriedade.
@@ -107,15 +108,15 @@ Cultura cadastrada na propriedade (ex.: soja, milho).
 - `criado_em`, `atualizado_em` — controle temporal.
 
 ### `gleba`
-Área/talhão da propriedade.
+Área de Plantio/talhão vinculado à propriedade. Áreas independentes ainda
+dependem da definição de autorização/contexto; a FK continua obrigatória.
 
 - `id` — PK.
 - `propriedade_id` — FK → `propriedade`.
 - `nome` — identificação da gleba/talhão.
 - `area_ha` — área em hectares (opcional).
-- `latitude`, `longitude` — ponto central da gleba (opcionais).
-- `poligono_geojson` — polígono da área em GeoJSON (`TEXT`, opcional) para o
-  **mapa real** futuro. No MVP o mapa pode começar simples.
+- `poligono_geojson` — delimitação própria da Área de Plantio em GeoJSON
+  (`TEXT`, opcional), preservada separadamente do contorno da Propriedade.
 - `tipo_solo` — tipo de solo (opcional).
 - `observacoes` — texto livre (opcional).
 - `criado_em`, `atualizado_em` — controle temporal.

@@ -194,3 +194,20 @@ suíte atual passando:
 - [06.1 — Arquitetura Técnica do MVP](../docs/06-1-arquitetura-tecnica-mvp.md)
 - [07 — Roadmap do MVP](../docs/07-roadmap-mvp.md)
 - [09 — Roadmap do MVP Ampliado](../docs/09-roadmap-mvp-ampliado.md)
+
+
+## Mapas territoriais — Etapa 05
+
+- `test_mapa_geometria.py`: validade topológica Shapely, limites de recurso,
+  JSON malformado/não finito, leitura legada sem reparo e comparação informativa.
+- `test_mapa_territorio.py`: contornos de Propriedade e Áreas de Plantio,
+  preservação de valores/histórico, contexto ativo, permissões, CSRF, auditoria
+  e persistência após recriar aplicativo/engine.
+- `test_mapa_migration.py`: upgrade real d3→e4 em SQLite descartável, snapshot
+  de 13 tabelas, coluna opcional e bloqueio de downgrade com conteúdo cadastrado.
+
+Testes existentes de mapa real/avançado continuam cobrindo os contratos antigos.
+Áreas independentes não foram implementadas por ausência de decisões sobre
+responsável/autorização/contexto; seus cenários condicionais não são declarados
+aprovados. A validação no navegador usa Leaflet/Leaflet.draw reais servidos
+localmente; detalhes e evidências no relatório de auditoria 05.

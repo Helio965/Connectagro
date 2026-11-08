@@ -1,0 +1,116 @@
+[
+  {
+    "package": "leaflet",
+    "version": "1.9.4",
+    "license": "BSD-2-Clause",
+    "source": "https://registry.npmjs.org/leaflet/-/leaflet-1.9.4.tgz",
+    "integrity": "sha512-nxS1ynzJOmOlHp+iL3FyWqK89GtNL8U8rvlMOsQdTTssxZwCXh8N2NB3GDQOL+YR3XnWyZAxwQixURb+FA74PA==",
+    "files": [
+      {
+        "path": "leaflet.css",
+        "sha256": "a7837102824184820dfa198d1ebcd109ff6d0ff9a2672a074b9a1b4d147d04c6",
+        "bytes": 14806
+      },
+      {
+        "path": "leaflet.js",
+        "sha256": "db49d009c841f5ca34a888c96511ae936fd9f5533e90d8b2c4d57596f4e5641a",
+        "bytes": 147552
+      },
+      {
+        "path": "images/layers-2x.png",
+        "sha256": "066daca850d8ffbef007af00b06eac0015728dee279c51f3cb6c716df7c42edf",
+        "bytes": 1259
+      },
+      {
+        "path": "images/layers.png",
+        "sha256": "1dbbe9d028e292f36fcba8f8b3a28d5e8932754fc2215b9ac69e4cdecf5107c6",
+        "bytes": 696
+      },
+      {
+        "path": "images/marker-icon-2x.png",
+        "sha256": "00179c4c1ee830d3a108412ae0d294f55776cfeb085c60129a39aa6fc4ae2528",
+        "bytes": 2464
+      },
+      {
+        "path": "images/marker-icon.png",
+        "sha256": "574c3a5cca85f4114085b6841596d62f00d7c892c7b03f28cbfa301deb1dc437",
+        "bytes": 1466
+      },
+      {
+        "path": "images/marker-shadow.png",
+        "sha256": "264f5c640339f042dd729062cfc04c17f8ea0f29882b538e3848ed8f10edb4da",
+        "bytes": 618
+      },
+      {
+        "path": "LICENSE",
+        "sha256": "53e8dc25862014e4324741ca18fbe3611e11d42ef69f59f86ea8c5389647d4cb",
+        "bytes": 1395
+      }
+    ]
+  },
+  {
+    "package": "leaflet-draw",
+    "version": "1.0.4",
+    "license": "MIT",
+    "source": "https://registry.npmjs.org/leaflet-draw/-/leaflet-draw-1.0.4.tgz",
+    "integrity": "sha512-rsQ6saQO5ST5Aj6XRFylr5zvarWgzWnrg46zQ1MEOEIHsppdC/8hnN8qMoFvACsPvTioAuysya/TVtog15tyAQ==",
+    "files": [
+      {
+        "path": "images/layers-2x.png",
+        "sha256": "066daca850d8ffbef007af00b06eac0015728dee279c51f3cb6c716df7c42edf",
+        "bytes": 1259
+      },
+      {
+        "path": "images/layers.png",
+        "sha256": "1dbbe9d028e292f36fcba8f8b3a28d5e8932754fc2215b9ac69e4cdecf5107c6",
+        "bytes": 696
+      },
+      {
+        "path": "images/marker-icon-2x.png",
+        "sha256": "2d77a2e4c2f08bbac41808324ef946b9a2fe61b6150480d011b72b379c3b238d",
+        "bytes": 2586
+      },
+      {
+        "path": "images/marker-icon.png",
+        "sha256": "574c3a5cca85f4114085b6841596d62f00d7c892c7b03f28cbfa301deb1dc437",
+        "bytes": 1466
+      },
+      {
+        "path": "images/marker-shadow.png",
+        "sha256": "264f5c640339f042dd729062cfc04c17f8ea0f29882b538e3848ed8f10edb4da",
+        "bytes": 618
+      },
+      {
+        "path": "images/spritesheet-2x.png",
+        "sha256": "fa2c95e0610f3787c879645e42b86ad010c305f8312e116841730d00d4ab72b7",
+        "bytes": 3581
+      },
+      {
+        "path": "images/spritesheet.png",
+        "sha256": "a8978a1d3d21d8ee6f16cce342ff67fc47c4241f52161f05baf88f15e1058199",
+        "bytes": 1906
+      },
+      {
+        "path": "images/spritesheet.svg",
+        "sha256": "7077bae968047180921324df351d95fe2f021cdaefa01e20645162402f767da4",
+        "bytes": 5551
+      },
+      {
+        "path": "leaflet.draw.css",
+        "sha256": "5f30f74696873efee5cd7f6ab7eda7d63e5c5a3e3c3b6e0ab2068662928df31f",
+        "bytes": 5267
+      },
+      {
+        "path": "leaflet.draw.js",
+        "sha256": "b22a1f7385308e5adadd85a4c2d84e9fc523ebd70d37868cba0fe2387362460b",
+        "bytes": 67484
+      },
+      {
+        "path": "LICENSE",
+        "sha256": "320f2c68ac27b7f7f2a78c490470a273d297e753ab37ba026944616bf0a62f47",
+        "bytes": 1078
+      }
+    ],
+    "license_source": "https://raw.githubusercontent.com/Leaflet/Leaflet.draw/v1.0.4/MIT-LICENSE.md"
+  }
+]

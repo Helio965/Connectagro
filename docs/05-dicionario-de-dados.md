@@ -105,7 +105,8 @@ Propriedade rural gerida pelo usuário.
 | nome          | TEXT    | Sim         |       | Nome da propriedade      |                        |
 | municipio     | TEXT    | Não         |       | Município                |                        |
 | uf            | TEXT    | Não         |       | Unidade federativa       | Sigla (ex.: `MT`)      |
-| area_total_ha | REAL    | Não         |       | Área total em hectares   |                        |
+| area_total_ha | REAL    | Não         |       | Área total informada em hectares | Não substituída pela geometria |
+| poligono_geojson | TEXT | Não | | Contorno próprio da Propriedade | GeoJSON opcional; migration e4ca60b1d732 |
 | criado_em     | TEXT    | Sim         |       | Data/hora de criação     | ISO 8601               |
 | atualizado_em | TEXT    | Não         |       | Data/hora de atualização | ISO 8601               |
 
@@ -127,8 +128,9 @@ Associação entre usuários e propriedades no MVP ampliado.
 | atualizado_em  | TEXT    | Não         |       | Data/hora da última atualização   | ISO 8601                                   |
 
 Restrições: o par (`usuario_id`, `propriedade_id`) é único. O painel não faz
-remoção física de usuários; a inativação marca `usuario.ativo = 0` e
-`usuario_propriedade.ativo = 0`.
+remoção física de usuários. Para conta compartilhada, a inativação altera apenas
+`usuario_propriedade.ativo`; para conta com um único vínculo, mantém também o
+bloqueio global anterior de `usuario.ativo`, conforme as Etapas 03/04.
 
 ### Tabela: `equipe_membro`
 Membros da equipe vinculados a uma propriedade.
@@ -194,8 +196,6 @@ Culturas cadastradas na propriedade.
 | propriedade_id   | INTEGER | Sim         | FK    | Propriedade da gleba       | FK para `propriedade(id)`            |
 | nome             | TEXT    | Sim         |       | Identificação da gleba     |                                      |
 | area_ha          | REAL    | Não         |       | Área em hectares           |                                      |
-| latitude         | REAL    | Não         |       | Latitude do ponto central  | Usada pelo mapa real simplificado    |
-| longitude        | REAL    | Não         |       | Longitude do ponto central | Usada pelo mapa real simplificado    |
 | poligono_geojson | TEXT    | Não         |       | Polígono da área (GeoJSON) | JSON em `TEXT`; editável no mapa (Fase 7.5) com permissão `mapa.edit` |
 | tipo_solo        | TEXT    | Não         |       | Tipo de solo               |                                      |
 | observacoes      | TEXT    | Não         |       | Texto livre                |                                      |

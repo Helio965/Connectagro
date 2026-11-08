@@ -1,4 +1,6 @@
 """CRUD de Glebas (áreas/talhões) — escopo: propriedade do usuário logado."""
+import math
+
 from flask import abort, flash, redirect, render_template, request, url_for
 from sqlalchemy.exc import IntegrityError
 
@@ -45,8 +47,8 @@ def _ler_e_validar_form():
 
     if not nome:
         return None, "O nome da Área de Plantio é obrigatório."
-    if area_ha is None or area_ha <= 0:
-        return None, "A área da Área de Plantio deve ser informada e maior que zero."
+    if area_ha is None or not math.isfinite(area_ha) or area_ha <= 0:
+        return None, "A área da Área de Plantio deve ser finita, informada e maior que zero."
     if status not in STATUS_GLEBA_VALIDOS:
         status = "ativa"
 
