@@ -4,10 +4,10 @@ Cria e configura a aplicação Flask: carrega configuração por ambiente,
 inicializa extensões, registra blueprints, handlers de erro e a rota de
 health check. Nenhum CRUD, banco populado, migration ou seed é executado aqui.
 """
-from flask import Flask, jsonify, render_template
+from flask import Flask, flash, jsonify, redirect, render_template, request, url_for
 from flask_wtf.csrf import CSRFError
 
-from .config import get_config
+from .config import configure_app
 from .extensions import csrf, db, mail, migrate
 from .blueprints import register_blueprints
 from .commands import register_commands
@@ -20,7 +20,7 @@ def create_app(config_name=None):
         Quando ``None``, usa ``FLASK_ENV`` (padrão: ``development``).
     """
     app = Flask(__name__)
-    app.config.from_object(get_config(config_name))
+    configure_app(app, config_name)
 
     # Extensões
     db.init_app(app)
@@ -42,6 +42,25 @@ def create_app(config_name=None):
     # Dados do usuário logado e autorização disponíveis nos templates Jinja.
     from .utils.auth import is_authenticated, usuario_atual
     from .utils.permissions import can, role_label
+    from .utils.contexto import propriedade_atual, propriedades_autorizadas
+
+    operacionais = {"dashboard", "culturas", "glebas", "aplicacoes", "colheita",
+                    "equipe", "financeiro", "upload", "mapa", "ia", "relatorios",
+                    "usuarios", "auditoria"}
+
+    @app.before_request
+    def exigir_contexto_operacional():
+        if request.blueprint not in operacionais or not is_authenticated():
+            return None
+        if propriedade_atual() is not None:
+            return None
+        mensagem = "Selecione uma propriedade autorizada para continuar. Seu acesso ao contexto anterior pode ter mudado."
+        if request.method not in {"GET", "HEAD"} or request.is_json:
+            if request.is_json:
+                return jsonify(ok=False, error=mensagem), 409
+            return render_template("propriedades/sem_contexto.html", mensagem=mensagem), 409
+        flash(mensagem, "warning")
+        return redirect(url_for("propriedades.selecionar"))
 
     @app.context_processor
     def inject_usuario():
@@ -50,6 +69,8 @@ def create_app(config_name=None):
             "is_authenticated": is_authenticated(),
             "can": can,
             "role_label": role_label,
+            "propriedade_selecionada": propriedade_atual(),
+            "propriedades_disponiveis": propriedades_autorizadas(),
         }
 
     # Health check

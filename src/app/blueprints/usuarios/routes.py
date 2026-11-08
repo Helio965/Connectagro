@@ -1,4 +1,4 @@
-"""Painel de Usuários — somente admin, escopo: propriedade atual (Fase 7.1).
+"""Painel de usuários por perfil e propriedade ativa.
 
 Permite listar, criar, editar dados principais, redefinir senha e ativar/
 inativar usuários vinculados à propriedade atual. Não há cadastro público,
@@ -8,7 +8,7 @@ import re
 import secrets
 
 from flask import (
-    abort, current_app, flash, redirect, render_template, request, session,
+    abort, current_app, flash, redirect, render_template, request,
     url_for,
 )
 
@@ -28,7 +28,7 @@ from ...services.email_service import (
 )
 from ...services.password_reset_service import gerar_token_definicao_senha
 from ...utils.auth import gerar_hash_senha, login_required, usuario_atual
-from ...utils.contexto import propriedade_atual, vazio_para_none
+from ...utils.contexto import propriedade_atual, propriedades_autorizadas, vazio_para_none
 from ...utils.permissions import PERFIS_OFICIAIS, require_permission, role_label
 from . import usuarios_bp
 
@@ -115,7 +115,25 @@ def _ativo_form(default=False):
 
 
 def _contar_admins_ativos():
-    return Usuario.query.filter_by(perfil="admin", ativo=True).count()
+    prop = propriedade_atual()
+    if prop is None:
+        return 0
+    return (Usuario.query.join(UsuarioPropriedade, UsuarioPropriedade.usuario_id == Usuario.id)
+            .filter(Usuario.perfil == "admin", Usuario.ativo.is_(True),
+                    UsuarioPropriedade.propriedade_id == prop.id,
+                    UsuarioPropriedade.ativo.is_(True)).count())
+
+
+def _compartilhado(usuario):
+    return UsuarioPropriedade.query.filter_by(usuario_id=usuario.id).count() > 1
+
+
+def _fora_do_escopo(usuario):
+    if usuario_atual()["id"] == usuario.id:
+        return False
+    permitidas = {p.id for p in propriedades_autorizadas()}
+    return any(v.propriedade_id not in permitidas
+               for v in UsuarioPropriedade.query.filter_by(usuario_id=usuario.id))
 
 
 def _validar_admin_preservado(usuario, novo_perfil, novo_ativo):
@@ -127,16 +145,19 @@ def _validar_admin_preservado(usuario, novo_perfil, novo_ativo):
         if novo_perfil != "admin":
             erros.append("Você não pode alterar seu próprio perfil de administrador.")
 
+    vinculo_atual = UsuarioPropriedade.query.filter_by(
+        usuario_id=usuario.id, propriedade_id=propriedade_atual().id).first()
+    ativo_aqui = bool(usuario.ativo and vinculo_atual and vinculo_atual.ativo)
     unico_admin_ativo = (
         usuario.perfil == "admin"
-        and usuario.ativo
+        and ativo_aqui
         and _contar_admins_ativos() <= 1
     )
     if unico_admin_ativo and novo_perfil != "admin":
         erros.append("Não é possível alterar o perfil do único admin ativo.")
     if unico_admin_ativo and not novo_ativo:
         erros.append("Não é possível inativar o único admin ativo.")
-    if usuario.perfil == "admin" and not usuario.ativo and novo_ativo and _contar_admins_ativos() >= 1:
+    if usuario.perfil == "admin" and not ativo_aqui and novo_ativo and _contar_admins_ativos() >= 1:
         erros.append("Não é possível ativar outro administrador.")
     return erros
 
@@ -196,6 +217,12 @@ def _validar_dados_usuario(*, usuario=None, perfis_permitidos=(), com_senha=True
 
 
 def _render_form(usuario, form, perfis, status=200, titulo=None, form_action=None):
+    somente_vinculo = bool(usuario and _fora_do_escopo(usuario))
+    if usuario and form is usuario:
+        vinculo = UsuarioPropriedade.query.filter_by(usuario_id=usuario.id,
+            propriedade_id=propriedade_atual().id).one()
+        form = dict(nome=usuario.nome, email=usuario.email, perfil=usuario.perfil,
+                    ativo=vinculo.ativo)
     return render_template(
         "usuarios/form.html",
         usuario=usuario,
@@ -204,16 +231,8 @@ def _render_form(usuario, form, perfis, status=200, titulo=None, form_action=Non
         min_senha=MIN_SENHA,
         titulo=titulo,
         form_action=form_action,
+        somente_vinculo=somente_vinculo,
     ), status
-
-
-def _sincronizar_sessao_se_usuario_atual(usuario):
-    atual = usuario_atual()
-    if not atual or atual.get("id") != usuario.id:
-        return
-    session["user_email"] = usuario.email
-    session["user_nome"] = usuario.nome
-    session["user_perfil"] = usuario.perfil
 
 
 @usuarios_bp.route("/")
@@ -249,11 +268,12 @@ def index():
             "usuario": u,
             "vinculo": v,
             "can_manage": can_manage,
+            "somente_vinculo": _fora_do_escopo(u),
             "admin_principal": (u.perfil == "admin"
                                 and propriedade.usuario_id == u.id),
             # Botão de inativar some para o único admin ativo e para o
             # próprio usuário (o backend também bloqueia as duas ações).
-            "mostrar_inativar": (can_manage and u.ativo
+            "mostrar_inativar": (can_manage and v.ativo
                                  and not eh_unico_admin and not eh_proprio),
         })
 
@@ -358,9 +378,9 @@ def _fluxo_novo(perfil_fixo=None):
         ))
         db.session.commit()
 
-        descricao = f"Usuário criado: {usuario.email}"
+        descricao = f"Usuário criado: {mascarar_email(usuario.email)}"
         if _is_manager(usuario_logado):
-            descricao = f"Gerente criou trabalhador: {usuario.email}"
+            descricao = f"Gerente criou trabalhador: {mascarar_email(usuario.email)}"
         registrar_sucesso("usuarios.create", entidade="usuario",
                           entidade_id=usuario.id,
                           descricao=descricao,
@@ -438,7 +458,10 @@ def reenviar_convite(usuario_id):
     """
     propriedade = propriedade_atual()
     usuario_logado = _usuario_logado_model()
-    usuario, _vinculo = _usuario_da_propriedade_ou_404(usuario_id, propriedade)
+    usuario, vinculo = _usuario_da_propriedade_ou_404(usuario_id, propriedade)
+    if _fora_do_escopo(usuario):
+        _bloquear_acao_usuario("usuarios.convite.blocked",
+            "Operação global de conta compartilhada fora do escopo", propriedade, usuario.id)
     if usuario.perfil == "admin" or not _can_edit_target_user(usuario_logado, usuario):
         _bloquear_acao_usuario(
             "usuarios.convite.blocked",
@@ -446,7 +469,7 @@ def reenviar_convite(usuario_id):
             propriedade,
             usuario.id,
         )
-    if not usuario.ativo:
+    if not usuario.ativo or not vinculo.ativo:
         flash("Usuário inativo não pode receber convite.", "error")
         return redirect(url_for("usuarios.index")), 400
     _enviar_convite(usuario, propriedade, reenvio=True)
@@ -488,22 +511,27 @@ def editar(usuario_id):
                 flash(e, "error")
             return _render_form(usuario, request.form, perfis_permitidos, 400)
 
+        if (_fora_do_escopo(usuario) and (dados["nome"] != usuario.nome
+                or dados["email"] != usuario.email or dados["perfil"] != usuario.perfil or dados["senha"])):
+            _bloquear_acao_usuario("usuarios.edit.blocked",
+                "Alteração global de conta compartilhada fora do escopo", propriedade, usuario.id)
+
         perfil_anterior = usuario.perfil
-        ativo_anterior = bool(usuario.ativo)
+        ativo_anterior = bool(vinculo.ativo)
         email_anterior = usuario.email
         senha_alterada = bool(dados["senha"])
 
         usuario.nome = dados["nome"]
         usuario.email = dados["email"]
         usuario.perfil = dados["perfil"]
-        usuario.ativo = dados["ativo"]
+        if not _compartilhado(usuario):
+            usuario.ativo = dados["ativo"]
         if senha_alterada:
             usuario.senha_hash = gerar_hash_senha(dados["senha"])
         usuario.atualizado_em = iso_now()
         vinculo.ativo = dados["ativo"]
         vinculo.atualizado_em = iso_now()
         db.session.commit()
-        _sincronizar_sessao_se_usuario_atual(usuario)
 
         registrar_sucesso("usuarios.edit", entidade="usuario",
                           entidade_id=usuario.id,
@@ -512,16 +540,16 @@ def editar(usuario_id):
         if email_anterior != usuario.email:
             registrar_sucesso("usuarios.email_change", entidade="usuario",
                               entidade_id=usuario.id,
-                              descricao=f"E-mail alterado: {email_anterior} -> {usuario.email}",
+                              descricao=f"E-mail alterado: {mascarar_email(email_anterior)} -> {mascarar_email(usuario.email)}",
                               propriedade_id=propriedade.id, request=request)
         if perfil_anterior != usuario.perfil:
             registrar_sucesso("usuarios.profile_change", entidade="usuario",
                               entidade_id=usuario.id,
                               descricao=f"Perfil alterado: {perfil_anterior} -> {usuario.perfil}",
                               propriedade_id=propriedade.id, request=request)
-        if ativo_anterior != usuario.ativo:
-            acao = "usuarios.activate" if usuario.ativo else "usuarios.deactivate"
-            descricao = "Usuário ativado" if usuario.ativo else "Usuário desativado"
+        if ativo_anterior != vinculo.ativo:
+            acao = "usuarios.activate" if vinculo.ativo else "usuarios.deactivate"
+            descricao = "Vínculo ativado" if vinculo.ativo else "Vínculo desativado"
             registrar_sucesso(acao, entidade="usuario", entidade_id=usuario.id,
                               descricao=f"{descricao}: #{usuario.id}",
                               propriedade_id=propriedade.id, request=request)
@@ -558,7 +586,8 @@ def inativar(usuario_id):
         flash("Não é possível inativar o único admin ativo.", "error")
         return redirect(url_for("usuarios.index")), 400
 
-    usuario.ativo = False
+    if not _compartilhado(usuario):
+        usuario.ativo = False
     usuario.atualizado_em = iso_now()
     vinculo.ativo = False
     vinculo.atualizado_em = iso_now()
@@ -566,7 +595,7 @@ def inativar(usuario_id):
 
     registrar_sucesso("usuarios.deactivate", entidade="usuario",
                       entidade_id=usuario.id,
-                      descricao=f"Usuário desativado: #{usuario.id}",
+                      descricao=f"Vínculo desativado nesta propriedade: #{usuario.id}",
                       propriedade_id=propriedade.id, request=request)
-    flash("Usuário inativado.", "success")
+    flash("Acesso inativado nesta propriedade.", "success")
     return redirect(url_for("usuarios.index"))

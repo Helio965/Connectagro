@@ -6,6 +6,7 @@ import pytest
 
 from app.extensions import db
 from app.utils.auth import gerar_hash_senha
+from tests.factories import criar_propriedade_com_vinculo
 
 
 @pytest.fixture
@@ -29,6 +30,8 @@ def usuarios(db_app):
                           perfil="trabalhador", ativo=False,
                           senha_hash=gerar_hash_senha("inativo123"))
         db.session.add_all([ativo, inativo])
+        db.session.flush()
+        criar_propriedade_com_vinculo(ativo.id, nome="Fazenda de autenticação")
         db.session.commit()
     return db_app
 
@@ -71,7 +74,7 @@ def test_logout_limpa_sessao(usuarios):
                 data={"email": "admin@connectagro.com", "senha": "admin123"})
     with client.session_transaction() as sess:
         assert "user_id" in sess
-    client.get("/auth/logout")
+    assert client.post("/auth/logout").status_code == 302
     with client.session_transaction() as sess:
         assert "user_id" not in sess
 
@@ -96,6 +99,40 @@ def test_dashboard_com_login_ok(usuarios):
     assert resp.status_code == 200
 
 
+def test_propriedade_legada_sem_vinculo_exige_migration_sem_escritas_em_leitura(db_app):
+    """Ownership antigo só é reconciliado pela migration, nunca pelo login/GET."""
+    from app.models import Propriedade, Usuario, UsuarioPropriedade
+
+    with db_app.app_context():
+        usuario = Usuario(nome="Legado", email="legacy@example.invalid",
+                          perfil="admin", ativo=True,
+                          senha_hash=gerar_hash_senha("legacy-password"))
+        db.session.add(usuario)
+        db.session.flush()
+        propriedade = Propriedade(usuario_id=usuario.id, nome="Fazenda legada")
+        db.session.add(propriedade)
+        db.session.commit()
+        propriedade_id = propriedade.id
+        antes = (Propriedade.query.count(), UsuarioPropriedade.query.count())
+
+    client = db_app.test_client()
+    assert client.post("/auth/login", data={
+        "email": "legacy@example.invalid", "senha": "legacy-password",
+    }).status_code == 302
+    for rota in ("/", "/glebas/", "/propriedades/", "/propriedades/selecionar"):
+        response = client.get(rota)
+        if rota in ("/", "/glebas/"):
+            assert response.status_code == 302
+            assert "/propriedades/selecionar" in response.headers["Location"]
+        else:
+            assert response.status_code == 200
+    with client.session_transaction() as sess:
+        assert "propriedade_ativa_id" not in sess
+    with db_app.app_context():
+        assert antes == (Propriedade.query.count(), UsuarioPropriedade.query.count())
+        assert db.session.get(Propriedade, propriedade_id).nome == "Fazenda legada"
+
+
 def test_health_continua_publico(usuarios):
     resp = usuarios.test_client().get("/health")
     assert resp.status_code == 200
@@ -109,7 +146,11 @@ def test_sessao_nao_contem_senha(usuarios):
     with client.session_transaction() as sess:
         assert "senha" not in sess
         assert "senha_hash" not in sess
-        assert sess.get("user_perfil") == "admin"
+        assert type(sess.get("user_id")) is int
+        assert sess.get("auth_version") == 1
+        assert "user_perfil" not in sess
+        assert "user_email" not in sess
+        assert "user_nome" not in sess
 
 
 def test_senha_armazenada_como_hash(usuarios):

@@ -6,6 +6,7 @@ import re
 import pytest
 
 from app.extensions import db
+from tests.factories import criar_propriedade_com_vinculo
 from app.utils.auth import gerar_hash_senha
 
 TOKEN_RE = re.compile(r'name="csrf_token" value="([^"]+)"')
@@ -24,7 +25,7 @@ def _criar_usuario(email, perfil="admin"):
                       senha_hash=gerar_hash_senha("senha123"))
     db.session.add(usuario)
     db.session.commit()
-    propriedade = Propriedade(usuario_id=usuario.id, nome=f"Fazenda {perfil}")
+    propriedade = criar_propriedade_com_vinculo(usuario_id=usuario.id, nome=f"Fazenda {perfil}")
     db.session.add(propriedade)
     db.session.commit()
     return usuario, propriedade
@@ -125,7 +126,10 @@ def test_post_sem_token_retorna_400_com_mensagem_amigavel(app_csrf):
     corpo = resp.data.decode("utf-8")
     assert resp.status_code == 400
     assert "Não foi possível validar a segurança do formulário." in corpo
-    assert "csrf_token" not in corpo
+    # O layout autenticado agora contém o formulário legítimo de logout com
+    # token. A mensagem de erro continua sem expor detalhes técnicos do CSRF.
+    mensagem = corpo.split('<main', 1)[1].split('</main>', 1)[0]
+    assert "csrf_token" not in mensagem
 
 
 def test_post_com_token_valido_funciona(app_csrf):

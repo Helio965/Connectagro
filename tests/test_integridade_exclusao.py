@@ -7,6 +7,7 @@ sem cascata), preservando aplicações, colheitas e os próprios registros.
 import pytest
 
 from app.extensions import db
+from tests.factories import criar_propriedade_com_vinculo
 from app.utils.auth import gerar_hash_senha
 
 SENHA = "senha123"
@@ -27,7 +28,7 @@ def _setup_com_associacao(email="a@integridade.com"):
     from app.models import Cultura, CulturaGleba, Gleba, Propriedade
 
     usuario_id = _criar_usuario(email)
-    propriedade = Propriedade(usuario_id=usuario_id, nome="Fazenda " + email)
+    propriedade = criar_propriedade_com_vinculo(usuario_id=usuario_id, nome="Fazenda " + email)
     db.session.add(propriedade)
     db.session.commit()
     gleba = Gleba(propriedade_id=propriedade.id, nome="Talhão 1")

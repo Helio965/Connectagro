@@ -14,7 +14,7 @@
   {% include "relatorios/_avisos.html" %}
 
   <div class="relatorio-section">
-    <h2>Propriedades</h2>
+    <h2>Áreas de Plantio</h2>
     {% if dados.glebas %}
     <table class="tabela">
       <thead><tr><th>Nome</th><th>Área</th><th>Status</th><th>Tipo de solo</th></tr></thead>
@@ -29,7 +29,7 @@
         {% endfor %}
       </tbody>
     </table>
-    {% else %}<p>Nenhuma propriedade cadastrada.</p>{% endif %}
+    {% else %}<p>Nenhuma Área de Plantio cadastrada.</p>{% endif %}
   </div>
 
   <div class="relatorio-section">
@@ -51,10 +51,10 @@
   </div>
 
   <div class="relatorio-section">
-    <h2>Associações Cultura ↔ Propriedade</h2>
+    <h2>Associações Cultura ↔ Área de Plantio</h2>
     {% if dados.associacoes %}
     <table class="tabela">
-      <thead><tr><th>Cultura</th><th>Propriedade</th><th>Área da propriedade</th><th>Status da cultura</th></tr></thead>
+      <thead><tr><th>Cultura</th><th>Área de Plantio</th><th>Área da Área de Plantio</th><th>Status da cultura</th></tr></thead>
       <tbody>
         {% for cg in dados.associacoes %}
         <tr>
@@ -65,7 +65,7 @@
         {% endfor %}
       </tbody>
     </table>
-    {% else %}<p>Nenhuma associação cultura↔propriedade.</p>{% endif %}
+    {% else %}<p>Nenhuma associação cultura↔área de plantio.</p>{% endif %}
   </div>
 
   <div class="relatorio-section">
@@ -75,7 +75,7 @@
     </p>
     {% if dados.colheitas %}
     <table class="tabela">
-      <thead><tr><th>Data</th><th>Cultura</th><th>Propriedade</th><th>Quantidade</th><th>Unidade</th><th>Qualidade</th><th>Observação</th></tr></thead>
+      <thead><tr><th>Data</th><th>Cultura</th><th>Área de Plantio</th><th>Quantidade</th><th>Unidade</th><th>Qualidade</th><th>Observação</th></tr></thead>
       <tbody>
         {% for col in dados.colheitas %}
         <tr>

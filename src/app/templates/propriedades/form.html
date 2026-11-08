@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Editar' if propriedade else 'Nova' }} propriedade — ConnectAgro{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>{{ 'Editar' if propriedade else 'Cadastrar' }} propriedade</h1>
+  <p>O responsável pelo cadastro é o usuário autenticado. As Áreas de Plantio são cadastradas separadamente.</p>
+  <form method="post" class="form-vertical">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label for="nome">Nome *</label>
+    <input id="nome" name="nome" maxlength="150" required value="{{ form.nome or '' }}">
+    <label for="municipio">Município</label>
+    <input id="municipio" name="municipio" maxlength="120" value="{{ form.municipio or '' }}">
+    <label for="uf">UF</label>
+    <input id="uf" name="uf" maxlength="2" value="{{ form.uf or '' }}">
+    <label for="area_total_ha">Área total (ha)</label>
+    <input id="area_total_ha" name="area_total_ha" value="{{ form.area_total_ha if form.area_total_ha is defined and form.area_total_ha is not none else '' }}">
+    <div class="form-acoes"><button type="submit" class="btn-acao">Salvar</button><a href="{{ url_for('propriedades.index') }}">Voltar</a></div>
+  </form>
+</section>
+{% endblock %}

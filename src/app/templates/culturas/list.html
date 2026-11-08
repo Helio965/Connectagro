@@ -15,7 +15,7 @@
   <table class="tabela">
     <thead>
       <tr>
-        <th>Nome</th><th>Variedade</th><th>Safra</th><th>Status</th><th>Propriedades</th><th>Ações</th>
+        <th>Nome</th><th>Variedade</th><th>Safra</th><th>Status</th><th>Áreas de Plantio</th><th>Ações</th>
       </tr>
     </thead>
     <tbody>
@@ -25,7 +25,7 @@
         <td>{{ c.variedade or "—" }}</td>
         <td>{{ c.safra or "—" }}</td>
         <td>{{ c.status }}</td>
-        <td>{{ c.cultura_glebas | length }}</td>
+        <td>{{ associacoes[c.id] }}</td>
         <td class="acoes">
           {% if can("culturas.edit") %}
           <a href="{{ url_for('culturas.editar', cultura_id=c.id) }}">Editar</a>

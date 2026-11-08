@@ -4,6 +4,7 @@ import json
 import pytest
 
 from app.extensions import db
+from tests.factories import criar_propriedade_com_vinculo
 from app.utils.auth import gerar_hash_senha
 
 
@@ -20,7 +21,7 @@ def _criar_usuario_propriedade(email, nome_propriedade):
                       senha_hash=gerar_hash_senha("senha123"))
     db.session.add(usuario)
     db.session.commit()
-    propriedade = Propriedade(usuario_id=usuario.id, nome=nome_propriedade)
+    propriedade = criar_propriedade_com_vinculo(usuario_id=usuario.id, nome=nome_propriedade)
     db.session.add(propriedade)
     db.session.commit()
     return usuario, propriedade
@@ -172,7 +173,7 @@ def test_mapa_sem_glebas_mostra_estado_vazio(app_db):
     resp, corpo = _corpo_mapa(app_db, "vazio@connectagro.com")
     assert resp.status_code == 200
     assert "Fazenda Vazia" in corpo
-    assert "Nenhuma propriedade cadastrada ainda." in corpo
+    assert "Nenhuma Área de Plantio cadastrada ainda." in corpo
     assert "Talhao Norte" not in corpo
 
 

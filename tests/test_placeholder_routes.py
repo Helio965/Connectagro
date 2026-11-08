@@ -8,6 +8,7 @@ import pytest
 
 from app.extensions import db
 from app.utils.auth import gerar_hash_senha
+from tests.factories import criar_propriedade_com_vinculo
 
 ROTAS_PROTEGIDAS = [
     "/",
@@ -34,9 +35,12 @@ def logged_client(app):
 
     with app.app_context():
         db.create_all()
-        db.session.add(Usuario(nome="Admin", email="admin@connectagro.com",
-                               perfil="admin", ativo=True,
-                               senha_hash=gerar_hash_senha("admin123")))
+        usuario = Usuario(nome="Admin", email="admin@connectagro.com",
+                          perfil="admin", ativo=True,
+                          senha_hash=gerar_hash_senha("admin123"))
+        db.session.add(usuario)
+        db.session.flush()
+        criar_propriedade_com_vinculo(usuario.id, nome="Fazenda de smoke test")
         db.session.commit()
     client = app.test_client()
     client.post("/auth/login",

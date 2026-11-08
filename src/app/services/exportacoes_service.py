@@ -112,12 +112,12 @@ def gerar_csv_relatorio_geral(propriedade, dados):
     w.writerow([])
     w.writerow(["Indicador", "Valor"])
     g = dados["glebas"]
-    w.writerow(["Total de propriedades", g["total"]])
+    w.writerow(["Total de Áreas de Plantio", g["total"]])
     w.writerow(["Área total (ha)", _fmt_valor(g["area_total"])])
-    w.writerow(["Propriedades sem área", g["sem_area"]])
+    w.writerow(["Áreas de Plantio sem área", g["sem_area"]])
     c = dados["culturas"]
     w.writerow(["Total de culturas", c["total"]])
-    w.writerow(["Associações cultura↔propriedade", c["total_associacoes"]])
+    w.writerow(["Associações cultura↔área de plantio", c["total_associacoes"]])
     f = dados["financeiro"]
     w.writerow(["Receitas", _fmt_valor(f["receitas"])])
     w.writerow(["Despesas", _fmt_valor(f["despesas"])])
@@ -152,7 +152,7 @@ def gerar_csv_relatorio_agricola(propriedade, dados):
     w.writerow([_AVISO_OPERACIONAL])
     w.writerow(["Relatório Agrícola", propriedade.nome])
     w.writerow([])
-    w.writerow(["Propriedades"])
+    w.writerow(["Áreas de Plantio"])
     w.writerow(["Nome", "Área (ha)", "Tipo de Solo"])
     for item in dados["glebas"]:
         g = item["obj"]
@@ -204,7 +204,7 @@ def gerar_pdf_relatorio_geral(propriedade, dados):
 
     table_data = [["Indicador", "Valor"]]
     g = dados["glebas"]
-    table_data.append(["Total de propriedades", str(g["total"])])
+    table_data.append(["Total de Áreas de Plantio", str(g["total"])])
     table_data.append(["Área total", f'{_fmt_valor(g["area_total"])} ha'])
     c = dados["culturas"]
     table_data.append(["Total de culturas", str(c["total"])])
@@ -250,7 +250,7 @@ def gerar_pdf_relatorio_agricola(propriedade, dados):
     styles = getSampleStyleSheet()
     elems = _pdf_header("Relatório Agrícola", propriedade, styles)
 
-    elems.append(Paragraph("Propriedades", styles["Heading2"]))
+    elems.append(Paragraph("Áreas de Plantio", styles["Heading2"]))
     table_data = [["Nome", "Área (ha)", "Tipo de Solo"]]
     for item in dados["glebas"]:
         g = item["obj"]

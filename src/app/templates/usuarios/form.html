@@ -5,18 +5,21 @@
 {% block content %}
 <section class="card">
   <h1>{{ titulo or ("Editar usuário" if usuario else "Novo usuário") }}</h1>
+  {% if usuario and not usuario.ativo %}<p class="hint">A conta está globalmente inativa. Um vínculo local ativo não habilita o login de uma conta globalmente inativa.</p>{% endif %}
 
   <form method="post" class="form-vertical"
         action="{{ form_action or (url_for('usuarios.editar', usuario_id=usuario.id) if usuario else url_for('usuarios.novo')) }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
     <label for="nome">Nome *</label>
-    <input type="text" id="nome" name="nome" required value="{{ form.nome or '' }}">
+    <input type="text" id="nome" name="nome" required {{ 'readonly' if somente_vinculo }} value="{{ form.nome or '' }}">
 
     <label for="email">E-mail *</label>
-    <input type="email" id="email" name="email" required value="{{ form.email or '' }}">
+    <input type="email" id="email" name="email" required {{ 'readonly' if somente_vinculo }} value="{{ form.email or '' }}">
 
-    {% if usuario %}
+    {% if usuario and somente_vinculo %}
+    <p class="hint">Conta compartilhada: neste contexto, altere apenas o vínculo local. Os dados globais estão protegidos.</p>
+    {% elif usuario %}
     <p class="hint">Preencha a senha apenas se quiser alterá-la.</p>
     <label for="senha">Nova senha</label>
     <input type="password" id="senha" name="senha" minlength="{{ min_senha }}"
@@ -34,7 +37,9 @@
     </p>
     {% endif %}
 
-    {% if perfis|length == 1 %}
+    {% if somente_vinculo %}
+    <p>Perfil: {{ role_label(form.perfil) }}</p><input type="hidden" name="perfil" value="{{ form.perfil }}">
+    {% elif perfis|length == 1 %}
     {# Perfil travado pela rota (Novo gerente / Novo trabalhador): o backend
        rejeita qualquer outro perfil mesmo com POST manipulado. #}
     <label>Perfil</label>
@@ -53,7 +58,7 @@
 
     <label class="check-inline">
       <input type="checkbox" name="ativo" value="1" {{ "checked" if form.ativo else "" }}>
-      Ativo
+      Ativo nesta propriedade
     </label>
 
     <div class="form-acoes">

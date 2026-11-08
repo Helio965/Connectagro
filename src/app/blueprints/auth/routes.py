@@ -73,7 +73,9 @@ def login():
             flash("E-mail ou senha inválidos.", "error")
             return render_template("auth/login.html"), 401
 
-        if not usuario.ativo:
+        from ...utils.permissions import PERFIS_OFICIAIS
+
+        if not usuario.ativo or usuario.perfil not in PERFIS_OFICIAIS:
             registrar_falha(
                 "auth.login.falha",
                 entidade="usuario",
@@ -100,7 +102,7 @@ def login():
     return render_template("auth/login.html")
 
 
-@auth_bp.route("/logout")
+@auth_bp.route("/logout", methods=["POST"])
 def logout():
     atual = usuario_atual()
     usuario_id = atual["id"] if atual else None
@@ -146,7 +148,8 @@ def esqueci_senha():
         # (fail-safe: falha de envio não altera a resposta genérica).
         if resultado.get("token") and usuario is not None and email_ativo():
             link = montar_link_absoluto(
-                url_for("auth.redefinir_senha", token=resultado["token"])
+                url_for("auth.redefinir_senha", token=resultado["token"],
+                        _external=not bool(current_app.config.get("APP_BASE_URL")))
             )
             email_recuperacao_senha(usuario, link)
 

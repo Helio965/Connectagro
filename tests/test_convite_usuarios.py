@@ -88,6 +88,9 @@ def test_criacao_gera_token_hash_e_link_dev(app_convite):
         assert registro.token_hash != token_puro
         assert registro.token_hash == hashlib.sha256(token_puro.encode()).hexdigest()
         convites = LogAuditoria.query.filter_by(acao="usuarios.convite_enviado").count()
+        for log in LogAuditoria.query.all():
+            assert token_puro not in (log.descricao or "")
+            assert "novo.gerente@example.com" not in (log.descricao or "")
         assert convites == 1
         # Auditoria não contém o token.
         evento = LogAuditoria.query.filter_by(acao="usuarios.convite_enviado").one()

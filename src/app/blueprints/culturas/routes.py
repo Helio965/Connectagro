@@ -69,6 +69,11 @@ def _sincronizar_glebas(cultura, gleba_ids, propriedade):
         db.session.add(CulturaGleba(cultura_id=cultura.id, gleba_id=gid))
 
 
+def _tem_vinculo_inconsistente(cultura, propriedade):
+    return any(cg.gleba is None or cg.gleba.propriedade_id != propriedade.id
+               for cg in cultura.cultura_glebas)
+
+
 @culturas_bp.route("/")
 @login_required
 @require_permission("culturas.view")
@@ -78,7 +83,9 @@ def index():
                 .filter_by(propriedade_id=propriedade.id)
                 .order_by(Cultura.nome)
                 .all())
-    return render_template("culturas/list.html", culturas=culturas)
+    associacoes = {c.id: sum(1 for cg in c.cultura_glebas
+                            if cg.gleba and cg.gleba.propriedade_id == propriedade.id) for c in culturas}
+    return render_template("culturas/list.html", culturas=culturas, associacoes=associacoes)
 
 
 @culturas_bp.route("/nova", methods=["GET", "POST"])
@@ -126,6 +133,8 @@ def nova():
 def editar(cultura_id):
     propriedade = propriedade_atual()
     cultura = _cultura_da_propriedade_ou_404(cultura_id, propriedade)
+    if request.method == "POST" and _tem_vinculo_inconsistente(cultura, propriedade):
+        abort(409, description="Associação territorial inconsistente; conciliação necessária sem remover dados.")
     glebas = _glebas_da_propriedade(propriedade)
     if request.method == "POST":
         nome = vazio_para_none(request.form.get("nome"))
@@ -180,6 +189,8 @@ def editar(cultura_id):
 def remover(cultura_id):
     propriedade = propriedade_atual()
     cultura = _cultura_da_propriedade_ou_404(cultura_id, propriedade)
+    if _tem_vinculo_inconsistente(cultura, propriedade):
+        abort(409, description="Associação territorial inconsistente; exclusão bloqueada.")
     if _cg_ids_com_historico(cg.id for cg in cultura.cultura_glebas):
         flash(MSG_CULTURA_COM_HISTORICO, "error")
         return redirect(url_for("culturas.index"))

@@ -2,6 +2,7 @@
 import pytest
 
 from app.extensions import db
+from tests.factories import criar_propriedade_com_vinculo
 from app.utils.auth import gerar_hash_senha
 
 
@@ -37,7 +38,7 @@ def _setup(email, gleba_nome, cultura_nome, receita=100.0, despesa=30.0):
                 senha_hash=gerar_hash_senha("senha123"))
     db.session.add(u)
     db.session.commit()
-    p = Propriedade(usuario_id=u.id, nome="Fazenda " + email)
+    p = criar_propriedade_com_vinculo(usuario_id=u.id, nome="Fazenda " + email)
     db.session.add(p)
     db.session.commit()
     g = Gleba(propriedade_id=p.id, nome=gleba_nome, area_ha=10.0,
@@ -111,7 +112,7 @@ def test_index_lista_relatorios(app_rel):
 def test_geral_mostra_propriedade_e_totais(app_rel):
     corpo = _login(app_rel, "a@connectagro.com").get("/relatorios/geral").data.decode("utf-8")
     assert "Fazenda a@connectagro.com" in corpo
-    assert "Total de propriedades" in corpo
+    assert "Total de Áreas de Plantio" in corpo
     assert "Total de culturas" in corpo
     assert "Total de aplicações" in corpo
 

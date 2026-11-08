@@ -18,6 +18,20 @@
     <div class="sidebar-head">
       <a class="brand" href="{{ url_for('dashboard.index') }}">ConnectAgro</a>
     </div>
+    <div class="propriedade-contexto">
+      <label for="propriedade-ativa">Propriedade ativa</label>
+      {% if propriedades_disponiveis %}
+      <form method="post" action="{{ url_for('propriedades.selecionar') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <select id="propriedade-ativa" name="propriedade_id" required>
+          <option value="">Selecione a propriedade</option>
+          {% for p in propriedades_disponiveis %}<option value="{{ p.id }}" {{ 'selected' if propriedade_selecionada and p.id == propriedade_selecionada.id }}>{{ p.nome }}</option>{% endfor %}
+        </select>
+        <button type="submit" class="btn-link-acao">Trocar</button>
+      </form>
+      {% else %}<p>Nenhuma propriedade autorizada.</p>{% endif %}
+      <a href="{{ url_for('propriedades.index') }}">Gerenciar propriedades</a>
+    </div>
 
     {% set bp = request.blueprint %}
     {% set cadastros_open = bp in ["culturas", "glebas", "equipe"] %}
@@ -42,7 +56,7 @@
       </button>
       <div id="menu-cadastros" class="sidebar-submenu {{ 'open' if cadastros_open }}">
         {% if can("culturas.view") %}<a class="{{ 'active' if bp == 'culturas' }}" href="{{ url_for('culturas.index') }}">Culturas</a>{% endif %}
-        {% if can("glebas.view") %}<a class="{{ 'active' if bp == 'glebas' }}" href="{{ url_for('glebas.index') }}">Propriedades</a>{% endif %}
+        {% if can("glebas.view") %}<a class="{{ 'active' if bp == 'glebas' }}" href="{{ url_for('glebas.index') }}">Áreas de Plantio</a>{% endif %}
         {% if can("equipe.view") %}<a class="{{ 'active' if bp == 'equipe' }}" href="{{ url_for('equipe.index') }}">Equipe</a>{% endif %}
       </div>
       {% endif %}
@@ -113,7 +127,10 @@
 
     <div class="sidebar-foot">
       <span class="sidebar-user">{{ current_user.nome }} <small>({{ role_label(current_user.perfil) }})</small></span>
-      <a class="sidebar-logout" href="{{ url_for('auth.logout') }}">Sair</a>
+      <form class="sidebar-logout-form" action="{{ url_for('auth.logout') }}" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="sidebar-logout" type="submit">Sair</button>
+      </form>
     </div>
   </aside>
 

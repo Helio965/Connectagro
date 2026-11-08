@@ -15,8 +15,10 @@ from .ia import ia_bp
 from .relatorios import relatorios_bp
 from .usuarios import usuarios_bp
 from .auditoria import auditoria_bp
+from .propriedades import propriedades_bp
 
 ALL_BLUEPRINTS = [
+    propriedades_bp,
     dashboard_bp,
     auth_bp,
     culturas_bp,

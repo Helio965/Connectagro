@@ -14,11 +14,11 @@
   {% include "relatorios/_avisos.html" %}
 
   <div class="relatorio-section">
-    <h2>Propriedades</h2>
+    <h2>Áreas de Plantio</h2>
     <ul class="dados">
-      <li><strong>Total de propriedades:</strong> {{ dados.glebas.total }}</li>
+      <li><strong>Total de Áreas de Plantio:</strong> {{ dados.glebas.total }}</li>
       <li><strong>Área total informada:</strong> {{ formatar_area(dados.glebas.area_total) }}</li>
-      <li><strong>Propriedades sem área:</strong> {{ dados.glebas.sem_area }}</li>
+      <li><strong>Áreas de Plantio sem área:</strong> {{ dados.glebas.sem_area }}</li>
     </ul>
   </div>
 
@@ -29,7 +29,7 @@
       {% for status, qtd in dados.culturas.por_status.items() %}
       <li><strong>{{ status }}:</strong> {{ qtd }}</li>
       {% endfor %}
-      <li><strong>Associações cultura↔propriedade:</strong> {{ dados.culturas.total_associacoes }}</li>
+      <li><strong>Associações cultura↔área de plantio:</strong> {{ dados.culturas.total_associacoes }}</li>
     </ul>
   </div>
 

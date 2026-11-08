@@ -8,8 +8,9 @@ Registra ações sensíveis na tabela ``log_auditoria``. Funções de conveniên
 - ``registrar_negado`` — atalho com resultado ``negado`` (permissão negada).
 - ``mascarar_email`` — oculta parcialmente o e-mail para exibição nos logs.
 
-A auditoria **nunca quebra o fluxo principal**: uma falha ao gravar log não
-impede a ação do usuário.
+Os atalhos de registro não interrompem o fluxo principal. Para operações que
+exigem auditoria atômica, ``preparar_evento`` devolve o log para o chamador
+adicionar à mesma transação e tratar eventual falha.
 """
 from ..extensions import db
 from ..models.log_auditoria import LogAuditoria
@@ -18,8 +19,9 @@ from ..models.log_auditoria import LogAuditoria
 def _safe_session_get_user_id():
     """Obtém o user_id da sessão de forma segura, sem importar ciclo."""
     try:
-        from flask import session
-        return session.get("user_id")
+        from ..utils.auth import usuario_atual
+        usuario = usuario_atual()
+        return usuario["id"] if usuario else None
     except Exception:
         return None
 
@@ -28,7 +30,7 @@ def _safe_propriedade_id():
     """Obtém o propriedade_id do contexto de forma segura."""
     try:
         from ..utils.contexto import propriedade_atual
-        prop = propriedade_atual()
+        prop = propriedade_atual(selecionar_unica=False)
         return prop.id if prop else None
     except Exception:
         return None
@@ -56,6 +58,37 @@ def mascarar_email(email):
     return f"{local[0]}***@{dominio}"
 
 
+def preparar_evento(
+    acao,
+    *,
+    entidade=None,
+    entidade_id=None,
+    resultado="sucesso",
+    descricao=None,
+    usuario_id=None,
+    propriedade_id=None,
+    request=None,
+):
+    """Constrói um log sem add/flush/commit; o chamador controla a transação."""
+    ip, ua = _request_info(request)
+    if usuario_id is None:
+        usuario_id = _safe_session_get_user_id()
+    if propriedade_id is None:
+        propriedade_id = _safe_propriedade_id()
+
+    return LogAuditoria(
+        usuario_id=usuario_id,
+        propriedade_id=propriedade_id,
+        acao=acao,
+        entidade=entidade,
+        entidade_id=entidade_id,
+        resultado=resultado,
+        descricao=descricao[:500] if descricao else None,
+        ip=ip,
+        user_agent=ua,
+    )
+
+
 def registrar_evento(
     acao,
     *,
@@ -67,25 +100,11 @@ def registrar_evento(
     propriedade_id=None,
     request=None,
 ):
-    """Registra um evento de auditoria. Nunca levanta exceção."""
+    """Registra um evento independente. Nunca levanta exceção."""
     try:
-        ip, ua = _request_info(request)
-        if usuario_id is None:
-            usuario_id = _safe_session_get_user_id()
-        if propriedade_id is None:
-            propriedade_id = _safe_propriedade_id()
-
-        log = LogAuditoria(
-            usuario_id=usuario_id,
-            propriedade_id=propriedade_id,
-            acao=acao,
-            entidade=entidade,
-            entidade_id=entidade_id,
-            resultado=resultado,
-            descricao=descricao[:500] if descricao else None,
-            ip=ip,
-            user_agent=ua,
-        )
+        log = preparar_evento(acao, entidade=entidade, entidade_id=entidade_id,
+            resultado=resultado, descricao=descricao, usuario_id=usuario_id,
+            propriedade_id=propriedade_id, request=request)
         db.session.add(log)
         db.session.commit()
     except Exception:

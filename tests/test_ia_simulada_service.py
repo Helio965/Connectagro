@@ -69,7 +69,7 @@ def test_gerar_alertas_operacionais(app_db):
     with app.app_context():
         propriedade = db.session.get(Propriedade, propriedade_id)
         alertas = gerar_alertas_operacionais(propriedade)
-        assert "Existem 1 propriedades sem área informada." in alertas
+        assert "Existem 1 áreas de plantio sem área informada." in alertas
         assert "Nenhum registro de colheita cadastrado." in alertas
         assert "Nenhum upload cadastrado. A IA não lê conteúdo de arquivos no MVP." in alertas
 
@@ -83,7 +83,7 @@ def test_responder_pergunta_simulada(app_db):
         propriedade = db.session.get(Propriedade, propriedade_id)
         resposta = responder_pergunta_simulada(propriedade, "Faça um resumo da propriedade")
         assert "Resumo operacional da propriedade" in resposta
-        assert "Propriedades cadastradas: 2" in resposta
+        assert "Áreas de Plantio cadastradas: 2" in resposta
         assert "Saldo financeiro: R$ 500,00" in resposta
         assert "Importante: esta IA é simulada" in resposta
 

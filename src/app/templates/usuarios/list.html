@@ -13,17 +13,17 @@
     {% if item.admin_principal %}
     <span class="badge badge-principal">Admin principal</span>
     {% endif %}
-    {% if item.usuario.ativo %}
-    <span class="badge badge-ativo">Ativo</span>
+    {% if item.usuario.ativo and item.vinculo.ativo %}
+    <span class="badge badge-ativo">Ativo nesta propriedade</span>
     {% else %}
-    <span class="badge badge-inativo">Inativo</span>
+    <span class="badge badge-inativo">Inativo nesta propriedade</span>
     {% endif %}
   </div>
   <div class="usuario-acoes acoes">
     {% if can("usuarios.edit") and item.can_manage %}
     <a href="{{ url_for('usuarios.editar', usuario_id=item.usuario.id) }}">Editar</a>
     {% endif %}
-    {% if can("usuarios.edit") and item.can_manage and item.usuario.ativo
+    {% if can("usuarios.edit") and item.can_manage and item.usuario.ativo and item.vinculo.ativo and not item.somente_vinculo
           and item.usuario.perfil != "admin" %}
     <form method="post" action="{{ url_for('usuarios.reenviar_convite', usuario_id=item.usuario.id) }}"
           style="display:inline;">

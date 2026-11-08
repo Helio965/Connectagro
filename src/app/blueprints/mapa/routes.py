@@ -106,7 +106,7 @@ def salvar_poligono(gleba_id):
     geojson, erro = validar_poligono_geojson(payload)
     if erro:
         registrar_falha(
-            "mapa.poligono.falha", entidade="propriedade", entidade_id=gleba.id,
+            "mapa.poligono.falha", entidade="gleba", entidade_id=gleba.id,
             descricao="GeoJSON inválido ao salvar polígono",
             propriedade_id=propriedade.id, request=request)
         return jsonify({"ok": False, "error": erro}), 400
@@ -114,8 +114,8 @@ def salvar_poligono(gleba_id):
     atualizar_poligono_gleba(gleba, geojson)
     db.session.commit()
     registrar_sucesso(
-        "mapa.poligono.update", entidade="propriedade", entidade_id=gleba.id,
-        descricao="Polígono da propriedade atualizado",
+        "mapa.poligono.update", entidade="gleba", entidade_id=gleba.id,
+        descricao="Polígono da Área de Plantio atualizado",
         propriedade_id=propriedade.id, request=request)
     return jsonify({
         "ok": True,
@@ -135,8 +135,8 @@ def limpar_poligono(gleba_id):
     limpar_poligono_gleba(gleba)
     db.session.commit()
     registrar_sucesso(
-        "mapa.poligono.delete", entidade="propriedade", entidade_id=gleba.id,
-        descricao="Polígono da propriedade removido",
+        "mapa.poligono.delete", entidade="gleba", entidade_id=gleba.id,
+        descricao="Polígono da Área de Plantio removido",
         propriedade_id=propriedade.id, request=request)
     return jsonify({
         "ok": True,

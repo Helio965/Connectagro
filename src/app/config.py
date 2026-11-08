@@ -16,6 +16,8 @@ Banco de dados (estratégia no estilo NEXO):
   não os reconhece.
 """
 import os
+from datetime import timedelta
+from urllib.parse import urlsplit
 
 from dotenv import load_dotenv
 from sqlalchemy.engine import make_url
@@ -114,6 +116,11 @@ class BaseConfig:
     MAX_CONTENT_LENGTH = int(os.environ.get("MAX_CONTENT_LENGTH", 16 * 1024 * 1024))
     APP_NAME = "ConnectAgro"
     WTF_CSRF_ENABLED = _env_bool("WTF_CSRF_ENABLED", "true")
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SECURE = False  # Desenvolvimento/testes aceitam HTTP local.
+    SESSION_COOKIE_SAMESITE = "Lax"
+    PERMANENT_SESSION_LIFETIME = timedelta(hours=8)
+    SESSION_REFRESH_EACH_REQUEST = False
     # Recuperação de senha (Fase 7.2): validade do token e exibição do link
     # de redefinição em tela (apenas para ambientes locais/dev/teste).
     PASSWORD_RESET_TOKEN_MINUTES = int(
@@ -158,6 +165,7 @@ class DevelopmentConfig(BaseConfig):
     """Ambiente de desenvolvimento."""
 
     DEBUG = True
+    APP_ENV = "development"
     # Em desenvolvimento, exibir o link de redefinição facilita o uso local
     # (não há envio real de e-mail nesta fase).
     PASSWORD_RESET_SHOW_DEV_LINK = _env_bool("PASSWORD_RESET_SHOW_DEV_LINK", "true")
@@ -171,6 +179,7 @@ class TestingConfig(BaseConfig):
     """
 
     TESTING = True
+    APP_ENV = "testing"
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
     SQLALCHEMY_DIRECT_URI = "sqlite:///:memory:"
@@ -185,6 +194,10 @@ class ProductionConfig(BaseConfig):
     """Ambiente de produção."""
 
     DEBUG = False
+    APP_ENV = "production"
+    SESSION_COOKIE_SECURE = True
+    WTF_CSRF_ENABLED = True
+    MAIL_DEBUG = False
     # Em produção, nunca exibir o link/token de redefinição na tela.
     PASSWORD_RESET_SHOW_DEV_LINK = False
 
@@ -199,5 +212,65 @@ CONFIG_BY_NAME = {
 
 def get_config(config_name=None):
     """Resolve a classe de configuração a partir do nome ou de ``FLASK_ENV``."""
-    name = config_name or os.environ.get("FLASK_ENV", "development")
-    return CONFIG_BY_NAME.get(name, DevelopmentConfig)
+    name = config_name if config_name is not None else os.environ.get("FLASK_ENV", "development")
+    if name not in CONFIG_BY_NAME:
+        raise ValueError("Ambiente inválido: use development, testing ou production.")
+    return CONFIG_BY_NAME[name]
+
+
+def configure_app(app, config_name=None):
+    """Lê valores de implantação por criação, antes de inicializar extensões.
+
+    Não congela chave/URLs no primeiro import e nunca inclui seus valores nos
+    erros de configuração. Produção exige uma chave externa estável.
+    """
+    config = get_config(config_name)
+    app.config.from_object(config)
+    if config is not TestingConfig:
+        app.config.update(
+            SECRET_KEY=os.environ.get("SECRET_KEY", BaseConfig.SECRET_KEY),
+            SQLALCHEMY_DATABASE_URI=resolve_database_uri(),
+            SQLALCHEMY_DIRECT_URI=resolve_direct_uri(),
+        )
+    if config is not ProductionConfig:
+        return
+
+    key = os.environ.get("SECRET_KEY", "")
+    demonstrativas = ("change-this", "troque-", "your-secret", "secret-key",
+                      "dev-secret", "test-secret", "development", "changeme", "password")
+    repetida = any(key == (key[:n] * (len(key) // n + 1))[:len(key)]
+                   for n in range(1, min(16, len(key) // 2) + 1))
+    if (len(key.strip()) < 32 or len(set(key)) < 8 or repetida
+            or any(texto in key.lower() for texto in demonstrativas)
+            or key.lower() == "abcdefghijklmnopqrstuvwxyz012345"):
+        raise ValueError("Produção exige SECRET_KEY externa forte, não demonstrativa, com ao menos 32 caracteres.")
+    # O CLI Flask considera qualquer valor diferente destes como debug ativo,
+    # inclusive "off", valores desconhecidos e strings com espaços.
+    if os.environ.get("FLASK_DEBUG", "").lower() not in {"", "0", "false", "no"}:
+        raise ValueError("FLASK_DEBUG deve estar desativado em produção.")
+    if not (os.environ.get("DATABASE_URL") or "").strip():
+        raise ValueError("Produção exige DATABASE_URL explícita.")
+    for uri in (resolve_database_uri(), resolve_direct_uri()):
+        try:
+            parsed = make_url(uri)
+            if not parsed.database:
+                raise ValueError()
+        except Exception:
+            raise ValueError("URL de banco inválida na configuração de produção.") from None
+    base_url = (os.environ.get("APP_BASE_URL") or "").strip().rstrip("/")
+    try:
+        parsed_base = urlsplit(base_url)
+        if (parsed_base.scheme != "https" or not parsed_base.hostname
+                or parsed_base.username or parsed_base.password
+                or parsed_base.query or parsed_base.fragment
+                or any(char.isspace() for char in base_url) or "\\" in base_url):
+            raise ValueError()
+        parsed_base.port  # Valida também a porta sem expor a URL em erros.
+    except ValueError:
+        raise ValueError("Produção exige APP_BASE_URL HTTPS canônica, sem credenciais.") from None
+    app.config.update(SECRET_KEY=key, DEBUG=False, WTF_CSRF_ENABLED=True,
+                      MAIL_DEBUG=False,
+                      APP_BASE_URL=base_url,
+                      PASSWORD_RESET_SHOW_DEV_LINK=False,
+                      SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SECURE=True,
+                      SESSION_COOKIE_SAMESITE="Lax")

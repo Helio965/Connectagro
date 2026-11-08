@@ -5,6 +5,9 @@ from ._helpers import iso_now
 
 class UsuarioPropriedade(db.Model):
     __tablename__ = "usuario_propriedade"
+    __table_args__ = (db.UniqueConstraint(
+        "usuario_id", "propriedade_id",
+        name="uq_usuario_propriedade_usuario_propriedade"),)
 
     id = db.Column(db.Integer, primary_key=True)
     usuario_id = db.Column(db.Integer, db.ForeignKey("usuario.id"), nullable=False)

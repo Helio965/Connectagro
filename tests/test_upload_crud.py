@@ -5,6 +5,7 @@ import os
 import pytest
 
 from app.extensions import db
+from tests.factories import criar_propriedade_com_vinculo
 from app.utils.auth import gerar_hash_senha
 
 
@@ -15,7 +16,7 @@ def _criar_usuario_com_propriedade(email):
                       senha_hash=gerar_hash_senha("senha123"))
     db.session.add(usuario)
     db.session.commit()
-    propriedade = Propriedade(usuario_id=usuario.id, nome="Fazenda " + email)
+    propriedade = criar_propriedade_com_vinculo(usuario_id=usuario.id, nome="Fazenda " + email)
     db.session.add(propriedade)
     db.session.commit()
     return {"usuario_id": usuario.id, "propriedade_id": propriedade.id}

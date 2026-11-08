@@ -11,6 +11,7 @@
 Nenhum comando é executado automaticamente; o banco gerado não é versionado.
 """
 import click
+from flask import current_app
 from flask.cli import with_appcontext
 
 from .extensions import db
@@ -80,6 +81,9 @@ USUARIOS_TESTE = [
 @with_appcontext
 def seed_users():
     """Cria usuários de teste e vínculos com a propriedade demo."""
+    if current_app.config.get("APP_ENV") not in {"development", "testing"}:
+        # Bloqueia antes de importar modelos ou consultar/escrever o banco.
+        raise click.ClickException("seed-users é permitido apenas em development ou testing.")
     from .models import Propriedade, Usuario, UsuarioPropriedade
     from .utils.auth import gerar_hash_senha
 

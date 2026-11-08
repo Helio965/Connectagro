@@ -7,7 +7,8 @@ import pytest
 from flask import session
 
 from app.extensions import db
-from app.utils.auth import gerar_hash_senha
+from tests.factories import criar_propriedade_com_vinculo
+from app.utils.auth import gerar_hash_senha, login_usuario
 
 EMAILS = {
     "admin": "admin@connectagro.com",
@@ -45,7 +46,7 @@ def _criar_dados_operacionais(usuario, produto, upload_folder):
                             UploadArquivo)
 
     prefixo = usuario.perfil
-    propriedade = Propriedade(usuario_id=usuario.id, nome=f"Fazenda {prefixo}")
+    propriedade = criar_propriedade_com_vinculo(usuario_id=usuario.id, nome=f"Fazenda {prefixo}")
     db.session.add(propriedade)
     db.session.commit()
 
@@ -123,10 +124,15 @@ def _login(app_db, perfil):
 def _session_perfil(app_db, perfil):
     ids = app_db.permission_test_ids[perfil]
     with app_db.test_request_context("/"):
-        session["user_id"] = ids["usuario_id"]
-        session["user_email"] = EMAILS[perfil]
-        session["user_nome"] = EMAILS[perfil]
-        session["user_perfil"] = perfil
+        from app.models import Usuario
+
+        usuario = db.session.get(Usuario, ids["usuario_id"])
+        if perfil == "desconhecido":
+            # Sessão adversarial: mesmo com epoch correto, DB inválido nega.
+            session["user_id"] = usuario.id
+            session["auth_version"] = usuario.auth_version
+        else:
+            login_usuario(usuario)
         yield
 
 
@@ -390,7 +396,7 @@ def test_templates_escondem_menu_e_acoes_sem_permissao(app_db):
 
     admin = _login(app_db, "admin")
     assert "Usuários" in admin.get("/").data.decode("utf-8")
-    assert "+ Nova propriedade" in admin.get("/glebas/").data.decode("utf-8")
+    assert "+ Nova Área de Plantio" in admin.get("/glebas/").data.decode("utf-8")
     assert "+ Novo lançamento" in admin.get("/financeiro/").data.decode("utf-8")
     assert "Remover" in admin.get("/upload/").data.decode("utf-8")
 

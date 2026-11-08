@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 
-{% block title %}Propriedades — ConnectAgro{% endblock %}
+{% block title %}Áreas de Plantio — ConnectAgro{% endblock %}
 
 {% block content %}
 <section class="card">
   <div class="card-head">
     <div>
-      <h1>Propriedades</h1>
-      <p class="hint">Gerencie as propriedades rurais cadastradas no ConnectAgro.</p>
+      <h1>Áreas de Plantio</h1>
+      <p class="hint">Gerencie as áreas de plantio cadastradas no ConnectAgro.</p>
     </div>
     {% if can("glebas.create") %}
-    <a class="btn-acao" href="{{ url_for('glebas.nova') }}">+ Nova propriedade</a>
+    <a class="btn-acao" href="{{ url_for('glebas.nova') }}">+ Nova Área de Plantio</a>
     {% endif %}
   </div>
 
@@ -34,7 +34,7 @@
           {% endif %}
           {% if can("glebas.delete") %}
           <form method="post" action="{{ url_for('glebas.remover', gleba_id=g.id) }}"
-                onsubmit="return confirm('Remover esta propriedade?');">
+                onsubmit="return confirm('Remover esta Área de Plantio?');">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn-link-danger">Remover</button>
           </form>
@@ -46,7 +46,7 @@
     </tbody>
   </table>
   {% else %}
-  <p>Nenhuma propriedade cadastrada ainda.{% if can("glebas.create") %} <a href="{{ url_for('glebas.nova') }}">Criar a primeira</a>.{% endif %}</p>
+  <p>Nenhuma Área de Plantio cadastrada ainda.{% if can("glebas.create") %} <a href="{{ url_for('glebas.nova') }}">Criar a primeira</a>.{% endif %}</p>
   {% endif %}
 </section>
 {% endblock %}

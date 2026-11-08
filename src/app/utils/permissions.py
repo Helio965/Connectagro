@@ -18,6 +18,7 @@ ROLE_LABELS = {
 }
 
 _ADMIN_PERMISSIONS = {
+    "propriedades.view", "propriedades.select", "propriedades.create", "propriedades.edit",
     "dashboard.view",
     "mapa.view",
     "mapa.edit",
@@ -60,6 +61,7 @@ _ADMIN_PERMISSIONS = {
 }
 
 _TECNICO_PERMISSIONS = {
+    "propriedades.view", "propriedades.select", "propriedades.create", "propriedades.edit",
     "dashboard.view",
     "mapa.view",
     "mapa.edit",
@@ -90,6 +92,7 @@ _TECNICO_PERMISSIONS = {
 }
 
 _TRABALHADOR_PERMISSIONS = {
+    "propriedades.view", "propriedades.select",
     "dashboard.view",
     "mapa.view",
     "catalogo.view",

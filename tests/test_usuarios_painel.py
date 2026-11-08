@@ -1,4 +1,6 @@
 """Painel administrativo de usuários."""
+import re
+
 import pytest
 
 from app.extensions import db
@@ -381,8 +383,15 @@ def test_rota_novo_gerente_trava_perfil_no_formulario(app_usuarios):
     client = _login(app_usuarios)
     corpo = client.get("/usuarios/novo/gerente").data.decode("utf-8")
     assert "Novo Gerente de Plantio" in corpo
-    assert 'type="hidden" name="perfil" value="tecnico"' in corpo
-    assert "<select" not in corpo
+    formulario = re.search(
+        r'<form\b[^>]*action="/usuarios/novo/gerente"[^>]*>(.*?)</form>', corpo, re.S,
+    )
+    assert formulario is not None
+    campos = formulario.group(1)
+    assert 'type="hidden" name="perfil" value="tecnico"' in campos
+    assert re.search(r'<select\b[^>]*name="perfil"', campos) is None
+    assert 'value="admin"' not in campos
+    assert 'value="trabalhador"' not in campos
 
 
 def test_admin_cria_gerente_pela_rota_dedicada(app_usuarios):

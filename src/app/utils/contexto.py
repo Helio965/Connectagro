@@ -1,17 +1,21 @@
 """Helpers de contexto do usuário logado para os CRUDs do MVP.
 
-Glebas e culturas pertencem a uma **propriedade**. No MVP ampliado, a
-propriedade atual passa a ser resolvida por vínculo usuário↔propriedade, com
-compatibilidade para propriedades antigas ainda ligadas diretamente por
-``propriedade.usuario_id``.
+Glebas e culturas pertencem a uma **propriedade**. O contexto exige vínculo
+ativo; a migration reconcilia as propriedades antigas de ``usuario_id``.
 """
+from flask import current_app, g, has_request_context, request, session
+
 from ..extensions import db
 from ..models import Propriedade, UsuarioPropriedade
 from .auth import usuario_atual
 
 
 def garantir_vinculo_usuario_propriedade(usuario_id, propriedade_id, criado_por_id=None):
-    """Garante vínculo usuário↔propriedade e o retorna."""
+    """Operação explícita interna; chamador autoriza e confirma a transação.
+
+    Não reativa vínculos existentes. Reconciliação antiga pertence à migration.
+    A constraint única protege também inserções concorrentes.
+    """
     vinculo = UsuarioPropriedade.query.filter_by(
         usuario_id=usuario_id,
         propriedade_id=propriedade_id,
@@ -24,42 +28,81 @@ def garantir_vinculo_usuario_propriedade(usuario_id, propriedade_id, criado_por_
             criado_por_id=criado_por_id,
         )
         db.session.add(vinculo)
-        db.session.commit()
-    elif not vinculo.ativo:
-        vinculo.ativo = True
-        db.session.commit()
     return vinculo
 
 
-def propriedade_atual():
-    """Retorna a propriedade do usuário logado, criando uma padrão se necessário.
+def invalidar_contexto():
+    """Invalida somente o cache da requisição, não os vínculos persistidos."""
+    if has_request_context():
+        g.pop("_contexto_request", None)
+        g.pop("_contexto", None)
 
-    Retorna ``None`` se não houver usuário autenticado.
-    """
+
+def _invalidar_formularios():
+    """Formulários de outro contexto não podem gravar no contexto novo."""
+    campo = current_app.config.get("WTF_CSRF_FIELD_NAME", "csrf_token")
+    session.pop(campo, None)
+    g.pop(campo, None)
+
+
+def _contexto_validado():
     usuario = usuario_atual()
-    if usuario is None:
+    if usuario is None or not has_request_context():
         return None
+    if (g.get("_contexto_request") is request._get_current_object()
+            and g._contexto["usuario_id"] == usuario["id"]):
+        return g._contexto
+    propriedades = (Propriedade.query.join(UsuarioPropriedade,
+        UsuarioPropriedade.propriedade_id == Propriedade.id).filter(
+        UsuarioPropriedade.usuario_id == usuario["id"], UsuarioPropriedade.ativo.is_(True))
+        .order_by(Propriedade.nome, Propriedade.id).populate_existing().all())
+    selecionada = session.get("propriedade_ativa_id")
+    id_valido = type(selecionada) is int and 1 <= selecionada <= 2**63 - 1
+    atual = next((p for p in propriedades if id_valido and p.id == selecionada), None)
+    invalidada = "propriedade_ativa_id" in session and atual is None
+    if invalidada:
+        session.pop("propriedade_ativa_id", None)
+        _invalidar_formularios()
+    contexto = {"usuario_id": usuario["id"], "propriedades": propriedades,
+                "atual": atual, "invalidada": invalidada}
+    g._contexto_request = request._get_current_object()
+    g._contexto = contexto
+    return contexto
 
-    vinculo = (UsuarioPropriedade.query
-               .filter_by(usuario_id=usuario["id"], ativo=True)
-               .order_by(UsuarioPropriedade.id)
-               .first())
-    if vinculo is not None:
-        return vinculo.propriedade
 
-    prop = (Propriedade.query
-            .filter_by(usuario_id=usuario["id"])
-            .order_by(Propriedade.id)
-            .first())
-    if prop is not None:
-        garantir_vinculo_usuario_propriedade(usuario["id"], prop.id, usuario["id"])
-        return prop
+def propriedades_autorizadas():
+    """Lista apenas propriedades existentes com vínculo ativo, sem escritas."""
+    contexto = _contexto_validado()
+    return contexto["propriedades"] if contexto else []
 
-    prop = Propriedade(usuario_id=usuario["id"], nome="Minha propriedade")
-    db.session.add(prop)
-    db.session.commit()
-    garantir_vinculo_usuario_propriedade(usuario["id"], prop.id, usuario["id"])
-    return prop
+
+def propriedade_atual(*, selecionar_unica=True):
+    """Consulta contexto autorizado; nunca cria propriedades ou vínculos.
+
+    Uma única opção pode ser selecionada na sessão, mas uma seleção revogada
+    nunca cai silenciosamente em outra propriedade na mesma requisição.
+    """
+    contexto = _contexto_validado()
+    if contexto is None:
+        return None
+    if (selecionar_unica and contexto["atual"] is None
+            and not contexto["invalidada"] and len(contexto["propriedades"]) == 1):
+        contexto["atual"] = contexto["propriedades"][0]
+        session["propriedade_ativa_id"] = contexto["atual"].id
+    return contexto["atual"]
+
+
+def selecionar_propriedade(propriedade_id):
+    """Seleciona somente ID já autorizado; inválido não altera seleção válida."""
+    if type(propriedade_id) is not int or not 1 <= propriedade_id <= 2**63 - 1:
+        return None
+    propriedade = next((p for p in propriedades_autorizadas() if p.id == propriedade_id), None)
+    if propriedade is not None:
+        if session.get("propriedade_ativa_id") != propriedade.id:
+            _invalidar_formularios()
+        session["propriedade_ativa_id"] = propriedade.id
+        invalidar_contexto()
+    return propriedade
 
 
 def parse_float(valor):

@@ -2,12 +2,16 @@
 import pytest
 
 from app.extensions import db
+from tests.factories import criar_propriedade_com_vinculo
 from app.utils.auth import gerar_hash_senha
 
 
 def _login(app_db, email):
     client = app_db.test_client()
-    client.post("/auth/login", data={"email": email, "senha": "senha123"})
+    assert client.post("/auth/login", data={"email": email, "senha": "senha123"}).status_code == 302
+    assert client.post("/propriedades/selecionar", data={
+        "propriedade_id": str(app_db.ia_propriedades[email]),
+    }).status_code == 302
     return client
 
 
@@ -18,7 +22,7 @@ def _criar_usuario_propriedade(email, nome_propriedade):
                       senha_hash=gerar_hash_senha("senha123"))
     db.session.add(usuario)
     db.session.commit()
-    propriedade = Propriedade(usuario_id=usuario.id, nome=nome_propriedade)
+    propriedade = criar_propriedade_com_vinculo(usuario_id=usuario.id, nome=nome_propriedade)
     db.session.add(propriedade)
     db.session.commit()
     return usuario, propriedade
@@ -40,7 +44,7 @@ def _popular_cenario_ia():
 
     usuario_a, prop_a = _criar_usuario_propriedade("a@connectagro.com", "Fazenda A")
     usuario_b, prop_b = _criar_usuario_propriedade("b@connectagro.com", "Fazenda B")
-    prop_a2 = Propriedade(usuario_id=usuario_a.id, nome="Fazenda A2")
+    prop_a2 = criar_propriedade_com_vinculo(usuario_id=usuario_a.id, nome="Fazenda A2")
     db.session.add(prop_a2)
     db.session.commit()
 
@@ -115,13 +119,14 @@ def _popular_cenario_ia():
                     pergunta="Pergunta de outra propriedade", resposta="Resposta outra propriedade", tipo="simulada"),
     ])
     db.session.commit()
+    return {"a@connectagro.com": prop_a.id, "b@connectagro.com": prop_b.id}
 
 
 @pytest.fixture
 def app_db(app):
     with app.app_context():
         db.create_all()
-        _popular_cenario_ia()
+        app.ia_propriedades = _popular_cenario_ia()
     return app
 
 
@@ -239,10 +244,10 @@ def test_resposta_financeiro_retorna_receitas_despesas_saldo(app_db):
 def test_resposta_propriedades_retorna_total_area_sem_area(app_db):
     resp, corpo = _post_ia(app_db, "Tenho propriedades sem área?")
     assert resp.status_code == 200
-    assert "Resumo de propriedades" in corpo
-    assert "Propriedades cadastradas: 2" in corpo
+    assert "Resumo de Áreas de Plantio" in corpo
+    assert "Áreas de Plantio cadastradas: 2" in corpo
     assert "Área total informada: 10,50 ha" in corpo
-    assert "Propriedades sem área informada: 1" in corpo
+    assert "Áreas de Plantio sem área informada: 1" in corpo
     assert "999,00 ha" not in corpo
 
 
@@ -253,7 +258,7 @@ def test_resposta_culturas_retorna_status_e_associacoes(app_db):
     assert "Culturas cadastradas: 2" in corpo
     assert "Planejadas: 1" in corpo
     assert "Em andamento: 1" in corpo
-    assert "Associações cultura↔propriedade: 2" in corpo
+    assert "Associações cultura↔área de plantio: 2" in corpo
     assert "Cultura secreta" not in corpo
 
 

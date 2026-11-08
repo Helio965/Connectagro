@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}{{ propriedade.nome }} — ConnectAgro{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>{{ propriedade.nome }}</h1>
+  <p>Município: {{ propriedade.municipio or 'Não informado' }} / {{ propriedade.uf or '—' }}</p>
+  <p>Área total: {{ propriedade.area_total_ha if propriedade.area_total_ha is not none else 'Não informada' }} ha</p>
+  {% if can('propriedades.edit') %}<a href="{{ url_for('propriedades.editar', propriedade_id=propriedade.id) }}">Editar propriedade</a>{% endif %}
+  <form method="post" action="{{ url_for('propriedades.selecionar') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="propriedade_id" value="{{ propriedade.id }}">
+    <button type="submit" class="btn-acao">Selecionar esta propriedade</button>
+  </form>
+  <p>Exclusão e desativação bloqueadas para preservar vínculos e históricos, até definição da política de retenção.</p>
+  <a href="{{ url_for('propriedades.index') }}">Voltar às propriedades</a>
+</section>
+{% endblock %}

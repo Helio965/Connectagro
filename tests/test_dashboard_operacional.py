@@ -2,6 +2,7 @@
 import pytest
 
 from app.extensions import db
+from tests.factories import criar_propriedade_com_vinculo
 from app.utils.auth import gerar_hash_senha
 
 
@@ -18,7 +19,7 @@ def _criar_usuario_propriedade(email, nome_propriedade):
                       senha_hash=gerar_hash_senha("senha123"))
     db.session.add(usuario)
     db.session.commit()
-    propriedade = Propriedade(usuario_id=usuario.id, nome=nome_propriedade)
+    propriedade = criar_propriedade_com_vinculo(usuario_id=usuario.id, nome=nome_propriedade)
     db.session.add(propriedade)
     db.session.commit()
     return usuario, propriedade
@@ -149,7 +150,7 @@ def test_dashboard_mostra_nome_da_propriedade_atual(app_db):
 
 def test_dashboard_mostra_propriedades_e_nao_vaza_outra_propriedade(app_db):
     _, corpo = _corpo_dashboard(app_db)
-    assert "Propriedades" in corpo
+    assert "Áreas de Plantio" in corpo
     assert "10,50 ha no total" in corpo
     assert "1 sem área" in corpo
     assert "Talhão B secreto" not in corpo
@@ -159,7 +160,7 @@ def test_dashboard_mostra_culturas_por_status(app_db):
     _, corpo = _corpo_dashboard(app_db)
     for texto in ("Planejada", "Em andamento", "Colhida", "Cancelada"):
         assert texto in corpo
-    assert "2 associações cultura↔propriedade" in corpo
+    assert "2 associações cultura↔área de plantio" in corpo
     assert "Cultura secreta" not in corpo
 
 
@@ -216,7 +217,7 @@ def test_dashboard_mostra_estados_vazios(app_db):
     resp, corpo = _corpo_dashboard(app_db, "vazio@connectagro.com")
     assert resp.status_code == 200
     assert "Fazenda Vazia" in corpo
-    assert "Nenhuma propriedade cadastrada ainda." in corpo
+    assert "Nenhuma Área de Plantio cadastrada ainda." in corpo
     assert "Nenhuma cultura cadastrada ainda." in corpo
     assert "Nenhum lançamento financeiro cadastrado." in corpo
     assert "Nenhum upload enviado." in corpo
@@ -225,7 +226,7 @@ def test_dashboard_mostra_estados_vazios(app_db):
 def test_dashboard_contem_atalhos_principais(app_db):
     _, corpo = _corpo_dashboard(app_db)
     for texto in (
-        "Nova Propriedade",
+        "Nova Área de Plantio",
         "Nova Cultura",
         "Novo Lançamento Financeiro",
         "Nova Colheita",

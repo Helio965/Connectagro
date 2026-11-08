@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 
-{% block title %}{{ "Editar" if gleba else "Nova" }} propriedade — ConnectAgro{% endblock %}
+{% block title %}{{ "Editar" if gleba else "Nova" }} Área de Plantio — ConnectAgro{% endblock %}
 
 {% block content %}
 <section class="card">
-  <h1>{{ "Editar propriedade" if gleba else "Cadastrar nova propriedade" }}</h1>
+  <h1>{{ "Editar Área de Plantio" if gleba else "Cadastrar nova Área de Plantio" }}</h1>
 
   <form method="post" class="form-vertical"
         action="{{ url_for('glebas.editar', gleba_id=gleba.id) if gleba else url_for('glebas.nova') }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-    <label for="nome">Nome da propriedade *</label>
+    <label for="nome">Nome da Área de Plantio *</label>
     <input type="text" id="nome" name="nome" required value="{{ form.nome or '' }}">
 
     <label for="area_ha">Área total (ha) *</label>

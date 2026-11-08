@@ -14,7 +14,7 @@ from . import glebas_bp
 STATUS_GLEBA_VALIDOS = ("ativa", "em_preparo", "em_cultivo", "pousio", "inativa")
 
 MSG_GLEBA_COM_HISTORICO = (
-    "Não é possível excluir esta propriedade porque ela possui aplicações, "
+    "Não é possível excluir esta Área de Plantio porque ela possui aplicações, "
     "colheitas ou outros dados históricos vinculados."
 )
 
@@ -44,9 +44,9 @@ def _ler_e_validar_form():
     status = request.form.get("status") or "ativa"
 
     if not nome:
-        return None, "O nome da propriedade é obrigatório."
+        return None, "O nome da Área de Plantio é obrigatório."
     if area_ha is None or area_ha <= 0:
-        return None, "A área da propriedade deve ser informada e maior que zero."
+        return None, "A área da Área de Plantio deve ser informada e maior que zero."
     if status not in STATUS_GLEBA_VALIDOS:
         status = "ativa"
 
@@ -89,10 +89,10 @@ def nova():
         )
         db.session.add(gleba)
         db.session.commit()
-        registrar_sucesso("glebas.create", entidade="propriedade", entidade_id=gleba.id,
-                          descricao="Propriedade criada", propriedade_id=propriedade.id,
+        registrar_sucesso("glebas.create", entidade="gleba", entidade_id=gleba.id,
+                          descricao="Área de Plantio criada", propriedade_id=propriedade.id,
                           request=request)
-        flash("Propriedade cadastrada com sucesso.", "success")
+        flash("Área de Plantio cadastrada com sucesso.", "success")
         return redirect(url_for("glebas.index"))
     return render_template("glebas/form.html", gleba=None, form={"status": "ativa"},
                            status_validos=STATUS_GLEBA_VALIDOS)
@@ -118,10 +118,10 @@ def editar(gleba_id):
         gleba.observacoes = dados["observacoes"]
         gleba.atualizado_em = iso_now()
         db.session.commit()
-        registrar_sucesso("glebas.edit", entidade="propriedade", entidade_id=gleba.id,
-                          descricao="Propriedade editada", propriedade_id=propriedade.id,
+        registrar_sucesso("glebas.edit", entidade="gleba", entidade_id=gleba.id,
+                          descricao="Área de Plantio editada", propriedade_id=propriedade.id,
                           request=request)
-        flash("Propriedade atualizada com sucesso.", "success")
+        flash("Área de Plantio atualizada com sucesso.", "success")
         return redirect(url_for("glebas.index"))
     return render_template("glebas/form.html", gleba=gleba, form=gleba,
                            status_validos=STATUS_GLEBA_VALIDOS)
@@ -133,6 +133,9 @@ def editar(gleba_id):
 def remover(gleba_id):
     propriedade = propriedade_atual()
     gleba = _gleba_da_propriedade_ou_404(gleba_id, propriedade)
+    if any(cg.cultura is None or cg.cultura.propriedade_id != propriedade.id
+           for cg in gleba.cultura_glebas):
+        abort(409, description="Associação territorial inconsistente; exclusão bloqueada.")
     if _cg_ids_com_historico(cg.id for cg in gleba.cultura_glebas):
         flash(MSG_GLEBA_COM_HISTORICO, "error")
         return redirect(url_for("glebas.index"))
@@ -144,14 +147,14 @@ def remover(gleba_id):
         db.session.commit()
     except IntegrityError:
         db.session.rollback()
-        registrar_falha("glebas.delete", entidade="propriedade",
+        registrar_falha("glebas.delete", entidade="gleba",
                         entidade_id=gleba_id,
-                        descricao="Exclusão bloqueada: propriedade com histórico",
+                        descricao="Exclusão bloqueada: Área de Plantio com histórico",
                         propriedade_id=propriedade.id, request=request)
         flash(MSG_GLEBA_COM_HISTORICO, "error")
         return redirect(url_for("glebas.index"))
-    registrar_sucesso("glebas.delete", entidade="propriedade", entidade_id=gleba_id,
-                      descricao="Propriedade removida", propriedade_id=propriedade.id,
+    registrar_sucesso("glebas.delete", entidade="gleba", entidade_id=gleba_id,
+                      descricao="Área de Plantio removida", propriedade_id=propriedade.id,
                       request=request)
-    flash("Propriedade excluída com sucesso.", "success")
+    flash("Área de Plantio excluída com sucesso.", "success")
     return redirect(url_for("glebas.index"))

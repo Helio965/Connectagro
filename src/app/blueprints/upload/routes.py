@@ -57,20 +57,29 @@ def _pasta_base_upload():
 
 def obter_pasta_upload_propriedade(propriedade_id):
     """Retorna (pasta_absoluta, pasta_relativa) da propriedade atual."""
-    pasta_base = _pasta_base_upload()
     pasta_relativa = f"propriedade_{propriedade_id}"
-    pasta_absoluta = os.path.abspath(os.path.join(pasta_base, pasta_relativa))
-    if os.path.commonpath([pasta_base, pasta_absoluta]) != pasta_base:
-        abort(400)
+    pasta_absoluta = _pasta_upload_autorizada(propriedade_id)
     os.makedirs(pasta_absoluta, exist_ok=True)
     return pasta_absoluta, pasta_relativa
 
 
-def _caminho_absoluto_upload(caminho_relativo):
+def _pasta_upload_autorizada(propriedade_id):
+    pasta_base = os.path.realpath(_pasta_base_upload())
+    pasta = os.path.join(pasta_base, f"propriedade_{propriedade_id}")
+    # Nem mesmo um symlink para outra subpasta da base pode trocar o contexto.
+    if os.path.realpath(pasta) != pasta:
+        abort(404)
+    return pasta
+
+
+def _caminho_absoluto_upload(caminho_relativo, propriedade_id):
     pasta_base = _pasta_base_upload()
     partes = str(caminho_relativo or "").replace("\\", "/").split("/")
-    caminho = os.path.abspath(os.path.join(pasta_base, *partes))
-    if os.path.commonpath([pasta_base, caminho]) != pasta_base:
+    if not partes or partes[0] != f"propriedade_{propriedade_id}":
+        abort(404)
+    pasta_esperada = _pasta_upload_autorizada(propriedade_id)
+    caminho = os.path.realpath(os.path.join(pasta_base, *partes))
+    if os.path.commonpath([pasta_esperada, caminho]) != pasta_esperada:
         abort(404)
     return caminho
 
@@ -197,7 +206,7 @@ def novo():
 def download(arquivo_id):
     propriedade = propriedade_atual()
     arquivo = _arquivo_da_propriedade_ou_404(arquivo_id, propriedade)
-    caminho_absoluto = _caminho_absoluto_upload(arquivo.caminho)
+    caminho_absoluto = _caminho_absoluto_upload(arquivo.caminho, propriedade.id)
     if not os.path.isfile(caminho_absoluto):
         abort(404)
     registrar_sucesso("upload.download", entidade="upload_arquivo",
@@ -217,7 +226,7 @@ def download(arquivo_id):
 def remover(arquivo_id):
     propriedade = propriedade_atual()
     arquivo = _arquivo_da_propriedade_ou_404(arquivo_id, propriedade)
-    caminho_absoluto = _caminho_absoluto_upload(arquivo.caminho)
+    caminho_absoluto = _caminho_absoluto_upload(arquivo.caminho, propriedade.id)
     arquivo_existia = os.path.isfile(caminho_absoluto)
     if arquivo_existia:
         os.remove(caminho_absoluto)

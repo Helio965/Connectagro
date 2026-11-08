@@ -1,0 +1,3 @@
+{% extends "base.html" %}
+{% block title %}Seleção necessária — ConnectAgro{% endblock %}
+{% block content %}<section class="card"><h1>Seleção de propriedade necessária</h1><p>{{ mensagem }}</p><a href="{{ url_for('propriedades.selecionar') }}">Escolher propriedade</a></section>{% endblock %}

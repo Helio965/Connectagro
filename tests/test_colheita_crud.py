@@ -2,6 +2,7 @@
 import pytest
 
 from app.extensions import db
+from tests.factories import criar_propriedade_com_vinculo
 from app.utils.auth import gerar_hash_senha
 
 
@@ -13,7 +14,7 @@ def _setup_usuario_com_associacao(email, cultura_nome="Soja", gleba_nome="Talhã
                 senha_hash=gerar_hash_senha("senha123"))
     db.session.add(u)
     db.session.commit()
-    p = Propriedade(usuario_id=u.id, nome="Fazenda " + email)
+    p = criar_propriedade_com_vinculo(usuario_id=u.id, nome="Fazenda " + email)
     db.session.add(p)
     db.session.commit()
     g = Gleba(propriedade_id=p.id, nome=gleba_nome)
@@ -231,7 +232,7 @@ def test_nova_sem_associacao_orienta_usuario(app_db):
                     senha_hash=gerar_hash_senha("senha123"))
         db.session.add(u)
         db.session.commit()
-        db.session.add(Propriedade(usuario_id=u.id, nome="Fazenda X"))
+        db.session.add(criar_propriedade_com_vinculo(usuario_id=u.id, nome="Fazenda X"))
         db.session.commit()
     client = _login(app_db, "x@connectagro.com")
     resp = client.get("/colheita/nova")

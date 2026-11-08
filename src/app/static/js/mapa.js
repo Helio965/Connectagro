@@ -149,7 +149,7 @@
 
   function enviarPoligono(urlPost, corpo, sucessoMsg) {
     if (!glebaAtivaId) {
-      definirStatus("Selecione uma propriedade primeiro.", "erro");
+      definirStatus("Selecione uma Área de Plantio primeiro.", "erro");
       return;
     }
     fetch(urlPost, {
@@ -227,7 +227,7 @@
     if (!select) {
       return;
     }
-    select.innerHTML = '<option value="">Selecione uma propriedade…</option>';
+    select.innerHTML = '<option value="">Selecione uma Área de Plantio…</option>';
     glebas.forEach((gleba) => {
       const opt = document.createElement("option");
       opt.value = gleba.id;

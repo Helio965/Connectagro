@@ -5,6 +5,7 @@ from ._helpers import iso_now
 
 class Propriedade(db.Model):
     __tablename__ = "propriedade"
+    __table_args__ = {"sqlite_autoincrement": True}
 
     id = db.Column(db.Integer, primary_key=True)
     usuario_id = db.Column(db.Integer, db.ForeignKey("usuario.id"), nullable=False)

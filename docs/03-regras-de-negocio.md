@@ -102,9 +102,11 @@
 - RN-11o — Criar usuário pelo painel exige e-mail único e perfil permitido. Não
   há cadastro público; o próprio usuário define a senha por link de convite
   seguro, expirável e de uso único, enviado por e-mail quando configurado.
-- RN-11p — Inativar usuário desativa o login e o vínculo com a propriedade, sem
-  remoção física do registro. A propriedade deve manter pelo menos um `admin`
-  ativo.
+- RN-11p — Inativar usuário preserva o registro e desativa seu vínculo local.
+  Para contas compartilhadas, por decisão da Etapa 03, não desativa a conta nem
+  os acessos às outras propriedades. Contas de um único contexto mantêm também
+  o bloqueio global de login anterior. Conta globalmente inativa nunca autentica.
+  A propriedade com administrador deve preservar pelo menos um `admin` ativo.
 
 ## Regras de recuperação de senha (Fase 7.2)
 
@@ -262,10 +264,18 @@
   exportações são relatórios operacionais, **não** documentos comerciais.
 - RN-42 — **Painel de usuários não é cadastro público**: a criação de usuários é
   uma ação administrativa interna, escopada à propriedade.
-- RN-42a — O vínculo `usuario_propriedade` é a fonte do painel de usuários no
-  MVP ampliado. `propriedade.usuario_id` permanece para compatibilidade e pode
-  gerar associação ativa automaticamente quando uma base antiga não possui
-  vínculo explícito.
+- RN-42a — O vínculo `usuario_propriedade` é a fonte do acesso ao contexto.
+  `propriedade.usuario_id` permanece preservado. A migration da Etapa 03 cria
+  somente pares ausentes do responsável legado, sem reativar vínculos inativos;
+  consultas não criam propriedades ou vínculos.
+- RN-42b — Administrador e gerente podem cadastrar e editar propriedades
+  autorizadas, por decisão expressa na Etapa 03. O cadastro vincula o próprio
+  ator como responsável, sem transferir registros anteriores. Todos os perfis
+  selecionam apenas propriedades com vínculo ativo; administrador não é global.
+- RN-42c — Operações globais sobre conta compartilhada exigem autoridade sobre
+  todos os seus contextos (ou a própria identidade), além das permissões de
+  perfil existentes. Fora desse escopo, somente o vínculo local pode ser alterado.
+  Não há exclusão/desativação de Propriedade até definição de retenção segura.
 - RN-43 — A **recuperação de senha** deve respeitar a segurança e **não** expor
   senha nem token; o token deve ser seguro, expirável, de uso único e armazenado
   apenas como hash.

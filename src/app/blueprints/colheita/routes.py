@@ -8,7 +8,7 @@ from collections import defaultdict
 from flask import abort, flash, redirect, render_template, request, url_for
 
 from ...extensions import db
-from ...models import ColheitaRegistro, Cultura, CulturaGleba
+from ...models import ColheitaRegistro, Cultura, CulturaGleba, Gleba
 from ...utils.auth import login_required
 from ...services.auditoria_service import registrar_sucesso
 from ...utils.contexto import parse_float, propriedade_atual, vazio_para_none
@@ -20,7 +20,9 @@ def _cultura_glebas_da_propriedade(propriedade):
     """Associações cultura↔gleba cuja cultura pertence à propriedade."""
     return (CulturaGleba.query
             .join(Cultura, CulturaGleba.cultura_id == Cultura.id)
-            .filter(Cultura.propriedade_id == propriedade.id)
+            .join(Gleba, CulturaGleba.gleba_id == Gleba.id)
+            .filter(Cultura.propriedade_id == propriedade.id,
+                    Gleba.propriedade_id == propriedade.id)
             .order_by(Cultura.nome, CulturaGleba.id)
             .all())
 
@@ -33,8 +35,10 @@ def _colheita_da_propriedade_ou_404(colheita_id, propriedade):
     colheita = (ColheitaRegistro.query
                 .join(CulturaGleba, ColheitaRegistro.cultura_gleba_id == CulturaGleba.id)
                 .join(Cultura, CulturaGleba.cultura_id == Cultura.id)
+                .join(Gleba, CulturaGleba.gleba_id == Gleba.id)
                 .filter(ColheitaRegistro.id == colheita_id,
-                        Cultura.propriedade_id == propriedade.id)
+                        Cultura.propriedade_id == propriedade.id,
+                        Gleba.propriedade_id == propriedade.id)
                 .first())
     if colheita is None:
         abort(404)
@@ -56,7 +60,7 @@ def _ler_e_validar_form(propriedade):
     quantidade_raw = request.form.get("quantidade")
 
     if not cg_raw.isdigit() or int(cg_raw) not in _ids_cultura_gleba_validos(propriedade):
-        return None, "Selecione uma associação cultura↔propriedade válida."
+        return None, "Selecione uma associação cultura↔área de plantio válida."
     if not data_colheita:
         return None, "A data da colheita é obrigatória."
 

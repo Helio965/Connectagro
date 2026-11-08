@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Propriedades — ConnectAgro{% endblock %}
+{% block content %}
+<section class="card">
+  <div class="card-head">
+    <h1>{{ 'Selecione a propriedade' if escolher else 'Propriedades' }}</h1>
+    {% if can('propriedades.create') %}<a class="btn-acao" href="{{ url_for('propriedades.nova') }}">Nova propriedade</a>{% endif %}
+  </div>
+  <p>Propriedade é o ambiente operacional. Dentro dela, cadastre suas Áreas de Plantio.</p>
+  {% if propriedades_disponiveis %}
+  <ul class="propriedades-lista">
+    {% for p in propriedades_disponiveis %}
+    <li>
+      <a href="{{ url_for('propriedades.detalhe', propriedade_id=p.id) }}">{{ p.nome }}</a>
+      {% if propriedade_selecionada and propriedade_selecionada.id == p.id %}<strong> — ativa</strong>{% endif %}
+      <form method="post" action="{{ url_for('propriedades.selecionar') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="propriedade_id" value="{{ p.id }}">
+        <button type="submit" class="btn-link-acao">Trabalhar nesta propriedade</button>
+      </form>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="empty-state">Nenhuma propriedade autorizada. {% if can('propriedades.create') %}Cadastre uma propriedade para começar.{% else %}Solicite um vínculo ao responsável.{% endif %}</p>
+  {% endif %}
+</section>
+{% endblock %}
