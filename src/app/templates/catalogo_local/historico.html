@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Histórico do catálogo local — ConnectAgro{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/catalogo-local.css') }}">{% endblock %}
+{% block content %}
+<section class="card catalogo-pagina">
+  <h1>Histórico {{ 'da personalização' if modo == 'personalizacao' else 'do produto local' }}</h1>
+  <p>{{ registro.nome_local or registro.produto.nome if modo == 'personalizacao' else registro.nome }}</p>
+  <p class="hint">Versões anteriores são preservadas para acompanhar as alterações desta propriedade.</p>
+  {% for revisao in revisoes %}<article class="catalogo-registro">
+    <h2>Versão {{ revisao.versao }}</h2><p class="catalogo-metadados">{{ revisao.criado_em }} · {{ {'create':'Cadastro','update':'Edição','ativar':'Reativação','inativar':'Inativação','criar':'Cadastro','editar':'Edição','reativar':'Reativação'}.get(revisao.acao, 'Alteração registrada') }}</p>
+    {% set dados = (detalhes_revisoes|default({})).get(revisao.id, {}) %}
+    {% if dados %}<details><summary>Consultar informações desta versão</summary><dl class="catalogo-dados">{% for campo, rotulo in [('nome','Nome'),('nome_local','Nome local'),('classe','Classe'),('categoria','Categoria'),('descricao_curta','Descrição resumida'),('descricao_completa','Descrição completa'),('descricao_local','Descrição local'),('unidade_referencia','Unidade de referência'),('observacoes','Observações'),('fonte','Fonte')] %}{% if dados.get(campo) %}<div><dt>{{ rotulo }}</dt><dd>{{ dados[campo] }}</dd></div>{% endif %}{% endfor %}</dl></details>{% endif %}
+  </article>{% else %}<p>Nenhuma alteração anterior registrada.</p>{% endfor %}
+  <a href="{{ url_for('catalogo_local.index') }}">Voltar ao catálogo da propriedade</a>
+</section>
+{% endblock %}

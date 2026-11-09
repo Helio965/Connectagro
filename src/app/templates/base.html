@@ -35,10 +35,10 @@
 
     {% set bp = request.blueprint %}
     {% set cadastros_open = bp in ["culturas", "glebas", "equipe"] %}
-    {% set insumos_open = bp in ["defensivos", "fertilizantes", "aplicacoes"] %}
+    {% set insumos_open = bp in ["defensivos", "fertilizantes", "aplicacoes", "catalogo_local"] %}
     {% set operacional_open = bp in ["financeiro", "colheita", "upload", "atividades"] %}
     {% set inteligencia_open = bp in ["mapa", "ia", "relatorios"] %}
-    {% set administracao_open = bp in ["usuarios", "auditoria"] %}
+    {% set administracao_open = bp in ["usuarios", "auditoria", "catalogo_admin"] %}
 
     <nav class="sidebar-nav" aria-label="Navegação principal">
       {% if can("dashboard.view") %}
@@ -73,6 +73,7 @@
       <div id="menu-insumos" class="sidebar-submenu {{ 'open' if insumos_open }}">
         {% if can("catalogo.view") %}<a class="{{ 'active' if bp == 'defensivos' }}" href="{{ url_for('defensivos.index') }}">Defensivos</a>{% endif %}
         {% if can("catalogo.view") %}<a class="{{ 'active' if bp == 'fertilizantes' }}" href="{{ url_for('fertilizantes.index') }}">Fertilizantes</a>{% endif %}
+        {% if can("catalogo.local.create") %}<a class="{{ 'active' if bp == 'catalogo_local' }}" href="{{ url_for('catalogo_local.index') }}">Catálogo da propriedade</a>{% endif %}
         {% if can("aplicacoes.view") %}<a class="{{ 'active' if bp == 'aplicacoes' }}" href="{{ url_for('aplicacoes.index') }}">Aplicações</a>{% endif %}
       </div>
       {% endif %}
@@ -110,7 +111,7 @@
       </div>
       {% endif %}
 
-      {% if can("usuarios.view") or can("auditoria.view") %}
+      {% if can("usuarios.view") or can("auditoria.view") or can("catalogo.global.review") %}
       <button class="sidebar-group-toggle {{ 'is-open is-active' if administracao_open }}"
               type="button"
               data-sidebar-toggle="menu-administracao"
@@ -122,6 +123,7 @@
       <div id="menu-administracao" class="sidebar-submenu {{ 'open' if administracao_open }}">
         {% if can("usuarios.view") %}<a class="{{ 'active' if bp == 'usuarios' }}" href="{{ url_for('usuarios.index') }}">Usuários</a>{% endif %}
         {% if can("auditoria.view") %}<a class="{{ 'active' if bp == 'auditoria' }}" href="{{ url_for('auditoria.index') }}">Auditoria</a>{% endif %}
+        {% if can("catalogo.global.review") %}<a class="{{ 'active' if bp == 'catalogo_admin' }}" href="{{ url_for('catalogo_admin.index') }}">Revisão do catálogo</a>{% endif %}
       </div>
       {% endif %}
     </nav>

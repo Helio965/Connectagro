@@ -18,6 +18,8 @@ ROLE_LABELS = {
 }
 
 _ADMIN_PERMISSIONS = {
+    "catalogo.local.create", "catalogo.local.edit", "catalogo.personalizar.create",
+    "catalogo.personalizar.edit", "catalogo.solicitar",
     "atividades.view", "atividades.create", "atividades.edit", "atividades.delete",
     "propriedades.view", "propriedades.select", "propriedades.create", "propriedades.edit",
     "dashboard.view",
@@ -62,6 +64,8 @@ _ADMIN_PERMISSIONS = {
 }
 
 _TECNICO_PERMISSIONS = {
+    "catalogo.local.create", "catalogo.local.edit", "catalogo.personalizar.create",
+    "catalogo.personalizar.edit", "catalogo.solicitar",
     "atividades.view", "atividades.create", "atividades.edit",
     "propriedades.view", "propriedades.select", "propriedades.create", "propriedades.edit",
     "dashboard.view",
@@ -94,6 +98,7 @@ _TECNICO_PERMISSIONS = {
 }
 
 _TRABALHADOR_PERMISSIONS = {
+    "catalogo.local.create", "catalogo.personalizar.create", "catalogo.solicitar",
     "atividades.view", "atividades.create",
     "propriedades.view", "propriedades.select",
     "dashboard.view",
@@ -134,6 +139,14 @@ def role_label(perfil):
 
 def has_permission(permission):
     """Indica se o perfil atual possui a permissão informada."""
+    if permission in {"catalogo.global.review", "catalogo.global.decide"}:
+        usuario = usuario_atual()
+        if usuario is None or usuario["perfil"] != "admin":
+            return False
+        from ..extensions import db
+        from ..models import Usuario
+        conta = db.session.get(Usuario, usuario["id"], populate_existing=True)
+        return bool(conta and conta.ativo and conta.perfil == "admin" and conta.catalogo_global_aprovador)
     permissoes = PERMISSOES_POR_PERFIL.get(perfil_atual(), set())
     return permission in permissoes
 

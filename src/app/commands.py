@@ -151,9 +151,33 @@ def seed_users():
     )
 
 
+@click.command("catalogo-global-permissao")
+@click.option("--usuario-id", required=True, type=click.IntRange(1, 2147483647))
+@click.option("--habilitar", is_flag=True, help="Habilita revisão global para uma conta Administrador ativa.")
+@click.option("--revogar", is_flag=True, help="Revoga somente a capacidade de revisão global.")
+@click.option("--motivo", default=None, help="Referência opcional da operação administrativa.")
+@with_appcontext
+def catalogo_global_permissao(usuario_id, habilitar, revogar, motivo):
+    """Provisionamento explícito pelo operador; não concede acesso operacional."""
+    if habilitar == revogar:
+        raise click.ClickException("Escolha exatamente uma opção: --habilitar ou --revogar.")
+    from .services.catalogo_governanca_service import definir_aprovador_global
+    try:
+        alterado = definir_aprovador_global(usuario_id, habilitar, motivo)
+        db.session.commit()
+    except ValueError as erro:
+        db.session.rollback()
+        raise click.ClickException(str(erro)) from None
+    except Exception:
+        db.session.rollback()
+        raise
+    click.echo("Capacidade global atualizada." if alterado else "A conta já possui a situação solicitada.")
+
+
 def register_commands(app):
     """Registra os comandos CLI na aplicação."""
     app.cli.add_command(init_db)
     app.cli.add_command(validate_catalog_seed)
     app.cli.add_command(import_catalog_seed)
     app.cli.add_command(seed_users)
+    app.cli.add_command(catalogo_global_permissao)

@@ -22,13 +22,15 @@
 {%- endmacro %}
 
 {% block title %}{{ produto.nome }} — ConnectAgro{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/catalogo-local.css') }}">{% endblock %}
 
 {% block content %}
-<section class="card">
+<section class="card catalogo-pagina" data-global-id="{{ produto.id }}">
+  <span class="catalogo-selo catalogo-selo-global">Referência global</span>
   <h1>{{ produto.nome }}</h1>
   <p class="hint">
-    {{ titulo }} de consulta agrícola. A imagem é uma referência visual obtida de
-    fonte pública (Wikimedia Commons) e não representa venda, cotação,
+    {{ titulo }} de consulta agrícola. Imagens de referência preservam suas fontes,
+    incluindo Wikimedia Commons, e não representam venda, cotação,
     recomendação ou validação oficial. O ConnectAgro não vende produtos e não
     substitui orientação técnica profissional.
   </p>
@@ -71,6 +73,18 @@
   </ul>
   {% else %}
   <p>Sem dados técnicos cadastrados para este produto.</p>
+  {% endif %}
+
+  {% if propriedade_catalogo %}
+    {% set complemento = personalizacoes.get(produto.id) %}
+    {% set existente = personalizacoes_existentes.get(produto.id) %}
+    {% if complemento %}<section class="catalogo-complemento catalogo-personalizacao" data-personalizacao-id="{{ complemento.id }}">
+      <h2>Complemento desta propriedade</h2><p class="hint">Informações locais; os dados globais acima permanecem como referência. Este complemento não altera registros operacionais anteriores.</p>
+      <dl class="catalogo-dados">{% for campo, rotulo in [('nome_local','Nome local'),('descricao_local','Descrição local'),('unidade_referencia','Unidade de referência'),('observacoes','Observações desta propriedade'),('fonte','Fonte local')] %}{% set valor = complemento|attr(campo) %}{% if valor %}<div><dt>{{ rotulo }}</dt><dd>{{ valor }}</dd></div>{% endif %}{% endfor %}</dl>
+      <div class="catalogo-acoes">{% if can('catalogo.personalizar.edit') %}<a href="{{ url_for('catalogo_local.personalizar', produto_id=produto.id) }}">Editar personalização</a>{% endif %}<a href="{{ url_for('catalogo_local.historico', tipo='personalizacao', id=complemento.id) }}">Histórico local</a>{% if can('catalogo.solicitar') %}<a href="{{ url_for('catalogo_local.solicitar_personalizacao', personalizacao_id=complemento.id) }}">Propor alteração global</a>{% endif %}</div>
+    </section>
+    {% elif existente %}<p class="hint">Há uma personalização inativa nesta propriedade. {% if can('catalogo.personalizar.edit') %}<a href="{{ url_for('catalogo_local.personalizar', produto_id=produto.id) }}">Consultar e editar personalização</a>{% endif %}</p>
+    {% elif can('catalogo.personalizar.create') %}<p><a class="btn-acao" href="{{ url_for('catalogo_local.personalizar', produto_id=produto.id) }}">Personalizar nesta propriedade</a></p>{% endif %}
   {% endif %}
 
   <h2>Aviso</h2>

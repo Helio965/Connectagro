@@ -21,6 +21,9 @@ class Usuario(db.Model):
     # Epoch persistente: cookies emitidos com outra versão não autenticam.
     auth_version = db.Column(db.Integer, nullable=False, default=1,
                              server_default=db.text("1"))
+    # Capacidade específica de catálogo; não concede acesso operacional global.
+    catalogo_global_aprovador = db.Column(db.Boolean, nullable=False, default=False,
+                                         server_default=db.false())
     criado_em = db.Column(db.String(40), nullable=False, default=iso_now)
     atualizado_em = db.Column(db.String(40), nullable=True)
 

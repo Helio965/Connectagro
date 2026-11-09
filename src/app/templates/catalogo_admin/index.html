@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% from 'catalogo_local/_macros.html' import estado with context %}
+{% block title %}Revisão do catálogo global — ConnectAgro{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/catalogo-local.css') }}">{% endblock %}
+{% block content %}
+<section class="card catalogo-pagina">
+  <h1>Revisão do catálogo global</h1>
+  <p class="hint">Análise exclusiva de propostas do catálogo. Esta autorização não concede acesso aos registros operacionais, equipe ou financeiro das propriedades de origem.</p>
+  <p class="hint">Aprovação administrativa no ConnectAgro não equivale a validação regulatória.</p>
+  {% for item in solicitacoes %}<article class="catalogo-registro" data-solicitacao-id="{{ item.id }}"><h2><a href="{{ url_for('catalogo_admin.detalhe', id=item.id) }}">Solicitação #{{ item.id }}</a></h2><span class="catalogo-selo">{{ estado(item.estado) }}</span><p>{{ 'Inclusão global' if item.tipo == 'inclusao' else 'Alteração de descrição' }} · {{ item.solicitado_em }}</p><a href="{{ url_for('catalogo_admin.detalhe', id=item.id) }}">Analisar proposta</a></article>{% else %}<p>Nenhuma solicitação disponível para análise.</p>{% endfor %}
+</section>
+{% endblock %}

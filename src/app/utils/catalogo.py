@@ -27,17 +27,29 @@ def parse_json_lista(valor):
     return [str(dados)]
 
 
-def aplicar_filtros_catalogo(classe, q=None, categoria=None, status_regulatorio=None):
+def aplicar_filtros_catalogo(classe, q=None, categoria=None, status_regulatorio=None,
+                            propriedade_id=None):
     """Monta a query de `ProdutoBase` da classe, com busca/filtros opcionais."""
     query = ProdutoBase.query.filter(ProdutoBase.classe == classe)
     if q:
         termo = f"%{q.strip()}%"
-        query = query.filter(db_or(
+        condicoes = [
             ProdutoBase.nome.ilike(termo),
             ProdutoBase.categoria.ilike(termo),
             ProdutoBase.descricao_curta.ilike(termo),
             ProdutoBase.descricao_completa.ilike(termo),
-        ))
+        ]
+        if propriedade_id is not None:
+            # O ID é derivado do contexto autorizado pelas rotas, nunca de args.
+            from sqlalchemy import select
+            from ..models import ProdutoPersonalizacao
+            alias_local = select(ProdutoPersonalizacao.produto_base_id).where(
+                ProdutoPersonalizacao.propriedade_id == propriedade_id,
+                ProdutoPersonalizacao.ativo.is_(True),
+                db_or(ProdutoPersonalizacao.nome_local.ilike(termo),
+                      ProdutoPersonalizacao.descricao_local.ilike(termo)))
+            condicoes.append(ProdutoBase.id.in_(alias_local))
+        query = query.filter(db_or(*condicoes))
     if categoria:
         query = query.filter(ProdutoBase.categoria == categoria)
     if status_regulatorio:
@@ -76,3 +88,40 @@ def primeiro_tecnico(produto):
     return (ProdutoTecnico.query
             .filter_by(produto_id=produto.id)
             .first())
+
+
+def contexto_local_catalogo(classe, q=None, categoria=None):
+    """Complementos da Propriedade autorizada, sem modificar dados globais.
+
+    A consulta global permanece disponível quando não há contexto. Retornar
+    registros locais exige o vínculo validado pelo resolvedor existente.
+    """
+    from ..models import ProdutoLocal, ProdutoPersonalizacao
+    from .contexto import propriedade_atual
+
+    propriedade = propriedade_atual()
+    dados = {"propriedade_catalogo": propriedade, "personalizacoes": {},
+             "personalizacoes_existentes": {}, "produtos_locais": [],
+             "categorias_locais": []}
+    if propriedade is None:
+        return dados
+    personalizados = (ProdutoPersonalizacao.query
+        .join(ProdutoBase, ProdutoPersonalizacao.produto_base_id == ProdutoBase.id)
+        .filter(ProdutoPersonalizacao.propriedade_id == propriedade.id,
+                ProdutoBase.classe == classe).all())
+    dados["personalizacoes_existentes"] = {p.produto_base_id: p for p in personalizados}
+    dados["personalizacoes"] = {p.produto_base_id: p for p in personalizados if p.ativo}
+    locais = ProdutoLocal.query.filter_by(propriedade_id=propriedade.id,
+                                         classe=classe, ativo=True)
+    dados["categorias_locais"] = [c[0] for c in locais.with_entities(ProdutoLocal.categoria)
+                                   .filter(ProdutoLocal.categoria.isnot(None))
+                                   .distinct().all() if c[0]]
+    if q:
+        termo = f"%{q.strip()}%"
+        locais = locais.filter(db_or(ProdutoLocal.nome.ilike(termo),
+            ProdutoLocal.categoria.ilike(termo), ProdutoLocal.descricao_curta.ilike(termo),
+            ProdutoLocal.descricao_completa.ilike(termo)))
+    if categoria:
+        locais = locais.filter(ProdutoLocal.categoria == categoria)
+    dados["produtos_locais"] = locais.order_by(ProdutoLocal.nome, ProdutoLocal.id).all()
+    return dados

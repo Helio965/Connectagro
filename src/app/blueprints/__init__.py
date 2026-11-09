@@ -17,8 +17,12 @@ from .usuarios import usuarios_bp
 from .auditoria import auditoria_bp
 from .propriedades import propriedades_bp
 from .atividades import atividades_bp
+from .catalogo_local import catalogo_local_bp
+from .catalogo_admin import catalogo_admin_bp
 
 ALL_BLUEPRINTS = [
+    catalogo_local_bp,
+    catalogo_admin_bp,
     atividades_bp,
     propriedades_bp,
     dashboard_bp,

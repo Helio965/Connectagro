@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% from 'catalogo_local/_macros.html' import estado, campos_conteudo, duplicatas, erro, atributos_erro with context %}
+{% block title %}Analisar solicitação #{{ solicitacao.id }} — ConnectAgro{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/catalogo-local.css') }}">{% endblock %}
+{% block content %}
+<section class="card catalogo-pagina" data-solicitacao-id="{{ solicitacao.id }}">
+  <h1>Analisar solicitação #{{ solicitacao.id }}</h1><span class="catalogo-selo">{{ estado(solicitacao.estado) }}</span>
+  <p>{{ 'Inclusão de produto global' if solicitacao.tipo == 'inclusao' else 'Alteração de descrição global' }} · enviada em {{ solicitacao.solicitado_em }}</p>
+  <p class="hint">Analise somente a proposta do catálogo. Não há acesso aos dados operacionais da origem. A decisão não valida oficialmente produto, uso ou comercialização.</p>
+  {{ campos_conteudo(conteudo) }}
+  {% if solicitacao.decidido_em %}<p>Decisão registrada em {{ solicitacao.decidido_em }}.</p>{% endif %}
+  {% if solicitacao.justificativa %}<h2>Justificativa registrada</h2><p class="catalogo-texto">{{ solicitacao.justificativa }}</p>{% endif %}
+  {% if solicitacao.produto_publicado %}<p>Referência global resultante: <a href="{{ url_for('defensivos.detalhe' if solicitacao.produto_publicado.classe == 'defensivo' else 'fertilizantes.detalhe', slug=solicitacao.produto_publicado.slug) }}">{{ solicitacao.produto_publicado.nome }}</a></p>{% endif %}
+  {{ duplicatas(duplicacoes) }}
+  {% if errors %}<div class="catalogo-alerta" role="alert"><p>A decisão ainda não foi registrada. Confira os campos.</p><ul>{% for mensagem in errors.values() %}<li>{{ mensagem }}</li>{% endfor %}</ul></div>{% endif %}
+  {% if solicitacao.estado == 'pendente' and can('catalogo.global.decide') %}
+  <h2>Aprovar proposta</h2>
+  <form method="post" action="{{ url_for('catalogo_admin.aprovar', id=solicitacao.id) }}" class="form-vertical catalogo-form" data-catalogo-form>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% if solicitacao.tipo == 'inclusao' %}
+    <label for="produto_global_existente_id">Vincular a um produto global existente — ID</label><input type="text" id="produto_global_existente_id" name="produto_global_existente_id" inputmode="numeric" maxlength="10" value="{{ form.produto_global_existente_id or '' }}" {{ atributos_erro('produto_global_existente_id') }}>{{ erro('produto_global_existente_id') }}
+    <p class="hint">Use somente após conferir a identidade. Vincular registra o resultado sem alterar o produto existente nem os históricos. Deixe vazio para criar um produto global distinto.</p>
+    <label for="slug_global">Identificador global do novo produto</label><input type="text" id="slug_global" name="slug_global" maxlength="150" placeholder="exemplo-de-identificador" value="{{ form.slug_global or '' }}" {{ atributos_erro('slug_global') }}>{{ erro('slug_global') }}
+    <label class="catalogo-confirmacao" for="confirmar_distinto"><input type="checkbox" id="confirmar_distinto" name="confirmar_distinto" value="1" {{ 'checked' if form.confirmar_distinto == '1' }} {{ atributos_erro('confirmar_distinto') }}><span>Conferi as possíveis correspondências e confirmo que o novo produto é distinto.</span></label>{{ erro('confirmar_distinto') }}
+    {% endif %}
+    <label for="justificativa_aprovar">Justificativa da aprovação</label><textarea id="justificativa_aprovar" name="justificativa" rows="3" maxlength="2000" {{ atributos_erro('justificativa') }}>{{ form.justificativa or '' }}</textarea>{{ erro('justificativa') }}
+    <button type="submit" class="btn-acao" data-save-button>Aprovar no ConnectAgro</button><p class="hint" data-save-status aria-live="polite"></p>
+  </form>
+  <h2>Rejeitar proposta</h2>
+  <form method="post" action="{{ url_for('catalogo_admin.rejeitar', id=solicitacao.id) }}" class="form-vertical catalogo-form" data-catalogo-form>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label for="justificativa_rejeitar">Justificativa da rejeição</label><textarea id="justificativa_rejeitar" name="justificativa" rows="3" maxlength="2000">{{ form.justificativa or '' }}</textarea><button type="submit" class="btn-acao" data-save-button>Rejeitar solicitação</button><p class="hint" data-save-status aria-live="polite"></p>
+  </form>
+  {% endif %}
+  <p class="catalogo-rodape"><a href="{{ url_for('catalogo_admin.index') }}">Voltar à revisão do catálogo</a></p>
+</section>
+{% endblock %}
+{% block extra_scripts %}<script src="{{ url_for('static', filename='js/catalogo-local.js') }}" defer></script>{% endblock %}

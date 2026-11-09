@@ -294,6 +294,34 @@ usam `Decimal`, sem `float` intermediário. Não aplicar `SUM`/`CAST` numérico 
 colunas textuais SQLite. Dose antiga, colheita, catálogo e financeiro não são
 convertidos pela nova migration.
 
+## Extensão do catálogo — Etapa 07
+
+| Tabela/campos | Tipo/obrigatoriedade | Responsabilidade |
+| --- | --- | --- |
+| `usuario.catalogo_global_aprovador` | BOOLEAN, não NULL, default falso | Capacidade explícita; só funciona com perfil Admin ativo |
+| `produto_imagem.origem_seed` | TEXT(150), opcional | Identidade da referência gerenciada pelo seed |
+| `produto_imagem.seed_fingerprint` | TEXT(64), opcional | SHA256 do último conteúdo aplicado; legado permanece NULL |
+| `catalogo_controle.id` | INTEGER PK, CHECK id=1 | Trava global de seed/publicação |
+| `produto_local.id`, `propriedade_id` | PK / FK obrigatória | Identidade local e contexto |
+| `produto_local.nome`, `classe` | TEXT(150)/TEXT(30), obrigatórios | Identificação informada; classes existentes |
+| `produto_local.categoria`, `descricao_curta`, `descricao_completa` | TEXT(40)/TEXT(255)/TEXT, opcionais | Informações locais; sem reclassificar globais |
+| `produto_local.unidade_referencia`, `observacoes`, `fonte` | TEXT(20)/TEXT/TEXT(255), opcionais | Complementos informados, não dose/custo automático |
+| `produto_local.chave_envio` | TEXT(64), UNIQUE, opcional no schema | UUID do formulário para idempotência |
+| `produto_personalizacao.propriedade_id`, `produto_base_id` | FKs obrigatórias, UNIQUE em conjunto | Uma personalização por contexto/base |
+| `produto_personalizacao.nome_local`, `descricao_local` | TEXT(150)/TEXT, opcionais | Rótulo e complemento locais, sem substituir ficha global |
+| `produto_personalizacao.unidade_referencia`, `observacoes`, `fonte` | TEXT(20)/TEXT/TEXT(255), opcionais | Informações particulares do contexto |
+| Ambos: `ativo`, `versao` | BOOLEAN/INTEGER, não NULL, defaults verdadeiro/1 | Inativação e versão positiva |
+| Ambos: `criado_por_id`, `criado_em` | FK/TEXT(40), obrigatórios | Autor e data de cadastro |
+| Ambos: `atualizado_por_id`, `atualizado_em` | FK/TEXT(40), opcionais | Atualização sem apagar autoria original |
+| `catalogo_revisao` | PK, propriedade FK, origem XOR, versão, snapshot JSON/TEXT, autor/data/ação | Histórico append-only das versões; origem/versão únicos |
+| `solicitacao_catalogo` | PK, propriedade FK, origem XOR, tipo, versão, conteúdo JSON/TEXT, fingerprint global | Proposta explícita e imutável; origem/versão únicos |
+| Solicitação: `estado`, `solicitado_por_id`, `solicitado_em` | TEXT(20), FK, TEXT(40) | Pendente/aprovada/rejeitada/cancelada, autor/data |
+| Solicitação: `decidido_por_id`, `decidido_em`, `justificativa` | FK/TEXT(40)/TEXT opcionais | Decisão rastreável |
+| Solicitação: `produto_publicado_id`, `global_anterior_json` | FK global/TEXT opcionais | Resultado sem remapear operações; descrição anterior preservada |
+
+Nenhum ID local/de solicitação é utilizado em `produto_base_id` operacional.
+Preços, doses, quantidades e custos anteriores não são modificados pela extensão.
+
 ## Catálogo de produtos
 
 > Base técnica inicial de consulta rápida. **Preço é pendência no MVP; imagens
@@ -309,7 +337,7 @@ Tabela central do catálogo.
 | nome               | TEXT    | Sim         |       | Nome principal do item     |                                                                             |
 | slug               | TEXT    | Sim         |       | Versão amigável (URL/busca)| Único. Ex.: `glifosato`, `npk-04-14-08`, `calcario-dolomitico`              |
 | classe             | TEXT    | Sim         |       | Grupo amplo                | Ex.: `defensivo`, `fertilizante`                                            |
-| categoria          | TEXT    | Sim         |       | Categoria específica       | Ex.: `herbicida`, `inseticida`, `fungicida`, `mineral`, `organico`, `corretivo`, `inoculante` |
+| categoria          | TEXT    | Não         |       | Categoria específica       | Ex.: `herbicida`, `inseticida`, `fungicida`, `mineral`, `organico`, `corretivo`, `inoculante` |
 | descricao_curta    | TEXT    | Não         |       | Resumo                     |                                                                             |
 | descricao_completa | TEXT    | Não         |       | Descrição detalhada        |                                                                             |
 | status_sistema     | TEXT    | Sim         |       | Status interno do sistema  | `pre_cadastrado`, `cadastrado_usuario`, `definitivo`, `bloqueado_historico`  |

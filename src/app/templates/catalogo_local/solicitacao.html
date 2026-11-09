@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% from 'catalogo_local/_macros.html' import estado, campos_conteudo with context %}
+{% block title %}Solicitação #{{ solicitacao.id }} — ConnectAgro{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/catalogo-local.css') }}">{% endblock %}
+{% block content %}
+<section class="card catalogo-pagina" data-solicitacao-id="{{ solicitacao.id }}">
+  <h1>Solicitação #{{ solicitacao.id }}</h1><span class="catalogo-selo">{{ estado(solicitacao.estado) }}</span>
+  <p>{{ 'Inclusão de produto global' if solicitacao.tipo == 'inclusao' else 'Alteração de descrição global' }} · enviada em {{ solicitacao.solicitado_em }}</p>
+  <p class="hint">As informações abaixo são a proposta enviada. Alterações locais posteriores não substituem este registro. Aprovação administrativa não significa validação oficial ou recomendação.</p>
+  {{ campos_conteudo(conteudo) }}
+  {% if solicitacao.decidido_em %}<p>Decisão registrada em {{ solicitacao.decidido_em }}.</p>{% endif %}
+  {% if solicitacao.justificativa %}<h2>Justificativa da decisão</h2><p class="catalogo-texto">{{ solicitacao.justificativa }}</p>{% endif %}
+  {% if solicitacao.produto_publicado %}<p>Referência global resultante: <a href="{{ url_for('defensivos.detalhe' if solicitacao.produto_publicado.classe == 'defensivo' else 'fertilizantes.detalhe', slug=solicitacao.produto_publicado.slug) }}">{{ solicitacao.produto_publicado.nome }}</a></p>{% endif %}
+  <div class="catalogo-acoes catalogo-rodape">
+    {% if solicitacao.estado == 'pendente' and can('catalogo.local.edit') %}<form method="post" action="{{ url_for('catalogo_local.cancelar_solicitacao', id=solicitacao.id) }}" onsubmit="return confirm('Cancelar esta solicitação? O registro será preservado.');"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" class="btn-link-acao">Cancelar solicitação</button></form>{% endif %}
+    <a href="{{ url_for('catalogo_local.solicitacoes') }}">Voltar às solicitações</a>
+  </div>
+</section>
+{% endblock %}

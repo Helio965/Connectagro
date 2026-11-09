@@ -213,6 +213,7 @@ def test_relatorios_financeiros_nao_adotam_propriedade_forjada(policy_app, alias
 # atividades gerais: Trabalhador cria/visualiza, Gerente também edita e Admin
 # também cancela. As permissões anteriores permanecem comparadas exatamente.
 _COMMON = {
+    "catalogo.local.create", "catalogo.personalizar.create", "catalogo.solicitar",
     "atividades.view", "atividades.create",
     "propriedades.view", "propriedades.select", "dashboard.view", "mapa.view",
     "catalogo.view", "relatorios.view", "ia.view", "glebas.view", "culturas.view",
@@ -220,6 +221,7 @@ _COMMON = {
     "upload.view", "upload.create", "upload.download",
 }
 _MANAGEMENT = {
+    "catalogo.local.edit", "catalogo.personalizar.edit",
     "atividades.edit",
     "propriedades.create", "propriedades.edit", "mapa.edit", "glebas.create", "glebas.edit",
     "culturas.create", "culturas.edit", "equipe.view", "financeiro.view", "colheita.edit",

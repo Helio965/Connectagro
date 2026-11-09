@@ -10,6 +10,8 @@ from .equipe import EquipeMembro
 from .cultura import Cultura, CulturaGleba
 from .gleba import Gleba
 from .produto import ProdutoBase, ProdutoTecnico, ProdutoPreco, ProdutoImagem
+from .catalogo_local import (CatalogoControle, ProdutoLocal, ProdutoPersonalizacao,
+                            CatalogoRevisao, SolicitacaoCatalogo)
 from .aplicacao import AplicacaoInsumo
 from .atividade import AtividadeOperacional, AtividadeItem
 from .colheita import ColheitaRegistro
@@ -33,6 +35,11 @@ __all__ = [
     "ProdutoTecnico",
     "ProdutoPreco",
     "ProdutoImagem",
+    "CatalogoControle",
+    "ProdutoLocal",
+    "ProdutoPersonalizacao",
+    "CatalogoRevisao",
+    "SolicitacaoCatalogo",
     "AplicacaoInsumo",
     "AtividadeOperacional",
     "AtividadeItem",

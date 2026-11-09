@@ -44,7 +44,7 @@ def create_app(config_name=None):
     from .utils.permissions import can, role_label
     from .utils.contexto import propriedade_atual, propriedades_autorizadas
 
-    operacionais = {"dashboard", "culturas", "glebas", "aplicacoes", "colheita", "atividades",
+    operacionais = {"dashboard", "culturas", "glebas", "aplicacoes", "colheita", "atividades", "catalogo_local",
                     "equipe", "financeiro", "upload", "mapa", "ia", "relatorios",
                     "usuarios", "auditoria"}
 

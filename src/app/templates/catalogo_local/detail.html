@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% from 'catalogo_local/_macros.html' import classe, versao_e_autoria with context %}
+{% block title %}{{ registro.nome }} — Produto local — ConnectAgro{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/catalogo-local.css') }}">{% endblock %}
+{% block content %}
+<section class="card catalogo-pagina" data-local-id="{{ registro.id }}">
+  <span class="catalogo-selo catalogo-selo-local">Produto local</span><span class="catalogo-selo">{{ 'Ativo' if registro.ativo else 'Inativo' }}</span>
+  <h1>{{ registro.nome }}</h1>
+  <p class="hint">Registro exclusivo desta propriedade. Não é ficha global, recomendação de produto ou validação oficial. Não está disponível para uso automático em aplicações ou atividades.</p>
+  {{ versao_e_autoria(registro) }}
+  <dl class="catalogo-dados">
+    <div><dt>Classe</dt><dd>{{ classe(registro.classe) }}</dd></div><div><dt>Categoria</dt><dd>{{ registro.categoria or 'Não informada' }}</dd></div>
+    <div><dt>Descrição resumida</dt><dd>{{ registro.descricao_curta or 'Não informada' }}</dd></div><div><dt>Unidade de referência</dt><dd>{{ registro.unidade_referencia or 'Não informada' }}</dd></div>
+    <div><dt>Descrição completa</dt><dd>{{ registro.descricao_completa or 'Não informada' }}</dd></div><div><dt>Fonte</dt><dd>{{ registro.fonte or 'Não informada' }}</dd></div>
+    <div><dt>Observações desta propriedade</dt><dd>{{ registro.observacoes or 'Não informadas' }}</dd></div>
+  </dl>
+  <div class="catalogo-acoes catalogo-rodape">
+    {% if can('catalogo.local.edit') %}<a href="{{ url_for('catalogo_local.editar', produto_id=registro.id) }}">Editar produto local</a>
+    <form method="post" action="{{ url_for('catalogo_local.inativar' if registro.ativo else 'catalogo_local.reativar', produto_id=registro.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="versao" value="{{ registro.versao }}"><button type="submit" class="btn-link-acao">{{ 'Inativar' if registro.ativo else 'Reativar' }}</button></form>{% endif %}
+    <a href="{{ url_for('catalogo_local.historico', tipo='local', id=registro.id) }}">Histórico</a>
+    {% if registro.ativo and can('catalogo.solicitar') %}<a class="btn-acao" href="{{ url_for('catalogo_local.solicitar_local', produto_id=registro.id) }}">Solicitar inclusão global</a>{% endif %}
+    <a href="{{ url_for('catalogo_local.index') }}">Voltar ao catálogo da propriedade</a>
+  </div>
+</section>
+{% endblock %}

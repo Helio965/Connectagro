@@ -1,0 +1,38 @@
+/* Catálogo local e revisão usam a identidade visual existente. */
+.catalogo-pagina { min-width: 0; overflow-wrap: anywhere; }
+.catalogo-cabecalho, .catalogo-acoes { display: flex; gap: .7rem; align-items: center; flex-wrap: wrap; }
+.catalogo-cabecalho { justify-content: space-between; }
+.catalogo-cabecalho h1, .catalogo-cabecalho h2 { margin: .3rem 0; }
+.catalogo-acoes form { margin: 0; }
+.catalogo-selo { display: inline-block; border: 1px solid var(--ca-border); border-radius: 999px; padding: .12rem .55rem; margin: .25rem .3rem .25rem 0; font-size: .8rem; font-weight: 600; }
+.catalogo-selo-global { color: var(--ca-green-400); }
+.catalogo-selo-local { color: var(--ca-warning-text); border-color: var(--ca-warning-border); }
+.catalogo-selo-inativo { color: var(--ca-text-soft); }
+.catalogo-complemento { border: 1px solid var(--ca-warning-border); background: var(--ca-warning-bg); border-radius: 9px; padding: .75rem; margin-top: .8rem; }
+.catalogo-complemento h2, .catalogo-complemento h3 { font-size: 1.05rem; margin: .2rem 0 .5rem; }
+.catalogo-complemento p { margin: .35rem 0; }
+.catalogo-grade-local { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 1rem; }
+.catalogo-registro { min-width: 0; border: 1px solid var(--ca-border); border-radius: 10px; padding: 1rem; margin: .7rem 0; }
+.catalogo-registro h2, .catalogo-registro h3 { margin-top: .2rem; }
+.catalogo-dados { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem 1rem; }
+.catalogo-dados > div { min-width: 0; }
+.catalogo-dados dt { color: var(--ca-text-soft); font-size: .85rem; }
+.catalogo-dados dd { margin: .25rem 0 0; white-space: pre-wrap; }
+.catalogo-texto { white-space: pre-wrap; overflow-wrap: anywhere; }
+.catalogo-form { max-width: 860px; min-width: 0; }
+.catalogo-form input, .catalogo-form textarea, .catalogo-form select { min-width: 0; max-width: 100%; width: 100%; }
+.catalogo-form .catalogo-confirmacao { display: flex; align-items: flex-start; gap: .6rem; }
+.catalogo-form input[type=checkbox] { width: auto; flex: 0 0 auto; margin-top: .3rem; }
+.catalogo-form .form-acoes { flex-wrap: wrap; }
+.catalogo-form [aria-invalid=true] { border-color: var(--ca-danger); }
+.catalogo-erro { display: block; color: #ffb4b4; margin: .2rem 0; }
+.catalogo-alerta { border: 1px solid var(--ca-warning-border); border-radius: 9px; padding: .8rem; background: var(--ca-warning-bg); margin: .7rem 0; }
+.catalogo-tabela { overflow-x: auto; max-width: 100%; }
+.catalogo-tabela table { min-width: 520px; }
+.catalogo-metadados { color: var(--ca-text-soft); font-size: .85rem; }
+.catalogo-rodape { margin-top: 1rem; }
+@media (max-width: 560px) {
+  .catalogo-dados { grid-template-columns: minmax(0, 1fr); }
+  .catalogo-registro { padding: .75rem; }
+  .catalogo-cabecalho { align-items: flex-start; }
+}

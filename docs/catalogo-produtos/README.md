@@ -4,6 +4,13 @@ Esta pasta documenta o **catálogo técnico de produtos agrícolas** do ConnectA
 
 ## Finalidade
 
+Na evolução da Etapa 07, a base global abaixo permanece preservada. Cadastros e
+personalizações privados da Propriedade usam entidades separadas e formulários
+autorizados; não reescrevem seed/ficha técnica ou histórico operacional.
+Solicitações só são publicadas após decisão de Administrador explicitamente
+habilitado, sem validação regulatória implícita. Veja
+[auditoria do catálogo global/local](../auditoria/07-catalogo-global-local.md).
+
 O catálogo é uma **base técnica inicial** de **consulta rápida** e fonte futura
 do seed do banco. Serve para:
 

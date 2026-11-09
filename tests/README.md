@@ -1,5 +1,18 @@
 # tests/
 
+## Catálogo global/local — Etapa 07
+
+- `test_catalogo_seed_stage7.py`: identidade ID↔slug, validação, proveniência de
+  imagens, preservação de manutenção administrativa e importação atômica.
+- `test_catalogo_local_migration.py`: upgrade f6→g7 populado, FKs, metadados,
+  capacidade falsa por padrão e downgrade protegido.
+- `test_catalogo_local_workflow.py` e `test_catalogo_global_workflow.py`: matriz
+  aprovada, contexto, versões/revisões, solicitações, publicação explícita,
+  duplicatas, bloqueios, histórico e ausência de acesso operacional indevido.
+
+Os testes anteriores continuam ativos. Resultados finais, evidências de navegador
+e PostgreSQL e cenários condicionais estão em `docs/auditoria/07-catalogo-global-local.md`.
+
 ## Registros operacionais — Etapa 06
 
 - `test_atividades_operacionais.py`: CRUD geral, contexto, itens, responsáveis,

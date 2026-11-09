@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% from 'catalogo_local/_macros.html' import erro, atributos_erro, duplicatas with context %}
+{% set inclusao = tipo == 'inclusao' %}
+{% block title %}Solicitar {{ 'inclusão' if inclusao else 'alteração' }} global — ConnectAgro{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/catalogo-local.css') }}">{% endblock %}
+{% block content %}
+<section class="card catalogo-pagina">
+  <h1>Solicitar {{ 'inclusão no catálogo global' if inclusao else 'alteração de descrição global' }}</h1>
+  <p>Origem: {{ registro.nome if inclusao else registro.nome_local or registro.produto.nome }}</p>
+  <p class="hint">Confira somente as informações que deseja propor. Observações privadas e arquivos da propriedade não são enviados automaticamente. A solicitação não publica nem valida oficialmente um produto.</p>
+  {% if not inclusao %}<p class="hint">Esta proposta altera somente descrições. Identidade, dados técnicos, bloqueios e preços globais são preservados.</p>{% endif %}
+  {{ duplicatas(duplicacoes) }}
+  {% if errors %}<div class="catalogo-alerta" role="alert"><p>Confira os campos antes de enviar.</p><ul>{% for mensagem in errors.values() %}<li>{{ mensagem }}</li>{% endfor %}</ul></div>{% endif %}
+  <form method="post" action="{{ request.path }}" class="form-vertical catalogo-form" data-catalogo-form>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="versao_origem" value="{{ form.get('versao_origem', registro.versao) }}">
+    {{ erro('versao_origem') }}
+    {% if inclusao %}
+    <label for="nome">Nome proposto *</label><input type="text" id="nome" name="nome" maxlength="150" required value="{{ form.nome or '' }}" {{ atributos_erro('nome') }}>{{ erro('nome') }}
+    <label for="classe">Classe *</label><select id="classe" name="classe" required {{ atributos_erro('classe') }}><option value="">Selecione…</option><option value="defensivo" {{ 'selected' if form.classe == 'defensivo' }}>Defensivo</option><option value="fertilizante" {{ 'selected' if form.classe == 'fertilizante' }}>Fertilizante</option></select>{{ erro('classe') }}
+    <label for="categoria">Categoria proposta</label><input type="text" id="categoria" name="categoria" maxlength="40" value="{{ form.categoria or '' }}" {{ atributos_erro('categoria') }}>{{ erro('categoria') }}
+    {% endif %}
+    <label for="descricao_curta">Descrição resumida proposta</label><input type="text" id="descricao_curta" name="descricao_curta" maxlength="255" value="{{ form.descricao_curta or '' }}" {{ atributos_erro('descricao_curta') }}>{{ erro('descricao_curta') }}
+    <label for="descricao_completa">Descrição completa proposta</label><textarea id="descricao_completa" name="descricao_completa" rows="5" maxlength="5000" {{ atributos_erro('descricao_completa') }}>{{ form.descricao_completa or '' }}</textarea>{{ erro('descricao_completa') }}
+    <label for="fonte">Fonte das informações propostas</label><input type="text" id="fonte" name="fonte" maxlength="255" value="{{ form.fonte or '' }}" {{ atributos_erro('fonte') }}>{{ erro('fonte') }}
+    <div class="form-acoes"><button type="submit" class="btn-acao" data-save-button>Enviar solicitação</button><a href="{{ url_for('catalogo_local.index') }}">Voltar sem enviar</a></div>
+    <p class="hint" data-save-status aria-live="polite"></p>
+  </form>
+</section>
+{% endblock %}
+{% block extra_scripts %}<script src="{{ url_for('static', filename='js/catalogo-local.js') }}" defer></script>{% endblock %}

@@ -193,6 +193,37 @@ erDiagram
     usuario o|--o{ atividade_operacional : autoria_e_execucao
 ```
 
+## Catálogo local e governança — Etapa 07
+
+`ProdutoBase` continua global, sem propriedade e sem troca das FKs operacionais.
+`produto_local` pertence à Propriedade; `produto_personalizacao` referencia a
+base global e é único por Propriedade/produto. Ambos possuem autor, versão,
+atualização e estado. `catalogo_revisao` preserva snapshots por origem/versão.
+
+`solicitacao_catalogo` guarda exatamente uma origem (local ou personalização),
+versão, snapshot proposto, solicitante/data, estado, decisão e produto global
+resultante. Unicidades de origem/versão e constraints XOR preservam rastreabilidade.
+`catalogo_controle` tem somente a linha singleton1 para coordenar seed/publicação.
+Não há cascade de exclusão ou integração automática com operações/financeiro.
+
+`usuario.catalogo_global_aprovador` é falso por padrão e só autoriza revisão
+global se a conta também é Admin ativa; não libera contextos operacionais.
+`produto_imagem.origem_seed` e `seed_fingerprint` são opcionais, sem backfill de
+legado incerto. Migration `g7c53b8e19a2` parte de f6 e bloqueia downgrade com dados
+de domínio, capacidade habilitada ou proveniência preenchida, antes de DDL.
+
+```mermaid
+erDiagram
+    propriedade ||--o{ produto_local : contem
+    propriedade ||--o{ produto_personalizacao : personaliza
+    produto_base ||--o{ produto_personalizacao : referencia
+    produto_local o|--o{ catalogo_revisao : versiona
+    produto_personalizacao o|--o{ catalogo_revisao : versiona
+    produto_local o|--o{ solicitacao_catalogo : propoe
+    produto_personalizacao o|--o{ solicitacao_catalogo : propoe
+    produto_base o|--o{ solicitacao_catalogo : resulta
+```
+
 ## Catálogo de produtos
 
 > O catálogo é **base técnica inicial de consulta rápida**, modelado de forma

@@ -37,6 +37,20 @@ flask --app src/run.py import-catalog-seed
 
 ## Regras dos seeds
 
+Na Etapa 07, a importação também confere a correspondência completa **ID↔slug**
+antes de alterar produtos: conflito aborta atomicamente, sem remapear IDs ou anexar
+dados ao produto errado. Bases/fichas existentes continuam preservadas; produtos
+com qualquer status bloqueado não são importados. A sequence PostgreSQL é
+avançada quando necessário após IDs explícitos, sem recuar valores já alocados.
+
+Imagens novas importadas registram proveniência e fingerprint. Atualização quando
+o próprio seed muda só ocorre na imagem explicitamente gerenciada cujo conteúdo
+ainda é igual ao último aplicado. Alterações administrativas, imagens adicionais
+e legados sem proveniência comprovada permanecem intactos. Não há backfill de
+proveniência por semelhança, e nenhum arquivo/licença do manifesto foi alterado.
+Seed e publicação administrativa usam a mesma trava global. A importação não
+transforma locais em globais nem concede capacidade global a usuários.
+
 1. O seed do MVP usa **`produto_base` + `produto_tecnico` + `produto_imagem`**.
 2. **`produto_preco` permanece vazio**. `produto_imagem` contém uma referência
    local por produto, com fonte/licença rastreadas e status não consolidado.

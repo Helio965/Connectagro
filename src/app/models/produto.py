@@ -109,6 +109,9 @@ class ProdutoImagem(db.Model):
     status_validacao = db.Column(db.String(20), nullable=False, default="pendente")
     observacoes = db.Column(db.Text, nullable=True)
     criado_em = db.Column(db.String(40), nullable=False, default=iso_now)
+    # NULL no legado: não presumir que uma imagem administrativa pertence ao seed.
+    origem_seed = db.Column(db.String(150), nullable=True)
+    seed_fingerprint = db.Column(db.String(64), nullable=True)
 
     produto = db.relationship("ProdutoBase", back_populates="imagens")
 

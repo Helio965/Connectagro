@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}{{ titulo }} — ConnectAgro{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/catalogo-local.css') }}">{% endblock %}
 
 {% macro imagem_catalogo(produto) -%}
   {% set imagem = produto.imagem_url %}
@@ -18,12 +19,12 @@
 {%- endmacro %}
 
 {% block content %}
-<section class="card">
-  <h1>{{ titulo }}</h1>
+<section class="card catalogo-pagina">
+  <div class="catalogo-cabecalho"><h1>{{ titulo }}</h1>{% if propriedade_catalogo %}<div class="catalogo-acoes"><a href="{{ url_for('catalogo_local.index') }}">Catálogo desta propriedade</a>{% if can('catalogo.local.create') %}<a class="btn-acao" href="{{ url_for('catalogo_local.nova') }}">+ Novo produto local</a>{% endif %}</div>{% endif %}</div>
 
   <p class="hint">
     Catálogo inicial de consulta de {{ tipo }} agrícolas. As imagens são
-    referências visuais obtidas de fontes públicas (Wikimedia Commons) e não
+    referências visuais com origem informada no catálogo, incluindo Wikimedia Commons, e não
     representam venda, cotação, recomendação ou validação oficial. O ConnectAgro
     não vende produtos e não substitui orientação técnica profissional.
   </p>
@@ -43,7 +44,7 @@
   {% if produtos %}
   <div class="catalog-grid">
     {% for p in produtos %}
-    <article class="catalog-card">
+    <article class="catalog-card" data-global-id="{{ p.id }}">
       <div class="catalog-image-wrapper">
         <img
           src="{{ imagem_catalogo(p) }}"
@@ -54,9 +55,12 @@
       </div>
 
       <div class="catalog-card-body">
+        <span class="catalogo-selo catalogo-selo-global">Global</span>
         <h2 class="catalog-title">{{ p.nome }}</h2>
         <span class="catalog-category">{{ p.categoria or "Sem categoria" }}</span>
         <p class="catalog-description">{{ p.descricao_curta or "Descrição não informada." }}</p>
+        {% set complemento = personalizacoes.get(p.id) %}
+        {% if complemento %}<div class="catalogo-complemento catalogo-personalizacao" data-personalizacao-id="{{ complemento.id }}"><h3>Complemento desta propriedade</h3>{% if complemento.nome_local %}<p><strong>Nome local:</strong> {{ complemento.nome_local }}</p>{% endif %}{% if complemento.descricao_local %}<p class="catalogo-texto">{{ complemento.descricao_local }}</p>{% endif %}{% if complemento.unidade_referencia %}<p><strong>Unidade de referência:</strong> {{ complemento.unidade_referencia }}</p>{% endif %}</div>{% endif %}
         <a href="{{ url_for(endpoint, slug=p.slug) }}" class="catalog-details-link">Ver detalhes</a>
       </div>
     </article>
@@ -64,6 +68,11 @@
   </div>
   {% else %}
   <p>Nenhum produto encontrado com os filtros atuais.</p>
+  {% endif %}
+  {% if propriedade_catalogo %}
+  <h2>Produtos locais desta propriedade</h2>
+  <p class="hint">Cadastros locais separados do catálogo global, sem utilização automática em aplicações ou atividades.</p>
+  {% if produtos_locais %}<div class="catalogo-grade-local">{% for p in produtos_locais %}<article class="catalogo-registro" data-local-id="{{ p.id }}"><span class="catalogo-selo catalogo-selo-local">Local</span><h3>{{ p.nome }}</h3><p>{{ p.categoria or 'Categoria não informada' }}</p><p>{{ p.descricao_curta or 'Descrição não informada.' }}</p><a href="{{ url_for('catalogo_local.detalhe', produto_id=p.id) }}">Consultar produto local</a></article>{% endfor %}</div>{% else %}<p>Nenhum produto local encontrado com os filtros atuais.</p>{% endif %}
   {% endif %}
 </section>
 {% endblock %}

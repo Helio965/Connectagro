@@ -8,12 +8,12 @@ from alembic.autogenerate import compare_metadata
 from alembic.migration import MigrationContext
 from alembic.script import ScriptDirectory
 from flask_migrate import downgrade, upgrade
-from sqlalchemy import inspect, text
+from sqlalchemy import MetaData, Table, inspect, text
 
 from app.extensions import db
 from app.models import (AplicacaoInsumo, ColheitaRegistro, Cultura, CulturaGleba,
     EquipeMembro, FinanceiroLancamento, Gleba, IaInteracao, LogAuditoria,
-    ProdutoBase, UploadArquivo, Usuario, UsuarioPropriedade)
+    ProdutoBase, UploadArquivo, UsuarioPropriedade)
 
 MIGRATIONS = str(Path(__file__).resolve().parents[1]/'migrations')
 ANTERIOR = 'd3b94f5a0c21'
@@ -26,6 +26,7 @@ COLUNAS_PROPRIEDADE = 'id,usuario_id,nome,municipio,uf,area_total_ha,criado_em,a
 # Comparar as colunas históricas, mesmo quando o head acrescenta dados opcionais.
 # Os novos campos e o schema completo são verificados na suíte e4→f6.
 COLUNAS_HISTORICAS = {
+    'usuario': 'id,nome,email,senha_hash,perfil,ativo,auth_version,criado_em,atualizado_em',
     'aplicacao_insumo': 'id,cultura_gleba_id,produto_base_id,data_aplicacao,dose,unidade,responsavel,observacao,criado_em',
     'colheita_registro': 'id,cultura_gleba_id,data_colheita,quantidade,unidade,qualidade,observacao,criado_em',
 }
@@ -34,10 +35,13 @@ COLUNAS_HISTORICAS = {
 def preparar_legado():
     upgrade(directory=MIGRATIONS,revision=ANTERIOR)
     with db.engine.begin() as c:
-        c.execute(Usuario.__table__.insert(),[
-            dict(id=1,nome='Responsável',email='responsavel@legacy.invalid',senha_hash='hash-preservado',perfil='admin',ativo=True),
-            dict(id=2,nome='Inativo',email='inativo@legacy.invalid',senha_hash='hash-inativo',perfil='tecnico',ativo=False),
-            dict(id=3,nome='Terceiro',email='terceiro@legacy.invalid',senha_hash='hash-terceiro',perfil='trabalhador',ativo=True)])
+        # A fixture usa o schema histórico refletido: defaults novos do modelo
+        # atual não podem inserir colunas que ainda não existiam em d3.
+        usuario_historico = Table('usuario', MetaData(), autoload_with=c)
+        c.execute(usuario_historico.insert(),[
+            dict(id=1,nome='Responsável',email='responsavel@legacy.invalid',senha_hash='hash-preservado',perfil='admin',ativo=True,auth_version=1,criado_em='old'),
+            dict(id=2,nome='Inativo',email='inativo@legacy.invalid',senha_hash='hash-inativo',perfil='tecnico',ativo=False,auth_version=1,criado_em='old'),
+            dict(id=3,nome='Terceiro',email='terceiro@legacy.invalid',senha_hash='hash-terceiro',perfil='trabalhador',ativo=True,auth_version=1,criado_em='old')])
         c.execute(text("INSERT INTO propriedade (id,usuario_id,nome,municipio,uf,area_total_ha,criado_em) VALUES "
             "(10,1,'Minha propriedade','Campinas','SP',100.25,'old'),"
             "(20,2,'Outra legítima',NULL,NULL,200.5,'old')"))

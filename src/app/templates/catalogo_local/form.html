@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% from 'catalogo_local/_macros.html' import erro, atributos_erro, duplicatas, versao_e_autoria with context %}
+{% set personalizar = modo == 'personalizacao' %}
+{% block title %}{{ 'Personalização local' if personalizar else 'Produto local' }} — ConnectAgro{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/catalogo-local.css') }}">{% endblock %}
+{% block content %}
+<section class="card catalogo-pagina">
+  <h1>{{ 'Editar personalização local' if personalizar and registro else 'Personalizar produto nesta propriedade' if personalizar else 'Editar produto local' if registro else 'Novo produto local' }}</h1>
+  <p class="hint">Estas informações pertencem somente à propriedade ativa. Não alteram dados regulatórios, preços ou fichas globais e não representam recomendação de uso.</p>
+  {% if personalizar %}<p><span class="catalogo-selo catalogo-selo-global">Referência global</span> {{ produto_global.nome }}</p>{% else %}<p class="hint">O produto local não é publicado globalmente nem utilizado automaticamente em aplicações ou atividades.</p>{% endif %}
+  {{ versao_e_autoria(registro) }}
+  {{ duplicatas(duplicacoes) }}
+  {% if errors %}<div class="catalogo-alerta" role="alert"><p>Confira os campos antes de salvar.</p><ul>{% for mensagem in errors.values() %}<li>{{ mensagem }}</li>{% endfor %}</ul></div>{% endif %}
+  <form method="post" action="{{ request.path }}" class="form-vertical catalogo-form" data-catalogo-form>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% if registro or personalizar %}<input type="hidden" name="versao" value="{{ form.get('versao', registro.versao if registro else 1) }}">{% endif %}
+    {% if not personalizar and not registro %}<input type="hidden" name="chave_envio" value="{{ form.chave_envio or '' }}">{{ erro('chave_envio') }}{% endif %}
+    {% if personalizar %}
+    <label for="nome_local">Nome usado nesta propriedade</label><input type="text" id="nome_local" name="nome_local" maxlength="150" value="{{ form.nome_local or '' }}" {{ atributos_erro('nome_local') }}>{{ erro('nome_local') }}
+    <label for="descricao_local">Descrição complementar local</label><textarea id="descricao_local" name="descricao_local" rows="4" maxlength="5000" {{ atributos_erro('descricao_local') }}>{{ form.descricao_local or '' }}</textarea>{{ erro('descricao_local') }}
+    {% else %}
+    <label for="nome">Nome do produto *</label><input type="text" id="nome" name="nome" maxlength="150" required value="{{ form.nome or '' }}" {{ atributos_erro('nome') }}>{{ erro('nome') }}
+    <label for="classe">Classe *</label><select id="classe" name="classe" required {{ atributos_erro('classe') }}><option value="">Selecione…</option><option value="defensivo" {{ 'selected' if form.classe == 'defensivo' }}>Defensivo</option><option value="fertilizante" {{ 'selected' if form.classe == 'fertilizante' }}>Fertilizante</option></select>{{ erro('classe') }}
+    <label for="categoria">Categoria</label><input type="text" id="categoria" name="categoria" maxlength="40" value="{{ form.categoria or '' }}" {{ atributos_erro('categoria') }}>{{ erro('categoria') }}
+    <label for="descricao_curta">Descrição resumida</label><input type="text" id="descricao_curta" name="descricao_curta" maxlength="255" value="{{ form.descricao_curta or '' }}" {{ atributos_erro('descricao_curta') }}>{{ erro('descricao_curta') }}
+    <label for="descricao_completa">Descrição completa</label><textarea id="descricao_completa" name="descricao_completa" rows="4" maxlength="5000" {{ atributos_erro('descricao_completa') }}>{{ form.descricao_completa or '' }}</textarea>{{ erro('descricao_completa') }}
+    {% endif %}
+    <label for="unidade_referencia">Unidade de referência</label><input type="text" id="unidade_referencia" name="unidade_referencia" maxlength="20" value="{{ form.unidade_referencia or '' }}" {{ atributos_erro('unidade_referencia') }}>{{ erro('unidade_referencia') }}
+    <p class="hint">Informação de cadastro, sem definir dose ou consumo em registros operacionais.</p>
+    <label for="observacoes">Observações desta propriedade</label><textarea id="observacoes" name="observacoes" rows="4" maxlength="5000" {{ atributos_erro('observacoes') }}>{{ form.observacoes or '' }}</textarea>{{ erro('observacoes') }}
+    <label for="fonte">Fonte das informações</label><input type="text" id="fonte" name="fonte" maxlength="255" value="{{ form.fonte or '' }}" {{ atributos_erro('fonte') }}>{{ erro('fonte') }}
+    {% if duplicacoes %}<label class="catalogo-confirmacao" for="confirmar_semelhante"><input type="checkbox" id="confirmar_semelhante" name="confirmar_semelhante" value="1" {{ 'checked' if form.confirmar_semelhante == '1' }} {{ atributos_erro('confirmar_semelhante') }}><span>Conferi as possíveis correspondências e desejo manter este cadastro local distinto.</span></label>{{ erro('confirmar_semelhante') }}{% endif %}
+    <div class="form-acoes"><button type="submit" class="btn-acao" data-save-button>Salvar {{ 'personalização' if personalizar else 'produto local' }}</button><a href="{{ url_for('catalogo_local.index') }}">Voltar sem salvar</a></div>
+    <p class="hint" data-save-status aria-live="polite"></p>
+  </form>
+</section>
+{% endblock %}
+{% block extra_scripts %}<script src="{{ url_for('static', filename='js/catalogo-local.js') }}" defer></script>{% endblock %}

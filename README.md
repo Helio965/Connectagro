@@ -116,6 +116,8 @@ como pós-MVP e devem preservar os limites de produto abaixo.
 | Defensivos     | Consulta de defensivos a partir do catálogo                     |
 | Fertilizantes  | Consulta de fertilizantes a partir do catálogo                  |
 | Aplicações     | Registro histórico operacional de aplicações de insumo          |
+| Catálogo local | Cadastros e complementos compartilhados na Propriedade ativa    |
+| Revisão global | Propostas do catálogo; somente Admin explicitamente habilitado  |
 | Atividades     | Execução agrícola por área, executor, itens, consumo e custos    |
 | Financeiro     | Registro de receitas e despesas                                 |
 | Upload         | Envio, listagem, download e remoção de arquivos da propriedade  |
@@ -293,6 +295,35 @@ em cópia, antes de iniciar esta versão em uma instalação anterior. A Etapa 0
 usou somente bancos descartáveis. Veja o [relatório territorial](docs/auditoria/05-mapas-organizacao-territorial.md).
 O mapa é apoio operacional e não substitui medição ou georreferenciamento oficial.
 Não há PostGIS, GPS em tempo real, shapefile/KML ou integração cadastral oficial.
+
+### Catálogo local e governança — Etapa 07
+
+Defensivos/Fertilizantes preservam a consulta global, buscas e filtros. Com uma
+Propriedade ativa, seus produtos locais e complementos aparecem identificados
+separadamente. Em `/catalogo/local/`, todos os perfis podem cadastrar e enviar
+propostas; somente Administrador/Gerente editam ou alteram estados. Categoria,
+descrições, unidade, observações e fonte são opcionais; nome/classe identificam
+o produto local. Personalização não altera ficha, status ou preço global.
+
+Solicitações guardam proposta e versão, sem publicação automática. Revisão em
+`/catalogo/revisao/` exige Administrador explicitamente habilitado para catálogo
+global, sem liberar operações de outras propriedades. Essa capacidade é falsa
+por padrão. Um operador de infraestrutura pode habilitar/revogar uma conta Admin
+ativa com `catalogo-global-permissao --usuario-id ID --habilitar` ou `--revogar`.
+Não há concessão pelo painel de usuários nem pelo seed.
+
+Inclusão aprovada cria referência global ou registra associação explícita a uma
+existente, sem trocar IDs de registros agrícolas. Alterações globais pelo fluxo
+limitam-se a descrições. Aprovação administrativa não é validação regulatória.
+Produtos locais não entram nos seletores globais de aplicações/atividades;
+essa integração e fotos privadas locais aguardam regra própria.
+
+Migration vigente: `g7c53b8e19a2`, após `f6a28d9c104e`. Preserve backup e valide
+em base descartável antes de qualquer atualização de desenvolvimento; não use
+`create_all()` para evoluir base existente. Histórico/proveniência/capacidade
+global impedem downgrade destrutivo. O seed continua idempotente, preserva
+imagens administradas e recusa conflitos ID↔slug sem remapear históricos.
+Relatório: `docs/auditoria/07-catalogo-global-local.md`.
 
 ### Registros operacionais — Etapa 06
 

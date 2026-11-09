@@ -203,6 +203,48 @@
 
 ## Regras operacionais
 
+### Catálogo local e governança — Etapa 07
+
+- Por decisão expressa, cadastros e complementos locais pertencem à Propriedade
+  ativa e são compartilhados por seus usuários autorizados. Todos os perfis
+  criam produtos locais, personalizações e solicitações; somente Administrador e
+  Gerente editam, inativam/reativam ou cancelam solicitação. Criar não concede
+  edição ao Trabalhador.
+- `ProdutoBase` permanece global. Locais e solicitações têm identidades próprias;
+  não são inseridos nos campos globais de aplicações/atividades. IDs, slugs,
+  quantidades, custos e fichas históricas não são remapeados ou copiados.
+- Personalização complementa nome local, descrição, unidade de referência,
+  observação e fonte, sem sobrescrever classe, status, preço ou ficha global.
+  Alterações geram versões e revisões preservadas. Nenhum apelido é aplicado
+  retrospectivamente ao histórico operacional.
+- Solicitações guardam proposta explícita e versão da origem; não publicam
+  automaticamente. Observações privadas e arquivos não são copiados ao envio.
+  Uma origem/versão tem uma solicitação; duplicatas não substituem autoria.
+- Exceção delimitada à regra do Administrador local: revisão/publicação global
+  exige perfil Admin **e** capacidade de banco explicitamente habilitada por
+  operador. Essa capacidade começa falsa, não é atribuída pelo seed/painel e não
+  concede acesso operacional, equipe, financeiro ou arquivos de outras origens.
+- O fluxo global permite inclusão com ID/slug próprios ou associação humana
+  explícita a uma referência existente, sem fusão/remapeamento de históricos.
+  Alterações globais nesta entrega são somente de descrições, preservando
+  identidade/status/ficha técnica. Aprovação administrativa não é validação
+  regulatória oficial nem recomendação de uso.
+- Decisões são atômicas, auditadas e serializadas. Conta/epoch/perfil/capacidade
+  são revalidados após esperar; origem inativa, versão ou ficha global obsoleta
+  impedem aprovação. Rejeitar não altera o global; reaplicar decisão não duplica.
+- Nomes semelhantes geram análise/confirmação, sem união automática. Slugs globais
+  continuam únicos. Confirmação ou slug distinto não pode liberar referência
+  cujo nome/identificador coincide exatamente com bloqueio já documentado.
+- Seed valida ID↔slug antes de alterar produtos e aborta conflitos sem trocar IDs.
+  Não importa bloqueados/preços nem sobrescreve bases/fichas existentes. Imagem
+  só é atualizada se origem seed for explícita e fingerprint ainda corresponder
+  ao último conteúdo aplicado; dados administrados/legados incertos são preservados.
+- Consulta global continua autenticada e disponível sem Propriedade; dados locais
+  exigem contexto/vínculo. Fotos privadas e uso operacional de locais aguardam
+  regras próprias. Não há estoque, comércio, e-mail automático ou nova validação
+  agronômica neste fluxo.
+
+
 ### Registros operacionais — Etapa 06
 
 - Por decisão expressa do usuário, atividades gerais têm `atividades.view/create`

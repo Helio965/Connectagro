@@ -1,0 +1,38 @@
+{% macro erro(campo) -%}
+  {% set mensagem = (errors|default({})).get(campo) %}
+  {% if mensagem %}<small class="catalogo-erro" id="erro-{{ campo }}" role="alert">{{ mensagem }}</small>{% endif %}
+{%- endmacro %}
+
+{% macro atributos_erro(campo) -%}
+  {% if (errors|default({})).get(campo) %}aria-invalid="true" aria-describedby="erro-{{ campo }}"{% endif %}
+{%- endmacro %}
+
+{% macro estado(valor) -%}
+  {{ {'pendente':'Pendente de análise', 'aprovada':'Aprovada no ConnectAgro', 'rejeitada':'Rejeitada', 'cancelada':'Cancelada'}.get(valor, 'Situação não informada') }}
+{%- endmacro %}
+
+{% macro classe(valor) -%}
+  {{ {'defensivo':'Defensivo', 'fertilizante':'Fertilizante'}.get(valor, valor or 'Não informada') }}
+{%- endmacro %}
+
+{% macro duplicatas(itens) -%}
+  {% if itens %}
+  <div class="catalogo-alerta" role="note">
+    <h2>Possíveis correspondências</h2>
+    <p>Nomes semelhantes precisam de conferência. Nenhum produto será unido ou substituído automaticamente.</p>
+    <ul>{% for item in itens %}<li>{{ item.nome }} — {{ classe(item.classe) }} ({{ 'catálogo global' if item.origem == 'global' else 'catálogo desta propriedade' }})</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+{%- endmacro %}
+
+{% macro campos_conteudo(conteudo) -%}
+  <dl class="catalogo-dados">
+    {% for campo, rotulo in [('nome','Nome proposto'),('classe','Classe'),('categoria','Categoria'),('descricao_curta','Descrição resumida proposta'),('descricao_completa','Descrição completa proposta'),('fonte','Fonte informada')] %}
+      {% if conteudo.get(campo) %}<div><dt>{{ rotulo }}</dt><dd>{{ classe(conteudo[campo]) if campo == 'classe' else conteudo[campo] }}</dd></div>{% endif %}
+    {% endfor %}
+  </dl>
+{%- endmacro %}
+
+{% macro versao_e_autoria(registro) -%}
+  {% if registro %}<p class="catalogo-metadados">Versão {{ registro.versao }} · Cadastrado em {{ registro.criado_em }}{% if registro.atualizado_em %} · Alterado em {{ registro.atualizado_em }}{% endif %}</p>{% endif %}
+{%- endmacro %}

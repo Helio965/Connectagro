@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% from 'catalogo_local/_macros.html' import classe, versao_e_autoria with context %}
+{% block title %}Catálogo da propriedade — ConnectAgro{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/catalogo-local.css') }}">{% endblock %}
+{% block content %}
+<section class="card catalogo-pagina">
+  <div class="catalogo-cabecalho"><h1>Catálogo da propriedade</h1><div class="catalogo-acoes">
+    {% if can('catalogo.local.create') %}<a class="btn-acao" href="{{ url_for('catalogo_local.nova') }}">+ Novo produto local</a>{% endif %}
+    <a href="{{ url_for('catalogo_local.solicitacoes') }}">Solicitações desta propriedade</a>
+  </div></div>
+  <p class="hint">Os registros locais são compartilhados somente com os usuários autorizados desta propriedade. Cadastrar ou personalizar aqui não altera o catálogo global.</p>
+  <p class="hint">Produtos locais ainda não são selecionados em aplicações ou atividades. O cadastro não é recomendação nem validação regulatória.</p>
+  <h2>Produtos locais</h2>
+  {% if produtos_locais %}<div class="catalogo-grade-local">
+    {% for item in produtos_locais %}
+    <article class="catalogo-registro" data-local-id="{{ item.id }}">
+      <span class="catalogo-selo catalogo-selo-local">Local</span><span class="catalogo-selo {{ '' if item.ativo else 'catalogo-selo-inativo' }}">{{ 'Ativo' if item.ativo else 'Inativo' }}</span>
+      <h3><a href="{{ url_for('catalogo_local.detalhe', produto_id=item.id) }}">{{ item.nome }}</a></h3>
+      <p>{{ classe(item.classe) }}{% if item.categoria %} · {{ item.categoria }}{% endif %}</p>
+      <p>{{ item.descricao_curta or 'Descrição não informada.' }}</p>
+      {{ versao_e_autoria(item) }}
+      <a href="{{ url_for('catalogo_local.detalhe', produto_id=item.id) }}">Consultar produto local</a>
+    </article>
+    {% endfor %}
+  </div>{% else %}<p>Nenhum produto local cadastrado nesta propriedade.</p>{% endif %}
+  <h2>Personalizações de produtos globais</h2>
+  <p class="hint">Nome, ficha técnica e bloqueios globais permanecem como referência. As informações abaixo são complementos locais.</p>
+  {% if personalizacoes %}
+    {% for item in personalizacoes %}<article class="catalogo-registro catalogo-personalizacao" data-personalizacao-id="{{ item.id }}">
+      <span class="catalogo-selo catalogo-selo-local">Complemento local</span><span class="catalogo-selo">{{ 'Ativo' if item.ativo else 'Inativo' }}</span>
+      <h3>{{ item.nome_local or item.produto.nome }}</h3>
+      <p>Referência global: <a href="{{ url_for('defensivos.detalhe' if item.produto.classe == 'defensivo' else 'fertilizantes.detalhe', slug=item.produto.slug) }}">{{ item.produto.nome }}</a></p>
+      {% if item.descricao_local %}<p class="catalogo-texto">{{ item.descricao_local }}</p>{% endif %}
+      {{ versao_e_autoria(item) }}
+      <div class="catalogo-acoes">
+        {% if can('catalogo.personalizar.edit') %}<a href="{{ url_for('catalogo_local.personalizar', produto_id=item.produto_base_id) }}">Editar personalização</a>{% endif %}
+        <a href="{{ url_for('catalogo_local.historico', tipo='personalizacao', id=item.id) }}">Histórico</a>
+        {% if item.ativo and can('catalogo.solicitar') %}<a href="{{ url_for('catalogo_local.solicitar_personalizacao', personalizacao_id=item.id) }}">Propor alteração global</a>{% endif %}
+        {% if can('catalogo.personalizar.edit') %}<form method="post" action="{{ url_for('catalogo_local.personalizacao_estado', personalizacao_id=item.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="versao" value="{{ item.versao }}">
+          <input type="hidden" name="ativo" value="{{ '0' if item.ativo else '1' }}"><button type="submit" class="btn-link-acao">{{ 'Inativar' if item.ativo else 'Reativar' }}</button>
+        </form>{% endif %}
+      </div>
+    </article>{% endfor %}
+  {% else %}<p>Nenhuma personalização cadastrada. Consulte um produto global para adicionar informações desta propriedade.</p>{% endif %}
+  <div class="catalogo-acoes catalogo-rodape"><a href="{{ url_for('defensivos.index') }}">Consultar Defensivos</a><a href="{{ url_for('fertilizantes.index') }}">Consultar Fertilizantes</a></div>
+</section>
+{% endblock %}

@@ -7,6 +7,7 @@ import sqlalchemy as sa
 from alembic import command
 from alembic.autogenerate import compare_metadata
 from alembic.migration import MigrationContext
+from alembic.script import ScriptDirectory
 from flask_migrate import downgrade, upgrade
 from sqlalchemy.exc import IntegrityError
 
@@ -66,12 +67,15 @@ def _snapshot(colunas):
 def test_upgrade_preserva_historico_poligonos_e_colunas_novas_ausentes(app):
     with app.app_context():
         colunas, antes = _preparar_legado()
-        upgrade(directory=MIGRATIONS, revision=NOVA)
+        # O contrato de dados e4→f6 também deve sobreviver ao head atual; os
+        # testes de downgrade abaixo continuam isolando a própria revisão f6.
+        upgrade(directory=MIGRATIONS)
         assert _snapshot(colunas) == antes
         with db.engine.connect() as c:
             assert c.execute(sa.text("PRAGMA foreign_key_check")).all() == []
             assert c.execute(sa.text("PRAGMA foreign_keys")).scalar() == 1
-            assert c.execute(sa.text("SELECT version_num FROM alembic_version")).scalar() == NOVA
+            config = app.extensions['migrate'].migrate.get_config(MIGRATIONS)
+            assert c.execute(sa.text("SELECT version_num FROM alembic_version")).scalar() == ScriptDirectory.from_config(config).get_current_head()
             for tabela, novas in NOVAS_COLUNAS.items():
                 values = c.execute(sa.text(f'SELECT {",".join(novas)} FROM {tabela}')).one()
                 assert all(value is None for value in values)
@@ -80,7 +84,7 @@ def test_upgrade_preserva_historico_poligonos_e_colunas_novas_ausentes(app):
             assert c.execute(sa.text("SELECT COUNT(*) FROM atividade_operacional")).scalar() == 0
             assert c.execute(sa.text("SELECT COUNT(*) FROM atividade_item")).scalar() == 0
             assert compare_metadata(MigrationContext.configure(c), db.metadata) == []
-        upgrade(directory=MIGRATIONS, revision=NOVA)
+        upgrade(directory=MIGRATIONS)
         assert _snapshot(colunas) == antes
 
 
@@ -142,7 +146,8 @@ def test_downgrade_bloqueia_atividade_mesmo_sem_itens_ou_cancelada(app, cancelad
 def test_itens_multiplos_decimais_e_fk_impedem_exclusao_cascata(app):
     with app.app_context():
         _preparar_legado()
-        upgrade(directory=MIGRATIONS, revision=NOVA)
+        # Relacionamentos ORM usam o modelo atual e, portanto, schema no head.
+        upgrade(directory=MIGRATIONS)
         atividade = AtividadeOperacional(gleba_id=20, cultura_gleba_id=40,
             tipo_atividade="Atividade informada", data_execucao="2026-11-08",
             responsavel="Nome informado", responsavel_usuario_id=2, criado_por_id=1)
