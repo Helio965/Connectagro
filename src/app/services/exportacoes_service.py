@@ -9,6 +9,7 @@ venda, checkout ou documento comercial.
 import csv
 import io
 from datetime import datetime, timezone
+from xml.sax.saxutils import escape
 
 from flask import make_response
 from reportlab.lib.pagesizes import A4
@@ -294,5 +295,111 @@ def gerar_pdf_relatorio_uploads(propriedade, dados):
         table_data.append([a.nome_original, a.tipo_mime or "—",
                           str(a.tamanho or 0), a.enviado_em or "—"])
     elems.append(_tabela_pdf(table_data))
+    doc.build(elems)
+    return buf.getvalue()
+
+
+def _texto_csv_operacional(valor):
+    """Texto literal na planilha, inclusive campos iniciados como fórmula."""
+    texto = str(valor) if valor is not None else ""
+    if texto.startswith(("\t", "\r", "\n")) or texto.lstrip().startswith(("=", "+", "-", "@")):
+        return "'" + texto
+    return texto
+
+
+def gerar_csv_relatorio_operacional(propriedade, dados):
+    from .relatorios_service import formatar_decimal_operacional as numero
+
+    buf = io.StringIO()
+    writer = _csv_writer(buf)
+
+    def linha(valores):
+        writer.writerow([_texto_csv_operacional(valor) for valor in valores])
+
+    linha([_AVISO_OPERACIONAL])
+    linha(["Histórico Operacional", propriedade.nome])
+    linha(["Fontes separadas; canceladas não entram nos totais; dose não equivale a consumo."])
+    colunas = ["Fonte", "ID", "Atividade", "Data de execução", "Área de Plantio", "Cultura/ciclo",
+               "Situação", "Executado por", "Registrado por", "Data de cadastro", "Produto",
+               "Situação do item", "Dose", "Unidade da dose", "Quantidade utilizada", "Unidade da quantidade", "Observações"]
+    if dados["incluir_custos"]:
+        colunas += ["Custo unitário", "Custo total", "Moeda", "Origem do custo"]
+    linha(colunas)
+    for registro in dados["registros"]:
+        for item in registro["itens"] or [None]:
+            valores = [registro["fonte_label"], registro["id"], registro["tipo_atividade"],
+                       registro["data_execucao"], registro["gleba"], registro["cultura"] or "—",
+                       "Cancelada" if registro["cancelado"] else "Ativa",
+                       registro["responsavel"] or "—", registro["autor"] or "—", registro["criado_em"],
+                       item["produto"] if item else "—", "Cancelado (histórico)" if item and item["cancelado"] else "Ativo" if item else "—",
+                       numero(item["dose"]) if item else "—",
+                       item["unidade_dose"] or "" if item else "", numero(item["quantidade_utilizada"]) if item else "—",
+                       item["unidade_quantidade"] or "" if item else "", registro["observacao"] or ""]
+            if dados["incluir_custos"]:
+                valores += [numero(item["custo_unitario"]) if item else "—",
+                            numero(item["custo_total"], 2) if item else "—",
+                            item["moeda"] or "" if item else "", item["origem_custo"] or "—" if item else "—"]
+            linha(valores)
+    linha([])
+    linha(["Consumo informado por produto e unidade (registros ativos)"])
+    linha(["Produto", "Quantidade utilizada", "Unidade"])
+    for item in dados["consumo"]:
+        linha([item["produto"], numero(item["quantidade"]), item["unidade"]])
+    if dados["incluir_custos"]:
+        linha([])
+        linha(["Custos informados de registros ativos; não somados ao financeiro"])
+        linha(["Moeda", "Custo total informado"])
+        for moeda, valor in dados["custos_por_moeda"]:
+            linha([moeda, numero(valor, 2)])
+        linha(["Itens ativos sem custo total conhecido", dados["custos_ausentes"]])
+    return buf.getvalue()
+
+
+def gerar_pdf_relatorio_operacional(propriedade, dados):
+    from .relatorios_service import formatar_decimal_operacional as numero
+
+    buf = io.BytesIO()
+    doc = _pdf_doc(buf, "Histórico Operacional")
+    styles = getSampleStyleSheet()
+
+    def texto(valor):
+        return escape(str(valor) if valor is not None else "—")
+
+    def paragrafo(valor, estilo="Normal"):
+        return Paragraph(texto(valor), styles[estilo])
+
+    elems = [paragrafo("Histórico Operacional", "Title"),
+             paragrafo(f"Propriedade: {propriedade.nome}"),
+             paragrafo(_AVISO_OPERACIONAL, "Italic"),
+             paragrafo("Atividades e aplicações são fontes separadas. Dose não equivale a consumo. Registros cancelados não entram nos totais."),
+             Spacer(1, 0.3 * cm), paragrafo(f"Registros: {dados['total']}; ativos: {dados['total_ativos']}.")]
+    for registro in dados["registros"]:
+        elems += [Spacer(1, 0.3 * cm),
+                  paragrafo(f"{registro['tipo_atividade']} — {registro['data_execucao']}", "Heading2"),
+                  paragrafo(f"{registro['fonte_label']} #{registro['id']} — {'Cancelada' if registro['cancelado'] else 'Ativa'}"),
+                  paragrafo(f"Área de Plantio: {registro['gleba']}; cultura/ciclo: {registro['cultura'] or '—'}."),
+                  paragrafo(f"Executado por: {registro['responsavel'] or '—'}. Registrado por: {registro['autor'] or '—'}. Cadastro: {registro['criado_em']}.")]
+        if registro["observacao"]:
+            elems.append(paragrafo(f"Observações: {registro['observacao']}"))
+        for item in registro["itens"]:
+            elems += [paragrafo(item["produto"] + (" — Item cancelado (histórico)" if item["cancelado"] else ""), "Heading3"),
+                      paragrafo(f"Dose: {numero(item['dose'])} {item['unidade_dose'] or ''}; quantidade utilizada: {numero(item['quantidade_utilizada'])} {item['unidade_quantidade'] or ''}.")]
+            if dados["incluir_custos"]:
+                elems.append(paragrafo(f"Custo unitário: {item['moeda'] or ''} {numero(item['custo_unitario'])}; custo total: {item['moeda'] or ''} {numero(item['custo_total'], 2)}. Origem: {item['origem_custo'] or '—'}."))
+        if not registro["itens"]:
+            elems.append(paragrafo("Sem itens utilizados informados."))
+    if not dados["registros"]:
+        elems.append(paragrafo("Nenhum registro operacional encontrado."))
+    elems += [Spacer(1, 0.3 * cm), paragrafo("Consumo informado por produto e unidade", "Heading2")]
+    for item in dados["consumo"]:
+        elems.append(paragrafo(f"{item['produto']}: {numero(item['quantidade'])} {item['unidade']}."))
+    if not dados["consumo"]:
+        elems.append(paragrafo("Nenhum consumo total informado."))
+    if dados["incluir_custos"]:
+        elems += [paragrafo("Custos operacionais informados", "Heading2"),
+                  paragrafo("Registros ativos, separados dos lançamentos financeiros.")]
+        for moeda, valor in dados["custos_por_moeda"]:
+            elems.append(paragrafo(f"{moeda} {numero(valor, 2)}"))
+        elems.append(paragrafo(f"Itens ativos sem custo total conhecido: {dados['custos_ausentes']}."))
     doc.build(elems)
     return buf.getvalue()

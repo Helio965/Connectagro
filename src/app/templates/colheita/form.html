@@ -1,6 +1,8 @@
 {% extends "base.html" %}
+{% from 'atividades/_macros.html' import erro, atributos_erro, responsavel, autoria with context %}
 
 {% block title %}{{ "Editar" if colheita else "Nova" }} colheita — ConnectAgro{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/atividades.css') }}">{% endblock %}
 
 {% block content %}
 <section class="card">
@@ -14,44 +16,59 @@
     área de plantio, antes de registrar uma colheita.
   </p>
   {% else %}
-  <form method="post" class="form-vertical"
+  {{ autoria(colheita) }}
+  {% if errors|default({}) %}<p class="operacional-erro" role="alert">Confira os campos indicados. A colheita ainda não foi salva.</p>{% endif %}
+  <form method="post" class="form-vertical operacional-form" data-operacional-form
         action="{{ url_for('colheita.editar', colheita_id=colheita.id) if colheita else url_for('colheita.nova') }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="chave_envio" value="{{ form.chave_envio or token_envio|default('') }}">
+    {{ erro('chave_envio') }}
+    {{ erro('formulario') }}
 
     <label for="cultura_gleba_id">Cultura ↔ Área de Plantio *</label>
-    <select id="cultura_gleba_id" name="cultura_gleba_id" required>
+    <select id="cultura_gleba_id" name="cultura_gleba_id" required {{ atributos_erro('cultura_gleba_id') }}>
       <option value="">Selecione…</option>
       {% for cg_id, rotulo in opcoes %}
       <option value="{{ cg_id }}"
-        {{ "selected" if (form.cultura_gleba_id|string == cg_id|string) or (selecionado == cg_id) else "" }}>
+        {{ "selected" if form.cultura_gleba_id|string == cg_id|string else "" }}>
         {{ rotulo }}
       </option>
       {% endfor %}
     </select>
+    {{ erro('cultura_gleba_id') }}
 
     <label for="data_colheita">Data da colheita *</label>
     <input type="date" id="data_colheita" name="data_colheita" required
-           value="{{ form.data_colheita or '' }}">
+           value="{{ form.data_colheita or '' }}" {{ atributos_erro('data_colheita') }}>
+    {{ erro('data_colheita') }}
 
     <label for="quantidade">Quantidade</label>
-    <input type="text" id="quantidade" name="quantidade"
-           value="{{ form.quantidade if form.quantidade is not none else '' }}">
+    <input type="text" inputmode="decimal" id="quantidade" name="quantidade" maxlength="32"
+           value="{{ form.quantidade if form.quantidade is not none else '' }}" {{ atributos_erro('quantidade') }}>
+    {{ erro('quantidade') }}
 
     <label for="unidade">Unidade</label>
-    <input type="text" id="unidade" name="unidade" placeholder="kg, sacas, ton"
-           value="{{ form.unidade or '' }}">
+    <input type="text" id="unidade" name="unidade" placeholder="kg, sacas, ton" maxlength="20"
+           value="{{ form.unidade or '' }}" {{ atributos_erro('unidade') }}>
+    {{ erro('unidade') }}
 
     <label for="qualidade">Qualidade</label>
-    <input type="text" id="qualidade" name="qualidade" value="{{ form.qualidade or '' }}">
+    <input type="text" id="qualidade" name="qualidade" maxlength="80" value="{{ form.qualidade or '' }}" {{ atributos_erro('qualidade') }}>
+    {{ erro('qualidade') }}
+
+    {{ responsavel(form, opcoes_responsaveis|default([])) }}
 
     <label for="observacao">Observação</label>
-    <textarea id="observacao" name="observacao" rows="2">{{ form.observacao or '' }}</textarea>
+    <textarea id="observacao" name="observacao" rows="2" maxlength="5000" {{ atributos_erro('observacao') }}>{{ form.observacao or '' }}</textarea>
+    {{ erro('observacao') }}
 
     <div class="form-acoes">
-      <button type="submit" class="btn-acao">Salvar</button>
+      <button type="submit" class="btn-acao" data-save-button>Salvar</button>
       <a href="{{ url_for('colheita.index') }}">Cancelar</a>
     </div>
+    <p class="hint" data-save-status aria-live="polite"></p>
   </form>
   {% endif %}
 </section>
 {% endblock %}
+{% block extra_scripts %}<script src="{{ url_for('static', filename='js/atividades.js') }}" defer></script>{% endblock %}

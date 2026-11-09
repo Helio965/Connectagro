@@ -223,7 +223,7 @@ Aplicação de um insumo do catálogo em uma cultura/gleba.
 | cultura_gleba_id | INTEGER | Sim         | FK    | Onde foi aplicado         | FK para `cultura_gleba(id)`                  |
 | produto_base_id  | INTEGER | Sim         | FK    | Produto aplicado          | FK para `produto_base(id)`                   |
 | data_aplicacao   | TEXT    | Sim         |       | Data da aplicação         | ISO 8601                                     |
-| dose             | REAL    | Não         |       | Quantidade aplicada       | Histórica/informativa; não valida dose correta |
+| dose             | REAL    | Não         |       | Dose histórica informada | Não equivale ao consumo total; não valida dose correta |
 | unidade          | TEXT    | Não         |       | Unidade da dose           | Ex.: kg/ha, L/ha                             |
 | responsavel      | TEXT    | Não         |       | Responsável pela aplicação|                                              |
 | observacao       | TEXT    | Não         |       | Texto livre               | Registro não substitui orientação agronômica |
@@ -244,6 +244,55 @@ Registros de colheita por cultura/gleba.
 | criado_em        | TEXT    | Sim         |       | Data/hora de criação | ISO 8601                   |
 
 ---
+
+## Campos operacionais acrescentados na Etapa 06
+
+Campos novos nas tabelas antigas são opcionais, sem backfill. `criado_por_id`
+identifica o autor; `responsavel_usuario_id` identifica o executor, mantendo
+`responsavel` como texto histórico. `atualizado_por_id`/`atualizado_em` identificam
+a edição. FKs de usuário referenciam `usuario.id`. `chave_envio` é texto único
+para evitar duplicação do cadastro.
+
+| Tabela | Campos novos | Semântica |
+| --- | --- | --- |
+| `aplicacao_insumo` | `responsavel_usuario_id`, `criado_por_id`, `atualizado_por_id`, `atualizado_em`, `chave_envio` | Executor e autoria separados, sem inferência sobre históricos |
+| `aplicacao_insumo` | `quantidade_utilizada`, `unidade_quantidade` | Consumo efetivo, diferente de dose/unidade |
+| `aplicacao_insumo` | `custo_unitario`, `custo_total`, `moeda`, `origem_custo` | Custo manual/calculado BRL; ausente não é zero |
+| `colheita_registro` | `responsavel`, `responsavel_usuario_id`, `criado_por_id`, `atualizado_por_id`, `atualizado_em`, `chave_envio` | Rastreabilidade; quantidade/unidade originais preservadas |
+
+### Tabela: `atividade_operacional`
+
+| Campo | Tipo lógico | Descrição |
+| --- | --- | --- |
+| `id` | INTEGER PK | Identificador |
+| `gleba_id` | INTEGER FK obrigatório | Área da Propriedade ativa |
+| `cultura_gleba_id` | INTEGER FK opcional | Cultura/ciclo da mesma área |
+| `tipo_atividade` | TEXT(120) obrigatório | Atividade informada, sem catálogo definitivo |
+| `data_execucao` | TEXT(40) obrigatório | Data civil válida ISO |
+| `responsavel`, `responsavel_usuario_id` | TEXT(120) / FK | Executor textual ou conta autorizada, exigido no formulário novo |
+| `observacao` | TEXT opcional | Observações informadas |
+| `criado_por_id`, `criado_em` | FK / TEXT(40) | Autor da sessão e data do cadastro |
+| `atualizado_por_id`, `atualizado_em` | FK / TEXT(40) | Última edição; preserva autoria original |
+| `cancelado_por_id`, `cancelado_em` | FK / TEXT(40) | Cancelamento lógico |
+| `chave_envio` | TEXT(64) UNIQUE | Repetição idêntica não cria outra atividade |
+
+### Tabela: `atividade_item`
+
+| Campo | Tipo lógico | Descrição |
+| --- | --- | --- |
+| `id` | INTEGER PK | Identificador do item |
+| `atividade_id`, `produto_base_id` | INTEGER FK obrigatórios | Atividade e produto do catálogo existente |
+| `dose`, `unidade_dose` | DECIMAL(18,6) / TEXT(20) | Dose histórica, não é consumo |
+| `quantidade_utilizada`, `unidade_quantidade` | DECIMAL(18,6) / TEXT(20) | Consumo positivo/finito, quando conhecido |
+| `custo_unitario`, `custo_total` | DECIMAL(18,6) / DECIMAL(18,2) | Valores conhecidos, não negativos |
+| `moeda` | TEXT(3) | BRL quando há custo; NULL quando ausente |
+| `origem_custo` | TEXT(40) | `informado_usuario` ou `calculado_quantidade_unitario` |
+| `cancelado_por_id`, `cancelado_em` | FK / TEXT(40) | Retirada com dados históricos preservados |
+
+`DecimalExato` usa `NUMERIC` no PostgreSQL e texto canônico no SQLite; cálculos
+usam `Decimal`, sem `float` intermediário. Não aplicar `SUM`/`CAST` numérico às
+colunas textuais SQLite. Dose antiga, colheita, catálogo e financeiro não são
+convertidos pela nova migration.
 
 ## Catálogo de produtos
 

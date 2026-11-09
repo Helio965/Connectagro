@@ -1,5 +1,23 @@
 # tests/
 
+## Registros operacionais — Etapa 06
+
+- `test_atividades_operacionais.py`: CRUD geral, contexto, itens, responsáveis,
+  autoria, idempotência, consumo/custos, perfis, cancelamento e CSRF.
+- `test_operacionais_legado.py`: evolução de aplicações/colheitas, finitude,
+  datas, autoria e preservação de campos; exclusões com atividades dependentes.
+- `test_decimal_exato.py`: precisão e persistência decimal sem float.
+- `test_operacionais_migration.py`: evolução e4→f6 em base populada, FKs, dados
+  históricos preservados, schema e downgrade protegido.
+- `test_relatorios_etapa6.py`: HTML/CSV/PDF, filtros, agrupamento de unidades,
+  custos por permissão, cancelamentos e integração segura com IA local.
+- `test_operacionais_concorrencia.py`: corridas reais SQLite com snapshots
+  antigos, custo concorrente, revogação de acesso e exclusão/criação de pais.
+
+Use a `.venv` existente. Testes de banco usam bases descartáveis; não executar
+revisões estruturais nem seeds em banco real. Resultados finais e validação de
+navegador/PostgreSQL estão em `docs/auditoria/06-registros-operacionais.md`.
+
 Testes automatizados do **ConnectAgro** (pytest).
 
 ## Estado atual

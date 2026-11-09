@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Histórico Operacional — ConnectAgro{% endblock %}
+{% block extra_head %}
+<style>
+  .historico-operacional { overflow-wrap: anywhere; }
+  .historico-operacional .relatorio-acoes { flex-wrap: wrap; }
+  .historico-operacional .relatorio-filtros label { min-width: 0; max-width: 100%; }
+  .historico-operacional .relatorio-filtros input,
+  .historico-operacional .relatorio-filtros select { min-width: 0; max-width: 100%; box-sizing: border-box; }
+</style>
+{% endblock %}
+{% block content %}
+<section class="card historico-operacional">
+  <h1>Histórico Operacional</h1>
+  <p class="hint">Propriedade: <strong>{{ propriedade.nome }}</strong></p>
+  {% include "relatorios/_acoes.html" %}
+  <p class="hint">Atividades e aplicações são registros separados. Dose é diferente de quantidade utilizada; nenhum consumo é estimado a partir da área. Registros cancelados permanecem no histórico e não entram nos totais.</p>
+  <form method="get" class="relatorio-filtros no-print">
+    <label>Início <input type="date" name="data_inicio" value="{{ filtros.data_inicio }}"></label>
+    <label>Fim <input type="date" name="data_fim" value="{{ filtros.data_fim }}"></label>
+    <label>Área de Plantio
+      <select name="gleba_id"><option value="">Todas</option>
+        {% for area in areas %}<option value="{{ area.id }}" {% if filtros.gleba_id == area.id|string %}selected{% endif %}>{{ area.nome }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Atividade <input name="tipo_atividade" maxlength="120" value="{{ filtros.tipo_atividade }}" placeholder="Descrição exata da atividade"></label>
+    <button type="submit" class="btn-acao">Filtrar</button>
+    <a href="{{ url_for('relatorios.operacionais') }}">Limpar</a>
+  </form>
+  {% if dados %}
+  <div class="relatorio-export no-print">
+    <a class="btn-acao" href="{{ url_for('relatorios.operacionais_exportar_csv', **filtros) }}">Exportar CSV</a>
+    <a class="btn-acao" href="{{ url_for('relatorios.operacionais_exportar_pdf', **filtros) }}">Exportar PDF</a>
+  </div>
+  <p>Total de registros: <strong>{{ dados.total }}</strong>; ativos: <strong>{{ dados.total_ativos }}</strong>.</p>
+  {% if dados.consumo %}
+  <h2>Consumo informado por produto e unidade</h2>
+  <ul>{% for item in dados.consumo %}<li>{{ item.produto }}: {{ formatar_decimal_operacional(item.quantidade) }} {{ item.unidade }}</li>{% endfor %}</ul>
+  {% endif %}
+  {% if dados.incluir_custos %}
+  <h2>Custos operacionais informados</h2>
+  <p class="hint">Valores registrados manualmente ou calculados a partir da quantidade e do custo unitário informados. Não são somados aos lançamentos financeiros.</p>
+  <ul>{% for moeda, valor in dados.custos_por_moeda %}<li>{{ moeda }} {{ formatar_decimal_operacional(valor, 2) }}</li>{% else %}<li>Nenhum custo total informado.</li>{% endfor %}</ul>
+  <p>Itens ativos sem custo total conhecido: {{ dados.custos_ausentes }}.</p>
+  {% endif %}
+  {% for registro in dados.registros %}
+  <article class="card">
+    <h2>{{ registro.tipo_atividade }} — {{ registro.data_execucao }}</h2>
+    <p>{{ registro.fonte_label }} #{{ registro.id }}{% if registro.cancelado %} — <strong>Cancelada</strong>{% endif %}</p>
+    <p>Área de Plantio: {{ registro.gleba }}; cultura/ciclo: {{ registro.cultura or "—" }}.</p>
+    <p>Executado por: {{ registro.responsavel or "—" }}. Registrado por: {{ registro.autor or "—" }}. Cadastro: {{ registro.criado_em }}.</p>
+    {% if registro.observacao %}<p>Observações: {{ registro.observacao }}</p>{% endif %}
+    {% for item in registro.itens %}
+    <div class="card">
+      <h3>{{ item.produto }}{% if item.cancelado %} — Item cancelado (histórico){% endif %}</h3>
+      <p>Dose: {{ formatar_decimal_operacional(item.dose) }} {{ item.unidade_dose or "" }}.</p>
+      <p>Quantidade utilizada: {{ formatar_decimal_operacional(item.quantidade_utilizada) }} {{ item.unidade_quantidade or "" }}.</p>
+      {% if dados.incluir_custos %}
+      <p>Custo unitário: {{ item.moeda or "" }} {{ formatar_decimal_operacional(item.custo_unitario) }}; custo total: {{ item.moeda or "" }} {{ formatar_decimal_operacional(item.custo_total, 2) }}. Origem: {{ item.origem_custo or "—" }}.</p>
+      {% endif %}
+    </div>
+    {% else %}<p>Sem itens utilizados informados.</p>{% endfor %}
+  </article>
+  {% else %}<p>Nenhum registro operacional encontrado.</p>{% endfor %}
+  {% endif %}
+</section>
+{% endblock %}

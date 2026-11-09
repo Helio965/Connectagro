@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% from 'atividades/_macros.html' import erro, atributos_erro, responsavel, autoria with context %}
+{% from 'atividades/_item.html' import campos_item with context %}
+
+{% block title %}{{ 'Editar' if atividade else 'Nova' }} atividade — ConnectAgro{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/atividades.css') }}">{% endblock %}
+
+{% block content %}
+<section class="card operacional-pagina">
+  <h1>{{ 'Editar atividade operacional' if atividade else 'Nova atividade operacional' }}</h1>
+  <p class="hint">Registre o que foi executado na Área de Plantio. Produtos e quantidades são históricos; o ConnectAgro não recomenda produtos nem valida doses.</p>
+  {% if not opcoes_glebas %}
+  <p class="placeholder-tag">Cadastre uma Área de Plantio nesta propriedade antes de registrar uma atividade.</p>
+  <p><a href="{{ url_for('atividades.index') }}">Voltar para atividades</a></p>
+  {% else %}
+  {% if errors|default({}) %}<p class="operacional-erro" role="alert">Confira os campos indicados. A atividade ainda não foi salva.</p>{% endif %}
+  {{ autoria(atividade) }}
+  <form method="post" class="form-vertical operacional-form" data-operacional-form
+        action="{{ url_for('atividades.editar', atividade_id=atividade.id) if atividade else url_for('atividades.nova') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="chave_envio" value="{{ form.chave_envio or token_envio|default('') }}">
+    {{ erro('chave_envio') }}
+    {{ erro('formulario') }}
+    <label for="gleba_id">Área de Plantio *</label>
+    <select id="gleba_id" name="gleba_id" required {{ atributos_erro('gleba_id') }}>
+      <option value="">Selecione…</option>
+      {% for gleba_id, rotulo in opcoes_glebas %}<option value="{{ gleba_id }}" {{ 'selected' if form.gleba_id|string == gleba_id|string }}>{{ rotulo }}</option>{% endfor %}
+    </select>
+    {{ erro('gleba_id') }}
+    <label for="cultura_gleba_id">Cultura ou ciclo associado</label>
+    <select id="cultura_gleba_id" name="cultura_gleba_id" {{ atributos_erro('cultura_gleba_id') }}>
+      <option value="">Sem associação a cultura/ciclo</option>
+      {% for cg_id, rotulo in opcoes_cultura_gleba %}<option value="{{ cg_id }}" {{ 'selected' if form.cultura_gleba_id|string == cg_id|string }}>{{ rotulo }}</option>{% endfor %}
+    </select>
+    {{ erro('cultura_gleba_id') }}
+    <p class="hint">Quando informar uma cultura/ciclo, escolha a associação da mesma Área de Plantio selecionada.</p>
+    <label for="tipo_atividade">Atividade executada *</label>
+    <input type="text" id="tipo_atividade" name="tipo_atividade" maxlength="120" required
+           value="{{ form.tipo_atividade or '' }}" {{ atributos_erro('tipo_atividade') }}>
+    {{ erro('tipo_atividade') }}
+    <label for="data_execucao">Data da execução *</label>
+    <input type="date" id="data_execucao" name="data_execucao" required value="{{ form.data_execucao or '' }}" {{ atributos_erro('data_execucao') }}>
+    {{ erro('data_execucao') }}
+    {{ responsavel(form, opcoes_responsaveis) }}
+    <h2>Produtos efetivamente utilizados</h2>
+    <p class="hint">Adicione somente produtos do catálogo utilizados nesta atividade, até 20 itens. Uma atividade sem consumo pode ser salva sem produtos. Dose e quantidade total são informações diferentes; não há conversão automática pela área.</p>
+    {{ erro('itens') }}
+    <div data-items-container>
+      {% for item in itens %}{{ campos_item(item, loop.index0) }}{% endfor %}
+    </div>
+    <button type="button" class="btn-acao operacional-adicionar" data-add-item>Adicionar produto</button>
+    <p class="hint" data-items-status aria-live="polite"></p>
+    <template id="operacional-item-template">{{ campos_item({}, '__INDEX__') }}</template>
+    <label for="observacao">Observações</label>
+    <textarea id="observacao" name="observacao" rows="4" maxlength="5000" {{ atributos_erro('observacao') }}>{{ form.observacao or '' }}</textarea>
+    {{ erro('observacao') }}
+    <div class="form-acoes">
+      <button type="submit" class="btn-acao" data-save-button>Salvar atividade</button>
+      <a href="{{ url_for('atividades.index') }}">Voltar sem salvar</a>
+    </div>
+    <p class="hint" data-save-status aria-live="polite"></p>
+  </form>
+  {% endif %}
+</section>
+{% endblock %}
+{% block extra_scripts %}<script src="{{ url_for('static', filename='js/atividades.js') }}" defer></script>{% endblock %}

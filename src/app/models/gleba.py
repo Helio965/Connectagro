@@ -20,6 +20,8 @@ class Gleba(db.Model):
 
     propriedade = db.relationship("Propriedade", back_populates="glebas")
     cultura_glebas = db.relationship("CulturaGleba", back_populates="gleba")
+    atividades = db.relationship("AtividadeOperacional", back_populates="gleba",
+                                passive_deletes="all")
 
     def __repr__(self):
         return f"<Gleba {self.id} {self.nome}>"

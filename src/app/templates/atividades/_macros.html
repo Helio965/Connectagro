@@ -1,0 +1,38 @@
+{% macro erro(campo) -%}
+  {% set mensagem = (errors|default({})).get(campo) %}
+  {% if mensagem %}<small class="operacional-erro" id="erro-{{ campo|replace('.', '-') }}" role="alert">{{ mensagem }}</small>{% endif %}
+{%- endmacro %}
+
+{% macro atributos_erro(campo) -%}
+  {% if (errors|default({})).get(campo) %}aria-invalid="true" aria-describedby="erro-{{ campo|replace('.', '-') }}"{% endif %}
+{%- endmacro %}
+
+{% macro numero(valor) -%}
+  {{ valor|string|replace('.', ',') if valor is defined and valor is not none and valor|string != '' else '—' }}
+{%- endmacro %}
+
+{% macro responsavel(form, opcoes) -%}
+  <label for="responsavel_usuario_id">Conta do responsável pela execução</label>
+  <select id="responsavel_usuario_id" name="responsavel_usuario_id" {{ atributos_erro('responsavel_usuario_id') }}>
+    <option value="">Sem conta vinculada — usar identificação abaixo</option>
+    {% for usuario_id, rotulo in opcoes %}
+    <option value="{{ usuario_id }}" {{ 'selected' if form.responsavel_usuario_id|string == usuario_id|string }}>{{ rotulo }}</option>
+    {% endfor %}
+  </select>
+  {{ erro('responsavel_usuario_id') }}
+  <label for="responsavel">Responsável pela execução — identificação textual</label>
+  <input type="text" id="responsavel" name="responsavel" maxlength="120"
+         value="{{ form.responsavel or '' }}" {{ atributos_erro('responsavel') }}>
+  {{ erro('responsavel') }}
+  <p class="hint">Ao selecionar uma conta, o nome vinculado identifica o executor. Sem conta, informe o nome de quem executou. O autor do cadastro é registrado separadamente.</p>
+{%- endmacro %}
+
+{% macro autoria(registro) -%}
+  {% if registro %}
+  <div class="operacional-autoria">
+    <span><strong>Criado no sistema por:</strong> {{ registro.criado_por.nome if registro.criado_por else 'Não informado no registro histórico' }}</span>
+    <span><strong>Data do cadastro:</strong> {{ registro.criado_em }}</span>
+    {% if registro.atualizado_em %}<span><strong>Última alteração:</strong> {{ registro.atualizado_em }}</span>{% endif %}
+  </div>
+  {% endif %}
+{%- endmacro %}

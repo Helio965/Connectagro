@@ -1,6 +1,8 @@
 {% extends "base.html" %}
+{% from 'atividades/_macros.html' import numero, autoria with context %}
 
 {% block title %}Aplicações de insumo — ConnectAgro{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/atividades.css') }}">{% endblock %}
 
 {% block content %}
 <section class="card">
@@ -27,7 +29,7 @@
     <thead>
       <tr>
         <th>Data</th><th>Cultura</th><th>Área de Plantio</th><th>Produto</th>
-        <th>Classe</th><th>Dose</th><th>Unidade</th><th>Responsável</th><th>Ações</th>
+        <th>Classe</th><th>Dose</th><th>Unidade</th><th>Responsável</th><th>Consumo e histórico</th><th>Ações</th>
       </tr>
     </thead>
     <tbody>
@@ -41,6 +43,18 @@
         <td>{{ "%.2f"|format(a.dose) if a.dose is not none else "—" }}</td>
         <td>{{ a.unidade or "—" }}</td>
         <td>{{ a.responsavel or "—" }}</td>
+        <td>
+          <details>
+            <summary>Consultar</summary>
+            <p><strong>Quantidade utilizada:</strong> {{ numero(a.quantidade_utilizada) }}{% if a.unidade_quantidade %} {{ a.unidade_quantidade }}{% endif %}</p>
+            {% if can('financeiro.view') %}
+            <p><strong>Custo unitário:</strong> {{ numero(a.custo_unitario) }}{% if a.custo_unitario is not none %} {{ a.moeda or 'BRL' }}{% endif %}</p>
+            <p><strong>Custo total:</strong> {{ numero(a.custo_total) }}{% if a.custo_total is not none %} {{ a.moeda or 'BRL' }}{% endif %}</p>
+            {% endif %}
+            {{ autoria(a) }}
+            {% if a.observacao %}<p class="operacional-observacao"><strong>Observação:</strong> {{ a.observacao }}</p>{% endif %}
+          </details>
+        </td>
         <td class="acoes">
           {% if can("aplicacoes.edit") %}
           <a href="{{ url_for('aplicacoes.editar', aplicacao_id=a.id) }}">Editar</a>

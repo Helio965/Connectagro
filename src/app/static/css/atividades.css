@@ -1,0 +1,42 @@
+/* Formulários operacionais compartilham a identidade visual do produto. */
+.operacional-pagina { min-width: 0; overflow-wrap: anywhere; }
+.operacional-form { max-width: 860px; }
+.operacional-form h2 { font-size: 1.1rem; margin: 1.2rem 0 0; }
+.operacional-item, .operacional-custo {
+  min-width: 0;
+  border: 1px solid var(--ca-border);
+  border-radius: 10px;
+  padding: .75rem;
+  margin: .6rem 0;
+}
+.operacional-item legend, .operacional-custo legend { font-weight: 600; padding: 0 .3rem; }
+.operacional-custo { background: var(--ca-bg-secondary); }
+.operacional-campos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem 1rem; }
+.operacional-campo { display: flex; flex-direction: column; gap: .3rem; min-width: 0; }
+.operacional-campo-largo { grid-column: 1 / -1; }
+.operacional-form input, .operacional-form select, .operacional-form textarea,
+.operacional-item input, .operacional-item select { min-width: 0; max-width: 100%; box-sizing: border-box; }
+.operacional-item input, .operacional-item select { width: 100%; }
+.operacional-erro { color: #ffb4b4; display: block; margin: .2rem 0; }
+.operacional-form [aria-invalid="true"] { border-color: var(--ca-danger); }
+.operacional-form :disabled { cursor: not-allowed; opacity: .65; }
+.operacional-remover { margin-top: .7rem; }
+.operacional-adicionar { align-self: flex-start; }
+.operacional-autoria { display: flex; flex-direction: column; gap: .25rem; margin: .6rem 0; font-size: .85rem; color: var(--ca-text-soft); }
+.operacional-lista { display: flex; flex-direction: column; gap: 1rem; }
+.operacional-registro { border: 1px solid var(--ca-border); border-radius: 10px; padding: 1rem; min-width: 0; }
+.operacional-registro h2 { font-size: 1.1rem; margin: 0; }
+.operacional-dados { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem 1rem; }
+.operacional-dados dt { color: var(--ca-text-soft); font-size: .85rem; }
+.operacional-dados dd { margin: .2rem 0 0; }
+.operacional-detalhes summary { cursor: pointer; color: var(--ca-green-400); padding: .4rem 0; }
+.operacional-observacao { white-space: pre-wrap; }
+.operacional-tabela-wrap { overflow-x: auto; max-width: 100%; }
+.operacional-tabela-wrap table { min-width: 560px; }
+.operacional-registro .form-acoes { flex-wrap: wrap; }
+.operacional-registro .form-acoes form { margin: 0; }
+@media (max-width: 560px) {
+  .operacional-campos, .operacional-dados { grid-template-columns: minmax(0, 1fr); }
+  .operacional-item, .operacional-custo, .operacional-registro { padding: .65rem; }
+  .operacional-form .form-acoes { flex-wrap: wrap; }
+}

@@ -116,6 +116,7 @@ como pós-MVP e devem preservar os limites de produto abaixo.
 | Defensivos     | Consulta de defensivos a partir do catálogo                     |
 | Fertilizantes  | Consulta de fertilizantes a partir do catálogo                  |
 | Aplicações     | Registro histórico operacional de aplicações de insumo          |
+| Atividades     | Execução agrícola por área, executor, itens, consumo e custos    |
 | Financeiro     | Registro de receitas e despesas                                 |
 | Upload         | Envio, listagem, download e remoção de arquivos da propriedade  |
 | Equipe         | Gestão de membros e funções                                     |
@@ -292,6 +293,38 @@ em cópia, antes de iniciar esta versão em uma instalação anterior. A Etapa 0
 usou somente bancos descartáveis. Veja o [relatório territorial](docs/auditoria/05-mapas-organizacao-territorial.md).
 O mapa é apoio operacional e não substitui medição ou georreferenciamento oficial.
 Não há PostGIS, GPS em tempo real, shapefile/KML ou integração cadastral oficial.
+
+### Registros operacionais — Etapa 06
+
+Em `/atividades/`, registre Área de Plantio autorizada, atividade executada, data,
+responsável e observações. Cultura/ciclo é opcional e deve corresponder à mesma
+área. Adicione até 20 produtos do catálogo em itens separados, ou salve sem
+produtos quando não houve consumo. A atividade é texto livre, sem catálogo
+definitivo de tipos.
+
+Dose histórica e quantidade efetivamente utilizada possuem campos/unidades
+separados, também em Aplicações. Não há estimativa de consumo pela área. Custos
+conhecidos são informados em BRL; quantidade × custo unitário calcula total em
+centavos. Preços do catálogo não são custo efetivo e não há geração automática
+de financeiro, estoque ou aplicações duplicadas.
+
+Trabalhador cria/visualiza atividades; Gerente também edita; Administrador também
+cancela, preservando o histórico. Custos seguem a matriz financeira: Administrador
+escreve, Administrador/Gerente consultam e Trabalhador não recebe detalhes
+individuais. Autor do cadastro vem da sessão e difere do executor. Contas de
+executor precisam ter vínculo ativo local; identificação textual continua
+permitida.
+
+O histórico em `/relatorios/operacionais` oferece filtros por área, período e
+atividade, com CSV/PDF. Consumos são agrupados por produto/unidade, sem misturar
+unidades. Cancelamentos ficam no histórico, fora dos totais; custos operacionais
+ficam separados do saldo financeiro. A IA local consulta contagem e consumo.
+
+Migration vigente: `f6a28d9c104e`, após `e4ca60b1d732`. Valide migrations primeiro
+em uma cópia descartável do banco de desenvolvimento. Não use `create_all()` para
+atualizar bases existentes. Downgrade com dados operacionais novos é bloqueado.
+Registros antigos não recebem custos, consumo ou autoria fictícios. Ver
+`docs/auditoria/06-registros-operacionais.md`.
 
 ### IA simulada operacional
 

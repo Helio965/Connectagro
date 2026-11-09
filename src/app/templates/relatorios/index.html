@@ -11,6 +11,10 @@
   {% include "relatorios/_avisos.html" %}
 
   <div class="relatorios-grid">
+    <a class="relatorio-card" href="{{ url_for('relatorios.operacionais') }}">
+      <strong>Histórico Operacional</strong>
+      <span>Atividades, aplicações e quantidades efetivamente utilizadas.</span>
+    </a>
     <a class="relatorio-card" href="{{ url_for('relatorios.geral') }}">
       <strong>Relatório Geral</strong>
       <span>Resumo consolidado da propriedade.</span>

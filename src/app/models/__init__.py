@@ -11,6 +11,7 @@ from .cultura import Cultura, CulturaGleba
 from .gleba import Gleba
 from .produto import ProdutoBase, ProdutoTecnico, ProdutoPreco, ProdutoImagem
 from .aplicacao import AplicacaoInsumo
+from .atividade import AtividadeOperacional, AtividadeItem
 from .colheita import ColheitaRegistro
 from .financeiro import FinanceiroLancamento
 from .upload import UploadArquivo
@@ -33,6 +34,8 @@ __all__ = [
     "ProdutoPreco",
     "ProdutoImagem",
     "AplicacaoInsumo",
+    "AtividadeOperacional",
+    "AtividadeItem",
     "ColheitaRegistro",
     "FinanceiroLancamento",
     "UploadArquivo",

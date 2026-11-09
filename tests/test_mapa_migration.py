@@ -6,6 +6,7 @@ import pytest
 from alembic import command
 from alembic.autogenerate import compare_metadata
 from alembic.migration import MigrationContext
+from alembic.script import ScriptDirectory
 from flask_migrate import downgrade, upgrade
 from sqlalchemy import inspect, text
 
@@ -22,6 +23,12 @@ TABELAS_HISTORICAS = ('usuario','usuario_propriedade','gleba','cultura','cultura
     'produto_base','aplicacao_insumo','colheita_registro','financeiro_lancamento',
     'upload_arquivo','equipe_membro','ia_interacao','log_auditoria')
 COLUNAS_PROPRIEDADE = 'id,usuario_id,nome,municipio,uf,area_total_ha,criado_em,atualizado_em'
+# Comparar as colunas históricas, mesmo quando o head acrescenta dados opcionais.
+# Os novos campos e o schema completo são verificados na suíte e4→f6.
+COLUNAS_HISTORICAS = {
+    'aplicacao_insumo': 'id,cultura_gleba_id,produto_base_id,data_aplicacao,dose,unidade,responsavel,observacao,criado_em',
+    'colheita_registro': 'id,cultura_gleba_id,data_colheita,quantidade,unidade,qualidade,observacao,criado_em',
+}
 
 
 def preparar_legado():
@@ -62,7 +69,7 @@ def preparar_legado():
 
 def snapshot():
     with db.engine.connect() as c:
-        dados = {t:c.execute(text(f'SELECT * FROM {t} ORDER BY id')).all() for t in TABELAS_HISTORICAS}
+        dados = {t:c.execute(text(f'SELECT {COLUNAS_HISTORICAS.get(t,"*")} FROM {t} ORDER BY id')).all() for t in TABELAS_HISTORICAS}
         dados['propriedade'] = c.execute(text(f'SELECT {COLUNAS_PROPRIEDADE} FROM propriedade ORDER BY id')).all()
         return dados
 
@@ -78,7 +85,8 @@ def test_upgrade_adiciona_contorno_opcional_sem_copiar_gleba_ou_modificar_histor
         with db.engine.connect() as c:
             assert c.execute(text('SELECT id,poligono_geojson FROM propriedade ORDER BY id')).all() == [(10,None),(20,None)]
             assert c.execute(text('PRAGMA foreign_key_check')).all() == []
-            assert c.execute(text('SELECT version_num FROM alembic_version')).scalar() == NOVA
+            config = app.extensions['migrate'].migrate.get_config(MIGRATIONS)
+            assert c.execute(text('SELECT version_num FROM alembic_version')).scalar() == ScriptDirectory.from_config(config).get_current_head()
             assert 'AUTOINCREMENT' in c.execute(text("SELECT sql FROM sqlite_master WHERE name='propriedade'")).scalar()
             assert compare_metadata(MigrationContext.configure(c),db.metadata) == []
         upgrade(directory=MIGRATIONS)
@@ -102,7 +110,8 @@ def test_downgrade_sem_contornos_preserva_relacoes_e_pode_reaplicar(app):
 def test_downgrade_com_conteudo_nao_null_aborta_antes_de_ddl_ou_exclusao(app,conteudo):
     with app.app_context():
         preparar_legado(); antes = snapshot()
-        upgrade(directory=MIGRATIONS)
+        # Este teste exerce o guard da própria e4, antes de migrations posteriores.
+        upgrade(directory=MIGRATIONS, revision=NOVA)
         with db.engine.begin() as c:
             c.execute(text('UPDATE propriedade SET poligono_geojson=:valor WHERE id=10'),{'valor':conteudo})
         config = app.extensions['migrate'].migrate.get_config(MIGRATIONS)

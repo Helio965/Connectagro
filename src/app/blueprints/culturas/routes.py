@@ -3,10 +3,13 @@ from flask import abort, flash, redirect, render_template, request, url_for
 from sqlalchemy.exc import IntegrityError
 
 from ...extensions import db
-from ...models import AplicacaoInsumo, ColheitaRegistro, Cultura, CulturaGleba, Gleba
+from ...models import (
+    AplicacaoInsumo, AtividadeOperacional, ColheitaRegistro, Cultura, CulturaGleba, Gleba,
+)
 from ...models._helpers import iso_now
 from ...utils.auth import login_required
 from ...services.auditoria_service import registrar_falha, registrar_sucesso
+from ...services.operacionais_lock import serializar_operacao
 from ...utils.contexto import propriedade_atual, vazio_para_none
 from ...utils.permissions import require_permission
 from . import culturas_bp
@@ -15,16 +18,16 @@ STATUS_VALIDOS = ("planejada", "em_andamento", "colhida", "cancelada")
 
 MSG_CULTURA_COM_HISTORICO = (
     "Não é possível excluir esta cultura porque ela possui aplicações, "
-    "colheitas ou outros dados históricos vinculados."
+    "colheitas, atividades ou outros dados históricos vinculados."
 )
 MSG_VINCULO_COM_HISTORICO = (
     "Não é possível remover o vínculo com gleba que possui aplicações, "
-    "colheitas ou outros dados históricos vinculados."
+    "colheitas, atividades ou outros dados históricos vinculados."
 )
 
 
 def _cg_ids_com_historico(cg_ids):
-    """Ids de associações cultura↔gleba referenciadas por aplicações/colheitas."""
+    """Inclui atividades canceladas: cancelar não elimina o histórico."""
     cg_ids = list(cg_ids)
     if not cg_ids:
         return set()
@@ -32,7 +35,10 @@ def _cg_ids_com_historico(cg_ids):
         AplicacaoInsumo.cultura_gleba_id.in_(cg_ids))
     com_colheita = db.session.query(ColheitaRegistro.cultura_gleba_id).filter(
         ColheitaRegistro.cultura_gleba_id.in_(cg_ids))
-    return {r[0] for r in com_aplicacao} | {r[0] for r in com_colheita}
+    com_atividade = db.session.query(AtividadeOperacional.cultura_gleba_id).filter(
+        AtividadeOperacional.cultura_gleba_id.in_(cg_ids))
+    return ({r[0] for r in com_aplicacao} | {r[0] for r in com_colheita}
+            | {r[0] for r in com_atividade})
 
 
 def _cultura_da_propriedade_ou_404(cultura_id, propriedade):
@@ -91,6 +97,7 @@ def index():
 @culturas_bp.route("/nova", methods=["GET", "POST"])
 @login_required
 @require_permission("culturas.create")
+@serializar_operacao("culturas.create")
 def nova():
     propriedade = propriedade_atual()
     glebas = _glebas_da_propriedade(propriedade)
@@ -130,6 +137,7 @@ def nova():
 @culturas_bp.route("/<int:cultura_id>/editar", methods=["GET", "POST"])
 @login_required
 @require_permission("culturas.edit")
+@serializar_operacao("culturas.edit")
 def editar(cultura_id):
     propriedade = propriedade_atual()
     cultura = _cultura_da_propriedade_ou_404(cultura_id, propriedade)
@@ -186,6 +194,7 @@ def editar(cultura_id):
 @culturas_bp.route("/<int:cultura_id>/remover", methods=["POST"])
 @login_required
 @require_permission("culturas.delete")
+@serializar_operacao("culturas.delete")
 def remover(cultura_id):
     propriedade = propriedade_atual()
     cultura = _cultura_da_propriedade_ou_404(cultura_id, propriedade)

@@ -1,0 +1,82 @@
+{% from 'atividades/_macros.html' import erro, atributos_erro, numero with context %}
+{% macro campos_item(item, indice) -%}
+{% set prefixo = 'itens.' ~ indice ~ '.' %}
+{% set custo_protegido = not can_editar_custos and ((item.custo_total is defined and item.custo_total is not none and item.custo_total|string != '') or (item.custo_unitario is defined and item.custo_unitario is not none and item.custo_unitario|string != '')) %}
+<fieldset class="operacional-item" data-item-row>
+  <legend>Produto <span data-item-number>{{ indice + 1 if indice is number else '' }}</span></legend>
+  <input type="hidden" name="item_id" value="{{ item.item_id or '' }}">
+  {{ erro(prefixo ~ 'item_id') }}
+  <div class="operacional-campos">
+    <div class="operacional-campo operacional-campo-largo">
+      <label for="item-{{ indice }}-produto_base_id">Produto do catálogo</label>
+      {% if custo_protegido %}<input type="hidden" name="produto_base_id" value="{{ item.produto_base_id or '' }}">{% endif %}
+      <select id="item-{{ indice }}-produto_base_id" {% if not custo_protegido %}name="produto_base_id"{% else %}disabled{% endif %} {{ atributos_erro(prefixo ~ 'produto_base_id') }}>
+        <option value="">Selecione um produto…</option>
+        {% for produto_id, rotulo in opcoes_produtos %}
+        <option value="{{ produto_id }}" {{ 'selected' if item.produto_base_id|string == produto_id|string }}>{{ rotulo }}</option>
+        {% endfor %}
+      </select>
+      {{ erro(prefixo ~ 'produto_base_id') }}
+    </div>
+    <div class="operacional-campo">
+      <label for="item-{{ indice }}-dose">Dose histórica, se aplicável</label>
+      <input type="text" inputmode="decimal" id="item-{{ indice }}-dose" name="dose" maxlength="32" placeholder="Ex.: 2,5"
+             value="{{ item.dose if item.dose is defined and item.dose is not none else '' }}" {{ atributos_erro(prefixo ~ 'dose') }}>
+      {{ erro(prefixo ~ 'dose') }}
+    </div>
+    <div class="operacional-campo">
+      <label for="item-{{ indice }}-unidade_dose">Unidade da dose</label>
+      <input type="text" id="item-{{ indice }}-unidade_dose" name="unidade_dose" maxlength="20" placeholder="Ex.: L/ha"
+             value="{{ item.unidade_dose or '' }}" {{ atributos_erro(prefixo ~ 'unidade_dose') }}>
+      {{ erro(prefixo ~ 'unidade_dose') }}
+    </div>
+    <div class="operacional-campo">
+      <label for="item-{{ indice }}-quantidade_utilizada">Quantidade efetivamente utilizada</label>
+      <input type="text" inputmode="decimal" id="item-{{ indice }}-quantidade_utilizada" name="quantidade_utilizada" maxlength="32" placeholder="Ex.: 15"
+             value="{{ item.quantidade_utilizada if item.quantidade_utilizada is defined and item.quantidade_utilizada is not none else '' }}" {{ 'readonly' if custo_protegido }} {{ atributos_erro(prefixo ~ 'quantidade_utilizada') }}>
+      {{ erro(prefixo ~ 'quantidade_utilizada') }}
+    </div>
+    <div class="operacional-campo">
+      <label for="item-{{ indice }}-unidade_quantidade">Unidade da quantidade utilizada</label>
+      <input type="text" id="item-{{ indice }}-unidade_quantidade" name="unidade_quantidade" maxlength="20" placeholder="Ex.: L, kg"
+             value="{{ item.unidade_quantidade or '' }}" {{ 'readonly' if custo_protegido }} {{ atributos_erro(prefixo ~ 'unidade_quantidade') }}>
+      {{ erro(prefixo ~ 'unidade_quantidade') }}
+    </div>
+  </div>
+  {% if can_editar_custos %}
+  <fieldset class="operacional-custo">
+    <legend>Custo efetivamente conhecido</legend>
+    <p class="hint">Preencha apenas valores conhecidos. O custo unitário corresponde à mesma unidade da quantidade utilizada. Nenhum preço é obtido do catálogo.</p>
+    <div class="operacional-campos">
+      <div class="operacional-campo">
+        <label for="item-{{ indice }}-custo_unitario">Custo por unidade utilizada (R$)</label>
+        <input type="text" inputmode="decimal" id="item-{{ indice }}-custo_unitario" name="custo_unitario" maxlength="32"
+               value="{{ item.custo_unitario if item.custo_unitario is defined and item.custo_unitario is not none else '' }}" {{ atributos_erro(prefixo ~ 'custo_unitario') }}>
+        {{ erro(prefixo ~ 'custo_unitario') }}
+      </div>
+      <div class="operacional-campo">
+        <label for="item-{{ indice }}-custo_total">Custo total informado (R$)</label>
+        <input type="text" inputmode="decimal" id="item-{{ indice }}-custo_total" name="custo_total" maxlength="32"
+               value="{{ item.custo_total if item.custo_total is defined and item.custo_total is not none and item.origem_custo|default('') != 'calculado_quantidade_unitario' else '' }}"
+               {% if item.origem_custo|default('') == 'calculado_quantidade_unitario' %}placeholder="Atual: {{ numero(item.custo_total) }}; recalculado ao salvar"{% endif %} {{ atributos_erro(prefixo ~ 'custo_total') }}>
+        {{ erro(prefixo ~ 'custo_total') }}
+      </div>
+      <div class="operacional-campo">
+        <label for="item-{{ indice }}-moeda">Moeda do custo</label>
+        <select id="item-{{ indice }}-moeda" name="moeda" {{ atributos_erro(prefixo ~ 'moeda') }}><option value="BRL">BRL — Real brasileiro</option></select>
+        {{ erro(prefixo ~ 'moeda') }}
+      </div>
+    </div>
+    <p class="hint">Com quantidade e custo unitário preenchidos, o total é calculado no salvamento. Deixe custos desconhecidos em branco. Não é criado lançamento financeiro.</p>
+  </fieldset>
+  {% elif can_ver_custos %}
+  <div class="operacional-custo">
+    <p><strong>Custo unitário:</strong> {{ numero(item.custo_unitario) }}{% if item.custo_unitario is defined and item.custo_unitario is not none and item.custo_unitario|string != '' %} BRL{% endif %}</p>
+    <p><strong>Custo total:</strong> {{ numero(item.custo_total) }}{% if item.custo_total is defined and item.custo_total is not none and item.custo_total|string != '' %} BRL{% endif %}</p>
+    {% if custo_protegido %}<p class="hint">Produto e quantidade deste item exigem permissão de edição de custos para serem alterados.</p>{% endif %}
+  </div>
+  {% endif %}
+  {{ erro(prefixo ~ 'custo') }}
+  <button type="button" class="btn-link-danger operacional-remover" data-remove-item {{ 'disabled' if custo_protegido }}>Retirar este produto</button>
+</fieldset>
+{%- endmacro %}

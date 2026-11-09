@@ -209,19 +209,24 @@ def test_relatorios_financeiros_nao_adotam_propriedade_forjada(policy_app, alias
         assert "Contexto A" in content
 
 
-# Contrato aprovado, descrito por operação; mudanças requerem decisão explícita.
+# Contrato aprovado, descrito por operação. Na Etapa 06 o usuário autorizou
+# atividades gerais: Trabalhador cria/visualiza, Gerente também edita e Admin
+# também cancela. As permissões anteriores permanecem comparadas exatamente.
 _COMMON = {
+    "atividades.view", "atividades.create",
     "propriedades.view", "propriedades.select", "dashboard.view", "mapa.view",
     "catalogo.view", "relatorios.view", "ia.view", "glebas.view", "culturas.view",
     "colheita.view", "colheita.create", "aplicacoes.view", "aplicacoes.create",
     "upload.view", "upload.create", "upload.download",
 }
 _MANAGEMENT = {
+    "atividades.edit",
     "propriedades.create", "propriedades.edit", "mapa.edit", "glebas.create", "glebas.edit",
     "culturas.create", "culturas.edit", "equipe.view", "financeiro.view", "colheita.edit",
     "aplicacoes.edit", "usuarios.view", "usuarios.create", "usuarios.edit", "usuarios.deactivate",
 }
 _ADMINISTRATION = {
+    "atividades.delete",
     "glebas.delete", "culturas.delete", "equipe.create", "equipe.edit", "equipe.delete",
     "financeiro.create", "financeiro.edit", "financeiro.delete", "colheita.delete",
     "aplicacoes.delete", "upload.delete", "auditoria.view",

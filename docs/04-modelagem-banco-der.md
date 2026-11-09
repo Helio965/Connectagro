@@ -162,6 +162,37 @@ Registro de colheita associado a uma cultura/gleba.
 
 ---
 
+## Evolução operacional — Etapa 06
+
+- `atividade_operacional`: FK obrigatória para `gleba`, FK opcional para
+  `cultura_gleba`, atividade em texto livre, execução, responsável textual/conta,
+  autor/editor, datas, observação, chave única de envio e cancelamento lógico.
+- `atividade_item`: FK obrigatória para atividade e produto; dose/unidade,
+  consumo/unidade, custo unitário/total, moeda/origem e cancelamento lógico.
+  Não há exclusão em cascata de registros operacionais.
+- `aplicacao_insumo`: conserva campos antigos e ganha executor vinculado,
+  autor/editor, atualização, chave única de envio, consumo/unidade e custos
+  opcionais. Não é copiada para a atividade nem recebe dados por backfill.
+- `colheita_registro`: ganha responsável textual/conta, autor/editor, atualização
+  e chave única de envio opcionais. Quantidade histórica permanece no campo
+  original, sem conversão dos valores antigos.
+- `DecimalExato(18,6)` representa consumo/dose nova/custo unitário;
+  `DecimalExato(18,2)` representa total monetário. PostgreSQL usa `NUMERIC`;
+  SQLite usa texto decimal canônico para evitar ponto flutuante. Cálculos e
+  agregações novas usam `Decimal` em Python.
+- Migration `f6a28d9c104e` parte de `e4ca60b1d732`. Campos legados novos são
+  nullable, sem default/backfill. Downgrade recusa qualquer atividade/item ou
+  campo novo não NULL, inclusive zero/texto vazio, antes de DDL.
+
+```mermaid
+erDiagram
+    gleba ||--o{ atividade_operacional : contextualiza
+    cultura_gleba o|--o{ atividade_operacional : associa_opcionalmente
+    atividade_operacional ||--o{ atividade_item : registra
+    produto_base ||--o{ atividade_item : identifica
+    usuario o|--o{ atividade_operacional : autoria_e_execucao
+```
+
 ## Catálogo de produtos
 
 > O catálogo é **base técnica inicial de consulta rápida**, modelado de forma

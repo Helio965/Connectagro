@@ -18,6 +18,7 @@ ROLE_LABELS = {
 }
 
 _ADMIN_PERMISSIONS = {
+    "atividades.view", "atividades.create", "atividades.edit", "atividades.delete",
     "propriedades.view", "propriedades.select", "propriedades.create", "propriedades.edit",
     "dashboard.view",
     "mapa.view",
@@ -61,6 +62,7 @@ _ADMIN_PERMISSIONS = {
 }
 
 _TECNICO_PERMISSIONS = {
+    "atividades.view", "atividades.create", "atividades.edit",
     "propriedades.view", "propriedades.select", "propriedades.create", "propriedades.edit",
     "dashboard.view",
     "mapa.view",
@@ -92,6 +94,7 @@ _TECNICO_PERMISSIONS = {
 }
 
 _TRABALHADOR_PERMISSIONS = {
+    "atividades.view", "atividades.create",
     "propriedades.view", "propriedades.select",
     "dashboard.view",
     "mapa.view",

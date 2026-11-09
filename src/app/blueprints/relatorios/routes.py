@@ -13,7 +13,7 @@ from ...utils.formatters import (
     formatar_numero,
     formatar_tamanho,
 )
-from ...utils.permissions import require_permission
+from ...utils.permissions import has_permission, require_permission
 from ...services.auditoria_service import registrar_falha, registrar_sucesso
 from ...services.exportacoes_service import (
     gerar_csv_relatorio_agricola,
@@ -21,28 +21,34 @@ from ...services.exportacoes_service import (
     gerar_csv_relatorio_financeiro,
     gerar_csv_relatorio_geral,
     gerar_csv_relatorio_uploads,
+    gerar_csv_relatorio_operacional,
     gerar_pdf_relatorio_agricola,
     gerar_pdf_relatorio_aplicacoes,
     gerar_pdf_relatorio_financeiro,
     gerar_pdf_relatorio_geral,
     gerar_pdf_relatorio_uploads,
+    gerar_pdf_relatorio_operacional,
     nome_arquivo,
     resposta_csv,
     resposta_pdf,
 )
 from ...services.relatorios_service import (
     FiltroInvalidoError,
+    AreaRelatorioInacessivelError,
+    formatar_decimal_operacional,
     montar_relatorio_agricola,
     montar_relatorio_aplicacoes,
     montar_relatorio_financeiro,
     montar_relatorio_geral,
     montar_relatorio_uploads,
+    montar_relatorio_operacional,
 )
+from ...models import Gleba
 from . import relatorios_bp
 
 _NOMES_RELATORIO = {
     "geral": "geral", "financeiro": "financeiro", "agricola": "agrícola",
-    "aplicacoes": "aplicações", "uploads": "uploads",
+    "aplicacoes": "aplicações", "uploads": "uploads", "operacionais": "operacional",
 }
 
 
@@ -67,6 +73,7 @@ FMT = {
     "formatar_moeda": formatar_moeda,
     "formatar_numero": formatar_numero,
     "formatar_tamanho": formatar_tamanho,
+    "formatar_decimal_operacional": formatar_decimal_operacional,
 }
 
 
@@ -289,3 +296,65 @@ def uploads_exportar_pdf():
     pdf = gerar_pdf_relatorio_uploads(propriedade, montar_relatorio_uploads(propriedade))
     _auditar_exportacao("uploads", "pdf", propriedade)
     return resposta_pdf(pdf, nome_arquivo("uploads", "pdf"))
+
+
+def _dados_operacionais(propriedade):
+    # A permissão vem da identidade revalidada, nunca de parâmetros de URL.
+    return montar_relatorio_operacional(
+        propriedade, data_inicio=vazio_para_none(request.args.get("data_inicio")),
+        data_fim=vazio_para_none(request.args.get("data_fim")),
+        gleba_id=vazio_para_none(request.args.get("gleba_id")),
+        tipo_atividade=vazio_para_none(request.args.get("tipo_atividade")),
+        incluir_custos=has_permission("financeiro.view"))
+
+
+@relatorios_bp.route("/operacionais")
+@login_required
+@require_permission("relatorios.view")
+def operacionais():
+    propriedade = propriedade_atual()
+    areas = Gleba.query.filter_by(propriedade_id=propriedade.id).order_by(Gleba.nome).all()
+    try:
+        dados = _dados_operacionais(propriedade)
+    except AreaRelatorioInacessivelError:
+        abort(404)
+    except FiltroInvalidoError as erro:
+        flash(str(erro), "error")
+        filtros = {campo: request.args.get(campo, "") for campo in
+                   ("data_inicio", "data_fim", "gleba_id", "tipo_atividade")}
+        return render_template("relatorios/operacionais.html", propriedade=propriedade,
+                               dados=None, areas=areas, filtros=filtros, **FMT), 400
+    return render_template("relatorios/operacionais.html", propriedade=propriedade,
+                           dados=dados, areas=areas, filtros=dados["filtros"], **FMT)
+
+
+def _exportar_operacionais(formato):
+    propriedade = propriedade_atual()
+    try:
+        dados = _dados_operacionais(propriedade)
+    except AreaRelatorioInacessivelError:
+        abort(404)
+    except FiltroInvalidoError as erro:
+        _falha_exportacao("operacionais", formato, propriedade, erro)
+    if formato == "csv":
+        conteudo = gerar_csv_relatorio_operacional(propriedade, dados)
+        resposta = resposta_csv(conteudo, nome_arquivo("operacionais", "csv"))
+    else:
+        conteudo = gerar_pdf_relatorio_operacional(propriedade, dados)
+        resposta = resposta_pdf(conteudo, nome_arquivo("operacionais", "pdf"))
+    _auditar_exportacao("operacionais", formato, propriedade)
+    return resposta
+
+
+@relatorios_bp.route("/operacionais/exportar.csv")
+@login_required
+@require_permission("relatorios.view")
+def operacionais_exportar_csv():
+    return _exportar_operacionais("csv")
+
+
+@relatorios_bp.route("/operacionais/exportar.pdf")
+@login_required
+@require_permission("relatorios.view")
+def operacionais_exportar_pdf():
+    return _exportar_operacionais("pdf")

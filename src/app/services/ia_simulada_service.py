@@ -21,6 +21,7 @@ from ..models import (
     UploadArquivo,
 )
 from ..utils.formatters import formatar_area, formatar_moeda, formatar_numero, formatar_tamanho
+from .relatorios_service import formatar_decimal_operacional, montar_relatorio_operacional
 
 STATUS_CULTURA = ("planejada", "em_andamento", "colhida", "cancelada")
 STATUS_LABELS = {
@@ -33,6 +34,7 @@ STATUS_BLOQUEADO = "bloqueado_historico"
 
 INTENCOES = (
     ("financeiro", ("financeiro", "saldo", "receita", "despesa", "gasto", "dinheiro")),
+    ("operacoes", ("atividade", "atividades", "operacao", "operacoes", "consumo")),
     ("glebas", ("gleba", "glebas", "talhao", "talhoes", "area", "mapa")),
     ("culturas", ("cultura", "culturas", "plantio", "safra", "lavoura")),
     ("colheita", ("colheita", "producao", "produtividade", "safra colhida")),
@@ -93,6 +95,7 @@ def montar_contexto_operacional(propriedade):
     aplicacoes_query = _aplicacoes_da_propriedade_query(propriedade)
     aplicacoes = aplicacoes_query.all()
     uploads = UploadArquivo.query.filter_by(propriedade_id=propriedade.id).all()
+    operacoes = montar_relatorio_operacional(propriedade, incluir_custos=False)
 
     culturas_por_status = {status: 0 for status in STATUS_CULTURA}
     for cultura in culturas:
@@ -108,6 +111,7 @@ def montar_contexto_operacional(propriedade):
             colheita_por_unidade[colheita.unidade or "sem unidade"] += colheita.quantidade
 
     return {
+        "operacoes": {"total": operacoes["total_ativos"], "consumo": operacoes["consumo"]},
         "glebas": {
             "total": len(glebas),
             "area_total": sum(gleba.area_ha or 0 for gleba in glebas),
@@ -210,6 +214,7 @@ def gerar_resumo_operacional(propriedade):
         f"* Saldo financeiro: {formatar_moeda(contexto['financeiro']['saldo'])}",
         f"* Registros de colheita: {contexto['colheita']['total']}",
         f"* Aplicações registradas: {contexto['aplicacoes']['total']}",
+        f"* Registros operacionais ativos: {contexto['operacoes']['total']}",
         f"* Uploads cadastrados: {contexto['uploads']['total']}",
         "",
         "Alertas:",
@@ -330,6 +335,22 @@ def _responder_documentos(propriedade):
     return "\n".join(linhas)
 
 
+def _responder_operacoes(propriedade):
+    # Nenhum custo individual entra na resposta persistida, mesmo para admin.
+    operacoes = montar_relatorio_operacional(propriedade, incluir_custos=False)
+    linhas = ["Resumo de atividades e consumo informado", "",
+              f"* Registros operacionais ativos: {operacoes['total_ativos']}",
+              "* Atividades e aplicações são fontes separadas; registros ou itens cancelados não entram nos totais."]
+    if operacoes["consumo"]:
+        linhas.append("* Consumo por produto e unidade:")
+        for item in operacoes["consumo"]:
+            linhas.append(f"  - {item['produto']}: {formatar_decimal_operacional(item['quantidade'])} {item['unidade']}")
+    else:
+        linhas.append("* Ainda não há quantidades totais utilizadas informadas.")
+    linhas.extend(["", "Consumo não é inferido da dose ou da área. Não há recomendação agronômica.", _rodape_simulado()])
+    return "\n".join(linhas)
+
+
 def _responder_catalogo(propriedade):
     catalogo = montar_contexto_operacional(propriedade)["catalogo"]
     linhas = [
@@ -356,6 +377,7 @@ def _responder_ajuda(propriedade):
         "* culturas",
         "* colheita",
         "* aplicações",
+        "* atividades e consumo",
         "* documentos",
         "* catálogo",
         "",
@@ -373,6 +395,7 @@ def responder_pergunta_simulada(propriedade, pergunta):
         "culturas": _responder_culturas,
         "colheita": _responder_colheita,
         "aplicacoes": _responder_aplicacoes,
+        "operacoes": _responder_operacoes,
         "documentos": _responder_documentos,
         "catalogo": _responder_catalogo,
         "ajuda": _responder_ajuda,

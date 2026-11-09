@@ -203,6 +203,54 @@
 
 ## Regras operacionais
 
+### Registros operacionais — Etapa 06
+
+- Por decisão expressa do usuário, atividades gerais têm `atividades.view/create`
+  para Trabalhador, também `atividades.edit` para Gerente e também
+  `atividades.delete` para Administrador. Cancelar preserva registro e itens.
+  As permissões anteriores de aplicações e colheitas continuam vigentes.
+- Toda atividade pertence a uma Área de Plantio da Propriedade ativa. Cultura/ciclo
+  é opcional; quando informado, deve pertencer à mesma área e Propriedade.
+  Atividade é texto informado pelo usuário, sem catálogo definitivo de tipos nem
+  exigências de cultura inferidas pelo sistema.
+- Responsável pela execução e autor do cadastro são distintos. A conta selecionada
+  precisa estar ativa e ter vínculo local ativo. Quem possui `equipe.view` seleciona
+  contas locais; Trabalhador seleciona sua própria conta ou utiliza identificação
+  textual. Não é exposto um diretório de equipe ao Trabalhador. O nome selecionado
+  fica como identificação histórica, inclusive após inativação; não há associação
+  retroativa por aproximação de nomes.
+- A atividade admite até 20 itens independentes do catálogo e pode não ter itens
+  quando não houve consumo. Produtos bloqueados não admitem novo uso. Um item que
+  venha a ser bloqueado pode permanecer inalterado como histórico. Retirar item é
+  cancelamento lógico, sem apagar seus dados.
+- Dose histórica e quantidade efetivamente utilizada têm campos/unidades separados.
+  Não há conversão de dose/área em consumo. Quantidades novas são decimais positivas
+  e finitas, até seis casas; desconhecido fica ausente. Consumo é agrupado por
+  produto e unidade exatamente informados, sem conversão de unidades.
+- Custos exigem também `financeiro.create/edit` para escrita e `financeiro.view`
+  para leitura individual: Administrador escreve, Gerente consulta, Trabalhador
+  não recebe detalhes. Gerente não modifica produto, quantidade/unidade nem retira
+  item com custo registrado sem autorização financeira. Campos omitidos não apagam
+  informações existentes.
+- Custos conhecidos são informados em BRL. O custo unitário refere-se à própria
+  unidade de consumo. Quantidade × custo unitário calcula total em centavos com
+  `ROUND_HALF_UP`; total explícito conflitante é recusado. Sem dados suficientes,
+  total não é inventado; zero conhecido difere de ausência. Preço do catálogo não
+  é custo efetivo automático.
+- Não há geração automática de aplicações, financeiro ou estoque. Aplicações
+  históricas permanecem na origem, sem migração/cópia/sincronização automática.
+  Relatórios identificam a fonte; custos operacionais não são somados ao saldo
+  financeiro. A associação reconciliada entre fontes depende de regra posterior.
+- Formulários usam CSRF, validação integral e chave de envio contra duplicação.
+  Operação e auditoria são atômicas; logs contêm ação, IDs e nomes de campos,
+  sem corpo de formulário, custos individuais, senhas ou tokens.
+- Relatório operacional HTML/CSV/PDF respeita área, período, tipo e contexto.
+  Cancelamentos continuam no histórico, fora dos totais. IA local consulta apenas
+  contagem e consumo; agregados financeiros anteriormente aprovados permanecem.
+- Recursos fora do catálogo e Áreas de Plantio independentes aguardam regras
+  específicas de cadastro, autorização e contexto.
+
+
 - RN-12 — Uma **cultura** está associada a uma ou mais **glebas**.
 - RN-13 — Lançamentos **financeiros** classificam-se em **receita** ou
   **despesa**.

@@ -1,6 +1,8 @@
 {% extends "base.html" %}
+{% from 'atividades/_macros.html' import erro, atributos_erro, responsavel, autoria, numero with context %}
 
 {% block title %}{{ "Editar" if aplicacao else "Nova" }} aplicação — ConnectAgro{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/atividades.css') }}">{% endblock %}
 
 {% block content %}
 <section class="card">
@@ -34,57 +36,108 @@
   {% endif %}
 
   {% if opcoes_cultura_gleba and opcoes_produtos %}
-  <form method="post" class="form-vertical"
+  {% set edita_custos = can_editar_custos|default(can('financeiro.edit') if aplicacao else can('financeiro.create')) %}
+  {% set ve_custos = can_ver_custos|default(can('financeiro.view')) %}
+  {% set custo_protegido = aplicacao and not edita_custos and (aplicacao.custo_total is not none or aplicacao.custo_unitario is not none) %}
+  {{ autoria(aplicacao) }}
+  {% if errors|default({}) %}<p class="operacional-erro" role="alert">Confira os campos indicados. A aplicação ainda não foi salva.</p>{% endif %}
+  <form method="post" class="form-vertical operacional-form" data-operacional-form
         action="{{ url_for('aplicacoes.editar', aplicacao_id=aplicacao.id) if aplicacao else url_for('aplicacoes.nova') }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="chave_envio" value="{{ form.chave_envio or token_envio|default('') }}">
+    {{ erro('chave_envio') }}
+    {{ erro('formulario') }}
 
     <label for="cultura_gleba_id">Cultura ↔ Área de Plantio *</label>
-    <select id="cultura_gleba_id" name="cultura_gleba_id" required>
+    <select id="cultura_gleba_id" name="cultura_gleba_id" required {{ atributos_erro('cultura_gleba_id') }}>
       <option value="">Selecione…</option>
       {% for cg_id, rotulo in opcoes_cultura_gleba %}
       <option value="{{ cg_id }}"
-        {{ "selected" if (form.cultura_gleba_id|string == cg_id|string) or (selecionado_cg == cg_id) else "" }}>
+        {{ "selected" if form.cultura_gleba_id|string == cg_id|string else "" }}>
         {{ rotulo }}
       </option>
       {% endfor %}
     </select>
+    {{ erro('cultura_gleba_id') }}
 
     <label for="produto_base_id">Produto do catálogo *</label>
-    <select id="produto_base_id" name="produto_base_id" required>
+    {% if custo_protegido %}<input type="hidden" name="produto_base_id" value="{{ form.produto_base_id or '' }}">{% endif %}
+    <select id="produto_base_id" {% if not custo_protegido %}name="produto_base_id" required{% else %}disabled{% endif %} {{ atributos_erro('produto_base_id') }}>
       <option value="">Selecione…</option>
       {% for produto_id, rotulo in opcoes_produtos %}
       <option value="{{ produto_id }}"
-        {{ "selected" if (form.produto_base_id|string == produto_id|string) or (selecionado_produto == produto_id) else "" }}>
+        {{ "selected" if form.produto_base_id|string == produto_id|string else "" }}>
         {{ rotulo }}
       </option>
       {% endfor %}
     </select>
+    {{ erro('produto_base_id') }}
 
     <label for="data_aplicacao">Data da aplicação *</label>
     <input type="date" id="data_aplicacao" name="data_aplicacao" required
-           value="{{ form.data_aplicacao or '' }}">
+           value="{{ form.data_aplicacao or '' }}" {{ atributos_erro('data_aplicacao') }}>
+    {{ erro('data_aplicacao') }}
 
-    <label for="dose">Dose</label>
-    <input type="text" id="dose" name="dose" placeholder="Ex.: 2,5"
-           value="{{ form.dose if form.dose is not none else '' }}">
+    <label for="dose">Dose histórica</label>
+    <input type="text" inputmode="decimal" id="dose" name="dose" placeholder="Ex.: 2,5" maxlength="32"
+           value="{{ form.dose if form.dose is not none else '' }}" {{ atributos_erro('dose') }}>
+    {{ erro('dose') }}
 
-    <label for="unidade">Unidade</label>
-    <input type="text" id="unidade" name="unidade" placeholder="kg/ha, L/ha"
-           value="{{ form.unidade or '' }}">
+    <label for="unidade">Unidade da dose</label>
+    <input type="text" id="unidade" name="unidade" placeholder="kg/ha, L/ha" maxlength="20"
+           value="{{ form.unidade or '' }}" {{ atributos_erro('unidade') }}>
+    {{ erro('unidade') }}
+    <label for="quantidade_utilizada">Quantidade efetivamente utilizada</label>
+    <input type="text" inputmode="decimal" id="quantidade_utilizada" name="quantidade_utilizada" placeholder="Ex.: 15" maxlength="32"
+           value="{{ form.quantidade_utilizada if form.quantidade_utilizada is defined and form.quantidade_utilizada is not none else '' }}" {{ 'readonly' if custo_protegido }} {{ atributos_erro('quantidade_utilizada') }}>
+    {{ erro('quantidade_utilizada') }}
+    <label for="unidade_quantidade">Unidade da quantidade utilizada</label>
+    <input type="text" id="unidade_quantidade" name="unidade_quantidade" placeholder="Ex.: L, kg" maxlength="20"
+           value="{{ form.unidade_quantidade or '' }}" {{ 'readonly' if custo_protegido }} {{ atributos_erro('unidade_quantidade') }}>
+    {{ erro('unidade_quantidade') }}
+    <p class="hint">Dose e quantidade total são distintas: por exemplo, 2 L/ha e 15 L utilizados. A quantidade não é estimada pela dose ou pela área.</p>
 
-    <label for="responsavel">Responsável</label>
-    <input type="text" id="responsavel" name="responsavel" value="{{ form.responsavel or '' }}">
+    {{ responsavel(form, opcoes_responsaveis|default([])) }}
+
+    {% if edita_custos %}
+    <fieldset class="operacional-custo">
+      <legend>Custo efetivamente conhecido</legend>
+      <label for="custo_unitario">Custo por unidade utilizada (R$)</label>
+      <input type="text" inputmode="decimal" id="custo_unitario" name="custo_unitario" maxlength="32"
+             value="{{ form.custo_unitario if form.custo_unitario is defined and form.custo_unitario is not none else '' }}" {{ atributos_erro('custo_unitario') }}>
+      {{ erro('custo_unitario') }}
+      <label for="custo_total">Custo total informado (R$)</label>
+      <input type="text" inputmode="decimal" id="custo_total" name="custo_total" maxlength="32"
+             value="{{ form.custo_total if form.custo_total is defined and form.custo_total is not none and form.origem_custo|default('') != 'calculado_quantidade_unitario' else '' }}"
+             {% if form.origem_custo|default('') == 'calculado_quantidade_unitario' %}placeholder="Atual: {{ numero(form.custo_total) }}; recalculado ao salvar"{% endif %} {{ atributos_erro('custo_total') }}>
+      {{ erro('custo_total') }}
+      <label for="moeda">Moeda do custo</label>
+      <select id="moeda" name="moeda" {{ atributos_erro('moeda') }}><option value="BRL">BRL — Real brasileiro</option></select>
+      {{ erro('moeda') }}
+      <p class="hint">O custo unitário corresponde à unidade da quantidade utilizada. Com ambos informados, o total é calculado no salvamento. Não há uso automático de preço do catálogo nem lançamento financeiro. Deixe valores desconhecidos em branco.</p>
+    </fieldset>
+    {% elif ve_custos %}
+    <div class="operacional-custo">
+      <p><strong>Custo unitário:</strong> {{ numero(form.custo_unitario) }}{% if form.custo_unitario is defined and form.custo_unitario is not none and form.custo_unitario|string != '' %} BRL{% endif %}</p>
+      <p><strong>Custo total:</strong> {{ numero(form.custo_total) }}{% if form.custo_total is defined and form.custo_total is not none and form.custo_total|string != '' %} BRL{% endif %}</p>
+      {% if custo_protegido %}<p class="hint">Produto e quantidade deste registro exigem permissão de edição de custos para serem alterados.</p>{% endif %}
+    </div>
+    {% endif %}
+    {{ erro('custo') }}
 
     <label for="observacao">Observação</label>
-    <textarea id="observacao" name="observacao" rows="3">{{ form.observacao or '' }}</textarea>
+    <textarea id="observacao" name="observacao" rows="3" maxlength="5000" {{ atributos_erro('observacao') }}>{{ form.observacao or '' }}</textarea>
+    {{ erro('observacao') }}
 
     <div class="form-acoes">
-      <button type="submit" class="btn-acao">Salvar</button>
+      <button type="submit" class="btn-acao" data-save-button>Salvar</button>
       <a href="{{ url_for('aplicacoes.index') }}">Cancelar</a>
     </div>
+    <p class="hint" data-save-status aria-live="polite"></p>
   </form>
   {% else %}
   <p><a href="{{ url_for('aplicacoes.index') }}">Voltar para aplicações</a></p>
   {% endif %}
 </section>
 {% endblock %}
+{% block extra_scripts %}<script src="{{ url_for('static', filename='js/atividades.js') }}" defer></script>{% endblock %}
