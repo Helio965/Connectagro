@@ -26,6 +26,17 @@ def _agora_utc():
     return datetime.now(timezone.utc).replace(microsecond=0)
 
 
+def _token_expirado(registro):
+    """Interpreta inclusive datas legadas sem timezone; inválidas são recusadas."""
+    try:
+        expira = datetime.fromisoformat(registro.expira_em)
+        if expira.tzinfo is None:
+            expira = expira.replace(tzinfo=timezone.utc)
+    except (ValueError, TypeError):
+        return True
+    return _agora_utc() > expira
+
+
 def solicitar_reset_por_email(email, *, request=None):
     """Cria um token de recuperação para o e-mail, se válido e ativo.
 
@@ -114,19 +125,11 @@ def validar_token_reset(token):
     token_hash = _hash_token(token)
     registro = SenhaResetToken.query.filter_by(
         token_hash=token_hash, usado=False
-    ).first()
+    ).populate_existing().first()
     if registro is None:
         return None
 
-    # Verifica expiração.
-    try:
-        expira = datetime.fromisoformat(registro.expira_em)
-        if expira.tzinfo is None:
-            expira = expira.replace(tzinfo=timezone.utc)
-    except (ValueError, TypeError):
-        return None
-
-    if _agora_utc() > expira:
+    if _token_expirado(registro):
         return None
 
     return registro
@@ -150,17 +153,48 @@ def redefinir_senha_com_token(token, nova_senha, confirmar_senha):
     if registro is None:
         return False, ["Link de redefinição inválido, expirado ou já utilizado."]
 
-    usuario = db.session.get(Usuario, registro.usuario_id)
-    if usuario is None or not usuario.ativo:
-        return False, ["Usuário não encontrado ou inativo."]
+    usuario_id = registro.usuario_id
+    # O hash é caro: calculá-lo antes de adquirir locks evita prender a conta
+    # durante esse trabalho. Toda autorização precisa ser relida depois dele.
+    senha_hash = gerar_hash_senha(nova_senha)
+    try:
+        usuario = (Usuario.query.filter_by(id=usuario_id).populate_existing()
+                   .with_for_update().first())
+        if usuario is None or not usuario.ativo:
+            db.session.rollback()
+            return False, ["Usuário não encontrado ou inativo."]
+        registro = validar_token_reset(token)
+        if registro is None:
+            db.session.rollback()
+            return False, ["Link de redefinição inválido, expirado ou já utilizado."]
 
-    # Atualiza a senha.
-    usuario.senha_hash = gerar_hash_senha(nova_senha)
-    usuario.atualizado_em = iso_now()
+        # SELECT FOR UPDATE protege a conta no PostgreSQL. No SQLite ele não
+        # existe: o UPDATE condicional disputa a escrita e somente um consumo
+        # pode alterar usado=False. Token, senha e epoch confirmam juntos.
+        consumo = db.session.execute(db.update(SenhaResetToken).where(
+            SenhaResetToken.id == registro.id,
+            SenhaResetToken.usado.is_(False),
+        ).values(usado=True, usado_em=iso_now()),
+            execution_options={"synchronize_session": False})
+        if consumo.rowcount != 1:
+            db.session.rollback()
+            return False, ["Link de redefinição inválido, expirado ou já utilizado."]
 
-    # Marca o token como usado.
-    registro.usado = True
-    registro.usado_em = iso_now()
-
-    db.session.commit()
-    return True, []
+        # A disputa pela escrita SQLite também pode ter esperado uma inativação
+        # ou ter atravessado a expiração. Revalidar sob o lock já adquirido.
+        db.session.refresh(usuario)
+        db.session.refresh(registro)
+        if not usuario.ativo:
+            db.session.rollback()
+            return False, ["Usuário não encontrado ou inativo."]
+        if _token_expirado(registro):
+            db.session.rollback()
+            return False, ["Link de redefinição inválido, expirado ou já utilizado."]
+        usuario.senha_hash = senha_hash
+        usuario.atualizado_em = iso_now()
+        # Atribuição ORM mantém a revogação persistente do mapper Usuario.
+        db.session.commit()
+        return True, []
+    except Exception:
+        db.session.rollback()
+        raise

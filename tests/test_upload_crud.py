@@ -54,6 +54,116 @@ def _primeiro_upload(app_db):
         return UploadArquivo.query.first()
 
 
+def test_falha_sql_ao_remover_preserva_documento_e_download(app_db, monkeypatch):
+    from sqlalchemy.exc import SQLAlchemyError
+    from app.models import UploadArquivo
+
+    client = _login(app_db, "a@connectagro.com")
+    assert _upload(client, conteudo=b"documento preservado").status_code == 302
+    arquivo = _primeiro_upload(app_db)
+    arquivo_id, relativo = arquivo.id, arquivo.caminho
+    caminho = os.path.join(app_db.config["UPLOAD_FOLDER"], relativo)
+
+    def falhar():
+        raise SQLAlchemyError("falha de commit simulada")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(db.session, "commit", falhar)
+        response = client.post(f"/upload/{arquivo_id}/remover")
+    assert response.status_code == 409
+    assert "O arquivo foi preservado" in response.get_data(as_text=True)
+    with app_db.app_context():
+        assert db.session.get(UploadArquivo, arquivo_id) is not None
+    with open(caminho, "rb") as documento:
+        assert documento.read() == b"documento preservado"
+    response = client.get(f"/upload/{arquivo_id}/download")
+    assert response.status_code == 200
+    assert response.data == b"documento preservado"
+
+
+def test_falha_sql_no_upload_limpa_arquivo_sem_registro(app_db, monkeypatch):
+    from pathlib import Path
+    from sqlalchemy.exc import SQLAlchemyError
+    from app.models import UploadArquivo
+
+    client = _login(app_db, "a@connectagro.com")
+
+    def falhar():
+        raise SQLAlchemyError("falha de commit simulada")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(db.session, "commit", falhar)
+        response = _upload(client)
+    assert response.status_code == 409
+    assert "Não foi possível registrar o arquivo" in response.get_data(as_text=True)
+    with app_db.app_context():
+        assert UploadArquivo.query.count() == 0
+    assert not [p for p in Path(app_db.config["UPLOAD_FOLDER"]).rglob("*") if p.is_file()]
+
+
+def test_falha_de_limpeza_apos_exclusao_nao_recria_registro(app_db, monkeypatch):
+    from app.blueprints.upload import routes
+    from app.models import UploadArquivo
+
+    client = _login(app_db, "a@connectagro.com")
+    assert _upload(client).status_code == 302
+    arquivo = _primeiro_upload(app_db)
+    arquivo_id, relativo = arquivo.id, arquivo.caminho
+    caminho = os.path.join(app_db.config["UPLOAD_FOLDER"], relativo)
+
+    def falhar(caminho):
+        raise PermissionError("falha de armazenamento simulada")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(routes.os, "remove", falhar)
+        response = client.post(f"/upload/{arquivo_id}/remover", follow_redirects=True)
+    assert response.status_code == 200
+    assert "limpeza do arquivo" in response.get_data(as_text=True)
+    assert os.path.isfile(caminho)
+    with app_db.app_context():
+        assert db.session.get(UploadArquivo, arquivo_id) is None
+    assert client.get(f"/upload/{arquivo_id}/download").status_code == 404
+
+
+def test_falha_de_escrita_limpa_arquivo_parcial(app_db, monkeypatch):
+    from pathlib import Path
+    from werkzeug.datastructures import FileStorage
+    from app.models import UploadArquivo
+
+    client = _login(app_db, "a@connectagro.com")
+
+    def falhar(storage, destino):
+        Path(destino).write_bytes(b"parcial")
+        raise OSError("disco indisponivel")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(FileStorage, "save", falhar)
+        response = _upload(client)
+    assert response.status_code == 503
+    assert "Não foi possível armazenar o arquivo" in response.get_data(as_text=True)
+    with app_db.app_context():
+        assert UploadArquivo.query.count() == 0
+    assert not [p for p in Path(app_db.config["UPLOAD_FOLDER"]).rglob("*") if p.is_file()]
+
+
+def test_pasta_upload_indisponivel_mostra_erro_controlado(app_db, monkeypatch):
+    from app.blueprints.upload import routes
+    from app.models import UploadArquivo
+
+    client = _login(app_db, "a@connectagro.com")
+
+    def falhar(*args, **kwargs):
+        raise PermissionError("pasta indisponivel")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(routes.os, "makedirs", falhar)
+        response = _upload(client)
+    assert response.status_code == 503
+    assert "Não foi possível armazenar o arquivo" in response.get_data(as_text=True)
+    with app_db.app_context():
+        assert UploadArquivo.query.count() == 0
+
+
 def test_upload_folder_padrao_fica_fora_de_static_publico():
     from app.config import BaseConfig
 

@@ -1,5 +1,27 @@
 # tests/
 
+## Qualidade e integração contínua — Etapa 08
+
+O workflow `.github/workflows/tests.yml` executa a suíte inteira em Python 3.12
+no Linux, em Pull Requests e pushes para `main`/`codex/**`. Também verifica
+dependências (`python -m pip check`), compilação (`python -m compileall -q src tests`),
+sintaxe dos cinco scripts de produto (`node --check`) e tamanho/SHA-256 dos 19
+assets Leaflet/Draw contra o manifesto versionado. Não usa credenciais reais,
+Supabase, SMTP ou deploy. O timeout é 15 minutos.
+
+Da raiz, com `.venv` ativa, execute `python -m pytest -q`. A suíte usa SQLite
+em memória e bases temporárias em disco para migrations/concorrência. Os testes
+de CSRF ativam a proteção explicitamente; os de produção usam apenas
+configuração e bancos sintéticos. Não aponte testes ou migrations ao banco real.
+PostgreSQL e navegador não são cobertos automaticamente por esse workflow.
+Execução no GitHub só é comprovada pelo resultado na aba Actions; a validação
+local do YAML ou das mesmas instruções não substitui essa evidência.
+
+Resultados atuais e regressões específicas de migrations estão no
+[relatório da Etapa 08](../docs/auditoria/08-qualidade-tecnica-integracao.md).
+Resultados dos relatórios anteriores são históricos e não substituem a execução
+no ambiente atual. Nenhum teste de segurança foi removido para a integração.
+
 ## Catálogo global/local — Etapa 07
 
 - `test_catalogo_seed_stage7.py`: identidade ID↔slug, validação, proveniência de
@@ -36,7 +58,8 @@ Testes automatizados do **ConnectAgro** (pytest).
 ## Estado atual
 
 Os testes usam a **Application Factory** (`create_app("testing")`) com banco
-**SQLite em memória** (ver `conftest.py`) e **não** dependem de banco `.db` real.
+**SQLite em memória** (ver `conftest.py`) ou configurações sintéticas com arquivos
+temporários (migrations e concorrência), sem depender de banco real.
 Testes de upload usam pasta temporária (`tmp_path`) para não escrever arquivos
 reais no repositório. O `TestingConfig` mantém `WTF_CSRF_ENABLED = False` por
 padrão para preservar os testes existentes; `test_csrf.py` ativa CSRF
@@ -58,7 +81,7 @@ Arquivos existentes:
 - **`test_placeholder_routes.py`** — rotas públicas respondem 200; rotas dos
   módulos protegidos redirecionam sem login e respondem 200 com login quando o
   perfil possui permissão.
-- **`test_models_schema.py`** — registro das 18 tabelas no metadata; colunas
+- **`test_models_schema.py`** — registro do subconjunto de 18 tabelas do MVP no metadata; colunas
   principais; `db.create_all()`; inserção mínima; unicidade de `usuario.email` e
   `produto_base.slug`; `produto_preco`/`produto_imagem` existem como tabelas; seed
   não importado automaticamente.
@@ -116,11 +139,11 @@ Arquivos existentes:
   culturas, financeiro, equipe, colheita, aplicações e uploads; não vaza dados de
   outra propriedade; mostra totais globais do catálogo; exibe estados vazios;
   contém atalhos principais; e não contém termos de venda.
-- **`test_mapa_real.py`** — Mapa real simplificado: exige login; `/mapa/` e
+- **`test_mapa_real.py`** — contratos de leitura do mapa: exige login; `/mapa/` e
   `/mapa/dados` respondem com login; JSON é escopado pela propriedade atual e não
-  expõe usuário/e-mail; separa glebas com coordenadas válidas das sem coordenadas
-  válidas; ignora GeoJSON inválido sem quebrar; não possui rotas POST; mostra
-  estados vazios; e não apresenta recursos avançados como funcionalidade ativa.
+  expõe usuário/e-mail; distingue áreas com/sem polígono; ignora GeoJSON inválido
+  sem quebrar; mostra estados vazios. Rotas de edição por POST são cobertas
+  separadamente pelos testes de mapa avançado e território.
 - **`test_ia_simulada.py`** — IA Simulada Operacional: exige login; `/ia/`
   responde com login; mostra avisos obrigatórios; POST válido salva
   `IaInteracao`; valida pergunta vazia e limite de 1000 caracteres; vincula
@@ -176,7 +199,7 @@ Arquivos existentes:
 Para rodar:
 
 ```bash
-pytest
+python -m pytest -q
 ```
 
 ## Testes do MVP ampliado (Fase 7)

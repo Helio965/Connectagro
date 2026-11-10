@@ -9,6 +9,7 @@ from datetime import date
 from decimal import Decimal, InvalidOperation
 
 from sqlalchemy import and_, or_
+from sqlalchemy.orm import joinedload
 
 from ..models import (
     AplicacaoInsumo,
@@ -42,10 +43,16 @@ class FiltroInvalidoError(ValueError):
 # ---------------------------------------------------------------------------
 
 def validar_periodo(data_inicio, data_fim):
-    """Valida um período (datas ISO ``yyyy-mm-dd`` como texto).
-
-    Lança ``FiltroInvalidoError`` se ``data_inicio > data_fim``.
-    """
+    """Exige datas civis ISO válidas antes de compará-las como texto."""
+    for valor in (data_inicio, data_fim):
+        if valor in (None, ""):
+            continue
+        try:
+            if (not isinstance(valor, str) or len(valor) != 10
+                    or date.fromisoformat(valor).isoformat() != valor):
+                raise ValueError
+        except (TypeError, ValueError):
+            raise FiltroInvalidoError("Informe datas válidas no formato AAAA-MM-DD.") from None
     if data_inicio and data_fim and data_inicio > data_fim:
         raise FiltroInvalidoError("A data inicial não pode ser maior que a data final.")
 
@@ -244,13 +251,6 @@ def formatar_decimal_operacional(valor, casas=None):
 
 
 def _filtros_operacionais(propriedade, data_inicio, data_fim, gleba_id, tipo_atividade):
-    for valor in (data_inicio, data_fim):
-        if valor:
-            try:
-                if len(valor) != 10 or date.fromisoformat(valor).isoformat() != valor:
-                    raise ValueError
-            except (TypeError, ValueError):
-                raise FiltroInvalidoError("Informe datas válidas no formato AAAA-MM-DD.") from None
     validar_periodo(data_inicio, data_fim)
     area = None
     if gleba_id not in (None, ""):
@@ -283,6 +283,9 @@ def montar_relatorio_operacional(propriedade, data_inicio=None, data_fim=None,
     area, tipo = _filtros_operacionais(
         propriedade, data_inicio, data_fim, gleba_id, tipo_atividade)
     atividades_query = (AtividadeOperacional.query
+                        .options(joinedload(AtividadeOperacional.gleba),
+                                 joinedload(AtividadeOperacional.cultura_gleba)
+                                 .joinedload(CulturaGleba.cultura))
                         .join(Gleba, AtividadeOperacional.gleba_id == Gleba.id)
                         .outerjoin(CulturaGleba, AtividadeOperacional.cultura_gleba_id == CulturaGleba.id)
                         .outerjoin(Cultura, CulturaGleba.cultura_id == Cultura.id)
@@ -293,7 +296,11 @@ def montar_relatorio_operacional(propriedade, data_inicio=None, data_fim=None,
     atividades_query = filtrar_por_periodo_query(
         atividades_query, AtividadeOperacional.data_execucao, data_inicio, data_fim)
     aplicacoes_query = filtrar_por_periodo_query(
-        _aplicacoes_da_propriedade_query(propriedade), AplicacaoInsumo.data_aplicacao,
+        _aplicacoes_da_propriedade_query(propriedade).options(
+            joinedload(AplicacaoInsumo.produto),
+            joinedload(AplicacaoInsumo.cultura_gleba).joinedload(CulturaGleba.gleba),
+            joinedload(AplicacaoInsumo.cultura_gleba).joinedload(CulturaGleba.cultura)),
+        AplicacaoInsumo.data_aplicacao,
         data_inicio, data_fim)
     if area is not None:
         atividades_query = atividades_query.filter(AtividadeOperacional.gleba_id == area.id)
@@ -307,7 +314,9 @@ def montar_relatorio_operacional(propriedade, data_inicio=None, data_fim=None,
     ids_atividades = [atividade.id for atividade in atividades]
     itens_por_atividade = defaultdict(list)
     if ids_atividades:
-        for item in AtividadeItem.query.filter(AtividadeItem.atividade_id.in_(ids_atividades)).order_by(AtividadeItem.id).all():
+        for item in (AtividadeItem.query.options(joinedload(AtividadeItem.produto))
+                     .filter(AtividadeItem.atividade_id.in_(ids_atividades))
+                     .order_by(AtividadeItem.id).all()):
             itens_por_atividade[item.atividade_id].append(item)
 
     # Nomes de contas são operacionais, sem e-mail/perfil/equipe. Uma FK antiga

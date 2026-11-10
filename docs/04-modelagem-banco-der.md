@@ -2,7 +2,7 @@
 
 ## Status do documento
 
-**DER do MVP — v0.4 (alinhado aos modelos SQLAlchemy implementados, incluindo Fase 7.1).**
+**DER — v0.5 (modelos SQLAlchemy até a Etapa 07; 25 tabelas de domínio).**
 
 Este documento descreve a modelagem de dados do ConnectAgro e serve como
 **referência documental dos modelos SQLAlchemy já implementados** em
@@ -52,6 +52,7 @@ Usuários que acessam o sistema (autenticação e dono das propriedades).
 - `senha_hash` — hash da senha (**nunca** em texto puro).
 - `perfil` — perfil de acesso oficial: `admin`, `tecnico`, `trabalhador`.
 - `ativo` — usuário ativo (`BOOLEAN`).
+- `auth_version` — epoch persistente de autenticação; revoga cookies anteriores.
 - `criado_em`, `atualizado_em` — controle temporal.
 
 ### `propriedade`
@@ -118,6 +119,7 @@ dependem da definição de autorização/contexto; a FK continua obrigatória.
 - `poligono_geojson` — delimitação própria da Área de Plantio em GeoJSON
   (`TEXT`, opcional), preservada separadamente do contorno da Propriedade.
 - `tipo_solo` — tipo de solo (opcional).
+- `status` — situação da área; padrão `ativa` no modelo.
 - `observacoes` — texto livre (opcional).
 - `criado_em`, `atualizado_em` — controle temporal.
 
@@ -139,7 +141,7 @@ Cobre defensivos, fertilizantes, corretivos, inoculantes e outros insumos.
 - `cultura_gleba_id` — FK → `cultura_gleba` (onde foi aplicado).
 - `produto_base_id` — FK → `produto_base` (o que foi aplicado).
 - `data_aplicacao` — data da aplicação.
-- `dose` — quantidade aplicada (opcional).
+- `dose` — dose histórica informada (opcional), distinta do consumo total.
 - `unidade` — unidade da dose (ex.: kg/ha, L/ha) (opcional).
 - `responsavel` — quem aplicou/registrou (opcional).
 - `observacao` — texto livre (opcional).
@@ -323,7 +325,7 @@ produto, com fonte/licença rastreadas e status ainda não consolidado.
 
 - `id` — PK.
 - `produto_id` — FK → `produto_base`.
-- `url` — caminho/URL da imagem (**pendência no MVP**; pode ser `NULL`).
+- `url` — caminho/URL opcional; o seed informa imagem local com fonte/licença rastreadas.
 - `fonte` — origem da imagem (**não usar imagem sem fonte**).
 - `status_validacao` — no MVP: `pendente`, `nao_consolidado` (ou equivalente).
 - `observacoes` — texto livre.
@@ -423,7 +425,9 @@ erDiagram
 
 ## Pendências e decisões em aberto
 
-- Formato definitivo e validação do `poligono_geojson` (mapa real).
+- GeoJSON já é validado estrutural e geometricamente com Shapely na Etapa 05.
+  Permanecem pendentes a autorização/modelagem de Áreas de Plantio independentes
+  e o eventual cálculo geodésico de hectares, sem alterar áreas informadas.
 - Eventual tabela de roles/permissões fora do escopo atual; o MVP usa matriz em
   código por `usuario.perfil`.
 - Normalização futura dos campos de **lista** (JSON → tabelas auxiliares).

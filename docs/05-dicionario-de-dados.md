@@ -2,7 +2,7 @@
 
 ## Status do documento
 
-**Dicionário de Dados — v0.5 (MVP ampliado concluído; 18 tabelas).**
+**Dicionário de Dados — v0.6 (Etapa 07; 25 tabelas de domínio).**
 
 Detalha as tabelas e campos derivados do [DER](./04-modelagem-banco-der.md) e está
 **alinhado** a ele (mesmos nomes de tabelas e campos), servindo como **referência
@@ -43,6 +43,13 @@ permanece em **18 tabelas**.
 A Fase 7.6 (revisão final do MVP ampliado) **não** altera o schema: não cria
 model, migration, tabela ou dependência. O total final do MVP ampliado permanece
 em **18 tabelas**.
+
+As contagens acima descrevem as fases históricas. A Etapa 06 acrescenta
+`atividade_operacional` e `atividade_item` (20 tabelas), e a Etapa 07 acrescenta
+`catalogo_controle`, `produto_local`, `produto_personalizacao`, `catalogo_revisao`
+e `solicitacao_catalogo`, chegando a **25 tabelas de domínio**. A tabela técnica
+`alembic_version` não entra nessa contagem. A revisão vigente é `g7c53b8e19a2`;
+não use `init-db`/`create_all()` para atualizar banco existente.
 
 ## Objetivo
 
@@ -87,13 +94,17 @@ Usuários do sistema (autenticação e perfil de acesso).
 | senha_hash    | TEXT    | Sim         |       | Hash da senha                   | Nunca armazenar senha em texto puro |
 | perfil        | TEXT    | Sim         |       | Perfil de acesso                | `admin`, `tecnico`, `trabalhador` |
 | ativo         | BOOLEAN | Sim         |       | Usuário ativo                   | `0`/`1`; padrão `1`               |
+| auth_version  | INTEGER | Sim         |       | Epoch persistente de autenticação | Padrão `1`; revogação invalida cookies anteriores |
 | criado_em     | TEXT    | Sim         |       | Data/hora de criação            | ISO 8601                          |
 | atualizado_em | TEXT    | Não         |       | Data/hora da última atualização | ISO 8601                          |
 
 Observação: permissões por perfil são resolvidas em código, não por tabela de
-permissões. A sessão guarda o perfil atual em `user_perfil` e os templates usam
-`can(...)` como apoio visual; o bloqueio obrigatório acontece nas rotas com
-`require_permission(...)`.
+permissões. A sessão identifica a conta por `user_id` e `auth_version`; nome,
+e-mail, perfil, atividade da conta e epoch são revalidados no banco a cada
+requisição. O contexto selecionado fica em `propriedade_ativa_id` e depende de
+vínculo ativo. Os templates usam `can(...)` como apoio visual; o bloqueio
+obrigatório acontece nas rotas com `require_permission(...)`. A capacidade
+`catalogo_global_aprovador` está detalhada na extensão da Etapa 07 abaixo.
 
 ### Tabela: `propriedade`
 Propriedade rural gerida pelo usuário.
@@ -154,14 +165,12 @@ do token; o token puro **nunca** é persistido e **nenhuma senha** é gravada aq
 | Campo                  | Tipo    | Obrigatório | Chave | Descrição                          | Observações                                  |
 |------------------------|---------|-------------|-------|------------------------------------|----------------------------------------------|
 | id                     | INTEGER | Sim         | PK    | Identificador único                | Autoincremento                               |
-| usuario_id             | INTEGER | Sim         | FK    | Usuário do token                   | FK para `usuario(id)`; indexado              |
+| usuario_id             | INTEGER | Sim         | FK    | Usuário do token                   | FK para `usuario(id)`                        |
 | token_hash             | TEXT    | Sim         | UQ    | Hash SHA-256 do token              | Único; nunca o token puro                    |
 | usado                  | BOOLEAN | Sim         |       | Token já utilizado                 | `0`/`1`; padrão `0`; uso único               |
 | criado_em              | TEXT    | Sim         |       | Data/hora de criação               | ISO 8601                                     |
 | expira_em              | TEXT    | Sim         |       | Data/hora de expiração             | ISO 8601; validade configurável              |
 | usado_em               | TEXT    | Não         |       | Data/hora de uso                   | ISO 8601                                     |
-| ip_solicitacao         | TEXT    | Não         |       | IP da solicitação                  | Dado mínimo de rastreio                      |
-| user_agent_solicitacao | TEXT    | Não         |       | User-Agent da solicitação          | Dado mínimo de rastreio                      |
 
 Restrições: `token_hash` é único. Solicitar um novo token invalida (marca como
 usados) os tokens abertos anteriores do mesmo usuário. Tokens expirados, usados
@@ -198,6 +207,7 @@ Culturas cadastradas na propriedade.
 | area_ha          | REAL    | Não         |       | Área em hectares           |                                      |
 | poligono_geojson | TEXT    | Não         |       | Polígono da área (GeoJSON) | JSON em `TEXT`; editável no mapa (Fase 7.5) com permissão `mapa.edit` |
 | tipo_solo        | TEXT    | Não         |       | Tipo de solo               |                                      |
+| status           | TEXT    | Sim         |       | Situação da área            | Padrão `ativa` no modelo              |
 | observacoes      | TEXT    | Não         |       | Texto livre                |                                      |
 | criado_em        | TEXT    | Sim         |       | Data/hora de criação       | ISO 8601                             |
 | atualizado_em    | TEXT    | Não         |       | Data/hora de atualização   | ISO 8601                             |
@@ -359,8 +369,8 @@ Tabela central do catálogo.
   Valores como `validado_agrofit`/`validado_sipeagro` só existirão após validação
   comprovada (não no MVP).
 - A importação do catálogo é feita via CLI e popula `produto_base` e
-  `produto_tecnico`; não cria preços, imagens, venda, carrinho, checkout ou
-  cotação.
+  `produto_tecnico`, além de imagens locais rastreadas em `produto_imagem`;
+  não cria preços, venda, carrinho, checkout ou cotação.
 
 ### Tabela: `produto_tecnico`
 Informações técnicas do produto.
@@ -413,7 +423,7 @@ rastreadas e status ainda não consolidado.
 |------------------|---------|-------------|-------|-----------------------|-----------------------------------|
 | id               | INTEGER | Sim         | PK    | Identificador único   | Autoincremento                    |
 | produto_id       | INTEGER | Sim         | FK    | Produto da imagem     | FK para `produto_base(id)`        |
-| url              | TEXT    | Não         |       | Caminho/URL da imagem | **Pendência**: `NULL` no MVP      |
+| url              | TEXT    | Não         |       | Caminho/URL da imagem | Seed informa caminho local rastreado |
 | fonte            | TEXT    | Não         |       | Origem da imagem      | Não usar imagem sem fonte         |
 | status_validacao | TEXT    | Sim         |       | Situação do dado      | MVP: `pendente`/`nao_consolidado` |
 | observacoes      | TEXT    | Não         |       | Texto livre           |                                   |
@@ -473,16 +483,16 @@ por propriedade e consultados apenas pelo `admin`.
 | Campo          | Tipo    | Obrigatório | Chave | Descrição                          | Observações                                  |
 |----------------|---------|-------------|-------|------------------------------------|----------------------------------------------|
 | id             | INTEGER | Sim         | PK    | Identificador único                | Autoincremento                               |
-| usuario_id     | INTEGER | Não         | FK    | Usuário da ação                    | FK para `usuario(id)`; indexado; nulo em evento público |
-| propriedade_id | INTEGER | Não         | FK    | Propriedade de contexto            | FK para `propriedade(id)`; indexado          |
-| acao           | TEXT    | Sim         |       | Ação auditada                      | Indexado; ex.: `glebas.create`, `auth.login.sucesso` |
+| usuario_id     | INTEGER | Não         |       | Identificador do usuário da ação   | Sem FK; nulo em evento público                |
+| propriedade_id | INTEGER | Não         |       | Identificador do contexto          | Sem FK; preserva referência histórica         |
+| acao           | TEXT    | Sim         |       | Ação auditada                      | Ex.: `glebas.create`, `auth.login.sucesso`     |
 | entidade       | TEXT    | Não         |       | Tipo da entidade afetada           | Ex.: `gleba`, `usuario`                      |
-| entidade_id    | TEXT    | Não         |       | Identificador da entidade          | Texto curto                                  |
+| entidade_id    | INTEGER | Não         |       | Identificador da entidade          | Identificador numérico ou NULL                |
 | resultado      | TEXT    | Sim         |       | Resultado da ação                  | `sucesso`, `falha`, `negado`                 |
 | descricao      | TEXT    | Não         |       | Descrição curta                    | Até 500 chars; sem dados sensíveis           |
 | ip             | TEXT    | Não         |       | IP da requisição                   | Dado mínimo de rastreio                      |
 | user_agent     | TEXT    | Não         |       | User-Agent da requisição           | Dado mínimo de rastreio                      |
-| criado_em      | TEXT    | Sim         |       | Data/hora do evento                | ISO 8601; indexado                           |
+| criado_em      | TEXT    | Sim         |       | Data/hora do evento                | ISO 8601                                     |
 
 ---
 

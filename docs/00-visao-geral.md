@@ -73,7 +73,8 @@ em todas as etapas:
   Flask-SQLAlchemy + Flask-Migrate
 - **Segurança:** sessão Flask, permissões por perfil e CSRF/Flask-WTF
 - **Exportações:** CSV com biblioteca padrão e PDF com ReportLab
-- **Mapa:** Leaflet + Leaflet.draw via CDN
+- **Mapa:** Leaflet + Leaflet.draw servidos localmente, Shapely/GEOS para
+  validação geométrica e tiles OpenStreetMap externos
 - **Frontend:** HTML, CSS, JavaScript
 
 ## Documentos relacionados

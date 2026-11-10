@@ -13,6 +13,7 @@ from flask import (
     url_for,
 )
 from werkzeug.utils import secure_filename
+from sqlalchemy.exc import SQLAlchemyError
 
 from ...extensions import db
 from ...models import UploadArquivo
@@ -94,6 +95,22 @@ def tamanho_arquivo(file_storage):
     return tamanho
 
 
+def _remover_arquivo_fisico(caminho):
+    """Limpeza posterior ao SQL; falha de disco não desfaz commit confirmado.
+
+    Um resíduo fica privado, sem registro que permita baixá-lo. Não registrar
+    caminhos ou nomes originais de documentos nos logs.
+    """
+    try:
+        os.remove(caminho)
+    except FileNotFoundError:
+        pass
+    except OSError:
+        current_app.logger.error("Não foi possível limpar um arquivo privado de upload.")
+        return False
+    return True
+
+
 def formatar_tamanho(bytes_):
     if bytes_ is None:
         return "—"
@@ -172,11 +189,20 @@ def novo():
                                    extensoes=sorted(EXTENSOES_PERMITIDAS),
                                    max_upload_mb=_max_upload_mb()), 400
 
-        pasta_absoluta, pasta_relativa = obter_pasta_upload_propriedade(propriedade.id)
-        caminho_absoluto = os.path.abspath(os.path.join(pasta_absoluta, dados_upload["nome_salvo"]))
-        if os.path.commonpath([pasta_absoluta, caminho_absoluto]) != pasta_absoluta:
-            abort(400)
-        file_storage.save(caminho_absoluto)
+        caminho_absoluto = None
+        try:
+            pasta_absoluta, pasta_relativa = obter_pasta_upload_propriedade(propriedade.id)
+            caminho_absoluto = os.path.abspath(os.path.join(pasta_absoluta, dados_upload["nome_salvo"]))
+            if os.path.commonpath([pasta_absoluta, caminho_absoluto]) != pasta_absoluta:
+                abort(400)
+            file_storage.save(caminho_absoluto)
+        except OSError:
+            if caminho_absoluto is not None:
+                _remover_arquivo_fisico(caminho_absoluto)
+            flash("Não foi possível armazenar o arquivo. Tente novamente.", "error")
+            return render_template("upload/form.html", form=request.form,
+                                   extensoes=sorted(EXTENSOES_PERMITIDAS),
+                                   max_upload_mb=_max_upload_mb()), 503
 
         caminho_relativo = f"{pasta_relativa}/{dados_upload['nome_salvo']}"
         arquivo = UploadArquivo(
@@ -188,7 +214,15 @@ def novo():
             descricao=vazio_para_none(request.form.get("descricao")),
         )
         db.session.add(arquivo)
-        db.session.commit()
+        try:
+            db.session.commit()
+        except SQLAlchemyError:
+            db.session.rollback()
+            _remover_arquivo_fisico(caminho_absoluto)
+            flash("Não foi possível registrar o arquivo. Tente novamente.", "error")
+            return render_template("upload/form.html", form=request.form,
+                                   extensoes=sorted(EXTENSOES_PERMITIDAS),
+                                   max_upload_mb=_max_upload_mb()), 409
         registrar_sucesso("upload.create", entidade="upload_arquivo",
                           entidade_id=arquivo.id, descricao="Arquivo enviado",
                           propriedade_id=propriedade.id, request=request)
@@ -228,14 +262,22 @@ def remover(arquivo_id):
     arquivo = _arquivo_da_propriedade_ou_404(arquivo_id, propriedade)
     caminho_absoluto = _caminho_absoluto_upload(arquivo.caminho, propriedade.id)
     arquivo_existia = os.path.isfile(caminho_absoluto)
-    if arquivo_existia:
-        os.remove(caminho_absoluto)
     db.session.delete(arquivo)
-    db.session.commit()
+    try:
+        db.session.commit()
+    except SQLAlchemyError:
+        db.session.rollback()
+        flash("Não foi possível remover o registro. O arquivo foi preservado.", "error")
+        abort(409, description="Não foi possível remover o registro. O arquivo foi preservado.")
+    # Nunca apagar conteúdo antes de confirmar a exclusão no banco: um
+    # rollback deve manter o documento disponível pelo registro original.
+    limpeza_concluida = not arquivo_existia or _remover_arquivo_fisico(caminho_absoluto)
     registrar_sucesso("upload.delete", entidade="upload_arquivo",
                       entidade_id=arquivo_id, descricao="Arquivo removido",
                       propriedade_id=propriedade.id, request=request)
-    if arquivo_existia:
+    if not limpeza_concluida:
+        flash("Registro removido. A limpeza do arquivo no armazenamento requer atenção do administrador.", "warning")
+    elif arquivo_existia:
         flash("Arquivo removido.", "success")
     else:
         flash("Registro removido. O arquivo físico já não existia.", "warning")

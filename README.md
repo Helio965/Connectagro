@@ -6,7 +6,7 @@ equipe, colheita, upload de documentos e mapa, oferecendo ainda apoio por uma
 camada de IA simulada, relatórios operacionais e um catálogo técnico de produtos
 agrícolas para consulta rápida.
 
-> **Status do projeto:** fundação Flask, **modelos SQLAlchemy** (18 tabelas),
+> **Status do projeto:** fundação Flask, **modelos SQLAlchemy** (25 tabelas),
 > **migrations** (Flask-Migrate), **importação do catálogo técnico** (via CLI),
 > **autenticação real** (login/logout), **recuperação de senha** (token seguro,
 > com envio do link por Flask-Mail/SMTP quando configurado), **permissões finas por perfil**,
@@ -22,7 +22,8 @@ agrícolas para consulta rápida.
 > histórico operacional) e **Upload de Arquivos** (armazenamento local com
 > metadados), além da **consulta somente leitura** do catálogo de **Defensivos** e
 > **Fertilizantes** e dos **Relatórios Operacionais HTML** (geral, financeiro,
-> agrícola, aplicações e uploads), somente leitura. Não há CRUD de produtos;
+> agrícola, aplicações, uploads e histórico operacional), somente leitura.
+> A Etapa 07 acrescenta cadastros locais e publicação global controlada;
 > `produto_preco` continua **vazio**; `produto_imagem` é populado com imagens
 > locais de referência e fontes/licenças rastreadas. Os relatórios
 > têm **exportação CSV/PDF** operacional (Fase 7.4) e o mapa permite **editar o
@@ -131,11 +132,11 @@ como pós-MVP e devem preservar os limites de produto abaixo.
 
 ## Stack tecnológica (MVP)
 
-- **Backend:** Python + Flask
+- **Backend:** Python + Flask; Python 3.12 é o alvo de validação e CI
 - **Banco de dados:** SQLite (dev local) ou PostgreSQL/Supabase via `DATABASE_URL` + Flask-SQLAlchemy + Flask-Migrate
 - **Segurança de formulários:** Flask-WTF / CSRFProtect
 - **Exportações:** `csv` (biblioteca padrão) + ReportLab (PDF)
-- **Mapa:** Leaflet + Leaflet.draw (via CDN)
+- **Mapa:** Leaflet + Leaflet.draw locais e Shapely/GEOS; tiles OpenStreetMap externos
 - **Frontend:** HTML, CSS, JavaScript, Jinja2
 - **Testes:** pytest
 
@@ -158,7 +159,7 @@ como pós-MVP e devem preservar os limites de produto abaixo.
 │       ├── config.py      # configuração por ambiente
 │       ├── extensions.py  # extensões (Flask-SQLAlchemy, Flask-Migrate, CSRF)
 │       ├── blueprints/    # auth + CRUDs + catálogo + módulos protegidos
-│       ├── models/        # modelos SQLAlchemy de domínio (18 tabelas)
+│       ├── models/        # modelos SQLAlchemy de domínio (25 tabelas)
 │       ├── commands.py    # CLI: init-db, validate/import-catalog-seed, seed-users
 │       ├── services/      # regras de negócio e agregações (dashboard, IA, relatórios)
 │       ├── utils/         # auth.py, contexto.py, formatters.py, permissions.py
@@ -179,10 +180,11 @@ Fluxo recomendado, a partir da raiz do projeto:
 ```bash
 # 1. Ambiente virtual
 python -m venv .venv
-# ative o ambiente conforme seu SO (ex.: source .venv/bin/activate)
+# Linux/macOS: source .venv/bin/activate
+# Windows PowerShell: .venv\Scripts\Activate.ps1
 
 # 2. Dependências
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 
 # 3. Schema do banco (migrations — Flask-Migrate/Alembic)
 flask --app src/run.py db upgrade
@@ -200,18 +202,53 @@ python src/run.py
 # 7. Acessar /auth/login e entrar com um usuário de teste
 
 # 8. Rodar os testes
-pytest
+python -m pytest -q
 ```
 
 O acesso exige **login** (sessão Flask + `werkzeug.security`): a rota `/` e os
 módulos são protegidos e redirecionam para `/auth/login`; `/health` é público. O
 arquivo de banco gerado **não** é versionado.
 
+Use Python 3.12 para reproduzir o ambiente validado. A versão instalada de
+Shapely exige Python >=3.11; outras versões de Python e Windows não foram
+validados nesta etapa. Os requisitos têm faixas abertas e não há lockfile:
+instalações novas podem resolver versões diferentes. Não atualize dependências
+automaticamente em uma instalação existente sem reexecutar os testes.
+
+### Integração contínua
+
+O workflow [Tests](.github/workflows/tests.yml) verifica Pull Requests e pushes
+em `main` e `codex/**`, com Python 3.12 no Linux, dependências isoladas do banco
+real e sem deploy. Executa `pip check`, `compileall`, sintaxe JavaScript com
+Node.js 22, integridade dos arquivos locais Leaflet/Draw e a suíte pytest completa.
+As actions são fixadas por commit; o token tem somente `contents: read` e não
+é persistido no checkout. Há limite de 15 minutos e cancelamento de execuções
+anteriores da mesma referência.
+
+Para reproduzir os checks principais localmente, com a `.venv` ativa:
+
+```bash
+python -m pip check
+python -m compileall -q src tests
+python -m pytest -q
+# Com Node.js disponível, confira cada arquivo em src/app/static/js/:
+node --check src/app/static/js/mapa.js
+```
+
+O passo de integridade compara tamanho e SHA-256 de cada asset com
+`src/app/static/vendor/mapa-dependencias.json`. Uma falha não autoriza substituir
+o hash: confira a origem oficial, o pacote e as licenças antes de atualizá-lo.
+Consulte o resultado remoto na aba **Actions** do GitHub; validação local do
+workflow não comprova execução remota. PostgreSQL e navegador são validações
+separadas da suíte CI SQLite. Veja [testes](tests/README.md) e o
+[relatório da Etapa 08](docs/auditoria/08-qualidade-tecnica-integracao.md).
+
 ### Banco de dados: SQLite local ou PostgreSQL/Supabase
 
 O ConnectAgro usa **SQLite por padrão** no desenvolvimento local (sem
 `DATABASE_URL`, o fallback é `sqlite:///connectagro.db` em `src/instance/`).
-Os testes usam sempre SQLite em memória e não dependem de PostgreSQL.
+A suíte pytest usa SQLite em memória ou arquivos temporários descartáveis
+(migrations e concorrência), sem depender de PostgreSQL ou do banco real.
 
 Para PostgreSQL/Supabase, configure no `.env` (nunca commitado):
 
@@ -391,11 +428,11 @@ extração de dados.
 
 ### Relatórios operacionais
 
-Em `/relatorios/` há uma central com cinco relatórios **HTML somente leitura**,
+Em `/relatorios/` há uma central com seis relatórios **HTML somente leitura**,
 escopados pela propriedade atual: **geral**, **financeiro** (com filtros de
-período e tipo), **agrícola**, **aplicações** (com filtros de período e classe) e
-**uploads**. Os relatórios apenas consultam dados já existentes — não criam,
-alteram ou removem nada. Além da impressão pelo navegador (`window.print()`),
+período e tipo), **agrícola**, **aplicações** (com filtros de período e classe),
+**uploads** e **histórico operacional**. Os relatórios apenas consultam dados já
+existentes — não criam, alteram ou removem nada. Além da impressão pelo navegador (`window.print()`),
 cada relatório oferece **exportação CSV/PDF** (Fase 7.4). Os relatórios não
 recomendam produtos, não validam dose e não leem o conteúdo dos uploads.
 
@@ -549,8 +586,9 @@ logs, retenção automática, SIEM ou integração externa nesta fase.
 >
 > A importação do catálogo popula `produto_base` + `produto_tecnico` +
 > `produto_imagem`; `produto_preco` permanece vazio e itens bloqueados
-> (Paraquate/Oxamil) não são importados. Alternativa pontual ao passo 3 (sem
-> migrations): `flask --app src/run.py init-db`.
+> (Paraquate/Oxamil) não são importados. `flask --app src/run.py init-db` serve
+> apenas para criar schema vazio descartável; não substitui migrations para
+> atualizar banco existente.
 
 ### Documentação principal
 
@@ -572,7 +610,7 @@ logs, retenção automática, SIEM ou integração externa nesta fase.
 ## Próximos passos
 
 Concluídos: documentação de produto, modelagem (DER + dicionário), catálogo
-técnico/seed, a **fundação Flask**, os **modelos SQLAlchemy de domínio** (18
+técnico/seed, a **fundação Flask**, os **modelos SQLAlchemy de domínio** (25
 tabelas), migrations, autenticação real, recuperação de senha, auditoria/logs,
 exportações CSV/PDF dos relatórios, mapa avançado (edição de polígonos),
 permissões finas por perfil, CSRF/Flask-WTF nos formulários POST, Dashboard
